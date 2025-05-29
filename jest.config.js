@@ -1,5 +1,9 @@
 module.exports = {
-  testEnvironment: 'node',
+  preset: 'ts-jest',
+  testEnvironment: 'node', // or 'jsdom' for frontend tests
   modulePaths: ['<rootDir>'], // Add or ensure this line is present
-  // You can add more configurations here as needed
+  // If you have moduleNameMapper for aliases, ensure they work with TS
+  moduleNameMapper: {
+    "\\.(css|less|scss|sass)$": "identity-obj-proxy"
+  }
 };

@@ -32,8 +32,8 @@ class Display extends React.Component {
 
   componentDidMount() {
     this.refresh()
-    const { host = 'http://localhost' } = this.props
-    const socket = socketIOClient(host)
+    // Use a relative path for socket connection, assuming it's on the same host
+    const socket = socketIOClient() 
     socket.on('admin:update', () => this.throttledRefresh())
   }
 
