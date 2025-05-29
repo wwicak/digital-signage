@@ -18,6 +18,9 @@ import {
   updateWidgetsForDisplay, 
   deleteWidgetsForDisplay 
 } from '../helpers/display_helper';
+import { sendSseEvent } from '../helpers/common_helper';
+import { addClient, removeClient, sendEventToDisplay } from '../sse_manager';
+
 
 const router: Router = express.Router();
 
@@ -117,6 +120,8 @@ router.post('/', ensureAuthenticated, async (req: Request<{}, any, CreateDisplay
     }
     const savedDisplay = await newDisplayDoc.save();
     const populatedDisplay = await savedDisplay.populate('widgets');
+    // Send SSE event for display creation
+    sendEventToDisplay(savedDisplay._id.toString(), 'display_updated', { displayId: savedDisplay._id.toString(), action: 'create' });
     res.status(201).json(populatedDisplay);
   } catch (error: any) {
     console.error('Error creating display:', error);
@@ -157,6 +162,8 @@ router.put('/:id', ensureAuthenticated, async (req: Request<{ id: string }, any,
 
     const savedDisplay = await displayToUpdate.save();
     const populatedDisplay = await savedDisplay.populate('widgets');
+    // Send SSE event for display update
+    sendEventToDisplay(displayId, 'display_updated', { displayId: displayId, action: 'update' });
     res.json(populatedDisplay);
 
   } catch (error: any) {
@@ -188,12 +195,32 @@ router.delete('/:id', ensureAuthenticated, async (req: Request<{ id: string }>, 
     await deleteWidgetsForDisplay(display); 
     await Display.findByIdAndDelete(displayId);
 
+    // Send SSE event for display deletion
+    sendEventToDisplay(displayId, 'display_updated', { displayId: displayId, action: 'delete' });
     res.json({ message: 'Display and associated widgets deleted successfully' });
 
   } catch (error: any) {
     console.error(`Error deleting display ${displayId}:`, error);
     res.status(500).json({ message: 'Error deleting display', error: error.message });
   }
+});
+
+router.get('/:displayId/events', (req: Request, res: Response) => {
+  const { displayId } = req.params;
+
+  res.setHeader('Content-Type', 'text/event-stream');
+  res.setHeader('Cache-Control', 'no-cache');
+  res.setHeader('Connection', 'keep-alive');
+  res.flushHeaders();
+
+  addClient(displayId, res);
+
+  // Send a connected event
+  sendSseEvent(res, 'connected', { message: 'SSE connection established' });
+
+  req.on('close', () => {
+    removeClient(displayId, res);
+  });
 });
 
 export default router;

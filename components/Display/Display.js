@@ -5,7 +5,7 @@
 
 import React from 'react'
 import GridLayout from 'react-grid-layout'
-import socketIOClient from 'socket.io-client'
+// import socketIOClient from 'socket.io-client' // Removed Socket.IO
 import _ from 'lodash'
 import { view } from 'react-easy-state'
 
@@ -28,17 +28,71 @@ class Display extends React.Component {
       statusBar: DEFAULT_STATUS_BAR
     }
     this.throttledRefresh = _.debounce(this.refresh, 1500)
+    this.eventSource = null; // Initialize eventSource
   }
 
   componentDidMount() {
     this.refresh()
-    // Use a relative path for socket connection, assuming it's on the same host
-    const socket = socketIOClient() 
-    socket.on('admin:update', () => this.throttledRefresh())
+    // const socket = socketIOClient() // Removed Socket.IO
+    // socket.on('admin:update', () => this.throttledRefresh()) // Removed Socket.IO
+
+    if (this.props.display) {
+      const sseUrl = `/api/v1/displays/${this.props.display}/events`;
+      this.eventSource = new EventSource(sseUrl);
+
+      this.eventSource.addEventListener('display_updated', (event) => {
+        // console.log('SSE event received:', event.data);
+        // const eventData = JSON.parse(event.data);
+        // console.log('Parsed SSE data:', eventData);
+        this.throttledRefresh();
+      });
+
+      this.eventSource.onerror = (err) => {
+        console.error('EventSource failed:', err);
+        // Optionally, close and try to reconnect if necessary,
+        // though EventSource handles some reconnection automatically.
+        // this.eventSource.close(); // Be careful with auto-closing on any error.
+      };
+
+      this.eventSource.addEventListener('connected', (event) => {
+        console.log('SSE connection established:', JSON.parse(event.data));
+      });
+    }
+  }
+
+  componentWillUnmount() {
+    if (this.eventSource) {
+      this.eventSource.close();
+    }
   }
 
   componentDidUpdate(prevProps) {
-    if (prevProps.display != this.props.display) this.refresh()
+    if (prevProps.display !== this.props.display) {
+      this.refresh(); // Refresh data for the new display
+
+      // Close existing EventSource connection if it exists
+      if (this.eventSource) {
+        this.eventSource.close();
+      }
+
+      // Establish new EventSource connection for the new display ID
+      if (this.props.display) { // Ensure display ID is present
+        const sseUrl = `/api/v1/displays/${this.props.display}/events`;
+        this.eventSource = new EventSource(sseUrl);
+
+        this.eventSource.addEventListener('display_updated', (event) => {
+          this.throttledRefresh();
+        });
+
+        this.eventSource.onerror = (err) => {
+          console.error('EventSource failed:', err);
+        };
+        
+        this.eventSource.addEventListener('connected', (event) => {
+            console.log('SSE connection established for new display:', JSON.parse(event.data));
+        });
+      }
+    }
   }
 
   refresh = () => {
