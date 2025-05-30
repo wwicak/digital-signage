@@ -20,7 +20,7 @@ class Preview extends React.Component<PreviewProps, PreviewState> {
   }
 
   // If getInitialProps is used, it should be static and typed
-  static async getInitialProps(ctx: NextPageContext): Promise<{ displayId: string; host: string }> {
+  static async getInitialProps(ctx: any): Promise<{ displayId: string; host: string }> {
     const displayId = ctx.query.id as string; // Example: get id from query
     const host =
       ctx.req && ctx.req.headers && ctx.req.headers.host
@@ -45,7 +45,7 @@ class Preview extends React.Component<PreviewProps, PreviewState> {
         <div className='preview'>
           <div className='content'>
             {/* Assuming display.id is a string or compatible type for DisplayComponent's display prop */}
-            <DisplayComponent host={host} display={display.id as string} />
+            <DisplayComponent display={display.id as string} />
           </div>
         </div>
         <style jsx>

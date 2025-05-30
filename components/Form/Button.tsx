@@ -1,39 +1,31 @@
 import React, { useState, useEffect, ButtonHTMLAttributes, ReactNode, CSSProperties } from 'react';
-const Lottie = require('react-lottie') as any; // Import Lottie with any type
-
-// Simple type declaration for react-lottie
-interface LottieOptions {
-  loop: boolean;
-  autoplay: boolean;
-  animationData: any;
-  rendererSettings?: {
-    preserveAspectRatio: string;
-  };
-}
-
-// Attempt to import the Lottie animation JSON statically
-// If this doesn't work due to bundler/TS config, it might need to be loaded via fetch or other means.
-import loadingAnimationData from './assets/loading.json';
+import { ButtonWithLoading } from '../ui/button-with-loading';
+import { cn } from '@/lib/utils';
 
 // Props for the Button component
 // Extends standard button attributes for passthrough (e.g., type, disabled from parent)
 export interface IButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   text?: string; // Text to display on the button
-  color?: string; // Background color for the button
+  color?: string; // Background color for the button (legacy support)
   style?: CSSProperties; // Custom styles for the button element
   onClick?: (event: React.MouseEvent<HTMLButtonElement>) => Promise<any> | void; // onClick can be async
   children?: ReactNode; // Allow children to override text prop if needed
   isLoading?: boolean; // Allow parent to control loading state externally (optional)
+  variant?: 'default' | 'destructive' | 'outline' | 'secondary' | 'ghost' | 'link'; // Shadcn/UI variants
+  size?: 'default' | 'sm' | 'lg' | 'icon'; // Shadcn/UI sizes
 }
 
 const Button: React.FC<IButtonProps> = ({
   text = 'Submit',
-  color = 'gray',
-  style = { marginLeft: 16 },
+  color,
+  style,
   onClick,
   children,
   isLoading: parentIsLoading,
   disabled: parentDisabled,
+  variant = 'default',
+  size = 'default',
+  className,
   ...restButtonProps
 }) => {
   const [internalLoading, setInternalLoading] = useState(false);
@@ -71,62 +63,25 @@ const Button: React.FC<IButtonProps> = ({
   // Determine final disabled state
   const isDisabled = parentDisabled || isLoading;
 
-  const lottieOptions: LottieOptions = {
-    loop: true,
-    autoplay: true,
-    animationData: loadingAnimationData, // Use statically imported animation data
-    rendererSettings: {
-      preserveAspectRatio: 'xMidYMid slice',
-    },
-  };
-  
-  const buttonStyle: CSSProperties = {
-      ...style, // Original style prop
-      background: color, // Apply color prop to background
+  // Handle legacy color prop by converting to CSS custom properties or inline styles
+  const legacyStyle: CSSProperties = {
+    ...style,
+    ...(color && { backgroundColor: color }),
   };
 
   return (
-    <button
-      className={'btn'}
-      onClick={!isLoading && onClick ? onClickWrapper : undefined} // Only attach onClickWrapper if not loading and onClick exists
-      style={buttonStyle}
+    <ButtonWithLoading
+      variant={variant}
+      size={size}
+      className={cn(className)}
+      onClick={!isLoading && onClick ? onClickWrapper : undefined}
+      style={legacyStyle}
       disabled={isDisabled}
-      {...restButtonProps} // Spread other button attributes like 'type'
+      isLoading={isLoading}
+      {...restButtonProps}
     >
-      {isLoading && (
-        <Lottie
-          height={24} // Adjusted size for Lottie animation within button
-          width={24}
-          style={{ margin: 0, marginRight: text || children ? 8 : 0 }} // Add margin if text is also present
-          options={lottieOptions}
-        />
-      )}
-      {children || text} {/* Render children if provided, otherwise text prop */}
-      <style jsx>{`
-        .btn {
-          font-family: 'Open Sans', sans-serif;
-          /* background is now set via inline style from 'color' prop */
-          text-decoration: none;
-          text-transform: uppercase;
-          color: white; /* Default text color, can be overridden by style prop */
-          font-size: 14px;
-          border-radius: 4px;
-          border: none;
-          display: inline-flex; /* Changed to inline-flex for better alignment of Lottie and text */
-          flex-direction: row;
-          justify-content: center;
-          align-items: center;
-          padding: 12px 24px; /* Slightly adjusted padding */
-          outline: none;
-          cursor: pointer;
-          transition: background-color 0.2s ease, opacity 0.2s ease; /* Added transitions */
-        }
-        .btn:disabled {
-          cursor: not-allowed;
-          opacity: 0.7; /* Dim button when disabled */
-        }
-      `}</style>
-    </button>
+      {children || text}
+    </ButtonWithLoading>
   );
 };
 

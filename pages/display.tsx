@@ -1,5 +1,5 @@
 import React from 'react';
-import { NextPageContext } from 'next';
+import { NextPage, NextPageContext } from 'next';
 import { view } from 'react-easy-state';
 
 import DisplayComponent from '../components/Display/Display'; // Renamed to DisplayComponent to avoid conflict with store
@@ -15,7 +15,7 @@ class DisplayPage extends React.Component<IDisplayPageProps> {
     super(props);
   }
 
-  static async getInitialProps(ctx: NextPageContext): Promise<IDisplayPageProps> {
+  static async getInitialProps(ctx: any): Promise<IDisplayPageProps> {
     const displayId = ctx.query && typeof ctx.query.display === 'string' ? ctx.query.display : undefined;
     const host =
       ctx.req && ctx.req.headers && ctx.req.headers.host
@@ -65,7 +65,7 @@ class DisplayPage extends React.Component<IDisplayPageProps> {
         {/* Pass the displayId obtained from props directly to the Display component */}
         {/* The Display component uses this ID to fetch its own data and setup SSE */}
         {currentDisplayId ? (
-          <DisplayComponent host={host} display={currentDisplayId} />
+          <DisplayComponent display={currentDisplayId} />
         ) : (
           <div>Loading display information or Display ID not provided...</div>
         )}

@@ -30,7 +30,7 @@ class Screens extends React.Component<ScreensProps> {
   }
 
   // Example: If displayId comes from query for this page too
-  static async getInitialProps(ctx: NextPageContext): Promise<{ displayId?: string }> {
+  static async getInitialProps(ctx: any): Promise<{ displayId?: string }> {
     const displayId = ctx.query.id as string | undefined;
     return { displayId };
   }
@@ -64,8 +64,8 @@ class Screens extends React.Component<ScreensProps> {
       <Frame loggedIn={loggedIn}>
         <h1>Screens</h1>
         <div className='wrapper'>
-          <ScreenListComponent ref={this.screenList} />
-          <Dialog /> {/* Assuming Dialog does not need specific props here or takes them from a store */}
+          <ScreenListComponent ref={this.screenList as any} />
+          <Dialog><div></div></Dialog>
           <Button
             text={'+ Add new screen'}
             color={'#8bc34a'}

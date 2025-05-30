@@ -1,3 +1,5 @@
+'use client';
+
 import React, { Component, ReactNode, CSSProperties } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { library, config, IconProp, IconPrefix } from '@fortawesome/fontawesome-svg-core';
@@ -46,7 +48,7 @@ class DropdownButton extends Component<IDropdownButtonProps, IDropdownButtonStat
     this.closeMenu = this.closeMenu.bind(this);
   }
 
-  showMenu(event: React.MouseEvent): void {
+  showMenu(event: React.MouseEvent | React.KeyboardEvent): void {
     event.preventDefault();
     event.stopPropagation(); // Prevent event from immediately triggering closeMenu if it bubbles to document
 
@@ -92,7 +94,7 @@ class DropdownButton extends Component<IDropdownButtonProps, IDropdownButtonStat
     return (
       <div className={'dropdownContainer'}>
         {children ? (
-          <div style={style} onClick={this.showMenu} role="button" tabIndex={0} onKeyPress={this.showMenu}>
+          <div style={style} onClick={this.showMenu} role="button" tabIndex={0} onKeyPress={(e) => { if (e.key === 'Enter' || e.key === ' ') this.showMenu(e); }}>
             {children}
           </div>
         ) : (
@@ -119,7 +121,7 @@ class DropdownButton extends Component<IDropdownButtonProps, IDropdownButtonStat
               >
                 {choice.icon && (
                   <div className={'btnIcon'}>
-                    <FontAwesomeIcon icon={choice.icon} prefix={choice.iconPrefix || 'fas'} />
+                    <FontAwesomeIcon icon={choice.icon} />
                   </div>
                 )}
                 {choice.name}

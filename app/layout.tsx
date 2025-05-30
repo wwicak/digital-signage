@@ -2,6 +2,7 @@ import React from 'react';
 import StyledComponentsRegistry from './lib/registry';
 
 // Import global styles
+import '../styles/globals.css';
 import '../styles/GridLayoutStyles.css';
 import 'react-resizable/css/styles.css';
 import '@fortawesome/fontawesome-svg-core/styles.css';

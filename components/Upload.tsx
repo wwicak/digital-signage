@@ -40,7 +40,7 @@ interface IUploadState {
 
 class Upload extends Component<IUploadProps, IUploadState> {
   // Ref to SlideEditDialog instance
-  private dialogRef = React.createRef<ISlideEditDialogRef>();
+  private dialogRef = React.createRef<SlideEditDialog>();
 
   constructor(props: IUploadProps) {
     super(props);

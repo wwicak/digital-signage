@@ -24,7 +24,7 @@ const webDefinitionArgs: IWidgetDefinitionArgs = {
   icon: faGlobe as IconProp, // Use the imported icon
   defaultData: {
     title: null,
-    url: "https://compsci.lafayette.edu/",
+    url: "https://www.plnindonesiapower.co.id/",
     color: "#FFFFFF", // Default background, though iframe usually covers this
     refreshInterval: 0, // 0 means no refresh
     scale: 1.0, // 100% scale

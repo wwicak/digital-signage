@@ -145,7 +145,7 @@ export default function LayoutAdminPage() {
         />
       </div>
 
-      {displayStore.statusBar && displayStore.statusBar.length > 0 && (
+      {displayStore.statusBar && displayStore.statusBar.elements && displayStore.statusBar.elements.length > 0 && (
           <div className='statusbar'>
               <DragDropContext onDragEnd={handleDragEnd}>
               <Droppable droppableId='droppable-statusbar' direction='horizontal'>
@@ -164,7 +164,7 @@ export default function LayoutAdminPage() {
                       }}
                       {...provided.droppableProps}
                   >
-                      {displayStore.statusBar!.map((item: string, index: number) => (
+                      {displayStore.statusBar.elements!.map((item: string, index: number) => (
                       <StatusBarElement
                           key={item}
                           item={item}

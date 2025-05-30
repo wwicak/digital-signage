@@ -38,7 +38,7 @@ class YoutubeOptions extends Component<IYoutubeOptionsProps, IYoutubeOptionsComp
   }
 
   // Handles changes for any field in IYoutubeDefaultData or the local inputUrl
-  handleChange = (name: keyof IYoutubeDefaultData | 'inputUrl', value: any): void => {
+  handleChange = (name: string, value: any): void => {
     const { onChange, data: currentWidgetData } = this.props;
 
     if (name === 'inputUrl') {
@@ -116,7 +116,6 @@ class YoutubeOptions extends Component<IYoutubeOptionsProps, IYoutubeOptionsComp
             value={inputUrl} // Controlled by local state
             placeholder={'e.g., https://www.youtube.com/watch?v=... or just video_id'}
             onChange={this.handleChange}
-            required
             helpText={`Current Video ID: ${video_id || 'None'}`}
           />
           <InlineInputGroup>

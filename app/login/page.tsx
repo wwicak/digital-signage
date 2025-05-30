@@ -13,7 +13,7 @@ import { display } from '../../stores';
 export default function LoginPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const displayId = searchParams.get('display');
+  const displayId = searchParams?.get('display');
 
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');

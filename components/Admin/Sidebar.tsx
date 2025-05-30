@@ -139,7 +139,7 @@ class Sidebar extends Component<ISidebarProps, ISidebarState> {
           <DropdownButton
             onSelect={this.navigateToAdmin}
             choices={dropdownChoices}
-            style={{ marginTop: 20, marginBottom: 20, width: 'calc(100% - 40px)', marginHorizontal: 20 }} // Adjusted style
+            style={{ marginTop: 20, marginBottom: 20, width: 'calc(100% - 40px)', marginLeft: 20, marginRight: 20 }} // Adjusted style
             menuStyle={{ left: 20, top: 'calc(100% + 5px)', width: 'calc(100% - 40px)' }} // Adjusted style
           >
             <div className='logo'>

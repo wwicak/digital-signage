@@ -2,9 +2,10 @@ import React from 'react';
 import { NextPage, NextPageContext } from 'next'; // For typing Next.js specific props if needed
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faThLarge, faTh, faPencilAlt, IconDefinition } from '@fortawesome/free-solid-svg-icons';
+import { IconProp } from '@fortawesome/fontawesome-svg-core';
 import GridLayout, { Layout as RglLayout, Layouts as RglLayouts } from 'react-grid-layout';
 import { view } from 'react-easy-state';
-import { DragDropContext, Droppable, DropResult, ResponderProvided } from 'react-beautiful-dnd';
+import { DragDropContext, Droppable, DropResult, DroppableProvided } from 'react-beautiful-dnd';
 
 import Frame from '../components/Admin/Frame'; // Assuming .js or .tsx
 import EditableWidget from '../components/Admin/EditableWidget'; // Assuming .js or .tsx
@@ -22,7 +23,7 @@ import { addWidget, getWidgets, deleteWidget, updateWidget, IWidgetData, INewWid
 import { protect } from '../helpers/auth'; // Assuming auth.js will be typed or allowJs
 import { display as displayStore } from '../stores'; // Already .tsx
 
-const GridLayoutWithWidth = WidthProvider(GridLayout);
+const GridLayoutWithWidth = WidthProvider(GridLayout as any);
 
 interface ILayoutPageProps {
   displayId: string; // Assuming protect HOC ensures displayId is available
@@ -182,11 +183,11 @@ class LayoutPage extends React.Component<ILayoutPageProps, ILayoutPageState> {
           />
         </div>
 
-        {displayStore.statusBar && displayStore.statusBar.length > 0 && (
+        {displayStore.statusBar && displayStore.statusBar.elements && displayStore.statusBar.elements.length > 0 && (
             <div className='statusbar'>
                 <DragDropContext onDragEnd={this.handleDragEnd}>
                 <Droppable droppableId='droppable-statusbar' direction='horizontal'>
-                    {(provided: ResponderProvided) => (
+                    {(provided: DroppableProvided) => (
                     <div
                         ref={provided.innerRef}
                         style={{
@@ -201,7 +202,7 @@ class LayoutPage extends React.Component<ILayoutPageProps, ILayoutPageState> {
                         }}
                         {...provided.droppableProps}
                     >
-                        {displayStore.statusBar!.map((item: string, index: number) => ( // Added type for item
+                        {displayStore.statusBar.elements!.map((item: string, index: number) => ( // Added type for item
                         <StatusBarElement
                             key={item} // Assuming item is unique like 'type_id'
                             item={item}
@@ -232,7 +233,7 @@ class LayoutPage extends React.Component<ILayoutPageProps, ILayoutPageState> {
               checkedIcon={faTh}
               uncheckedIcon={faThLarge}
               checked={displayStore.layout === 'spaced'}
-              onChange={this.handleLayoutTypeChange}
+              onValueChange={this.handleLayoutTypeChange}
             />
           </Form>
         </div>

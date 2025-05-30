@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React, { Component, ComponentType, JSX } from 'react';
 import _ from 'lodash';
 
 // Assuming these will be migrated or are usable as JS with appropriate typings/shims
@@ -214,9 +214,10 @@ class Slideshow extends Component<ISlideshowWidgetContentProps, ISlideshowWidget
         {this.props.data?.show_progressbar !== false && currentSlideIndex !== null && (
           <Progress
             key={`progress-${currentSlideIndex}`} // Force re-mount for progress animation
-            slideDuration={(this.orderedSlides[currentSlideIndex]?.duration || 0) * 1000 || defaultDuration}
-            isSlideReady={isCurrentSlideReady}
-            // Pass other necessary props to Progress if its API changed
+            current={currentSlideIndex}
+            defaultDuration={defaultDuration}
+            orderedSlides={this.orderedSlides}
+            ready={isCurrentSlideReady}
           />
         )}
         <style jsx>

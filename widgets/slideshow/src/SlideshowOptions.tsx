@@ -45,7 +45,7 @@ class SlideshowOptions extends Component<ISlideshowWidgetOptionsProps, ISlidesho
   }
 
   // Handles changes for any field in ISlideshowWidgetDefaultData
-  handleChange = (name: keyof ISlideshowWidgetDefaultData, value: any): void => {
+  handleChange = (name: string, value: any): void => {
     const { onChange, data: currentWidgetData } = this.props;
     if (onChange) {
       // Create a new data object based on current props.data, then update the changed field

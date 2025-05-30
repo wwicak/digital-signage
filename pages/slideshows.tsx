@@ -28,7 +28,7 @@ class Slideshows extends React.Component<SlideshowsProps> {
   }
 
   // Example: If displayId comes from query for this page
-  static async getInitialProps(ctx: NextPageContext): Promise<{ displayId?: string }> {
+  static async getInitialProps(ctx: any): Promise<{ displayId?: string }> {
     const displayId = ctx.query.id as string | undefined;
     return { displayId };
   }
@@ -56,8 +56,8 @@ class Slideshows extends React.Component<SlideshowsProps> {
       <Frame loggedIn={loggedIn}>
         <h1>Slideshows</h1>
         <div className='wrapper'>
-          <SlideshowListComponent ref={this.slideshowList} />
-          <Dialog /> {/* Assuming Dialog is generic or context-based */}
+          <SlideshowListComponent ref={this.slideshowList as any} />
+          <Dialog><div></div></Dialog>
           <Button
             text={'+ Add new slideshow'}
             color={'#8bc34a'}

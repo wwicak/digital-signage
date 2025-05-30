@@ -116,7 +116,7 @@ class WidgetEditDialog extends Component<IWidgetEditDialogProps, IWidgetEditDial
   render() {
     // Default to a simple Form if no OptionsComponent is provided, though this might not be very useful.
     // Usually, OptionsComponent should always be provided for meaningful editing.
-    const { OptionsComponent = Form as ComponentType<IWidgetOptionsEditorProps> } = this.props;
+    const { OptionsComponent = Form as unknown as ComponentType<IWidgetOptionsEditorProps> } = this.props;
     const { widgetConfigData, error, initialWidgetData } = this.state;
 
     const isLoading = initialWidgetData === undefined && !error; // Still loading initial data

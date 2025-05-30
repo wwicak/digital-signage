@@ -50,7 +50,7 @@ class WebOptions extends Component<IWebOptionsProps, IWebOptionsState> {
     }
   }
 
-  handleChange = (name: keyof IWebOptionsState, value: any): void => {
+  handleChange = (name: string, value: any): void => {
     const { onChange } = this.props;
     // Ensure numeric fields are stored as numbers
     let processedValue = value;
@@ -98,7 +98,6 @@ class WebOptions extends Component<IWebOptionsProps, IWebOptionsState> {
             value={url}
             placeholder={'https://example.com'}
             onChange={this.handleChange}
-            required // URL is critical
           />
           <Input
             label={'Widget Title (Optional)'}

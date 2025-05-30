@@ -7,8 +7,8 @@ import Document, {
   DocumentInitialProps,
 } from 'next/document';
 import { ServerStyleSheet, StyleSheetManager } from 'styled-components';
-import { flush } from 'styled-jsx/server';
-import React from 'react';
+import flush from 'styled-jsx/server';
+import React, { JSX } from 'react';
 
 interface IAppDocumentProps extends DocumentInitialProps {
   styleTags?: React.ReactElement[]; // From styled-components
@@ -31,12 +31,10 @@ class AppDocument extends Document<IAppDocumentProps> {
 
       return {
         ...initialProps,
-        styles: (
-          <>
-            {initialProps.styles}
-            {styledJsxStyles}
-          </>
-        ),
+        styles: [
+          ...(Array.isArray(initialProps.styles) ? initialProps.styles : [initialProps.styles]),
+          styledJsxStyles
+        ].filter(Boolean),
         styleTags: sheet.getStyleElement(), // styled-components styles
       };
     } finally {

@@ -2,6 +2,7 @@ import { AppProps } from 'next/app';
 import React from 'react';
 
 // Import global styles
+import '../styles/globals.css';
 import '../styles/GridLayoutStyles.css';
 import 'react-resizable/css/styles.css';
 import '@fortawesome/fontawesome-svg-core/styles.css'; // Prevent Font Awesome from adding its own CSS automatically

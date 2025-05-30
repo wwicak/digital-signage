@@ -44,7 +44,7 @@ class ListOptions extends Component<IListOptionsProps, IListOptionsState> {
   }
 
   // Handles changes for top-level properties like title, color, etc.
-  handleChange = (name: keyof Omit<IListOptionsState, 'list'>, value: any): void => {
+  handleChange = (name: string, value: any): void => {
     this.setState(
       { [name]: value } as Pick<IListOptionsState, keyof IListOptionsState>,
       () => {
@@ -178,6 +178,7 @@ class ListOptions extends Component<IListOptionsProps, IListOptionsState> {
             {list.map((item, index) => (
               <InlineInputGroup key={`list-item-edit-${index}`}>
                 <Input
+                  type="text"
                   inline={false}
                   name={`item-text-${index}`} // Unique name for form handling if needed, though direct index used
                   value={item.text}
@@ -186,6 +187,7 @@ class ListOptions extends Component<IListOptionsProps, IListOptionsState> {
                   expand // Allow text input to expand
                 />
                 <Input
+                  type="text"
                   inline={false}
                   name={`item-label-${index}`}
                   value={item.label || ''} // Handle null label for input

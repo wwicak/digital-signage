@@ -48,7 +48,7 @@ class AnnouncementOptions extends Component<IAnnouncementOptionsProps, IAnnounce
     }
   }
 
-  handleChange = (name: keyof IAnnouncementOptionsState, value: any): void => {
+  handleChange = (name: string, value: any): void => {
     // Type assertion for name is okay here as we know it's a key of the state.
     this.setState(
       { [name]: value } as Pick<IAnnouncementOptionsState, keyof IAnnouncementOptionsState>,

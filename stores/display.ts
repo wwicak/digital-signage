@@ -1,70 +1,63 @@
 import { store } from "react-easy-state";
 import _ from "lodash";
-import * as DisplayActions from "../actions/display"; // Assuming it will be .ts or allowJs handles .js
+import * as DisplayActions from "../actions/display";
+import { IDisplayData } from "../actions/display";
 import shortid from "shortid";
 
-// Define interfaces for the state and related structures
+// Import types from actions to ensure consistency
 interface IWidget {
   _id: string;
   name: string;
-  type: string; // Consider creating an enum for WidgetType if it's well-defined
+  type: string;
   x: number;
   y: number;
   w: number;
   h: number;
-  data: any; // Replace 'any' with a more specific type if possible
+  data: any;
+}
+
+interface IStatusBar {
+  enabled?: boolean;
+  color?: string;
+  elements?: string[];
 }
 
 interface IDisplayState {
   id: string | null;
   name: string | null;
   layout: "spaced" | "compact" | null;
-  statusBar: string[] | null; // Assuming status bar items are strings like 'type_shortid'
-  widgets: IWidget[] | null;
+  statusBar: IStatusBar;
+  widgets: IWidget[];
   setId: (id: string) => Promise<void>;
   setName: (name: string) => void;
   updateName: (name: string) => void;
   updateLayout: (layout: "spaced" | "compact") => void;
   addStatusBarItem: (type: string) => Promise<void>;
-  removeStatusBarItem: (index: number) => void; // Changed id to index based on usage
+  removeStatusBarItem: (index: number) => void;
   reorderStatusBarItems: (startIndex: number, endIndex: number) => void;
 }
 
-// Type for the displayInfo returned by DisplayActions.getDisplay
-// This is an assumption; adjust if the actual structure is different.
-interface IDisplayInfo {
-  _id: string;
-  name: string;
-  layout: "spaced" | "compact";
-  statusBar: string[];
-  widgets: IWidget[];
-  // Add other properties if present in displayInfo
-}
-
 const updateDisplayThrottled = _.debounce(
-  (id: string, data: Partial<IDisplayInfo>) => {
-    // Assuming DisplayActions.updateDisplay can take a string ID.
-    // If DisplayActions.updateDisplay expects an ObjectId, this might need adjustment.
+  (id: string, data: Partial<IDisplayData>) => {
     return DisplayActions.updateDisplay(id, data);
   },
   300
 );
 
 const display = store({
-  id: null,
-  name: null,
-  layout: null,
-  statusBar: null,
-  widgets: null,
+  id: null as string | null,
+  name: null as string | null,
+  layout: null as "spaced" | "compact" | null,
+  statusBar: { enabled: false, elements: [] as string[] } as IStatusBar,
+  widgets: [] as IWidget[],
   async setId(id: string): Promise<void> {
     if (!id) return;
     this.id = id;
-    // Assuming getDisplay returns a Promise<IDisplayInfo>
-    const displayInfo: IDisplayInfo = await DisplayActions.getDisplay(id);
-    this.layout = displayInfo.layout;
-    this.statusBar = displayInfo.statusBar;
+    const displayInfo: IDisplayData = await DisplayActions.getDisplay(id);
+    this.layout = displayInfo.layout || null;
+    this.statusBar = displayInfo.statusBar || { enabled: false, elements: [] };
     this.name = displayInfo.name;
-    this.widgets = displayInfo.widgets;
+    this.widgets = displayInfo.widgets || [];
   },
   setName(name: string): void {
     if (!name) return;
@@ -81,38 +74,41 @@ const display = store({
     updateDisplayThrottled(this.id, { layout });
   },
   addStatusBarItem(type: string): Promise<void> {
-    if (!this.id || !this.statusBar) {
-      // Ensure statusBar is initialized
-      // Optionally initialize statusBar if null, or handle error
-      if (!this.statusBar) this.statusBar = [];
-    }
-    this.statusBar = [...this.statusBar!, type + "_" + shortid.generate()];
-    updateDisplayThrottled(this.id!, { statusBar: this.statusBar });
+    if (!this.id) return Promise.resolve();
+
+    const elements = this.statusBar.elements || [];
+    this.statusBar = {
+      ...this.statusBar,
+      elements: [...elements, type + "_" + shortid.generate()],
+    };
+    updateDisplayThrottled(this.id, { statusBar: this.statusBar });
     return Promise.resolve();
   },
   removeStatusBarItem(index: number): void {
-    if (
-      !this.id ||
-      !this.statusBar ||
-      index < 0 ||
-      index >= this.statusBar.length
-    )
-      return;
-    this.statusBar = [
-      ...this.statusBar.slice(0, index),
-      ...this.statusBar.slice(index + 1),
-    ];
+    const elements = this.statusBar.elements || [];
+    if (!this.id || index < 0 || index >= elements.length) return;
+
+    this.statusBar = {
+      ...this.statusBar,
+      elements: [...elements.slice(0, index), ...elements.slice(index + 1)],
+    };
     updateDisplayThrottled(this.id, { statusBar: this.statusBar });
   },
   reorderStatusBarItems(startIndex: number, endIndex: number): void {
-    if (!this.id || !this.statusBar || !this.statusBar) return;
-    const result = Array.from(this.statusBar);
+    const elements = this.statusBar.elements || [];
+    if (!this.id || elements.length === 0) return;
+
+    const result = Array.from(elements);
     const [removed] = result.splice(startIndex, 1);
     result.splice(endIndex, 0, removed);
 
-    this.statusBar = result;
+    this.statusBar = {
+      ...this.statusBar,
+      elements: result,
+    };
     updateDisplayThrottled(this.id, { statusBar: this.statusBar });
   },
 });
 
+export { display };
 export default display;
