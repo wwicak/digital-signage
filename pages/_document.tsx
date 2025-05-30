@@ -6,13 +6,11 @@ import Document, {
   DocumentContext,
   DocumentInitialProps,
 } from 'next/document';
-import { ServerStyleSheet, StyleSheetManager } from 'styled-components';
-import flush from 'styled-jsx/server';
+import { ServerStyleSheet } from 'styled-components';
 import React, { JSX } from 'react';
 
 interface IAppDocumentProps extends DocumentInitialProps {
   styleTags?: React.ReactElement[]; // From styled-components
-  styles?: React.ReactElement[]; // From styled-jsx
 }
 
 class AppDocument extends Document<IAppDocumentProps> {
@@ -27,14 +25,9 @@ class AppDocument extends Document<IAppDocumentProps> {
         });
 
       const initialProps = await Document.getInitialProps(ctx);
-      const styledJsxStyles = flush(); // Get styled-jsx styles
 
       return {
         ...initialProps,
-        styles: [
-          ...(Array.isArray(initialProps.styles) ? initialProps.styles : [initialProps.styles]),
-          styledJsxStyles
-        ].filter(Boolean),
         styleTags: sheet.getStyleElement(), // styled-components styles
       };
     } finally {
@@ -44,12 +37,10 @@ class AppDocument extends Document<IAppDocumentProps> {
 
   render(): JSX.Element {
     return (
-      <Html lang="en"> {/* Optional: Add lang attribute */}
+      <Html lang="en">
         <Head>
-          {/* Enforce order: 1. styled-jsx (initialProps.styles includes this), 2. styled-components */}
-          {/* styles prop from getInitialProps now includes styled-jsx, initialProps.styles from Next itself */}
-          {/* this.props.styles includes the flushed styled-jsx tags */}
-          {this.props.styleTags} {/* styled-components tags */}
+          {/* styled-components styles */}
+          {this.props.styleTags}
           <style>{'body { margin: 0 } /* custom! */'}</style>
           <meta name='viewport' content='width=device-width, initial-scale=1' />
           <meta charSet='utf-8' />
@@ -57,7 +48,6 @@ class AppDocument extends Document<IAppDocumentProps> {
             href='https://fonts.googleapis.com/css?family=Open+Sans:300,400,600,700,800'
             rel='stylesheet'
           />
-          {/* Socket.IO client script removed as it's obsolete after SSE migration. */}
         </Head>
         <body>
           <Main />
