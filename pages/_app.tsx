@@ -1,5 +1,8 @@
 import { AppProps } from 'next/app';
 import React from 'react';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
+import { DisplayProvider } from '../contexts/DisplayContext';
 
 // Import global styles
 import '../styles/globals.css';
@@ -7,12 +10,26 @@ import '../styles/GridLayoutStyles.css';
 import 'react-resizable/css/styles.css';
 import '@fortawesome/fontawesome-svg-core/styles.css'; // Prevent Font Awesome from adding its own CSS automatically
 
-// If react-easy-state's view HOC were used here, or a global Provider,
-// it would be initialized or wrapped here.
-// For example, if `view` was required for all pages:
-// import { view } from 'react-easy-state';
+// Create a client
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      // With SSR, we usually want to set some default staleTime
+      // above 0 to avoid refetching immediately on the client
+      staleTime: 60 * 1000, // 1 minute
+      retry: 1,
+    },
+  },
+});
 
 // Modern functional App component using the new pattern for Next.js 12+
 export default function MyApp({ Component, pageProps }: AppProps) {
-  return <Component {...pageProps} />;
+  return (
+    <QueryClientProvider client={queryClient}>
+      <DisplayProvider>
+        <Component {...pageProps} />
+        <ReactQueryDevtools initialIsOpen={false} />
+      </DisplayProvider>
+    </QueryClientProvider>
+  );
 }
