@@ -7,7 +7,7 @@ import Document, {
   DocumentInitialProps,
 } from 'next/document';
 import { ServerStyleSheet, StyleSheetManager } from 'styled-components';
-import flush from 'styled-jsx/server';
+import { flush } from 'styled-jsx/server';
 import React from 'react';
 
 interface IAppDocumentProps extends DocumentInitialProps {

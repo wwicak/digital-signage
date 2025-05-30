@@ -1,35 +1,62 @@
-import React, { ComponentType } from 'react';
-import EmptyWidget from '../components/Widgets/EmptyWidget'; // Assuming .js or .tsx
-import EmptyWidgetOptions from '../components/Widgets/EmptyWidgetOptions'; // Assuming .js or .tsx
-import { IconProp } from '@fortawesome/fontawesome-svg-core'; // For the 'icon' field
+import React, { ComponentType } from "react";
+import EmptyWidget from "../components/Widgets/EmptyWidget"; // Assuming .js or .tsx
+import EmptyWidgetOptions from "../components/Widgets/EmptyWidgetOptions"; // Assuming .js or .tsx
+import { IconProp } from "@fortawesome/fontawesome-svg-core"; // For the 'icon' field
+
+// Generic widget content props interface
+export interface IWidgetContentProps<T = Record<string, any>> {
+  data?: T;
+  isPreview?: boolean;
+}
+
+// Generic widget options props interface
+export interface IWidgetOptionsProps<T = Record<string, any>> {
+  data: T;
+  onChange: (
+    name: string,
+    value: any,
+    event?:
+      | React.ChangeEvent<
+          HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
+        >
+      | File
+  ) => void;
+}
+// Interface that matches what WidgetEditDialog expects
+export interface IWidgetOptionsEditorProps<T = Record<string, any>> {
+  data: T | undefined;
+  onChange: (newData: T) => void;
+}
 
 // Interface for the arguments passed to the BaseWidget constructor
 // Individual widgets will provide these details.
-export interface IWidgetDefinitionArgs {
+export interface IWidgetDefinitionArgs<TData = Record<string, any>> {
   name: string; // Human-readable name of the widget
   type: string; // Unique type identifier for the widget (e.g., 'clock', 'weather-map')
   version: string; // Version of the widget definition
   icon: IconProp; // Icon to represent the widget in UI
-  defaultData?: Record<string, any>; // Default configuration data for a new instance of this widget
-  WidgetComponent?: ComponentType<any>; // The actual React component to render the widget
-  OptionsComponent?: ComponentType<any>; // The React component to render widget-specific options/settings
+  defaultData?: TData; // Default configuration data for a new instance of this widget
+  WidgetComponent?: ComponentType<IWidgetContentProps<TData>>; // The actual React component to render the widget
+  OptionsComponent?: ComponentType<IWidgetOptionsEditorProps<TData>>; // The React component to render widget-specific options/settings
   [key: string]: any; // Allow other properties specific to the widget definition
 }
 
 // Interface for the BaseWidget instance structure
 // This defines what properties an instance of BaseWidget (or its derivatives) will have.
-export interface IBaseWidget {
+export interface IBaseWidget<TData = Record<string, any>> {
   name: string;
   type: string;
   version: string;
   icon: IconProp;
-  defaultData?: Record<string, any>;
-  Widget: ComponentType<any>; // Getter for the widget display component
-  Options: ComponentType<any>; // Getter for the widget options component
+  defaultData?: TData;
+  Widget: ComponentType<IWidgetContentProps<TData>>; // Getter for the widget display component
+  Options: ComponentType<IWidgetOptionsEditorProps<TData>>; // Getter for the widget options component
   [key: string]: any; // Allow other properties from definition
 }
 
-const REQUIRED_DEF_FIELDS: Array<keyof Pick<IWidgetDefinitionArgs, 'name' | 'version' | 'icon' | 'type'>> = ['name', 'type', 'version', 'icon'];
+const REQUIRED_DEF_FIELDS: Array<
+  keyof Pick<IWidgetDefinitionArgs, "name" | "version" | "icon" | "type">
+> = ["name", "type", "version", "icon"];
 
 class BaseWidget implements IBaseWidget {
   // Declare properties that will be set by the constructor from definition
@@ -46,7 +73,9 @@ class BaseWidget implements IBaseWidget {
   constructor(definition: IWidgetDefinitionArgs) {
     for (const reqField of REQUIRED_DEF_FIELDS) {
       if (!(reqField in definition)) {
-        throw new Error(`Field '${reqField}' is a required property for new widget definitions.`);
+        throw new Error(
+          `Field '${reqField}' is a required property for new widget definitions.`
+        );
       }
     }
 
@@ -58,12 +87,13 @@ class BaseWidget implements IBaseWidget {
     this.version = definition.version;
     this.icon = definition.icon;
     this.defaultData = definition.defaultData;
-    
+
     // Assign other fields from definition dynamically
     for (const defField of Object.keys(definition)) {
-        if (!(this as any).hasOwnProperty(defField)) { // Avoid re-assigning already declared properties
-            (this as any)[defField] = definition[defField];
-        }
+      if (!(this as any).hasOwnProperty(defField)) {
+        // Avoid re-assigning already declared properties
+        (this as any)[defField] = definition[defField];
+      }
     }
 
     this._WidgetComponent = definition.WidgetComponent || EmptyWidget;

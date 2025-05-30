@@ -1,4 +1,4 @@
-import axios, { AxiosResponse } from 'axios';
+import axios, { AxiosResponse } from "axios";
 
 // Define a generic WidgetType enum or string literal union if types are known
 // For example:
@@ -35,10 +35,13 @@ export interface INewWidgetData {
 
 // Interface for the data sent when updating a widget
 // Most fields are optional.
-export interface IUpdateWidgetData extends Omit<Partial<IWidgetData>, '_id' | 'display_id' | 'creator_id' | 'creation_date' | 'last_update'> {
+export interface IUpdateWidgetData
+  extends Omit<
+    Partial<IWidgetData>,
+    "_id" | "display_id" | "creator_id" | "creation_date" | "last_update"
+  > {
   // No additional fields needed here usually, but can be extended
 }
-
 
 // Interface for the response when a widget is deleted
 interface IDeleteResponse {
@@ -46,18 +49,26 @@ interface IDeleteResponse {
   // Potentially other fields like id of deleted item
 }
 
-export const addWidget = (widgetDetails: INewWidgetData, host: string = ''): Promise<IWidgetData> => {
-  return axios.post<IWidgetData>(`${host}/api/v1/widgets`, widgetDetails)
+export const addWidget = (
+  widgetDetails: INewWidgetData,
+  host: string = ""
+): Promise<IWidgetData> => {
+  return axios
+    .post<IWidgetData>(`${host}/api/v1/widgets`, widgetDetails)
     .then((res: AxiosResponse<IWidgetData>) => {
       if (res && res.data) {
         return res.data;
       }
-      throw new Error('Failed to add widget: no data received');
+      throw new Error("Failed to add widget: no data received");
     });
 };
 
-export const getWidgets = (displayId: string, host: string = ''): Promise<IWidgetData[]> => {
-  return axios.get<IWidgetData[]>(`${host}/api/v1/display/${displayId}/widgets`)
+export const getWidgets = (
+  displayId: string,
+  host: string = ""
+): Promise<IWidgetData[]> => {
+  return axios
+    .get<IWidgetData[]>(`${host}/api/v1/display/${displayId}/widgets`)
     .then((res: AxiosResponse<IWidgetData[]>) => {
       if (res && res.data) {
         return res.data;
@@ -66,8 +77,12 @@ export const getWidgets = (displayId: string, host: string = ''): Promise<IWidge
     });
 };
 
-export const deleteWidget = (id: string, host: string = ''): Promise<IDeleteResponse> => {
-  return axios.delete<IDeleteResponse>(`${host}/api/v1/widgets/${id}`)
+export const deleteWidget = (
+  id: string,
+  host: string = ""
+): Promise<IDeleteResponse> => {
+  return axios
+    .delete(`${host}/api/v1/widgets/${id}`)
     .then((res: AxiosResponse<IDeleteResponse>) => {
       if (res && res.data) {
         return res.data;
@@ -75,12 +90,19 @@ export const deleteWidget = (id: string, host: string = ''): Promise<IDeleteResp
       // If server doesn't send a body on delete, this might be an empty object or string.
       // Adjust expected type or handling if necessary.
       // For now, assuming a JSON response like { message: "deleted" }.
-      throw new Error(`Failed to delete widget ${id}: no confirmation received`);
+      throw new Error(
+        `Failed to delete widget ${id}: no confirmation received`
+      );
     });
 };
 
-export const updateWidget = (id: string, data: IUpdateWidgetData, host: string = ''): Promise<IWidgetData> => {
-  return axios.put<IWidgetData>(`${host}/api/v1/widgets/${id}`, data)
+export const updateWidget = (
+  id: string,
+  data: IUpdateWidgetData,
+  host: string = ""
+): Promise<IWidgetData> => {
+  return axios
+    .put<IWidgetData>(`${host}/api/v1/widgets/${id}`, data)
     .then((res: AxiosResponse<IWidgetData>) => {
       if (res && res.data) {
         return res.data;
@@ -89,8 +111,12 @@ export const updateWidget = (id: string, data: IUpdateWidgetData, host: string =
     });
 };
 
-export const getWidget = (id: string, host: string = ''): Promise<IWidgetData> => {
-  return axios.get<IWidgetData>(`${host}/api/v1/widgets/${id}`)
+export const getWidget = (
+  id: string,
+  host: string = ""
+): Promise<IWidgetData> => {
+  return axios
+    .get<IWidgetData>(`${host}/api/v1/widgets/${id}`)
     .then((res: AxiosResponse<IWidgetData>) => {
       if (res && res.data) {
         return res.data;

@@ -150,7 +150,7 @@ class WeatherContent extends Component<IWeatherContentProps, IWeatherContentStat
     } catch (error: any) {
       console.error("Failed to fetch weather data:", error);
       let errorMessage = "Could not retrieve weather information.";
-      if (axios.isAxiosError(error) && error.response) {
+      if (error.response) {
         // Handle specific API error messages if available
         errorMessage = `Error ${error.response.status}: ${error.response.data?.message || error.message}`;
       } else if (error instanceof Error) {
@@ -178,7 +178,7 @@ class WeatherContent extends Component<IWeatherContentProps, IWeatherContentStat
     return (
       <div className='weather-widget-content'> {/* Renamed class */}
         {iconCode && <div className='background-icon'> {/* Renamed class */}
-          <WeatherIcon iconCode={iconCode} />
+          <WeatherIcon icon={iconCode} />
         </div>}
         <div className='info-panel'> {/* Renamed class */}
           <div className='temp'>{Math.round(temperature || 0)}°</div>
@@ -191,7 +191,7 @@ class WeatherContent extends Component<IWeatherContentProps, IWeatherContentStat
           </div>
         </div>
         {iconCode && <div className='main-icon'> {/* Renamed class */}
-          <WeatherIcon iconCode={iconCode} />
+          <WeatherIcon icon={iconCode} />
         </div>}
         <style jsx>
           {`

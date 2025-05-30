@@ -1,15 +1,18 @@
-import { IBaseWidget } from './base_widget';
+import { IBaseWidget } from "./base_widget";
+
+// Export the interface for compatibility
+export type IWidgetDefinition = IBaseWidget;
 
 // Import all widget instances
 // TypeScript will resolve these to the respective index.ts files in each directory
-import announcementWidget from './announcement';
-import congratsWidget from './congrats';
-import imageWidget from './image';
-import listWidget from './list';
-import slideshowWidget from './slideshow';
-import weatherWidget from './weather';
-import webWidget from './web';
-import youtubeWidget from './youtube';
+import announcementWidget from "./announcement";
+import congratsWidget from "./congrats";
+import imageWidget from "./image";
+import listWidget from "./list";
+import slideshowWidget from "./slideshow";
+import weatherWidget from "./weather";
+import webWidget from "./web";
+import youtubeWidget from "./youtube";
 // Import other widget instances here as they are created/migrated
 
 // Define the structure of the exported widgets collection

@@ -4,7 +4,7 @@ import { view } from 'react-easy-state';
 
 import Frame from '../components/Admin/Frame.tsx'; // Assuming .tsx
 import DisplayComponent from '../components/Display/Display.tsx'; // Renamed to avoid conflict, assuming .tsx
-import { protect, ProtectProps } from '../helpers/auth.ts'; // Assuming .ts and ProtectProps provides { loggedIn: boolean }
+import { protect, ProtectProps } from '../helpers/auth'; // Now .tsx
 import { display } from '../stores'; // Assuming stores are typed
 
 interface PreviewProps extends ProtectProps {

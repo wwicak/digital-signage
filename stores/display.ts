@@ -1,7 +1,7 @@
-import { store, Store } from 'react-easy-state';
-import _ from 'lodash';
-import * as DisplayActions from '../actions/display'; // Assuming it will be .ts or allowJs handles .js
-import shortid from 'shortid';
+import { store } from "react-easy-state";
+import _ from "lodash";
+import * as DisplayActions from "../actions/display"; // Assuming it will be .ts or allowJs handles .js
+import shortid from "shortid";
 
 // Define interfaces for the state and related structures
 interface IWidget {
@@ -18,13 +18,13 @@ interface IWidget {
 interface IDisplayState {
   id: string | null;
   name: string | null;
-  layout: 'spaced' | 'compact' | null;
+  layout: "spaced" | "compact" | null;
   statusBar: string[] | null; // Assuming status bar items are strings like 'type_shortid'
   widgets: IWidget[] | null;
   setId: (id: string) => Promise<void>;
   setName: (name: string) => void;
   updateName: (name: string) => void;
-  updateLayout: (layout: 'spaced' | 'compact') => void;
+  updateLayout: (layout: "spaced" | "compact") => void;
   addStatusBarItem: (type: string) => Promise<void>;
   removeStatusBarItem: (index: number) => void; // Changed id to index based on usage
   reorderStatusBarItems: (startIndex: number, endIndex: number) => void;
@@ -35,19 +35,22 @@ interface IDisplayState {
 interface IDisplayInfo {
   _id: string;
   name: string;
-  layout: 'spaced' | 'compact';
+  layout: "spaced" | "compact";
   statusBar: string[];
   widgets: IWidget[];
   // Add other properties if present in displayInfo
 }
 
-const updateDisplayThrottled = _.debounce((id: string, data: Partial<IDisplayInfo>) => {
-  // Assuming DisplayActions.updateDisplay can take a string ID.
-  // If DisplayActions.updateDisplay expects an ObjectId, this might need adjustment.
-  return DisplayActions.updateDisplay(id, data);
-}, 300);
+const updateDisplayThrottled = _.debounce(
+  (id: string, data: Partial<IDisplayInfo>) => {
+    // Assuming DisplayActions.updateDisplay can take a string ID.
+    // If DisplayActions.updateDisplay expects an ObjectId, this might need adjustment.
+    return DisplayActions.updateDisplay(id, data);
+  },
+  300
+);
 
-const display: Store<IDisplayState> = store({
+const display = store({
   id: null,
   name: null,
   layout: null,
@@ -72,23 +75,33 @@ const display: Store<IDisplayState> = store({
     this.name = name;
     updateDisplayThrottled(this.id, { name });
   },
-  updateLayout(layout: 'spaced' | 'compact'): void {
-    if (!layout || !['spaced', 'compact'].includes(layout) || !this.id) return;
+  updateLayout(layout: "spaced" | "compact"): void {
+    if (!layout || !["spaced", "compact"].includes(layout) || !this.id) return;
     this.layout = layout;
     updateDisplayThrottled(this.id, { layout });
   },
   addStatusBarItem(type: string): Promise<void> {
-    if (!this.id || !this.statusBar) { // Ensure statusBar is initialized
-        // Optionally initialize statusBar if null, or handle error
-        if (!this.statusBar) this.statusBar = [];
+    if (!this.id || !this.statusBar) {
+      // Ensure statusBar is initialized
+      // Optionally initialize statusBar if null, or handle error
+      if (!this.statusBar) this.statusBar = [];
     }
-    this.statusBar = [...this.statusBar!, type + '_' + shortid.generate()];
+    this.statusBar = [...this.statusBar!, type + "_" + shortid.generate()];
     updateDisplayThrottled(this.id!, { statusBar: this.statusBar });
     return Promise.resolve();
   },
   removeStatusBarItem(index: number): void {
-    if (!this.id || !this.statusBar || index < 0 || index >= this.statusBar.length) return;
-    this.statusBar = [...this.statusBar.slice(0, index), ...this.statusBar.slice(index + 1)];
+    if (
+      !this.id ||
+      !this.statusBar ||
+      index < 0 ||
+      index >= this.statusBar.length
+    )
+      return;
+    this.statusBar = [
+      ...this.statusBar.slice(0, index),
+      ...this.statusBar.slice(index + 1),
+    ];
     updateDisplayThrottled(this.id, { statusBar: this.statusBar });
   },
   reorderStatusBarItems(startIndex: number, endIndex: number): void {
@@ -99,7 +112,7 @@ const display: Store<IDisplayState> = store({
 
     this.statusBar = result;
     updateDisplayThrottled(this.id, { statusBar: this.statusBar });
-  }
+  },
 });
 
 export default display;

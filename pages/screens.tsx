@@ -8,7 +8,7 @@ import Dialog from '../components/Dialog.tsx'; // Assuming .tsx
 import { Button } from '../components/Form'; // Assuming Form components are in .tsx or have .d.ts
 
 import { addDisplay } from '../actions/display'; // Assuming .ts and typed
-import { protect, ProtectProps } from '../helpers/auth.ts'; // Assuming .ts
+import { protect, ProtectProps } from '../helpers/auth'; // Now .tsx
 import { display } from '../stores'; // Assuming stores are typed
 
 // Placeholder for ScreenList component instance type

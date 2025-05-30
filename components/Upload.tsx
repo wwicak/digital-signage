@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import dynamic from 'next/dynamic';
 import ContentLoader from 'react-content-loader';
-import { DropzoneProps, FileRejection, DropEvent } from 'react-dropzone'; // Import types
+import { FileRejection, DropzoneProps, DropEvent } from 'react-dropzone'; // Import types
 
 // Assuming SlideEditDialog.tsx exports ISlideEditDialogRef for its ref methods
 import SlideEditDialog, { ISlideEditDialogRef } from './Admin/SlideEditDialog';

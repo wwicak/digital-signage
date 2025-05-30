@@ -4,30 +4,29 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPencilAlt, IconDefinition } from '@fortawesome/free-solid-svg-icons';
 import _ from 'lodash';
 import { view } from 'react-easy-state';
+import { SortEndHandler } from 'react-sortable-hoc'; // Import SortEndHandler
 
-import Frame from '../components/Admin/Frame.tsx';
-import SlideListComponent from '../components/Admin/SlideList.tsx'; // Renamed
-import SlideEditDialogComponent from '../components/Admin/SlideEditDialog.tsx'; // Renamed
-import Upload from '../components/Upload.tsx';
-import Button from '../components/Form/Button.tsx';
-import Dialog from '../components/Dialog.tsx'; // Assuming this is a generic Dialog component
+import Frame from '../components/Admin/Frame';
+import SlideListComponent, { ISlideListProps } from '../components/Admin/SlideList'; // Renamed and import props
+import SlideEditDialogComponent, { ISlideEditDialogRef } from '../components/Admin/SlideEditDialog'; // Renamed and import ref interface
+import Upload from '../components/Upload';
+import Button from '../components/Form/Button';
+import Dialog from '../components/Dialog'; // Assuming this is a generic Dialog component
 
-import { getSlideshow, updateSlideshow } from '../actions/slideshow'; // Assuming .ts and typed
-import { protect, ProtectProps } from '../helpers/auth.ts'; // Assuming .ts
+import { getSlideshow, updateSlideshow, ISlideshowData } from '../actions/slideshow'; // Using ISlideshowData
+import { protect, IProtectedPageProps } from '../helpers/auth'; // Using IProtectedPageProps
 import { display } from '../stores'; // Assuming stores are typed
 
 // Define the structure of a slideshow object
-interface SlideshowData {
-  _id: string;
-  title: string;
-  // Add other properties of slideshow object here, e.g., slides: any[]
+interface SlideshowData extends ISlideshowData {
+  // May add component-specific properties here if needed, but for now match ISlideshowData
 }
 
 // Props for the Slideshow component
-interface SlideshowProps extends ProtectProps {
+interface SlideshowProps extends IProtectedPageProps {
   slideshow?: SlideshowData; // slideshow can be undefined if ID is new or not found
-  host: string;
-  displayId?: string; // from query or HOC
+  // host and loggedIn are already in IProtectedPageProps
+  // displayId is already in IProtectedPageProps
 }
 
 // State for the Slideshow component
@@ -35,29 +34,27 @@ interface SlideshowState {
   slideshow?: SlideshowData; // Mirroring props, slideshow can be undefined
 }
 
-// Placeholder types for component instances via refs
-interface SlideListInstance {
-  refresh: () => void;
-}
-interface SlideEditDialogInstance {
-  open: () => void;
-  // define other methods if any
-}
+// Placeholder types for component instances via refs (using the actual component class for full type checking)
+// No longer need to manually define all methods if using the component class directly as the ref type.
+// The interfaces ISlideEditDialogRef and SlideListInstance are for *what we expect* to find via the ref,
+// but the ref itself should be typed as the component class.
+// ISlideEditDialogRef is already defined in components/Admin/SlideEditDialog.tsx
+// We will use that directly.
 
 const updateSlideshowThrottled = _.debounce((id: string, data: Partial<SlideshowData>) => {
   return updateSlideshow(id, data);
 }, 300);
 
 class Slideshow extends React.Component<SlideshowProps, SlideshowState> {
-  private slideList = React.createRef<SlideListInstance>();
-  private dialog = React.createRef<SlideEditDialogInstance>();
+  private slideList = React.createRef<SlideListComponent>();
+  private dialog = React.createRef<SlideEditDialogComponent>();
 
   constructor(props: SlideshowProps) {
     super(props);
     this.state = { slideshow: props.slideshow };
   }
 
-  static async getInitialProps(ctx: NextPageContext): Promise<Partial<SlideshowProps>> {
+  static async getInitialProps(ctx: any): Promise<Partial<SlideshowProps>> {
     const id = ctx.query.id as string | undefined;
     const host =
       ctx.req && ctx.req.headers && ctx.req.headers.host
@@ -115,7 +112,7 @@ class Slideshow extends React.Component<SlideshowProps, SlideshowState> {
         }),
         () => {
           if (this.state.slideshow) { // Check again due to async nature of setState
-            updateSlideshowThrottled(this.state.slideshow._id, { title: newTitle });
+            updateSlideshowThrottled(this.state.slideshow._id, { name: newTitle });
           }
         }
       );
@@ -133,19 +130,19 @@ class Slideshow extends React.Component<SlideshowProps, SlideshowState> {
           <input
             className='input'
             placeholder='Untitled Slideshow'
-            value={(slideshow && slideshow.title) || ''} // Handle undefined case for value
+            value={(slideshow && slideshow.name) || ''} // Handle undefined case for value. ISlideshowData has name, not title
             onChange={this.handleTitleChange}
             onClick={(e: React.MouseEvent<HTMLInputElement>) => e.stopPropagation()}
-            size={(slideshow && slideshow.title && slideshow.title.length) || 20} // Default size
+            size={(slideshow && slideshow.name && slideshow.name.length) || 20} // Default size
           />
           <div className='icon'>
             <FontAwesomeIcon icon={faPencilAlt as IconDefinition} fixedWidth color='#828282' />
           </div>
         </div>
         <div className='wrapper'>
-          <Upload slideshowId={slideshow && slideshow._id} refresh={this.refresh} />
+          <Upload slideshowId={slideshow && slideshow._id || ''} refresh={this.refresh} /> {/* Ensure slideshowId is string */}
           <SlideEditDialogComponent
-            slideshowId={slideshow && slideshow._id}
+            slideshowId={slideshow && slideshow._id || ''} // Ensure slideshowId is string
             refresh={this.refresh}
             ref={this.dialog}
           />
@@ -155,9 +152,10 @@ class Slideshow extends React.Component<SlideshowProps, SlideshowState> {
             style={{ flex: 1, margin: 0, width: '100%', marginTop: 20 }}
             onClick={this.openAddDialog}
           />
-          <SlideListComponent ref={this.slideList} slideshowId={slideshow && slideshow._id} />
-          {/* Assuming this Dialog is a generic one, e.g. for alerts, or context-based */}
-          <Dialog /> 
+          {/* Ensure slideshowId is string for SlideListComponent */}
+          <SlideListComponent ref={this.slideList} slideshowId={slideshow && slideshow._id || ''} />
+          {/* Assuming DialogProps requires children, provide an empty one */}
+          <Dialog><div></div></Dialog>
         </div>
         <style jsx>
           {`

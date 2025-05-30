@@ -12,7 +12,7 @@ export interface IChoice {
 }
 
 // Base props common to all input types
-interface IBaseInputProps {
+export interface IBaseInputProps {
   name: string; // Name of the input field, passed to onChange
   value?: any; // Current value of the input
   onChange: (

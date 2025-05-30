@@ -3,40 +3,43 @@
  * along with its title and description.
  */
 
-import GenericSlide from './Generic'
+import GenericSlide, { GenericSlideProps, GenericSlideState } from './Generic'
 import React from 'react'
+import Image from 'next/image'
 
 class PhotoSlide extends GenericSlide {
-  constructor(props) {
-    super(props)
+  private image: React.RefObject<HTMLImageElement | null>;
 
+  constructor(props: GenericSlideProps) {
+    super(props)
     this.image = React.createRef()
   }
 
-  componentDidMount() {
+  componentDidMount(): void {
+    super.componentDidMount();
     if (this.image && this.image.current && this.image.current.complete) {
       this.handleImageLoaded()
     }
   }
 
-  handleImageLoaded = () => {
+  handleImageLoaded = (): void => {
     this.state.loading.resolve
       ? this.state.loading.resolve()
-      : this.setState({ loading: { promise: Promise.resolve() } })
+      : this.setState({ loading: { ...this.state.loading, promise: Promise.resolve() } })
   }
 
-  handleImageErrored = () => {
+  handleImageErrored = (): void => {
     this.state.loading.reject
       ? this.state.loading.reject()
-      : this.setState({ loading: { promise: Promise.reject() } })
+      : this.setState({ loading: { ...this.state.loading, promise: Promise.reject() } })
   }
 
   /**
    * Renders the inner content of the slide (ex. the photo, youtube iframe, etc)
-   * @param {string} data The slide's data (usually a URL or object ID)
-   * @returns {Component}
+   * @param data The slide's data (usually a URL or object ID)
+   * @returns React element
    */
-  renderSlideContent(data) {
+  renderSlideContent(data: string): React.ReactElement {
     return (
       <div className='slide-content'>
         <div
@@ -51,12 +54,16 @@ class PhotoSlide extends GenericSlide {
             backgroundImage: `url(${data})`
           }}
         />
-        <img
+        <Image
           src={data}
+          alt="Slide photo"
+          width={1}
+          height={1}
           className='invisible'
           onLoad={this.handleImageLoaded.bind(this)}
           onError={this.handleImageErrored.bind(this)}
           ref={this.image}
+          unoptimized={true}
         />
         <style jsx>{`
           .slide-content {
@@ -100,12 +107,12 @@ class PhotoSlide extends GenericSlide {
   /**
    * Stops the slide's content from playing when the slide is out of focus
    */
-  stop = () => {}
+  stop = (): void => {}
 
   /**
    * Starts or resumes the slide's content when the slide is in focus
    */
-  play = () => {}
+  play = (): void => {}
 }
 
 export default PhotoSlide

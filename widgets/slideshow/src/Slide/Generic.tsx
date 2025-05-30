@@ -5,18 +5,41 @@
 
 import React, { Component } from 'react'
 
-class GenericSlide extends Component {
-  constructor(props) {
+interface SlideData {
+  data: string;
+  title?: string;
+  description?: string;
+}
+
+export interface GenericSlideProps {
+  slide: SlideData;
+  show?: boolean;
+}
+
+interface LoadingState {
+  promise: Promise<void>;
+  resolve: (() => void) | null;
+  reject: (() => void) | null;
+  done: (() => void) | null;
+}
+
+export interface GenericSlideState {
+  loading: LoadingState;
+  loaded: boolean;
+}
+
+class GenericSlide extends Component<GenericSlideProps, GenericSlideState> {
+  constructor(props: GenericSlideProps) {
     super(props)
 
-    const loading = {
-      promise: null,
+    const loading: LoadingState = {
+      promise: Promise.resolve(),
       resolve: null,
       reject: null,
       done: null
     }
 
-    loading.promise = new Promise((resolve, reject) => {
+    loading.promise = new Promise<void>((resolve, reject) => {
       loading.resolve = resolve
       loading.reject = reject
     }).then(() => this.setState({ loaded: true }))
@@ -27,24 +50,26 @@ class GenericSlide extends Component {
     }
   }
 
-  componentDidMount() {
-    this.state.loading.resolve()
+  componentDidMount(): void {
+    if (this.state.loading.resolve) {
+      this.state.loading.resolve()
+    }
   }
 
-  get loadedPromise() {
+  get loadedPromise(): Promise<void> {
     return this.state.loading.promise
   }
 
-  get loaded() {
+  get loaded(): boolean {
     return this.state.loaded
   }
 
   /**
    * Renders the inner content of the slide (ex. the photo, youtube iframe, etc)
-   * @param {string} data The slide's data (usually a URL or object ID)
-   * @returns {Component}
+   * @param data The slide's data (usually a URL or object ID)
+   * @returns React element
    */
-  renderSlideContent(data) {
+  renderSlideContent(data: string): React.ReactElement {
     return (
       <div className='slide-content unknown'>
         {`Unknown slide type with data: ${data}`}
@@ -67,22 +92,22 @@ class GenericSlide extends Component {
   /**
    * Stops the slide's content from playing when the slide is out of focus
    */
-  stop = () => {
+  stop = (): void => {
     // TODO(@wassgha) Execute code to stop slide content
   }
 
   /**
    * Starts or resumes the slide's content when the slide is in focus
    */
-  play = () => {
+  play = (): void => {
     // TODO(@wassgha) Execute code to resume/restart slide content
   }
 
   /**
    * Renders the slide along with an overlayed title and description if given
-   * @returns {Component}
+   * @returns React element
    */
-  render() {
+  render(): React.ReactElement {
     const { slide, show = false } = this.props
     const { data, title, description } = slide
     const { loaded } = this.state

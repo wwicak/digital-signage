@@ -1,10 +1,10 @@
-import { ComponentType } from 'react';
-import { IconProp } from '@fortawesome/fontawesome-svg-core';
-import { faImages } from '@fortawesome/free-solid-svg-icons'; // Using faImages as it's typical for slideshows
+import { ComponentType } from "react";
+import { IconProp } from "@fortawesome/fontawesome-svg-core";
+import { faImages } from "@fortawesome/free-solid-svg-icons"; // Using faImages as it's typical for slideshows
 
-import BaseWidget, { IBaseWidget, IWidgetDefinitionArgs } from '../../base_widget';
-import SlideshowContent from './src/Slideshow'; // Assuming .js for now, will be .tsx later
-import SlideshowOptions from './src/SlideshowOptions'; // Assuming .js for now, will be .tsx later
+import BaseWidget, { IBaseWidget, IWidgetDefinitionArgs } from "../base_widget";
+import SlideshowContent from "./src/Slideshow"; // Assuming .js for now, will be .tsx later
+import SlideshowOptions from "./src/SlideshowOptions"; // Assuming .js for now, will be .tsx later
 
 // Define the structure for the slideshow widget's default data
 export interface ISlideshowWidgetDefaultData {
@@ -16,9 +16,9 @@ export interface ISlideshowWidgetDefaultData {
 
 // Define the widget definition arguments for the Slideshow widget
 const slideshowWidgetDefinitionArgs: IWidgetDefinitionArgs = {
-  name: 'Slideshow',
-  type: 'slideshow', // Added 'type' field as it's required
-  version: '0.1',
+  name: "Slideshow",
+  type: "slideshow", // Added 'type' field as it's required
+  version: "0.1",
   icon: faImages as IconProp, // Use the imported icon
   defaultData: {
     slideshow_id: null,

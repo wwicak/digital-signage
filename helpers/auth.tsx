@@ -1,8 +1,21 @@
-import Router, { NextRouter } from 'next/router';
+import Router from 'next/router';
 import axios, { AxiosResponse } from 'axios';
 import React, { ComponentType } from 'react';
-import { parseCookies, setCookie, destroyCookie, NookiesNextPageContext } from 'nookies';
-import { NextPageContext } from 'next'; // Base NextPageContext
+import { parseCookies, setCookie, destroyCookie } from 'nookies';
+import { IncomingMessage, ServerResponse } from 'http';
+import { ParsedUrlQuery } from 'querystring';
+
+// Define our own context type based on Next.js patterns
+interface PageContext {
+  req?: IncomingMessage & { user?: any };
+  res?: ServerResponse;
+  query: ParsedUrlQuery;
+}
+
+// Define the component type with getInitialProps
+type NextPageWithInitialProps<P = {}> = ComponentType<P> & {
+  getInitialProps?: (ctx: PageContext) => Promise<P> | P;
+};
 
 import { getDisplays, IDisplayData } from '../actions/display'; // Assuming IDisplayData is the type for display items
 
@@ -33,12 +46,15 @@ export interface ILogoutAuthResponse extends IAuthSuccessResponse {
 
 // Props injected by the protect HOC into the wrapped component
 export interface IProtectedPageProps {
-  displayId: string; // Default displayId if none in query
+  displayId?: string; // Default displayId if none in query (can be optional)
   host: string;
   loggedIn: boolean;
   // Plus any props returned by Component.getInitialProps
   [key: string]: any; // To allow other props
 }
+
+// Legacy alias for compatibility
+export type ProtectProps = IProtectedPageProps;
 
 
 // --- Functions ---
@@ -73,7 +89,7 @@ export const login = async (
     return response.data;
   } catch (error: any) {
     // Handle or transform error as needed
-    if (axios.isAxiosError(error) && error.response) {
+    if (error.response) {
       return error.response.data as ILoginAuthResponse; // API might return { success: false, message: '...' }
     }
     // Fallback for network errors or other issues
@@ -95,7 +111,7 @@ export const logout = async (host: string = ''): Promise<ILogoutAuthResponse> =>
     
     return response.data; // Should ideally indicate success/failure from server
   } catch (error: any) {
-    if (axios.isAxiosError(error) && error.response) {
+    if (error.response) {
       return error.response.data as ILogoutAuthResponse;
     }
     return { success: false, message: error.message || 'Logout failed due to an unexpected error.' };
@@ -105,12 +121,12 @@ export const logout = async (host: string = ''): Promise<ILogoutAuthResponse> =>
 // --- HOC for Protected Pages ---
 // P represents the original props of the Component being wrapped.
 export const protect = <P extends object>(
-  WrappedComponent: ComponentType<P & IProtectedPageProps> // Wrapped component receives original + injected props
+  WrappedComponent: ComponentType<P> // Accept any component type
 ): ComponentType<P> => { // The HOC itself receives original props P
   return class ProtectedPage extends React.Component<P> { // HOC component takes P as props
-    static async getInitialProps(ctx: NookiesNextPageContext): Promise<Partial<IProtectedPageProps> | {}> {
+    static async getInitialProps(ctx: PageContext): Promise<Partial<IProtectedPageProps> | {}> {
       const { req, res, query } = ctx;
-      const cookies = parseCookies(ctx);
+      const cookies = parseCookies(ctx as any);
       const alreadyLoggedIn = !!cookies.loggedIn; // Convert to boolean
 
       // Determine host (safer check for window)
@@ -127,7 +143,7 @@ export const protect = <P extends object>(
 
       if (isAuthenticated) {
         if (!alreadyLoggedIn && typeof window === 'undefined') { // Only set cookie on server-side if not already set
-            setCookie(ctx, 'loggedIn', 'true', { // Nookies ctx for server-side
+            setCookie(ctx as any, 'loggedIn', 'true', { // Nookies ctx for server-side
                 maxAge: 30 * 24 * 60 * 60, // 30 days
                 path: '/',
                 // secure: process.env.NODE_ENV === 'production', // Add secure and httpOnly if applicable
@@ -168,8 +184,9 @@ export const protect = <P extends object>(
         }
 
         // Call wrapped component's getInitialProps if it exists
-        const componentProps = WrappedComponent.getInitialProps
-          ? await WrappedComponent.getInitialProps(ctx as any) // Cast ctx if WrappedComponent expects a simpler NextPageContext
+        const wrappedComponentWithInitialProps = WrappedComponent as any;
+        const componentProps = wrappedComponentWithInitialProps.getInitialProps
+          ? await wrappedComponentWithInitialProps.getInitialProps(ctx as any) // Cast ctx if WrappedComponent expects a simpler NextPageContext
           : {};
         
         return {

@@ -1,4 +1,3 @@
-import ReactDOM from 'react-dom';
 import React, { ComponentType, CSSProperties } from 'react';
 
 interface WidgetLayout {
@@ -61,7 +60,7 @@ export default function HeightProvider<P extends object>(
       // The original code uses MeasureComponent directly.
       // This implies MeasureComponent is an instance or a DOM element passed from outside.
       // If MeasureComponent were a component type rendered inside this HOC, a ref would be needed.
-      const node = MeasureComponent ? ReactDOM.findDOMNode(MeasureComponent) : null;
+      const node = MeasureComponent as HTMLElement;
 
       if (node instanceof HTMLElement) {
         this.setState({ width: node.offsetWidth, height: node.offsetHeight });

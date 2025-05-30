@@ -1,10 +1,10 @@
-import { ComponentType } from 'react';
-import { IconProp } from '@fortawesome/fontawesome-svg-core';
-import { faListUl } from '@fortawesome/free-solid-svg-icons'; // Using faListUl for a generic list icon
+import { ComponentType } from "react";
+import { IconProp } from "@fortawesome/fontawesome-svg-core";
+import { faListUl } from "@fortawesome/free-solid-svg-icons"; // Using faListUl for a generic list icon
 
-import BaseWidget, { IBaseWidget, IWidgetDefinitionArgs } from '../../base_widget';
-import ListContent from './src/ListContent'; // Assuming .js for now
-import ListOptions from './src/ListOptions'; // Assuming .js for now
+import BaseWidget, { IBaseWidget, IWidgetDefinitionArgs } from "../base_widget";
+import ListContent from "./src/ListContent"; // Assuming .js for now
+import ListOptions from "./src/ListOptions"; // Assuming .js for now
 
 // Define the structure for a single list item
 export interface IListItem {
@@ -14,7 +14,7 @@ export interface IListItem {
 }
 
 // Define the structure for the list widget's default data
-interface IListDefaultData {
+export interface IListDefaultData {
   title?: string | null;
   color: string; // Background color for the widget
   textColor: string; // Text color for list items
@@ -25,15 +25,15 @@ interface IListDefaultData {
 
 // Define the widget definition arguments for the List widget
 const listDefinitionArgs: IWidgetDefinitionArgs = {
-  name: 'List',
-  type: 'list', // Added 'type' field as it's required
-  version: '0.1',
+  name: "List",
+  type: "list", // Added 'type' field as it's required
+  version: "0.1",
   icon: faListUl as IconProp, // Use the imported icon
   defaultData: {
     title: null,
-    color: '#34495e', // Wet Asphalt
-    textColor: '#ffffff', // White
-    list: [{ text: 'First item', label: null }], // Default with one item
+    color: "#34495e", // Wet Asphalt
+    textColor: "#ffffff", // White
+    list: [{ text: "First item", label: null }], // Default with one item
     ordered: false, // Default to unordered list
     fontSize: 16, // Default font size
   } as IListDefaultData,

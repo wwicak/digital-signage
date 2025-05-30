@@ -43,13 +43,13 @@ class WebContent extends Component<IWebContentProps, IWebContentState> {
   }
 
   componentDidUpdate(prevProps: IWebContentProps) {
-    const oldData = prevProps.data || {};
-    const newData = this.props.data || {};
+    const oldData = prevProps.data;
+    const newData = this.props.data;
 
-    if (oldData.url !== newData.url) {
+    if (oldData?.url !== newData?.url) {
       this.setState({ iframeKey: Date.now() }); // Change key to force iframe reload on URL change
     }
-    if (oldData.refreshInterval !== newData.refreshInterval || oldData.url !== newData.url) {
+    if (oldData?.refreshInterval !== newData?.refreshInterval || oldData?.url !== newData?.url) {
       this.clearRefreshInterval();
       this.setupRefreshInterval();
     }
@@ -80,7 +80,7 @@ class WebContent extends Component<IWebContentProps, IWebContentState> {
   };
 
   render() {
-    const { data = {} } = this.props;
+    const { data } = this.props;
     const {
       title = null,
       url = DEFAULT_URL,
@@ -88,7 +88,7 @@ class WebContent extends Component<IWebContentProps, IWebContentState> {
       scale = DEFAULT_SCALE,
       allowInteraction = DEFAULT_ALLOW_INTERACTION,
       // refreshInterval is used in setupRefreshInterval
-    } = data;
+    } = data || {};
 
     const iframeContainerStyle: CSSProperties = {
       flex: 1,

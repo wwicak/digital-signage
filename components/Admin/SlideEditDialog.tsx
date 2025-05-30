@@ -9,7 +9,11 @@ import { getSlide, addSlide, updateSlide, ISlideData, SlideAddData, SlideUpdateD
 // Interface for methods exposed via ref
 export interface ISlideEditDialogRef {
   open: () => void;
-  close: () => void; // Or Promise<void> if it matches original
+  close: () => void;
+  refreshSlideData: () => Promise<void>;
+  // If the internal dialog ref also needs to be accessed, it would be here,
+  // but generally, we want to expose only the minimal public API.
+  // For the purpose of the ref in slideshow.tsx, these are the primary methods.
 }
 
 export interface ISlideEditDialogProps {
@@ -73,14 +77,20 @@ class SlideEditDialog extends Component<ISlideEditDialogProps, ISlideEditDialogS
         const slideData = await getSlide(slideId);
         this.setState({
           // Reset fields before populating from fetched data
-          data: undefined,
-          title: undefined,
-          description: undefined, // Assuming description is part of slideData or handled locally
-          type: undefined,
-          duration: undefined,
-          ...slideData, // Spread fetched slide data
-          upload: upload || null, // Keep current upload prop or reset
-          type: upload ? 'photo' : slideData.type, // Prioritize photo type if upload is present
+           ...{ // Define properties explicitly to avoid conflicts
+              data: undefined,
+              title: undefined, // If title is used in state and maps to ISlideData.name
+              description: undefined,
+              duration: undefined,
+              type: upload ? 'photo' : undefined, // Set type based on upload first
+           },
+           ...slideData, // Spread fetched data, which might override the above with actual values
+           // Explicitly set 'type' and 'data' last if 'upload' dictates 'photo' logic.
+           // If 'upload' is present, it's a photo, so 'data' should be undefined (it holds the URL for non-photo types).
+           // If no upload, then use fetched slideData.type.
+           type: upload ? 'photo' : slideData.type,
+           data: upload ? undefined : slideData.data, // Clear data if it's a photo upload
+           upload: upload || null, // Ensure upload is correctly set or null
         });
       } catch (error) {
         console.error("Failed to get slide data:", error);
@@ -114,7 +124,7 @@ class SlideEditDialog extends Component<ISlideEditDialogProps, ISlideEditDialogS
     }
   };
 
-  handleChange = (name: keyof ISlideEditDialogState, value: any): void => {
+  handleChange = (name: string, value: any): void => {
     this.setState(prevState => ({
       ...prevState,
       [name]: value,
@@ -130,7 +140,7 @@ class SlideEditDialog extends Component<ISlideEditDialogProps, ISlideEditDialogS
   };
   
   // Handler specifically for the photo upload Input component
-  handlePhotoChange = (name: "upload", value: File | string | null): void => {
+  handlePhotoChange = (name: string, value: File | string | null): void => {
     if (value instanceof File) {
         this.setState({ upload: value, data: undefined }); // New file takes precedence, clear existing data URL
     } else if (typeof value === 'string') {
@@ -161,9 +171,9 @@ class SlideEditDialog extends Component<ISlideEditDialogProps, ISlideEditDialogS
 
     try {
       if (slideshowId) { // Adding a new slide
-        await addSlide(slideshowId, upload, slideDetails as SlideAddData);
+        await addSlide(slideshowId, upload || null, slideDetails as SlideAddData); // Ensure upload is File | null
       } else if (slideId) { // Updating an existing slide
-        await updateSlide(slideId, upload, slideDetails as SlideUpdateData);
+        await updateSlide(slideId, upload || null, slideDetails as SlideUpdateData); // Ensure upload is File | null
       }
       this.close(); // Close dialog and trigger refresh via this.close()
     } catch (error) {
@@ -213,12 +223,11 @@ class SlideEditDialog extends Component<ISlideEditDialogProps, ISlideEditDialogS
             />
           ) : (
             <Input
-              type={'text'}
+              type={type === 'markdown' ? 'textarea' : 'text'} // Set type to 'textarea' for markdown
               label={type === 'web' ? 'Web URL' : type === 'youtube' ? 'Youtube URL' : type === 'markdown' ? 'Markdown Content' : 'Data'}
               name={'data'}
               value={data || ''} // Ensure value is not null/undefined for input
               onChange={this.handleChange}
-              textarea={type === 'markdown'} // Use textarea for markdown
             />
           )}
           <Input

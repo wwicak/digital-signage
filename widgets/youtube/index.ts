@@ -1,10 +1,10 @@
-import { ComponentType } from 'react';
-import { IconProp } from '@fortawesome/fontawesome-svg-core';
-import { faYoutube } from '@fortawesome/free-brands-svg-icons'; // Import the specific icon
+import { ComponentType } from "react";
+import { IconProp } from "@fortawesome/fontawesome-svg-core";
+import { faYoutube } from "@fortawesome/free-brands-svg-icons"; // Import the specific icon
 
-import BaseWidget, { IBaseWidget, IWidgetDefinitionArgs } from '../../base_widget';
-import YoutubeContent from './src/YoutubeContent'; // Assuming .js for now
-import YoutubeOptions from './src/YoutubeOptions'; // Assuming .js for now
+import BaseWidget, { IBaseWidget, IWidgetDefinitionArgs } from "../base_widget";
+import YoutubeContent from "./src/YoutubeContent"; // Assuming .js for now
+import YoutubeOptions from "./src/YoutubeOptions"; // Assuming .js for now
 
 // Define the structure for the YouTube widget's default data
 export interface IYoutubeDefaultData {
@@ -21,12 +21,12 @@ export interface IYoutubeDefaultData {
 
 // Define the widget definition arguments for the YouTube widget
 const youtubeDefinitionArgs: IWidgetDefinitionArgs = {
-  name: 'YouTube Video', // More descriptive name
-  type: 'youtube', // Added 'type' field as it's required
-  version: '0.1',
+  name: "YouTube Video", // More descriptive name
+  type: "youtube", // Added 'type' field as it's required
+  version: "0.1",
   icon: faYoutube as IconProp, // Use the imported icon
   defaultData: {
-    video_id: '9xwazD5SyVg', // Example video ID
+    video_id: "9xwazD5SyVg", // Example video ID
     autoplay: true,
     loop: false,
     show_controls: true,

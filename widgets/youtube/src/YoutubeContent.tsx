@@ -53,7 +53,7 @@ class YoutubeContent extends Component<IYoutubeContentProps> {
 
 
   render() {
-    const { data = {} } = this.props;
+    const { data } = this.props;
     // Use defaults from IYoutubeDefaultData defined in ../index.ts via props.data
     const {
       video_id = null, // This is the primary field now
@@ -65,7 +65,7 @@ class YoutubeContent extends Component<IYoutubeContentProps> {
       show_captions = false,
       // title and color from original JS data are less relevant here.
       // If a title bar is needed, it should be a separate element.
-    } = data;
+    } = data || {};
 
     // The original JS used getVideoId(url). Now, video_id is directly configured.
     // If a URL were still primary, extraction would be:

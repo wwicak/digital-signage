@@ -1,15 +1,15 @@
-import { ComponentType } from 'react';
-import { IconProp } from '@fortawesome/fontawesome-svg-core';
-import { faImage } from '@fortawesome/free-solid-svg-icons'; // Import the specific icon
+import { ComponentType } from "react";
+import { IconProp } from "@fortawesome/fontawesome-svg-core";
+import { faImage } from "@fortawesome/free-solid-svg-icons"; // Import the specific icon
 
-import BaseWidget, { IBaseWidget, IWidgetDefinitionArgs } from '../../base_widget';
-import ImageContent from './src/ImageContent'; // Assuming .js for now
-import ImageOptions from './src/ImageOptions'; // Assuming .js for now
+import BaseWidget, { IBaseWidget, IWidgetDefinitionArgs } from "../base_widget";
+import ImageContent from "./src/ImageContent"; // Assuming .js for now
+import ImageOptions from "./src/ImageOptions"; // Assuming .js for now
 
 // Define the structure for the image widget's default data
-export type TImageFit = 'contain' | 'cover' | 'fill' | 'none' | 'scale-down';
+export type TImageFit = "contain" | "cover" | "fill" | "none" | "scale-down";
 
-interface IImageDefaultData {
+export interface IImageDefaultData {
   title?: string | null; // Optional title for the image/widget
   url: string | null; // URL of the image
   fit: TImageFit; // How the image should fit within its container
@@ -19,16 +19,16 @@ interface IImageDefaultData {
 
 // Define the widget definition arguments for the Image widget
 const imageDefinitionArgs: IWidgetDefinitionArgs = {
-  name: 'Image',
-  type: 'image', // Added 'type' field as it's required
-  version: '0.1',
+  name: "Image",
+  type: "image", // Added 'type' field as it's required
+  version: "0.1",
   icon: faImage as IconProp, // Use the imported icon
   defaultData: {
     title: null,
     url: null,
-    fit: 'contain',
-    color: '#2d3436', // Default background: Dark Gray
-    altText: '',
+    fit: "contain",
+    color: "#2d3436", // Default background: Dark Gray
+    altText: "",
   } as IImageDefaultData,
   WidgetComponent: ImageContent as ComponentType<any>, // Cast as ComponentType<any> for now
   OptionsComponent: ImageOptions as ComponentType<any>, // Cast as ComponentType<any> for now

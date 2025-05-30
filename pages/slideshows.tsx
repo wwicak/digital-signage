@@ -8,7 +8,7 @@ import Dialog from '../components/Dialog.tsx';
 import { Button } from '../components/Form';
 
 import { addSlideshow } from '../actions/slideshow'; // Assuming .ts and typed
-import { protect, ProtectProps } from '../helpers/auth.ts'; // Assuming .ts
+import { protect, ProtectProps } from '../helpers/auth'; // Now .tsx
 import { display } from '../stores'; // Assuming stores are typed
 
 // Placeholder for SlideshowList component instance type

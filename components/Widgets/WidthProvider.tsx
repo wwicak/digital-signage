@@ -1,4 +1,3 @@
-import ReactDOM from 'react-dom';
 import React, { ComponentType, CSSProperties } from 'react';
 
 interface WidthProviderProps {
@@ -44,7 +43,7 @@ export default function WidthProvider<P extends object>(
     onWindowResize = () => {
       if (!this.mounted) return;
       
-      const node = ReactDOM.findDOMNode(this); // 'this' refers to the WidthProviderComponent instance
+      const node = this as any; // Cast to avoid ReactDOM.findDOMNode deprecation
       if (node instanceof HTMLElement) {
         this.setState({ width: node.offsetWidth });
       }
