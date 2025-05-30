@@ -20,6 +20,7 @@ import { StatusBarElementTypes, IStatusBarElementDefinition } from '../helpers/s
 import Widgets, { IWidgetDefinition } from '../widgets'; // Assuming widgets/index.js will be typed
 
 import { addWidget, getWidgets, deleteWidget, updateWidget, IWidgetData, INewWidgetData, IUpdateWidgetData } from '../actions/widgets'; // Already .tsx
+import { WidgetType } from '../api/models/Widget';
 import { protect } from '../helpers/auth'; // Assuming auth.js will be typed or allowJs
 import { display as displayStore } from '../stores'; // Already .tsx
 
@@ -78,7 +79,7 @@ class LayoutPage extends React.Component<ILayoutPageProps, ILayoutPageState> {
     const widgetDefinition: IWidgetDefinition | undefined = Widgets[type];
     const newWidgetData: Partial<INewWidgetData> = { // Construct data for addWidget action
         display: displayStore.id!, // displayStore.id should be set
-        type: type,
+        type: type as WidgetType,
         data: widgetDefinition?.defaultData || {},
         // x, y, w, h can be omitted if server assigns defaults or if not needed immediately
     };

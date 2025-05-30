@@ -5,6 +5,7 @@ import Dialog, { IDialogProps, DialogMethods } from '../Dialog'; // Assuming Dia
 import { Form, Input, Button, ButtonGroup, IInputProps, IChoice } from '../Form'; // Assuming Form components are/will be typed
 
 import { getSlide, addSlide, updateSlide, ISlideData, SlideAddData, SlideUpdateData } from '../../actions/slide'; // Slide actions are typed
+import { SlideType, SlideData } from '../../api/models/Slide';
 
 // Interface for methods exposed via ref
 export interface ISlideEditDialogRef {
@@ -26,18 +27,17 @@ export interface ISlideEditDialogProps {
   // This Dialog is for SLIDES. WidgetEditDialog is different.
 }
 
-interface ISlideEditDialogState extends Partial<Omit<ISlideData, '_id' | 'creator_id' | 'creation_date' | 'last_update' | 'slideshow_ids'>> {
+interface ISlideEditDialogState extends Partial<Omit<ISlideData, '_id' | 'creator_id' | 'creation_date' | 'last_update' | 'slideshow_ids' | 'data'>> {
   // Fields from ISlideData that are editable:
   // name?: string; // ISlideData might use 'name', original JS used 'title' in state.
-  // type?: 'youtube' | 'web' | 'photo' | 'markdown' | string; // From ISlideData.type
-  // data?: any; // URL or content
+  // type?: SlideType; // From ISlideData.type
   // duration?: number;
   
   // State specific to this dialog's form handling:
   title?: string; // Corresponds to slide's name/title
   description?: string; // A field not explicitly in ISlideData, maybe for internal use or needs adding to ISlideData
   upload?: File | null; // Current file being uploaded/edited
-  // type, data, duration are directly from ISlideData (via Partial)
+  data?: string | SlideData; // Allow both string (for URLs/text input) and SlideData (for structured data)
 }
 
 
@@ -48,7 +48,7 @@ class SlideEditDialog extends Component<ISlideEditDialogProps, ISlideEditDialogS
     super(props);
     this.state = {
       upload: props.upload || null,
-      type: props.upload ? 'photo' : undefined, // Default to 'photo' if upload prop is present
+      type: props.upload ? SlideType.PHOTO : undefined, // Default to 'photo' if upload prop is present
       // Initialize other fields as undefined or from props if creating new
       title: undefined,
       description: undefined,
@@ -62,7 +62,7 @@ class SlideEditDialog extends Component<ISlideEditDialogProps, ISlideEditDialogS
     if (this.props.upload !== prevProps.upload) {
       this.setState({
         upload: this.props.upload,
-        type: this.props.upload ? 'photo' : this.state.type, // Keep existing type if no new upload, or set to photo
+        type: this.props.upload ? SlideType.PHOTO : this.state.type, // Keep existing type if no new upload, or set to photo
       });
     }
     // If the slideId prop changes, it implies we might need to load a new slide's data.
@@ -88,7 +88,7 @@ class SlideEditDialog extends Component<ISlideEditDialogProps, ISlideEditDialogS
            // Explicitly set 'type' and 'data' last if 'upload' dictates 'photo' logic.
            // If 'upload' is present, it's a photo, so 'data' should be undefined (it holds the URL for non-photo types).
            // If no upload, then use fetched slideData.type.
-           type: upload ? 'photo' : slideData.type,
+           type: upload ? SlideType.PHOTO : slideData.type,
            data: upload ? undefined : slideData.data, // Clear data if it's a photo upload
            upload: upload || null, // Ensure upload is correctly set or null
         });
@@ -102,7 +102,7 @@ class SlideEditDialog extends Component<ISlideEditDialogProps, ISlideEditDialogS
         data: undefined,
         title: undefined,
         description: undefined,
-        type: upload ? 'photo' : 'youtube', // Default type for new slide
+        type: upload ? SlideType.PHOTO : SlideType.YOUTUBE, // Default type for new slide
         duration: 5, // Default duration
         upload: upload || null,
       });
@@ -133,7 +133,7 @@ class SlideEditDialog extends Component<ISlideEditDialogProps, ISlideEditDialogS
     }), () => {
         // If type changed to 'photo', and there's an existing 'data' (URL), clear it.
         // The 'upload' field will handle the new photo.
-        if (name === 'type' && this.state.type === 'photo' && typeof this.state.data === 'string' && this.state.data.startsWith('http')) {
+        if (name === 'type' && this.state.type === SlideType.PHOTO && typeof this.state.data === 'string' && this.state.data.startsWith('http')) {
             this.setState({ data: undefined });
         }
     });
@@ -164,7 +164,7 @@ class SlideEditDialog extends Component<ISlideEditDialogProps, ISlideEditDialogS
       name: title, // Map state.title to slide.name
       description: description, // If description is part of ISlideData
       type: type,
-      data: (type === 'photo' && upload) ? undefined : data, // `data` field is for URL/text, not the file itself for 'photo' type if new upload
+      data: (type === SlideType.PHOTO && upload) ? undefined : data, // `data` field is for URL/text, not the file itself for 'photo' type if new upload
       duration: Number(duration) || 5, // Ensure duration is a number
     }, v => v !== undefined);
 
@@ -184,21 +184,21 @@ class SlideEditDialog extends Component<ISlideEditDialogProps, ISlideEditDialogS
   
   // Choices for the 'type' select input
   private typeChoices: IChoice[] = [
-    { id: 'youtube', label: 'Youtube Video' },
-    { id: 'web', label: 'Web Page' },
-    { id: 'photo', label: 'Photo' },
-    { id: 'markdown', label: 'Markdown' }, // Added markdown as an option
+    { id: SlideType.YOUTUBE, label: 'Youtube Video' },
+    { id: SlideType.WEB, label: 'Web Page' },
+    { id: SlideType.PHOTO, label: 'Photo' },
+    { id: SlideType.MARKDOWN, label: 'Markdown' }, // Added markdown as an option
   ];
 
 
   render() {
     // Destructure all relevant fields from state for the form
-    const { data, title, description, duration, type = 'photo', upload } = this.state;
+    const { data, title, description, duration, type = SlideType.PHOTO, upload } = this.state;
     
     // Determine the correct value for the photo input
     // If 'upload' (File object) exists, it's a new or changed photo.
     // If 'data' (string URL) exists and type is 'photo', it's an existing photo.
-    const photoInputValue = upload ? upload : (type === 'photo' && typeof data === 'string' ? data : undefined);
+    const photoInputValue = upload ? upload : (type === SlideType.PHOTO && typeof data === 'string' ? data : undefined);
 
 
     return (
@@ -212,9 +212,9 @@ class SlideEditDialog extends Component<ISlideEditDialogProps, ISlideEditDialogS
             choices={this.typeChoices}
             onChange={this.handleChange}
           />
-          {type === 'photo' ? (
+          {type === SlideType.PHOTO ? (
             <Input
-              type={'photo'} // This custom type should handle File objects and string URLs
+              type={SlideType.PHOTO} // This custom type should handle File objects and string URLs
               label={'Photo'}
               name={'upload'} // This input should update the 'upload' state field
               value={photoInputValue} // Pass the File object or existing URL string
@@ -223,8 +223,8 @@ class SlideEditDialog extends Component<ISlideEditDialogProps, ISlideEditDialogS
             />
           ) : (
             <Input
-              type={type === 'markdown' ? 'textarea' : 'text'} // Set type to 'textarea' for markdown
-              label={type === 'web' ? 'Web URL' : type === 'youtube' ? 'Youtube URL' : type === 'markdown' ? 'Markdown Content' : 'Data'}
+              type={type === SlideType.MARKDOWN ? 'textarea' : 'text'} // Set type to 'textarea' for markdown
+              label={type === SlideType.WEB ? 'Web URL' : type === SlideType.YOUTUBE ? 'Youtube URL' : type === SlideType.MARKDOWN ? 'Markdown Content' : 'Data'}
               name={'data'}
               value={data || ''} // Ensure value is not null/undefined for input
               onChange={this.handleChange}

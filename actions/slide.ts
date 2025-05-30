@@ -1,19 +1,19 @@
 import axios, { AxiosResponse } from "axios";
+import { SlideType, SlideData } from "../api/models/Slide";
 
 // Define interfaces for the data structures
 // This should ideally match the backend API/models or be a subset.
 export interface ISlideData {
   _id: string;
   name?: string; // Assuming name is optional or might not always be there
-  type: "image" | "video" | "web" | "markdown" | "photo" | "youtube"; // Example types, adjust as needed
-  data: any; // For image/video URL, web URL, or markdown content. Be more specific if possible.
+  type: SlideType;
+  data: SlideData;
   duration?: number;
   position?: number;
   slideshow_ids?: string[]; // Assuming it's an array of slideshow IDs
   creator_id?: string;
   creation_date?: string; // Or Date
   last_update?: string; // Or Date
-  // Add any other fields that are part of the slide object
 }
 
 // Interface for responses that might just be a success message or some specific data

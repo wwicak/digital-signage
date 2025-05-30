@@ -1,10 +1,5 @@
 import axios, { AxiosResponse } from "axios";
-
-// Define a generic WidgetType enum or string literal union if types are known
-// For example:
-// export type WidgetType = 'clock' | 'weather' | 'news' | 'custom';
-// For now, using string.
-export type WidgetType = string;
+import { WidgetType, WidgetData } from "../api/models/Widget";
 
 export interface IWidgetData {
   _id: string;
@@ -15,7 +10,7 @@ export interface IWidgetData {
   y: number;
   w: number;
   h: number;
-  data: Record<string, any>; // For widget-specific configuration
+  data: WidgetData; // Now using specific widget data types
   creator_id?: string;
   creation_date?: string; // Or Date
   last_update?: string; // Or Date
@@ -30,7 +25,7 @@ export interface INewWidgetData {
   y?: number; // Optional during creation
   w?: number; // Optional during creation
   h?: number; // Optional during creation
-  data?: Record<string, any>;
+  data?: WidgetData;
 }
 
 // Interface for the data sent when updating a widget

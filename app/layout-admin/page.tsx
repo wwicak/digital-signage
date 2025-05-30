@@ -18,6 +18,7 @@ import { StatusBarElementTypes } from '../../helpers/statusbar';
 import Widgets from '../../widgets';
 
 import { addWidget, getWidgets, deleteWidget, updateWidget, IWidgetData, INewWidgetData, IUpdateWidgetData } from '../../actions/widgets';
+import { WidgetType } from '../../api/models/Widget';
 import { display as displayStore } from '../../stores';
 
 const GridLayoutWithWidth = WidthProvider(GridLayout as any);
@@ -47,7 +48,7 @@ export default function LayoutAdminPage() {
     const widgetDefinition = Widgets[type];
     const newWidgetData: Partial<INewWidgetData> = {
         display: displayStore.id!,
-        type: type,
+        type: type as WidgetType,
         data: widgetDefinition?.defaultData || {},
     };
 
