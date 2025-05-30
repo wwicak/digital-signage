@@ -43,8 +43,8 @@ const SlideshowListWithQuery: React.FC<ISlideshowListWithQueryProps> = () => {
                 height={100}
                 width={640}
                 speed={2}
-                primaryColor="#f3f3f3"
-                secondaryColor="#ecebeb"
+                backgroundColor="#f3f3f3"
+                foregroundColor="#ecebeb"
               >
                 <rect x="0" y="10" rx="4" ry="4" width="50" height="50" />
                 <rect x="60" y="10" rx="3" ry="3" width="300" height="15" />

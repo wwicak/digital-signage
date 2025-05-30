@@ -1,5 +1,4 @@
 import React, { useEffect } from 'react';
-import { NextPage, NextPageContext } from 'next';
 import { useRouter } from 'next/router';
 
 import Frame from '../components/Admin/Frame.tsx'; // Assuming .tsx
@@ -12,7 +11,7 @@ interface PreviewProps extends ProtectProps {
   host: string;
 }
 
-const PreviewPage: NextPage<PreviewProps> = ({ host, loggedIn, displayId: initialDisplayId }) => {
+const PreviewPage = ({ host, loggedIn, displayId: initialDisplayId }: PreviewProps) => {
   const router = useRouter();
   const { setId } = useDisplayContext();
   
@@ -66,7 +65,7 @@ const PreviewPage: NextPage<PreviewProps> = ({ host, loggedIn, displayId: initia
 };
 
 // Static method for getting initial props
-PreviewPage.getInitialProps = async (ctx: NextPageContext): Promise<{ displayId: string; host: string }> => {
+PreviewPage.getInitialProps = async (ctx: any): Promise<{ displayId: string; host: string }> => {
   const displayId = ctx.query.id as string; // Example: get id from query
   const host =
     ctx.req && ctx.req.headers && ctx.req.headers.host

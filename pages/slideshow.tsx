@@ -1,9 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { NextPageContext } from 'next';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPencilAlt, IconDefinition } from '@fortawesome/free-solid-svg-icons';
 import _ from 'lodash';
-import { SortEndHandler } from 'react-sortable-hoc';
 
 import Frame from '../components/Admin/Frame';
 import SlideListComponent, { ISlideListProps } from '../components/Admin/SlideList';
@@ -33,7 +31,7 @@ const updateSlideshowThrottled = _.debounce((id: string, data: Partial<Slideshow
   return updateSlideshow(id, data);
 }, 300);
 
-const SlideshowPage: React.FC<SlideshowProps> = ({ slideshow: initialSlideshow, loggedIn, displayId, host }) => {
+const SlideshowPage = ({ slideshow: initialSlideshow, loggedIn, displayId, host }: SlideshowProps) => {
   const [slideshow, setSlideshow] = useState<SlideshowData | undefined>(initialSlideshow);
   const slideListRef = useRef<SlideListComponent>(null);
   const dialogRef = useRef<SlideEditDialogComponent>(null);

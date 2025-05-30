@@ -13,7 +13,7 @@ const DropzoneWithNoSSR = dynamic(
   {
     ssr: false,
     loading: () => (
-      <ContentLoader height={120} width={640} speed={2} primaryColor="#f3f3f3" secondaryColor="#ecebeb">
+      <ContentLoader height={120} width={640} speed={2} backgroundColor="#f3f3f3" foregroundColor="#ecebeb">
         <rect x="0" y="0" rx="5" ry="5" width="100%" height="100" />
       </ContentLoader>
     ),

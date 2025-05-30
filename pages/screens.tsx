@@ -1,5 +1,4 @@
 import React, { useEffect, useRef } from 'react';
-import { NextPage, NextPageContext } from 'next';
 
 import Frame from '../components/Admin/Frame.tsx'; // Assuming .tsx
 import ScreenListComponent from '../components/Admin/ScreenList.tsx'; // Renamed, Assuming .tsx
@@ -21,7 +20,7 @@ interface ScreensProps extends ProtectProps {
   displayId?: string; // displayId might be optional or from router query
 }
 
-const Screens: React.FC<ScreensProps> = ({ loggedIn, displayId }) => {
+const Screens = ({ loggedIn, displayId }: ScreensProps) => {
   const screenListRef = useRef<ScreenListInstance>(null);
   const displayContext = useDisplayContext();
 

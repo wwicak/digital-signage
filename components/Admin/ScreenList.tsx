@@ -72,8 +72,8 @@ class ScreenList extends Component<IScreenListProps, IScreenListState> {
                   height={120} // Height of one card placeholder
                   width={640}  // Max width of card or list area
                   speed={2}
-                  primaryColor="#f3f3f3"
-                  secondaryColor="#ecebeb"
+                  backgroundColor="#f3f3f3"
+                  foregroundColor="#ecebeb"
                 >
                   {/* Placeholder for ScreenCard structure */}
                   <rect x='0' y='10' rx='4' ry='4' width='60' height='60' /> {/* Thumbnail */}

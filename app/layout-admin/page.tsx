@@ -5,7 +5,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faThLarge, faTh, faPencilAlt } from '@fortawesome/free-solid-svg-icons';
 import GridLayout, { Layout as RglLayout } from 'react-grid-layout';
 import { useSearchParams } from 'next/navigation';
-import { DragDropContext, Droppable, DropResult } from 'react-beautiful-dnd';
+import { DragDropContext, Droppable, DropResult } from '@hello-pangea/dnd';
 
 import Frame from '../../components/Admin/Frame';
 import EditableWidget from '../../components/Admin/EditableWidget';

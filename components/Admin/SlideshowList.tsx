@@ -72,8 +72,8 @@ class SlideshowList extends Component<ISlideshowListProps, ISlideshowListState> 
                   height={100} // Height of one SlideshowCard placeholder
                   width={640}  // Max width of card or list area
                   speed={2}
-                  primaryColor="#f3f3f3"
-                  secondaryColor="#ecebeb"
+                  backgroundColor="#f3f3f3"
+                  foregroundColor="#ecebeb"
                 >
                   {/* Placeholder for SlideshowCard structure */}
                   <rect x="0" y="10" rx="4" ry="4" width="50" height="50" />   {/* Thumbnail */}

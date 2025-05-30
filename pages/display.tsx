@@ -1,5 +1,5 @@
 import React from 'react';
-import { NextPage, NextPageContext } from 'next';
+import { NextPage, GetServerSidePropsContext } from 'next';
 
 import DisplayComponent from '../components/Display/Display'; // Renamed to DisplayComponent to avoid conflict
 
@@ -8,7 +8,7 @@ interface IDisplayPageProps {
   displayId: string | undefined; // displayId can be undefined if not in query
 }
 
-const DisplayPage: NextPage<IDisplayPageProps> = ({ host, displayId }) => {
+const DisplayPage = ({ host, displayId }: IDisplayPageProps) => {
   // The DisplayComponent expects `display` prop which is the ID.
   // The Display component uses DisplayContext internally to manage state and handle SSE events.
   // No need to call setId here as the Display component will handle it when the display prop changes.

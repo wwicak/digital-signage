@@ -3,7 +3,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faThLarge, faTh, faPencilAlt, IconDefinition } from '@fortawesome/free-solid-svg-icons';
 import { IconProp } from '@fortawesome/fontawesome-svg-core';
 import GridLayout, { Layout as RglLayout, Layouts as RglLayouts } from 'react-grid-layout';
-import { DragDropContext, Droppable, DropResult, DroppableProvided } from 'react-beautiful-dnd';
+import { DragDropContext, Droppable, DropResult, DroppableProvided } from '@hello-pangea/dnd';
 
 import Frame from '../components/Admin/Frame'; // Assuming .js or .tsx
 import EditableWidget from '../components/Admin/EditableWidget'; // Assuming .js or .tsx
