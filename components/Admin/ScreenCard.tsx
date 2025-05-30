@@ -5,7 +5,6 @@ import { faWindowRestore } from '@fortawesome/free-regular-svg-icons';
 import { faChromecast } from '@fortawesome/free-brands-svg-icons';
 import { faTrash, faTv, faEye, faLink } from '@fortawesome/free-solid-svg-icons';
 import Link from 'next/link';
-import { view } from 'react-easy-state';
 
 import { deleteDisplay, IDisplayData } from '../../actions/display'; // IDisplayData is already defined
 
@@ -240,4 +239,4 @@ const ScreenCard: React.FC<IScreenCardProps> = ({ value, refresh = () => {} }) =
   );
 };
 
-export default view(ScreenCard);
+export default ScreenCard;

@@ -95,6 +95,8 @@ function displayReducer(state: DisplayState, action: DisplayAction): DisplayStat
     default:
       return state;
   }
+}
+
 interface DisplayContextType {
   state: DisplayState;
   setId: (id: string) => Promise<void>;

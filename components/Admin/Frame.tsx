@@ -1,8 +1,7 @@
 import React, { ReactNode } from 'react';
-import { view } from 'react-easy-state';
 
 import Sidebar from './Sidebar'; // Assuming Sidebar.js or Sidebar.tsx
-import { display as displayStore } from '../../stores'; // display store is already typed
+import { useDisplayContext } from '../../contexts/DisplayContext';
 
 export interface IFrameProps {
   children: ReactNode;
@@ -10,10 +9,12 @@ export interface IFrameProps {
 }
 
 const Frame: React.FC<IFrameProps> = (props) => {
+  const { state } = useDisplayContext();
+  
   return (
     <div className='admin-frame-container'>
-      {/* The displayId for the Sidebar is taken from the global store */}
-      <Sidebar loggedIn={props.loggedIn} displayId={displayStore.id} />
+      {/* The displayId for the Sidebar is taken from the context */}
+      <Sidebar loggedIn={props.loggedIn} displayId={state.id} />
       <div className='admin-frame-content'>{props.children}</div>
       <style jsx>
         {`
@@ -35,4 +36,4 @@ const Frame: React.FC<IFrameProps> = (props) => {
   );
 };
 
-export default view(Frame);
+export default Frame;

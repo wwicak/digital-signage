@@ -4,11 +4,10 @@ import { IconProp } from '@fortawesome/fontawesome-svg-core';
 import { faClock, faImages } from '@fortawesome/free-regular-svg-icons';
 import { faTrash, faPlay } from '@fortawesome/free-solid-svg-icons';
 import Link from 'next/link';
-import { view } from 'react-easy-state';
 
 import { deleteSlideshow, ISlideshowData } from '../../actions/slideshow'; // ISlideshowData is already defined
 import { ISlideData } from '../../actions/slide'; // For typing populated slides
-import { display as displayStore } from '../../stores'; // displayStore is typed
+import { useDisplayContext } from '../../contexts/DisplayContext';
 
 // Props for SlideshowCard
 export interface ISlideshowCardProps {
@@ -17,6 +16,7 @@ export interface ISlideshowCardProps {
 }
 
 const SlideshowCard: React.FC<ISlideshowCardProps> = ({ value, refresh = () => {} }) => {
+  const { state: displayState } = useDisplayContext();
   const handleDelete = (event: React.MouseEvent): void => {
     event.preventDefault(); // Prevent Link navigation when clicking delete icon
     event.stopPropagation(); // Stop event from bubbling further
@@ -51,7 +51,7 @@ const SlideshowCard: React.FC<ISlideshowCardProps> = ({ value, refresh = () => {
 
   const totalDuration = calculateTotalDuration();
   const slideCount = value.slides ? value.slides.length : 0;
-  const displayId = displayStore.id || ''; // Fallback if displayStore.id is null
+  const displayId = displayState.id || ''; // Fallback if displayState.id is null
 
   // Original JS used value.title, ISlideshowData uses value.name
   const slideshowTitle = value.name || 'Untitled Slideshow';
@@ -228,4 +228,4 @@ const SlideshowCard: React.FC<ISlideshowCardProps> = ({ value, refresh = () => {
   );
 };
 
-export default view(SlideshowCard);
+export default SlideshowCard;

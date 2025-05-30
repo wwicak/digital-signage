@@ -1,11 +1,7 @@
 'use client';
 
-import React, { useEffect } from 'react';
-import { useParams } from 'next/navigation';
-import { view } from 'react-easy-state';
-
+import React from 'react';
 import DisplayComponent from '../../../components/Display/Display';
-import { display as displayStore } from '../../../stores';
 
 interface DisplayPageProps {
   params: {
@@ -15,16 +11,6 @@ interface DisplayPageProps {
 
 function DisplayPage({ params }: DisplayPageProps) {
   const { id: displayId } = params;
-
-  useEffect(() => {
-    if (displayId) {
-      displayStore.setId(displayId);
-    } else {
-      console.warn('DisplayPage: displayId is undefined. Cannot set store ID.');
-    }
-  }, [displayId]);
-
-  const host = typeof window !== 'undefined' ? window.location.origin : '';
 
   return (
     <div className={'container'}>
@@ -42,7 +28,7 @@ function DisplayPage({ params }: DisplayPageProps) {
           }
         `}
       </style>
-      <style jsx global> 
+      <style jsx global>
         {`
           * {
             -ms-overflow-style: none; /* IE and Edge */
@@ -57,4 +43,4 @@ function DisplayPage({ params }: DisplayPageProps) {
   );
 }
 
-export default view(DisplayPage);
+export default DisplayPage;
