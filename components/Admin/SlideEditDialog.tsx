@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import _ from 'lodash';
 
-import Dialog, { IDialogProps } from '../Dialog'; // Assuming Dialog.tsx and its props
+import Dialog, { IDialogProps, DialogMethods } from '../Dialog'; // Assuming Dialog.tsx and its props
 import { Form, Input, Button, ButtonGroup, IInputProps, IChoice } from '../Form'; // Assuming Form components are/will be typed
 
 import { getSlide, addSlide, updateSlide, ISlideData, SlideAddData, SlideUpdateData } from '../../actions/slide'; // Slide actions are typed
@@ -42,7 +42,7 @@ interface ISlideEditDialogState extends Partial<Omit<ISlideData, '_id' | 'creato
 
 
 class SlideEditDialog extends Component<ISlideEditDialogProps, ISlideEditDialogState> implements ISlideEditDialogRef {
-  private dialog = React.createRef<Dialog>(); // Ref to Dialog.tsx component instance
+  private dialog = React.createRef<DialogMethods>(); // Ref to Dialog.tsx component instance
 
   constructor(props: ISlideEditDialogProps) {
     super(props);

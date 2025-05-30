@@ -22,6 +22,7 @@ export interface IWidgetOptionsProps<T = Record<string, any>> {
       | File
   ) => void;
 }
+
 // Interface that matches what WidgetEditDialog expects
 export interface IWidgetOptionsEditorProps<T = Record<string, any>> {
   data: T | undefined;
@@ -29,7 +30,6 @@ export interface IWidgetOptionsEditorProps<T = Record<string, any>> {
 }
 
 // Interface for the arguments passed to the BaseWidget constructor
-// Individual widgets will provide these details.
 export interface IWidgetDefinitionArgs<TData = Record<string, any>> {
   name: string; // Human-readable name of the widget
   type: string; // Unique type identifier for the widget (e.g., 'clock', 'weather-map')
@@ -67,8 +67,11 @@ class BaseWidget implements IBaseWidget {
   public defaultData?: Record<string, any>;
 
   // Store the components passed in definition, or use defaults
-  private _WidgetComponent: ComponentType<any>;
-  private _OptionsComponent: ComponentType<any>;
+  private _WidgetComponent: ComponentType<IWidgetContentProps<any>>;
+  private _OptionsComponent: ComponentType<IWidgetOptionsEditorProps<any>>;
+
+  // Index signature to allow dynamic properties
+  [key: string]: any;
 
   constructor(definition: IWidgetDefinitionArgs) {
     for (const reqField of REQUIRED_DEF_FIELDS) {
@@ -101,12 +104,12 @@ class BaseWidget implements IBaseWidget {
   }
 
   // Getter for the React component that renders the widget
-  public get Widget(): ComponentType<any> {
+  public get Widget(): ComponentType<IWidgetContentProps<any>> {
     return this._WidgetComponent;
   }
 
   // Getter for the React component that renders the widget's options/settings form
-  public get Options(): ComponentType<any> {
+  public get Options(): ComponentType<IWidgetOptionsEditorProps<any>> {
     return this._OptionsComponent;
   }
 }

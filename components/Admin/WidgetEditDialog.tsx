@@ -1,5 +1,5 @@
 import React, { Component, ComponentType } from 'react';
-import Dialog from '../Dialog'; // Assuming Dialog.tsx
+import Dialog, { DialogMethods } from '../Dialog'; // Assuming Dialog.tsx
 import { Form, Button, ButtonGroup } from '../Form'; // Assuming Form components are/will be typed
 import { getWidget, updateWidget, IWidgetData } from '../../actions/widgets'; // Widget actions are typed
 
@@ -30,7 +30,7 @@ interface IWidgetEditDialogState {
 }
 
 class WidgetEditDialog extends Component<IWidgetEditDialogProps, IWidgetEditDialogState> implements IWidgetEditDialog {
-  private dialogRef = React.createRef<Dialog>(); // Ref to Dialog.tsx component instance
+  private dialogRef = React.createRef<DialogMethods>(); // Ref to Dialog.tsx component instance
 
   constructor(props: IWidgetEditDialogProps) {
     super(props);

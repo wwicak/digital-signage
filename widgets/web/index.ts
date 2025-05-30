@@ -33,7 +33,6 @@ const webDefinitionArgs: IWidgetDefinitionArgs = {
   WidgetComponent: WebContent as ComponentType<any>,
   OptionsComponent: WebOptions as ComponentType<any>,
 };
-
 // Renamed from Web to WebWidget for consistency
 class WebWidget extends BaseWidget {
   constructor() {
