@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faThLarge, faTh, faPencilAlt } from '@fortawesome/free-solid-svg-icons';
 import GridLayout, { Layout as RglLayout } from 'react-grid-layout';
-import { view } from 'react-easy-state';
+import { useSearchParams } from 'next/navigation';
 import { DragDropContext, Droppable, DropResult } from 'react-beautiful-dnd';
 
 import Frame from '../../components/Admin/Frame';
@@ -13,27 +13,30 @@ import StatusBarElement from '../../components/Admin/StatusBarElement';
 import WidthProvider from '../../components/Widgets/WidthProvider';
 import DropdownButton from '../../components/DropdownButton';
 import { Form, Switch } from '../../components/Form';
+import { useDisplayContext } from '../../contexts/DisplayContext';
 
 import { StatusBarElementTypes } from '../../helpers/statusbar';
 import Widgets from '../../widgets';
 
 import { addWidget, getWidgets, deleteWidget, updateWidget, IWidgetData, INewWidgetData, IUpdateWidgetData } from '../../actions/widgets';
 import { WidgetType } from '../../api/models/Widget';
-import { display as displayStore } from '../../stores';
 
 const GridLayoutWithWidth = WidthProvider(GridLayout as any);
 
 export default function LayoutAdminPage() {
   const [widgets, setWidgets] = useState<IWidgetData[]>([]);
-  const [displayId, setDisplayId] = useState<string>('');
+  const searchParams = useSearchParams();
+  const context = useDisplayContext();
 
   useEffect(() => {
-    // In a real implementation, you'd get this from URL params or auth
-    const id = 'default-display-id'; // Placeholder
-    setDisplayId(id);
-    displayStore.setId(id);
+    // Get display ID from URL search params (e.g., ?display=ID)
+    const displayIdFromUrl = searchParams?.get('display');
+    const id = displayIdFromUrl || 'default-display-id'; // Fallback to default
+    
+    // Set the display ID in context, which will trigger data fetching
+    context.setId(id);
     refreshWidgets(id);
-  }, []);
+  }, [searchParams, context]);
 
   const refreshWidgets = (displayId: string): Promise<void> => {
     return getWidgets(displayId).then(widgets => {
@@ -47,19 +50,19 @@ export default function LayoutAdminPage() {
   const handleAddWidget = (type: string): void => {
     const widgetDefinition = Widgets[type];
     const newWidgetData: Partial<INewWidgetData> = {
-        display: displayStore.id!,
+        display: context.state.id!,
         type: type as WidgetType,
         data: widgetDefinition?.defaultData || {},
     };
 
     addWidget(newWidgetData as INewWidgetData)
-        .then(() => refreshWidgets(displayStore.id!))
+        .then(() => refreshWidgets(context.state.id!))
         .catch(error => console.error("Failed to add widget:", error));
   };
 
   const handleDeleteWidget = (id: string): void => {
     deleteWidget(id)
-        .then(() => refreshWidgets(displayStore.id!))
+        .then(() => refreshWidgets(context.state.id!))
         .catch(error => console.error("Failed to delete widget:", error));
   };
 
@@ -77,19 +80,19 @@ export default function LayoutAdminPage() {
   };
 
   const handleDragEnd = (result: DropResult): void => {
-    if (!result.destination || !displayStore.id) {
+    if (!result.destination || !context.state.id) {
       return;
     }
-    displayStore.reorderStatusBarItems(result.source.index, result.destination.index);
+    context.reorderStatusBarItems(result.source.index, result.destination.index);
   };
 
   const handleTitleChange = (event: React.ChangeEvent<HTMLInputElement>): void => {
     const title = event.target.value;
-    displayStore.updateName(title);
+    context.updateName(title);
   };
   
   const handleLayoutTypeChange = (name: string, checked: boolean): void => {
-    displayStore.updateLayout(checked ? 'spaced' : 'compact');
+    context.updateLayout(checked ? 'spaced' : 'compact');
   };
 
   const rglLayout: RglLayout[] = widgets.map(widget => ({
@@ -126,10 +129,10 @@ export default function LayoutAdminPage() {
           <input
             className='input'
             placeholder='Unnamed display'
-            value={displayStore.name || ''}
+            value={context.state.name || ''}
             onChange={handleTitleChange}
             onClick={(e: React.MouseEvent) => e.stopPropagation()}
-            size={(displayStore.name && displayStore.name.length > 0) ? displayStore.name.length : undefined}
+            size={(context.state.name && context.state.name.length > 0) ? context.state.name.length : undefined}
           />
           <div className='icon'>
             <FontAwesomeIcon icon={faPencilAlt} fixedWidth color='#828282' />
@@ -141,12 +144,12 @@ export default function LayoutAdminPage() {
         <DropdownButton
           icon={faPencilAlt}
           text='Add Status Bar Item'
-          onSelect={displayStore.addStatusBarItem}
+          onSelect={context.addStatusBarItem}
           choices={statusBarChoices}
         />
       </div>
 
-      {displayStore.statusBar && displayStore.statusBar.elements && displayStore.statusBar.elements.length > 0 && (
+      {context.state.statusBar && context.state.statusBar.elements && context.state.statusBar.elements.length > 0 && (
           <div className='statusbar'>
               <DragDropContext onDragEnd={handleDragEnd}>
               <Droppable droppableId='droppable-statusbar' direction='horizontal'>
@@ -165,12 +168,12 @@ export default function LayoutAdminPage() {
                       }}
                       {...provided.droppableProps}
                   >
-                      {displayStore.statusBar.elements!.map((item: string, index: number) => (
+                      {context.state.statusBar.elements!.map((item: string, index: number) => (
                       <StatusBarElement
                           key={item}
                           item={item}
                           index={index}
-                          onDelete={() => displayStore.removeStatusBarItem(index)}
+                          onDelete={() => context.removeStatusBarItem(index)}
                       />
                       ))}
                       {provided.placeholder}
@@ -195,19 +198,19 @@ export default function LayoutAdminPage() {
             uncheckedLabel={'Spaced'}
             checkedIcon={faTh}
             uncheckedIcon={faThLarge}
-            checked={displayStore.layout === 'spaced'}
+            checked={context.state.layout === 'spaced'}
             onValueChange={handleLayoutTypeChange}
           />
         </Form>
       </div>
 
-      <div className='layout' style={{ borderRadius: displayStore.layout === 'spaced' ? '8px' : '0px' }}>
+      <div className='layout' style={{ borderRadius: context.state.layout === 'spaced' ? '8px' : '0px' }}>
         <GridLayoutWithWidth
           layout={rglLayout}
           cols={6}
           onLayoutChange={handleLayoutChange}
           draggableCancel={'.ReactModalPortal,.controls'}
-          margin={displayStore.layout === 'spaced' ? [12, 12] : [4, 4]}
+          margin={context.state.layout === 'spaced' ? [12, 12] : [4, 4]}
           rowHeight={100}
           isBounded={true}
         >
@@ -217,7 +220,7 @@ export default function LayoutAdminPage() {
                 id={widget._id}
                 type={widget.type as string}
                 onDelete={() => handleDeleteWidget(widget._id)}
-                layout={displayStore.layout || 'compact'}
+                layout={context.state.layout || 'compact'}
               />
             </div>
           ))}

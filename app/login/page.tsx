@@ -8,7 +8,6 @@ import { faTv, faCheck, faTimes, faAngleLeft } from '@fortawesome/free-solid-svg
 
 import Frame from '../../components/Admin/Frame';
 import { login } from '../../helpers/auth';
-import { display } from '../../stores';
 
 export default function LoginPage() {
   const router = useRouter();
