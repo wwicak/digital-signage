@@ -1,62 +1,90 @@
-import { Component } from 'react'
-import Link from 'next/link'
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faTv, faCheck, faTimes, faAngleLeft } from '@fortawesome/free-solid-svg-icons'
-import { view } from 'react-easy-state'
+import { Component } from 'react';
+import Link from 'next/link';
+import { NextPageContext } from 'next';
+import Router from 'next/router'; // Import Router
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faTv, faCheck, faTimes, faAngleLeft } from '@fortawesome/free-solid-svg-icons';
+import { view } from 'react-easy-state';
 
-import Frame from '../components/Admin/Frame.js'
-import { login } from '../helpers/auth.js'
-import { display } from '../stores'
+import Frame from '../components/Admin/Frame'; // Assuming Frame.js is now Frame.tsx or .js is fine with allowJs
+import { login, ILoginResponse } from '../helpers/auth'; // Assuming login helper is/will be typed
+import { display } from '../stores'; // display store is now TypeScript
 
-class Login extends Component {
-  constructor(props) {
-    super(props)
+interface ILoginPageProps {
+  displayId?: string;
+  loggedIn?: boolean; // Assuming Frame might pass this, or it comes from a wrapper
+  // Add other props if any, e.g., from Next.js Router or custom HOCs
+}
+
+interface ILoginPageState {
+  username: string;
+  password: string;
+  alert: 'success' | 'error' | 'info' | null; // Expanded to include 'info' based on usage
+}
+
+class Login extends Component<ILoginPageProps, ILoginPageState> {
+  constructor(props: ILoginPageProps) {
+    super(props);
 
     this.state = {
       username: '',
       password: '',
-      alert: null
-    }
+      alert: null,
+    };
   }
 
-  static async getInitialProps({ query }) {
-    const displayId = query && query.display
-    return { displayId }
+  static async getInitialProps(ctx: NextPageContext): Promise<ILoginPageProps> {
+    const displayId = ctx.query && typeof ctx.query.display === 'string' ? ctx.query.display : undefined;
+    // Potentially fetch loggedIn status here if needed for initial render
+    return { displayId };
   }
 
   componentDidMount() {
-    const { displayId } = this.props
-    display.setId(displayId)
+    const { displayId } = this.props;
+    if (displayId) {
+      display.setId(displayId); // setId is async but not awaited here, which is fine if not critical path
+    }
   }
 
-  performLogin = () => {
-    const { username, password } = this.state
-    const { displayId } = this.props
-    login({ username, password }, undefined, displayId)
-      .then(resp => {
-        if (!resp.success) throw Error()
-        this.setState({ alert: 'success' })
-      })
-      .catch(() => {
-        this.setState({ alert: 'error' })
-      })
-  }
+  performLogin = async (): Promise<void> => {
+    const { username, password } = this.state;
+    const { displayId } = this.props;
+    try {
+      // Assuming login function is updated to return a more detailed response or throw on error
+      const resp: ILoginResponse = await login({ username, password }, undefined, displayId);
+      if (!resp.success) {
+        // This case might be handled by login throwing an error directly
+        this.setState({ alert: 'error' });
+      } else {
+        this.setState({ alert: 'success' });
+        // Optional: redirect on success
+        // Router.push(displayId ? `/display/${displayId}` : '/admin');
+      }
+    } catch (error) {
+      this.setState({ alert: 'error' });
+    }
+  };
 
-  usernameChangeHandler = event => {
+  usernameChangeHandler = (event: React.ChangeEvent<HTMLInputElement>): void => {
     this.setState({
-      username: event.target.value
-    })
-  }
+      username: event.target.value,
+    });
+  };
 
-  passwordChangeHandler = event => {
+  passwordChangeHandler = (event: React.ChangeEvent<HTMLInputElement>): void => {
     this.setState({
-      password: event.target.value
-    })
-  }
+      password: event.target.value,
+    });
+  };
+
+  handleSubmit = (event: React.FormEvent<HTMLFormElement>): void => {
+    event.preventDefault();
+    this.performLogin();
+  };
 
   render() {
-    const { loggedIn } = this.props
-    const { alert } = this.state
+    const { loggedIn } = this.props; // loggedIn might come from a session or auth HOC
+    const { username, password, alert } = this.state;
     return (
       <Frame loggedIn={loggedIn}>
         <h1>Login</h1>
@@ -68,49 +96,52 @@ class Login extends Component {
           </div>
           <form
             className='form'
-            onSubmit={event => {
-              event.preventDefault()
-              this.performLogin()
-              return false
-            }}
+            onSubmit={this.handleSubmit}
           >
             {alert && (
               <div className={`alert-${alert}`}>
                 <FontAwesomeIcon
-                  icon={alert == 'success' ? faCheck : faTimes}
+                  icon={alert === 'success' ? faCheck : faTimes}
                   fixedWidth
                   size='sm'
                   color='white'
                 />
                 <span className={'alert-text'}>
-                  {alert == 'success'
+                  {alert === 'success'
                     ? 'Successfully logged in to your account.'
-                    : 'Username or password not recognized.'}
+                    : alert === 'error' 
+                    ? 'Username or password not recognized.'
+                    : 'Use the username "demo" and password "demo"'} 
                 </span>
               </div>
             )}
-            <div className={'alert-info'}>
-              <span className={'alert-text'}>
-                Use the username "demo" and password "demo"
-              </span>
-            </div>
-            <label for='username'>Username</label>
+            {/* Default info message shown when no other alert */}
+            {!alert && (
+                 <div className={'alert-info'}>
+                    <span className={'alert-text'}>
+                    Use the username "demo" and password "demo"
+                    </span>
+                </div>
+            )}
+            <label htmlFor='username'>Username</label> {/* Changed for to htmlFor */}
             <input
               type='text'
               className='username'
               id='username'
               placeholder='Enter your username...'
+              value={username}
               onChange={this.usernameChangeHandler}
             />
-            <label for='password'>Password</label>
+            <label htmlFor='password'>Password</label> {/* Changed for to htmlFor */}
             <input
               type='password'
               className='password'
               id='password'
               placeholder='Enter your password...'
+              value={password}
               onChange={this.passwordChangeHandler}
             />
-            <button>Log In.</button>
+            <button type="submit">Log In.</button> {/* Added type="submit" */}
           </form>
           <Link href='/'>
             <span className='back'>
@@ -200,7 +231,7 @@ class Login extends Component {
               margin: 16px;
               font-family: 'Open Sans', sans-serif;
               color: #6f6e6e;
-              font-size: 14;
+              font-size: 14px; /* Corrected: was 14 */
               cursor: pointer;
             }
             .alert-error {
@@ -228,8 +259,8 @@ class Login extends Component {
           `}
         </style>
       </Frame>
-    )
+    );
   }
 }
 
-export default view(Login)
+export default view(Login);
