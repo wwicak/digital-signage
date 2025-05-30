@@ -4,19 +4,19 @@
   "description": "This is a user interface for a dynamic digital signage",
   "main": "index.js",
   "scripts": {
-    "setup": "[ -f .env ] || makeconf",
-    "dev": "next dev",
-    "dev:server": "ENVIRON=DEV nodemon --watch 'server.ts' --watch 'keys.ts' --watch 'api/**/*.ts' --exec 'ts-node --project tsconfig.server.json -r tsconfig-paths/register' server.ts",
-    "prod": "npm run build && ENVIRON=PROD node dist/server.js",
-    "build": "next build && tsc --project tsconfig.server.json",
-    "lint": "eslint --ext .js,.jsx,.ts,.tsx .",
-    "type-check": "tsc --noEmit && tsc --project tsconfig.server.json --noEmit",
-    "start": "node dist/server.js",
-    "test": "jest",
-    "update": "git pull && npm i && npm run build",
-    "heroku-postbuild": "next build"
-  },
-  "repository": {
+    "scripts": {
+      "setup": "[ -f .env ] || makeconf",
+      "dev": "next dev",
+      "dev:server": "ENVIRON=DEV nodemon --watch 'server.ts' --watch 'keys.ts' --watch 'api/**/*.ts' --exec 'bun --bun run --project tsconfig.server.json -r tsconfig-paths/register' server.ts",
+      "prod": "bun run build && ENVIRON=PROD bun dist/server.js",
+      "build": "next build && tsc --project tsconfig.server.json",
+      "lint": "eslint --ext .js,.jsx,.ts,.tsx .",
+      "type-check": "tsc --noEmit && tsc --project tsconfig.server.json --noEmit",
+      "start": "bun dist/server.js",
+      "test": "bun test",
+      "update": "git pull && bun install && bun run build",
+      "heroku-postbuild": "next build"
+    },
     "type": "git",
     "url": "git+https://github.com/alexander-e-andrews/CSSeniorDisplayProject.git"
   },
