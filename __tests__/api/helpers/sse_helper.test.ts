@@ -1,11 +1,28 @@
+import * as http from 'http';
+import { Express } from 'express'; // Assuming Express types are installed
+
 // Import the functions to be tested and reset module state for sendSSEUpdate's connectedClients array
-let sseHelper = require('api/helpers/sse_helper.js');
+let sseHelper = require('api/helpers/sse_helper.js'); // Keep require for now, may need path alias or direct import if sse_helper is also TS
 const actualSseHelperPath = require.resolve('api/helpers/sse_helper.js');
 
+interface MockRequest extends http.IncomingMessage {
+  on: jest.Mock;
+}
+
+interface MockResponse extends http.ServerResponse {
+  setHeader: jest.Mock;
+  flushHeaders: jest.Mock;
+  write: jest.Mock;
+  end: jest.Mock;
+  status?: jest.Mock; // Optional, for Express-like responses
+  json?: jest.Mock; // Optional, for Express-like responses
+}
+
+
 describe('sse_helper', () => {
-  let mockApp;
-  let mockReq;
-  let mockRes;
+  let mockApp: Partial<Express>; // Use Partial<Express> for mocks
+  let mockReq: MockRequest;
+  let mockRes: MockResponse;
 
   beforeEach(() => {
     // Reset modules to clear connectedClients array in sse_helper for each test
@@ -16,26 +33,35 @@ describe('sse_helper', () => {
       get: jest.fn(),
     };
     mockReq = {
-      on: jest.fn(), // To mock 'close' event listener attachment
-    };
+      on: jest.fn(),
+      // http.IncomingMessage properties (add more as needed for type safety)
+      headers: {},
+      method: 'GET',
+      url: '/',
+      socket: {} as any, // Simplified for mock
+    } as MockRequest;
     mockRes = {
       setHeader: jest.fn(),
       flushHeaders: jest.fn(),
       write: jest.fn(),
       end: jest.fn(),
-    };
+      // http.ServerResponse properties (add more as needed for type safety)
+      statusCode: 200,
+      statusMessage: 'OK',
+      writableEnded: false,
+    } as unknown as MockResponse; // Cast to unknown first for complex mock
   });
 
   describe('initializeSSE', () => {
     it('should set up the /api/v1/events GET route', () => {
-      sseHelper.initializeSSE(mockApp);
+      sseHelper.initializeSSE(mockApp as Express);
       expect(mockApp.get).toHaveBeenCalledWith('/api/v1/events', expect.any(Function));
     });
 
     it('should set correct SSE headers and send initial event when a client connects', () => {
-      sseHelper.initializeSSE(mockApp);
+      sseHelper.initializeSSE(mockApp as Express);
       // Simulate a client connection by calling the route handler passed to app.get
-      const routeHandler = mockApp.get.mock.calls[0][1];
+      const routeHandler = (mockApp.get as jest.Mock).mock.calls[0][1];
       routeHandler(mockReq, mockRes);
 
       expect(mockRes.setHeader).toHaveBeenCalledWith('Content-Type', 'text/event-stream');
@@ -43,18 +69,16 @@ describe('sse_helper', () => {
       expect(mockRes.setHeader).toHaveBeenCalledWith('Connection', 'keep-alive');
       expect(mockRes.flushHeaders).toHaveBeenCalled();
       expect(mockRes.write).toHaveBeenCalledWith('event: connected\ndata: {"message":"SSE connection established"}\n\n');
-      expect(sseHelper.getConnectedClientsCount()).toBe(1); // Assuming getConnectedClientsCount is exposed for testing
+      expect(sseHelper.getConnectedClientsCount()).toBe(1);
     });
 
     it('should remove a client when their connection closes', () => {
-      sseHelper.initializeSSE(mockApp);
-      const routeHandler = mockApp.get.mock.calls[0][1];
-      routeHandler(mockReq, mockRes); // Client connects
+      sseHelper.initializeSSE(mockApp as Express);
+      const routeHandler = (mockApp.get as jest.Mock).mock.calls[0][1];
+      routeHandler(mockReq, mockRes); 
 
       expect(sseHelper.getConnectedClientsCount()).toBe(1);
 
-      // Simulate 'close' event
-      // The 'close' event callback is the first argument to the first call of req.on
       expect(mockReq.on).toHaveBeenCalledWith('close', expect.any(Function));
       const closeCallback = mockReq.on.mock.calls[0][1];
       closeCallback();
@@ -66,29 +90,23 @@ describe('sse_helper', () => {
 
   describe('sendSSEUpdate', () => {
     it('should not send updates if no clients are connected', () => {
-      //spyOn(console, 'log'); // Optional: if you want to assert console logs
       sseHelper.sendSSEUpdate({ message: 'test' });
-      //expect(console.log).toHaveBeenCalledWith('[SSE] No clients connected, skipping update.');
-      expect(mockRes.write).not.toHaveBeenCalled(); // mockRes is for a single client, check no client.res.write happened
+      expect(mockRes.write).not.toHaveBeenCalled();
     });
 
     it('should send updates to all connected clients', () => {
-      // Simulate two connected clients
-      const mockResClient1 = { write: jest.fn() };
-      const mockResClient2 = { write: jest.fn() };
+      const mockResClient1 = { write: jest.fn(), setHeader: jest.fn(), flushHeaders: jest.fn(), end: jest.fn() } as unknown as MockResponse;
+      const mockResClient2 = { write: jest.fn(), setHeader: jest.fn(), flushHeaders: jest.fn(), end: jest.fn() } as unknown as MockResponse;
       
-      // Manually add clients for this test (since initializeSSE and its route handler are complex to call repeatedly here)
-      // This requires a way to modify connectedClients from outside or a more advanced setup.
-      // For simplicity, we'll assume getConnectedClientsCount() was tested and we can rely on internal client management.
-      // The ideal way is to call the route handler multiple times if it's easy.
+      sseHelper.initializeSSE(mockApp as Express);
+      const routeHandler = (mockApp.get as jest.Mock).mock.calls[0][1];
       
-      // Connect first client
-      sseHelper.initializeSSE(mockApp);
-      const routeHandler = mockApp.get.mock.calls[0][1];
-      routeHandler(mockReq, mockResClient1); // mockReq will be reused, but res is unique
+      // Client 1
+      const mockReq1 = { on: jest.fn(), headers: {}, method: 'GET', url: '/', socket: {} as any } as MockRequest;
+      routeHandler(mockReq1, mockResClient1);
 
-      // Connect second client (need a new mockReq for 'close' listeners to be distinct if req is stored per client)
-      const mockReq2 = { on: jest.fn() };
+      // Client 2
+      const mockReq2 = { on: jest.fn(), headers: {}, method: 'GET', url: '/', socket: {} as any } as MockRequest;
       routeHandler(mockReq2, mockResClient2);
 
       expect(sseHelper.getConnectedClientsCount()).toBe(2);
@@ -102,17 +120,21 @@ describe('sse_helper', () => {
     });
 
     it('should log an error if writing to a client fails', () => {
-      sseHelper.initializeSSE(mockApp);
-      const routeHandler = mockApp.get.mock.calls[0][1];
+      sseHelper.initializeSSE(mockApp as Express);
+      const routeHandler = (mockApp.get as jest.Mock).mock.calls[0][1];
       const mockBadClientRes = {
         write: jest.fn().mockImplementation(() => { 
           throw new Error('Client write failed'); 
-        })
-      };
+        }),
+        setHeader: jest.fn(), // Add missing properties for MockResponse
+        flushHeaders: jest.fn(),
+        end: jest.fn()
+      } as unknown as MockResponse;
+      
       routeHandler(mockReq, mockBadClientRes);
 
       expect(sseHelper.getConnectedClientsCount()).toBe(1);
-      const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {}); // Suppress console.error output for this test
+      const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
       
       sseHelper.sendSSEUpdate({ message: 'data for bad client' });
       

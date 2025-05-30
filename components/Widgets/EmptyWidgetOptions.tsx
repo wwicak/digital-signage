@@ -1,6 +1,12 @@
-import React from 'react'
+import React from 'react';
 
-class EmptyWidgetOptions extends React.Component {
+// Define prop types, even if empty
+interface EmptyWidgetOptionsProps {}
+
+// Define state types, even if empty
+interface EmptyWidgetOptionsState {}
+
+class EmptyWidgetOptions extends React.Component<EmptyWidgetOptionsProps, EmptyWidgetOptionsState> {
   render() {
     return (
       <div className={'widget'}>
@@ -18,8 +24,8 @@ class EmptyWidgetOptions extends React.Component {
           `}
         </style>
       </div>
-    )
+    );
   }
 }
 
-export default EmptyWidgetOptions
+export default EmptyWidgetOptions;
