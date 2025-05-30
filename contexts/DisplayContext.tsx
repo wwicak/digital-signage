@@ -1,8 +1,8 @@
 import React, { createContext, useContext, useReducer, useCallback } from 'react';
 import _ from 'lodash';
 import shortid from 'shortid';
-import { useDisplay, useUpdateDisplay } from '../hooks/useDisplay';
-import { IDisplayData } from '../actions/display';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { getDisplay, updateDisplay, IDisplayData } from '../actions/display';
 
 // Types
 interface IWidget {
@@ -36,6 +36,7 @@ type DisplayAction =
   | { type: 'SET_NAME'; payload: string }
   | { type: 'SET_LAYOUT'; payload: "spaced" | "compact" }
   | { type: 'SET_STATUS_BAR'; payload: IStatusBar }
+  | { type: 'SET_WIDGETS'; payload: IWidget[] }
   | { type: 'ADD_STATUS_BAR_ITEM'; payload: string }
   | { type: 'REMOVE_STATUS_BAR_ITEM'; payload: number }
   | { type: 'REORDER_STATUS_BAR_ITEMS'; payload: { startIndex: number; endIndex: number } };
@@ -67,6 +68,8 @@ function displayReducer(state: DisplayState, action: DisplayAction): DisplayStat
       return { ...state, layout: action.payload };
     case 'SET_STATUS_BAR':
       return { ...state, statusBar: action.payload };
+    case 'SET_WIDGETS':
+      return { ...state, widgets: action.payload };
     case 'ADD_STATUS_BAR_ITEM':
       const newElements = [...(state.statusBar.elements || []), action.payload + "_" + shortid.generate()];
       return {
@@ -92,15 +95,14 @@ function displayReducer(state: DisplayState, action: DisplayAction): DisplayStat
     default:
       return state;
   }
-}
-
 interface DisplayContextType {
   state: DisplayState;
-  setId: (id: string) => void;
+  setId: (id: string) => Promise<void>;
   setName: (name: string) => void;
   updateName: (name: string) => void;
   updateLayout: (layout: "spaced" | "compact") => void;
-  addStatusBarItem: (type: string) => void;
+  updateWidgets: (widgets: IWidget[]) => void;
+  addStatusBarItem: (type: string) => Promise<void>;
   removeStatusBarItem: (index: number) => void;
   reorderStatusBarItems: (startIndex: number, endIndex: number) => void;
   isLoading: boolean;
@@ -108,13 +110,28 @@ interface DisplayContextType {
 }
 
 const DisplayContext = createContext<DisplayContextType | undefined>(undefined);
-
 export const DisplayProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [state, dispatch] = useReducer(displayReducer, initialState);
-  const updateDisplayMutation = useUpdateDisplay();
+  const queryClient = useQueryClient();
   
   // Use TanStack Query to fetch display data
-  const { data: displayData, isLoading, error } = useDisplay(state.id);
+  const { data: displayData, isLoading, error } = useQuery({
+    queryKey: ["display", state.id],
+    queryFn: () => getDisplay(state.id!),
+    enabled: !!state.id,
+    staleTime: 5 * 60 * 1000, // 5 minutes
+    retry: 2,
+  });
+
+  // Mutation for updating display data
+  const updateDisplayMutation = useMutation({
+    mutationFn: ({ id, data }: { id: string; data: Partial<IDisplayData> }) =>
+      updateDisplay(id, data),
+    onSuccess: (data, variables) => {
+      // Update the specific display cache
+      queryClient.invalidateQueries({ queryKey: ["display", variables.id] });
+    },
+  });
 
   // Update local state when display data changes
   React.useEffect(() => {
@@ -131,8 +148,17 @@ export const DisplayProvider: React.FC<{ children: React.ReactNode }> = ({ child
     [updateDisplayMutation]
   );
 
-  const setId = useCallback((id: string) => {
+  const setId = useCallback(async (id: string): Promise<void> => {
+    if (!id) return;
     dispatch({ type: 'SET_ID', payload: id });
+    
+    // Fetch display data when ID is set (similar to legacy store behavior)
+    try {
+      const displayInfo: IDisplayData = await getDisplay(id);
+      dispatch({ type: 'SET_DISPLAY_DATA', payload: displayInfo });
+    } catch (error) {
+      console.error('Failed to fetch display data:', error);
+    }
   }, []);
 
   const setName = useCallback((name: string) => {
@@ -152,13 +178,21 @@ export const DisplayProvider: React.FC<{ children: React.ReactNode }> = ({ child
     updateDisplayThrottled(state.id, { layout });
   }, [state.id, updateDisplayThrottled]);
 
-  const addStatusBarItem = useCallback((type: string) => {
+  const updateWidgets = useCallback((widgets: IWidget[]) => {
     if (!state.id) return;
+    dispatch({ type: 'SET_WIDGETS', payload: widgets });
+    updateDisplayThrottled(state.id, { widgets });
+  }, [state.id, updateDisplayThrottled]);
+
+  const addStatusBarItem = useCallback(async (type: string): Promise<void> => {
+    if (!state.id) return Promise.resolve();
+
     dispatch({ type: 'ADD_STATUS_BAR_ITEM', payload: type });
     // Update will be handled by the reducer, then we sync with server
     const newElements = [...(state.statusBar.elements || []), type + "_" + shortid.generate()];
     const newStatusBar = { ...state.statusBar, elements: newElements };
     updateDisplayThrottled(state.id, { statusBar: newStatusBar });
+    return Promise.resolve();
   }, [state.id, state.statusBar, updateDisplayThrottled]);
 
   const removeStatusBarItem = useCallback((index: number) => {
@@ -189,6 +223,7 @@ export const DisplayProvider: React.FC<{ children: React.ReactNode }> = ({ child
     setName,
     updateName,
     updateLayout,
+    updateWidgets,
     addStatusBarItem,
     removeStatusBarItem,
     reorderStatusBarItems,

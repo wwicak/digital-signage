@@ -14,9 +14,11 @@ import '@fortawesome/fontawesome-svg-core/styles.css'; // Prevent Font Awesome f
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      // With SSR, we usually want to set some default staleTime
-      // above 0 to avoid refetching immediately on the client
-      staleTime: 60 * 1000, // 1 minute
+      staleTime: 5 * 60 * 1000, // 5 minutes
+      retry: 2,
+      refetchOnWindowFocus: false, // Disable for digital signage use case
+    },
+    mutations: {
       retry: 1,
     },
   },
