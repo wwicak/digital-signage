@@ -10,7 +10,11 @@ import '@fortawesome/fontawesome-svg-core/styles.css';
 export const metadata = {
   title: 'Digital Signage',
   description: 'A user interface for dynamic digital signage',
-  viewport: 'width=device-width, initial-scale=1',
+};
+
+export const viewport = {
+  width: 'device-width',
+  initialScale: 1,
 };
 
 export default function RootLayout({

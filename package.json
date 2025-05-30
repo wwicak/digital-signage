@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "setup": "[ -f .env ] || makeconf",
-    "dev": "next dev --turbo",
+    "dev": "next dev",
     "dev:server": "ENVIRON=DEV nodemon --watch 'server.ts' --watch 'keys.ts' --watch 'api/**/*.ts' --exec 'ts-node --project tsconfig.server.json -r tsconfig-paths/register' server.ts",
     "prod": "npm run build && ENVIRON=PROD node dist/server.js",
     "build": "next build && tsc --project tsconfig.server.json",
