@@ -261,7 +261,7 @@ class Input extends Component<IInputProps> {
   }
 
   render() {
-    const { label, inline = true, expand = true, helpText, error, style } = this.props;
+    const { label, inline = false, expand = true, helpText, error, style } = this.props;
 
     // Determine error state for styling
     const hasError = typeof error === 'string' ? !!error : !!error;

@@ -30,13 +30,6 @@ const Button: React.FC<IButtonProps> = ({
 }) => {
   const [internalLoading, setInternalLoading] = useState(false);
 
-  // Sync internal loading state with parent isLoading prop
-  useEffect(() => {
-    if (parentIsLoading !== undefined) {
-      setInternalLoading(parentIsLoading);
-    }
-  }, [parentIsLoading]);
-
   // Wrapper for the onClick prop to handle loading state
   const onClickWrapper = async (event: React.MouseEvent<HTMLButtonElement>): Promise<void> => {
     if (onClick) {
@@ -74,11 +67,11 @@ const Button: React.FC<IButtonProps> = ({
       variant={variant}
       size={size}
       className={cn(className)}
-      onClick={!isLoading && onClick ? onClickWrapper : undefined}
       style={legacyStyle}
-      disabled={isDisabled}
+      {...restButtonProps} // Spread rest props first
+      onClick={!isLoading && onClick ? onClickWrapper : undefined}
+      disabled={isDisabled} // Explicit props later to ensure they override
       isLoading={isLoading}
-      {...restButtonProps}
     >
       {children || text}
     </ButtonWithLoading>

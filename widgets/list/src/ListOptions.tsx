@@ -64,11 +64,13 @@ class ListOptions extends Component<IListOptionsProps, IListOptionsState> {
 
   // Handles changes for top-level properties like title, color, etc.
   handleChange = (name: string, value: any): void => {
+    const updatedPartOfState = { [name]: value };
     this.setState(
-      { [name]: value } as Pick<IListOptionsState, keyof IListOptionsState>,
+      updatedPartOfState as Pick<IListOptionsState, keyof IListOptionsState>,
       () => {
         if (this.props.onChange) {
-          this.props.onChange(this.state);
+          // Pass a merged object to be certain about the state being passed
+          this.props.onChange({ ...this.state, ...updatedPartOfState });
         }
       }
     );

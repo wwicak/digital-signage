@@ -1,19 +1,20 @@
 import React, { Component } from 'react';
 import { Form, Input, InlineInputGroup, IInputProps, IChoice } from '../../../components/Form';
 import { IWidgetOptionsEditorProps } from '../../../components/Admin/WidgetEditDialog';
-import * as z from 'zod';
-
-import CongratsContent, { CongratsWidgetContentDataSchema, ICongratsWidgetData } from './CongratsContent'; // ICongratsWidgetData is z.infer
+// Import the schema from the new types.ts file
+import * as z from 'zod'; // z is still needed for CongratsOptionsPropsSchema
+import { CongratsWidgetContentDataSchema, ICongratsWidgetData } from './types';
+import CongratsContent from './CongratsContent'; // CongratsContent is for preview.
 
 // Zod schema for CongratsOptions props
 export const CongratsOptionsPropsSchema = z.object({
-  data: CongratsWidgetContentDataSchema.optional(),
-  onChange: z.function().args(CongratsWidgetContentDataSchema).returns(z.void()),
+  data: CongratsWidgetContentDataSchema.optional(), // Use the imported schema
+  onChange: z.function().args(CongratsWidgetContentDataSchema).returns(z.void()), // Use the imported schema
 });
 export type ICongratsOptionsProps = z.infer<typeof CongratsOptionsPropsSchema>;
 
 // State for CongratsOptions will also use ICongratsWidgetData (inferred from CongratsWidgetContentDataSchema)
-type ICongratsOptionsState = ICongratsWidgetData; // This is already an inferred type
+type ICongratsOptionsState = ICongratsWidgetData;
 
 // Define available animation choices
 const animationChoices: IChoice[] = [

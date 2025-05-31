@@ -1,21 +1,37 @@
-import type { Config } from "@jest/types";
+import type { Config } from 'jest';
+import nextJest from 'next/jest';
 
-// Or use `import type { Config } from 'jest';` if you prefer
-// and then type `config: Config`
+const createJestConfig = nextJest({
+  // Provide the path to your Next.js app to load next.config.js and .env files in your test environment
+  dir: './',
+});
 
-const config: Config.InitialOptions = {
-  preset: "ts-jest",
-  testEnvironment: "node", // or 'jsdom' for frontend tests
-  modulePaths: ["<rootDir>"],
+// Add any custom config to be passed to Jest
+const config: Config = {
+  coverageProvider: 'v8',
+  testEnvironment: 'jest-environment-jsdom',
+  // Add more setup options before each test is run
+  setupFilesAfterEnv: ['<rootDir>/jest.setup.js'],
   moduleNameMapper: {
-    "\\.(css|less|scss|sass)$": "identity-obj-proxy"
+    // Handle CSS imports (with CSS modules)
+    // https://jestjs.io/docs/webpack#mocking-css-modules
+    '^.+\\.module\\.(css|sass|scss)$': 'identity-obj-proxy',
+
+    // Handle CSS imports (without CSS modules)
+    '^.+\\.(css|sass|scss)$': '<rootDir>/__mocks__/styleMock.js',
+
+    // Handle image imports
+    // https://jestjs.io/docs/webpack#handling-static-assets
+    '^.+\\.(png|jpg|jpeg|gif|webp|avif|ico|bmp|svg)$/i': `<rootDir>/__mocks__/fileMock.js`,
+
+    // Handle module aliases
+    '^@/(.*)$': '<rootDir>/$1',
   },
-  // ts-jest specific options can go into globals:
-  // globals: {
-  //   'ts-jest': {
-  //     tsconfig: 'tsconfig.jest.json' // if you have a specific tsconfig for jest
-  //   }
-  // }
+  // Add Babel preset for Next.js
+  transform: {
+    '^.+\\.(js|jsx|ts|tsx)$': ['babel-jest', { presets: ['next/babel'] }],
+  },
 };
 
-export default config;
+// createJestConfig is exported this way to ensure that next/jest can load the Next.js config which is async
+export default createJestConfig(config);
