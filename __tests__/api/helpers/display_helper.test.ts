@@ -300,409 +300,251 @@ describe('Display Helper Functions', () => {
       jest.restoreAllMocks();
     });
 
-    // Test scenarios will be added here
-    it('placeholder test for updateWidgetsForDisplay', () => {
-      expect(true).toBe(true);
-    });
+    // Remove placeholder and add new tests
 
-    it('should only add new widgets when all provided widgets lack _id', async () => {
+    it('should only create new widgets when newWidgetsData contains only new widgets', async () => {
       displayObject.widgets = []; // Start with an empty display
-      const newWidgetsData = [
-        { name: 'New Widget 1', type: WidgetType.ANNOUNCEMENT, x:0, y:0, w:1, h:1, data: { content: 'First new widget' } },
-        { name: 'New Widget 2', type: WidgetType.IMAGE, x:0, y:0, w:1, h:1, data: { url: 'http://example.com/new_image.png' } },
-      ];
+      const newWidgetData1 = { name: 'New Widget 1', type: WidgetType.ANNOUNCEMENT, x:0, y:0, w:1, h:1, data: { content: 'First' } };
+      const newWidgetData2 = { name: 'New Widget 2', type: WidgetType.IMAGE, x:0, y:0, w:1, h:1, data: { url: 'http://new.png' } };
+      const newWidgetsToSubmit = [newWidgetData1, newWidgetData2];
 
-      // Mocking instance creation and save method
-      // When `new Widget(data)` is called by the helper, it will use the mocked Widget constructor from jest.mock('mongoose').
-      // That constructor returns an object with a `save` method which is `jest.fn().mockResolvedValue(data)`.
-      // We need to capture the created instances or ensure this default behavior is what we want.
+      const createdWidgetId1 = new mongoose.Types.ObjectId();
+      const createdWidgetId2 = new mongoose.Types.ObjectId();
 
-      // createdWidgetDocs is not needed for ID comparison if we derive expected IDs from mock results.
-      // const createdWidgetDocs = newWidgetsData.map((data, index) => ({
-      //   ...data,
-      //   _id: new mongoose.Types.ObjectId(), // Simulate DB generating an ID
-      //   creator_id: creatorId,
-      // }));
+      (Widget.create as jest.Mock)
+        .mockResolvedValueOnce({ ...newWidgetData1, _id: createdWidgetId1, creator_id: creatorId })
+        .mockResolvedValueOnce({ ...newWidgetData2, _id: createdWidgetId2, creator_id: creatorId });
 
-      // If the helper does `new Widget(data).save()`, we need to mock `Widget.prototype.save` or ensure
-      // the constructor mock from `jest.mock('mongoose')` handles it.
-      // The global mock `mongoose.model` returns a constructor where instances have `.save = jest.fn().mockResolvedValue(this)`.
-      // Let's rely on that for now. If specific instances need different save results, this gets more complex.
-      // For this test, assume all saves succeed and return the object with a new _id.
+      const resultWidgetIds = await updateWidgetsForDisplay(displayObject, newWidgetsToSubmit, creatorId);
 
-      // To check that `new Widget(data)` was called and then `save` on its instance,
-      // we'd ideally spy on `Widget.prototype.save`.
-      // However, `Widget` is the mocked constructor from `jest.mock('mongoose')`.
-      // Its instances are plain objects from that mock's perspective:
-      // `jest.fn(data => ({ ...data, save: jest.fn().mockResolvedValue(data), ...data }))`
-      // So, `new Widget(data)` creates an object, and its `save` method is a new `jest.fn()` each time.
-      // This makes it hard to globally spy on `save` for all new instances.
+      expect(Widget.create).toHaveBeenCalledTimes(2);
+      expect(Widget.create).toHaveBeenCalledWith({ ...newWidgetData1, creator_id: creatorId });
+      expect(Widget.create).toHaveBeenCalledWith({ ...newWidgetData2, creator_id: creatorId });
+      expect(Widget.findByIdAndUpdate).not.toHaveBeenCalled();
+      expect(Widget.deleteMany).not.toHaveBeenCalled(); // No initial widgets, so no deletions triggered by comparing new set to empty current set
 
-      // Alternative: If `updateWidgetsForDisplay` uses `Widget.create()` (which often calls `new Model().save()`)
-      // then mocking `Widget.create` is easier. The problem asks for `new Widget().save()`.
-
-      // For now, let's assume the helper creates widgets and the `save` calls are successful.
-      // We'll assert the *outcome* (returned IDs and display state).
-      // Direct assertion of `new Widget().save()` calls is tricky without more advanced prototype spying
-      // on the specific constructor returned by the `mongoose.model` mock.
-
-      // Let's refine the mock for `Widget.create` or `insertMany` if those are used for new widgets.
-      // The prompt implies `new Widget().save()`.
-      // This test should align with "new Widget().save()" as per prompt.
-      // The Widget constructor mock (from jest.mock('mongoose')) returns instances with a `save` mock.
-      // `(Widget as jest.Mock).mockClear()` // Clear calls to Widget constructor
-      // `createdWidgetDocs` will serve as the expected data that `save()` should resolve to, per instance.
-
-      // We need to ensure that when `new Widget(data)` is called, the `save` on the resulting instance
-      // resolves to the corresponding document in `createdWidgetDocs`.
-      // The current global mock for `save` is: `save: jest.fn().mockResolvedValue(instanceData)`
-      // where instanceData is `{ ...constructorData, _id: new ObjectId() }`. This is good.
-
-      const resultFromHelper = await updateWidgetsForDisplay(displayObject, newWidgetsData, creatorId, Widget as any);
-      console.log('Result from updateWidgetsForDisplay (new widgets only):', JSON.stringify(resultFromHelper, null, 2));
-
-      const addedIds = resultFromHelper;
-
-      const constructorMock = Widget as jest.Mock;
-      expect(constructorMock).toHaveBeenCalledTimes(newWidgetsData.length);
-
-      const actualSavedDocIds: string[] = [];
-      for (let i = 0; i < newWidgetsData.length; i++) {
-        const widgetData = newWidgetsData[i];
-        expect(constructorMock).toHaveBeenCalledWith(expect.objectContaining({
-          ...widgetData, // This now includes x,y,w,h,data
-          creator_id: creatorId,
-        }));
-        const instanceCreated = constructorMock.mock.results[i].value;
-        expect(instanceCreated.save).toHaveBeenCalledTimes(1);
-        const savedInstanceData = await instanceCreated.save.mock.results[0].value;
-        actualSavedDocIds.push(savedInstanceData._id.toString());
-      }
-
-      expect(addedIds.length).toBe(newWidgetsData.length);
-      // updatedIds and deletedIds are not expected from a simple array return in this specific test
-      // if the helper indeed returns just an array of added IDs in this scenario.
-      // For now, let's assume the destructured updatedIds/deletedIds might be undefined if result is an array.
-      // The prompt implies a structured return { addedIds, updatedIds, deletedIds } so these should be tested in other scenarios.
-      // For this test focusing on 'added only', we'll only validate addedIds based on the direct array return.
-      // expect(updatedIds && updatedIds.length).toBe(0);
-      // expect(deletedIds && deletedIds.length).toBe(0);
-
-      console.log('actualSavedDocIds for comparison:', JSON.stringify(actualSavedDocIds.slice().sort(), null, 2));
-      console.log('addedIds from helper for comparison (raw):', JSON.stringify(addedIds, null, 2)); // Log raw addedIds
-      console.log('addedIds from helper for comparison (sorted string):', JSON.stringify(addedIds.map((id:any) => id.toString()).slice().sort(), null, 2));
-      expect(addedIds.map((id:any) => id.toString()).sort()).toEqual(actualSavedDocIds.sort());
-
-      // Assert that displayObject.widgets (which started as []) remains empty
-      const displayWidgetIdsAsStrings = displayObject.widgets.map((id: any) => id.toString());
-      expect(displayWidgetIdsAsStrings).toEqual([]);
-      expect(displayObject.widgets.length).toBe(0);
+      expect(resultWidgetIds.map(id => id.toString()).sort()).toEqual([createdWidgetId1.toString(), createdWidgetId2.toString()].sort());
+      expect(displayObject.widgets).toEqual([]); // Should not be modified
     });
 
-    it('should only update existing widgets when all provided widgets have _ids', async () => {
-      const localExistingWidgetId1 = new mongoose.Types.ObjectId();
-      const localExistingWidgetId2 = new mongoose.Types.ObjectId();
-      const localExistingWidgetId3 = new mongoose.Types.ObjectId();
-      const initialDisplayWidgetObjectIds = [localExistingWidgetId1, localExistingWidgetId2, localExistingWidgetId3];
+    it('should only update existing widgets when newWidgetsData contains only existing widgets', async () => {
+      // displayObject.widgets already has existingWidgetId1, existingWidgetId2, existingWidgetId3
+      const updateData1 = { _id: existingWidgetId1.toString(), name: 'Updated Widget 1', data: { content: 'Updated C1' } };
+      const updateData2 = { _id: existingWidgetId2.toString(), name: 'Updated Widget 2', data: { url: 'http://updated.png' } };
+      const newWidgetsToSubmit = [updateData1, updateData2]; // Not updating existingWidgetId3
 
-      // Use a fresh displayObject for this test to avoid interference with global existingWidgetId1 etc.
-      const currentDisplayObject = {
-        _id: new mongoose.Types.ObjectId(),
-        name: 'Test Display For Updates',
-        widgets: [...initialDisplayWidgetObjectIds],
-      };
+      (Widget.findByIdAndUpdate as jest.Mock)
+        .mockResolvedValueOnce({ ...updateData1, _id: existingWidgetId1 })
+        .mockResolvedValueOnce({ ...updateData2, _id: existingWidgetId2 });
 
-      const newWidgetsData = [
-        { _id: localExistingWidgetId1.toString(), name: 'Updated Widget 1 Name', type: WidgetType.IMAGE, data: { url: 'http://example.com/updated1.png' }, x:0, y:0, w:1, h:1 },
-        { _id: localExistingWidgetId2.toString(), name: 'Updated Widget 2 Name', type: WidgetType.WEB, data: { url: 'http://example.com/updated2.html' }, x:1, y:1, w:1, h:1 },
-        { _id: localExistingWidgetId3.toString(), name: 'Updated Widget 3 Name', type: WidgetType.LIST, data: { items: ['itemA', 'itemB'] }, x:2, y:2, w:1, h:1 },
-      ];
+      (Widget.deleteMany as jest.Mock).mockResolvedValue({ acknowledged: true, deletedCount: 1 }); // For existingWidgetId3
 
-      (Widget.findByIdAndUpdate as jest.Mock).mockImplementation(async (id, dataToUpdate) => {
-        // The mock should return the updated document structure, including its original _id
-        const originalId = typeof id === 'string' ? new mongoose.Types.ObjectId(id) : id;
-        return { ...dataToUpdate, _id: originalId };
-      });
+      const resultWidgetIds = await updateWidgetsForDisplay(displayObject, newWidgetsToSubmit, creatorId);
 
-      const resultWidgetObjectIds = await updateWidgetsForDisplay(currentDisplayObject as any, newWidgetsData, creatorId, Widget as any);
+      expect(Widget.create).not.toHaveBeenCalled();
+      expect(Widget.findByIdAndUpdate).toHaveBeenCalledTimes(2);
+      expect(Widget.findByIdAndUpdate).toHaveBeenCalledWith(existingWidgetId1.toString(), updateData1, { new: true, runValidators: true });
+      expect(Widget.findByIdAndUpdate).toHaveBeenCalledWith(existingWidgetId2.toString(), updateData2, { new: true, runValidators: true });
 
-      expect(Widget.findByIdAndUpdate).toHaveBeenCalledTimes(3);
-      expect(Widget.findByIdAndUpdate).toHaveBeenCalledWith(
-        localExistingWidgetId1.toString(),
-        expect.objectContaining({ name: 'Updated Widget 1 Name' }), // Check against the update payload
-        { new: true, runValidators: true }
-      );
-      expect(Widget.findByIdAndUpdate).toHaveBeenCalledWith(
-        localExistingWidgetId2.toString(),
-        expect.objectContaining({ name: 'Updated Widget 2 Name' }),
-        { new: true, runValidators: true }
-      );
-      expect(Widget.findByIdAndUpdate).toHaveBeenCalledWith(
-        localExistingWidgetId3.toString(),
-        expect.objectContaining({ name: 'Updated Widget 3 Name' }),
-        { new: true, runValidators: true }
-      );
+      // Deletion WILL be called for existingWidgetId3 because it's not in newWidgetsToSubmit
+      expect(Widget.deleteMany).toHaveBeenCalledWith({ _id: { $in: [existingWidgetId3] } });
 
-      expect(Array.isArray(resultWidgetObjectIds)).toBe(true);
-      expect(resultWidgetObjectIds.length).toBe(3);
 
-      const resultWidgetIdsAsStrings = resultWidgetObjectIds.map((id: any) => id.toString()).sort();
-      const expectedWidgetIdsAsStrings = initialDisplayWidgetObjectIds.map(id => id.toString()).sort();
-      expect(resultWidgetIdsAsStrings).toEqual(expectedWidgetIdsAsStrings);
-
-      // Assert that displayObject.widgets was NOT modified
-      expect(currentDisplayObject.widgets).toEqual(initialDisplayWidgetObjectIds);
-      expect(currentDisplayObject.widgets.length).toBe(initialDisplayWidgetObjectIds.length);
+      const expectedReturnedIds = [existingWidgetId1.toString(), existingWidgetId2.toString()].sort();
+      expect(resultWidgetIds.map(id => id.toString()).sort()).toEqual(expectedReturnedIds);
+      expect(displayObject.widgets).toEqual([existingWidgetId1, existingWidgetId2, existingWidgetId3]); // Should not be modified
     });
 
     it('should only delete widgets when newWidgetsData is empty', async () => {
-      const localExistingWidgetId1 = new mongoose.Types.ObjectId();
-      const localExistingWidgetId2 = new mongoose.Types.ObjectId();
-      const initialDisplayWidgetObjectIds = [localExistingWidgetId1, localExistingWidgetId2];
+      // displayObject.widgets has existingWidgetId1, existingWidgetId2, existingWidgetId3
+      const newWidgetsToSubmit: any[] = [];
 
-      const currentDisplayObject = {
-        _id: new mongoose.Types.ObjectId(),
-        name: 'Test Display For Deletes',
-        widgets: [...initialDisplayWidgetObjectIds],
-      };
-      const newWidgetsData: any[] = [];
+      (Widget.deleteMany as jest.Mock).mockResolvedValue({ acknowledged: true, deletedCount: 3 });
 
-      (Widget.deleteMany as jest.Mock).mockResolvedValue({ acknowledged: true, deletedCount: initialDisplayWidgetObjectIds.length });
+      const resultWidgetIds = await updateWidgetsForDisplay(displayObject, newWidgetsToSubmit, creatorId);
 
-      const resultWidgetIds = await updateWidgetsForDisplay(currentDisplayObject as any, newWidgetsData, creatorId, Widget as any);
-
+      expect(Widget.create).not.toHaveBeenCalled();
+      expect(Widget.findByIdAndUpdate).not.toHaveBeenCalled();
       expect(Widget.deleteMany).toHaveBeenCalledTimes(1);
-      expect(Widget.deleteMany).toHaveBeenCalledWith({
-        _id: { $in: initialDisplayWidgetObjectIds }
-      });
+      expect(Widget.deleteMany).toHaveBeenCalledWith({ _id: { $in: [existingWidgetId1, existingWidgetId2, existingWidgetId3] } });
 
-      // Expect empty array as per current observed behavior (returns processed IDs, none in this case)
-      // Or, if it returns { addedIds, updatedIds, deletedIds }, then deletedIds should be checked.
-      // For now, assuming flat array return.
       expect(resultWidgetIds).toEqual([]);
-
-      // Assert that displayObject.widgets was NOT modified by the helper itself
-      expect(currentDisplayObject.widgets).toEqual(initialDisplayWidgetObjectIds);
+      expect(displayObject.widgets).toEqual([existingWidgetId1, existingWidgetId2, existingWidgetId3]); // Should not be modified
     });
 
-    it('should handle mixed operations: create, update, and delete widgets', async () => {
-      const widgetToDeleteId = new mongoose.Types.ObjectId();
-      const widgetToUpdateId = new mongoose.Types.ObjectId();
-      const initialDisplayWidgetObjectIds = [widgetToDeleteId, widgetToUpdateId];
-      const creatorId = new mongoose.Types.ObjectId().toString(); // Already in outer scope, but can redefine for clarity
+    it('should handle mixed operations: create, update, and delete', async () => {
+      // displayObject.widgets = [existingWidgetId1, existingWidgetId2, existingWidgetId3]
+      // existingWidgetId1 will be updated
+      // existingWidgetId2 will be deleted (not in newWidgetsToSubmit)
+      // existingWidgetId3 will be kept (implicitly, by being updated)
+      // one new widget will be created
 
-      const currentDisplayObject = {
-        _id: new mongoose.Types.ObjectId(),
-        name: 'Test Display Mixed Ops',
-        widgets: [...initialDisplayWidgetObjectIds],
-      };
+      const newWidgetData = { name: 'Brand New Widget', type: WidgetType.WEB, x:1,y:1,w:1,h:1, data: {url: 'http://new.com'} };
+      const updateDataForId1 = { _id: existingWidgetId1.toString(), name: 'Updated Name for W1' };
+      const updateDataForId3 = { _id: existingWidgetId3.toString(), name: 'Updated Name for W3' }; // Keep W3 by updating it
 
-      const newWidgetSaveMock = jest.fn();
-      const mockNewWidgetId = new mongoose.Types.ObjectId();
+      const newWidgetsToSubmit = [newWidgetData, updateDataForId1, updateDataForId3];
 
-      const newWidgetData = { name: 'Newly Created Widget', type: WidgetType.ANNOUNCEMENT, data: { title: 'New' }, x:0,y:0,w:1,h:1 };
-      const updatedWidgetData = { _id: widgetToUpdateId.toString(), name: 'Updated Existing Widget', type: WidgetType.IMAGE, data: { url: 'http://example.com/updated.jpg' }, x:1,y:1,w:1,h:1 };
-      const newWidgetsDataArray = [newWidgetData, updatedWidgetData];
+      const createdWidgetId = new mongoose.Types.ObjectId();
+      (Widget.create as jest.Mock).mockResolvedValueOnce({ ...newWidgetData, _id: createdWidgetId, creator_id: creatorId });
+      (Widget.findByIdAndUpdate as jest.Mock)
+        .mockImplementation(async (id, data) => {
+          if (id.toString() === existingWidgetId1.toString()) return { ...data, _id: existingWidgetId1 };
+          if (id.toString() === existingWidgetId3.toString()) return { ...data, _id: existingWidgetId3 };
+          return null;
+        });
+      (Widget.deleteMany as jest.Mock).mockResolvedValue({ acknowledged: true, deletedCount: 1 }); // For existingWidgetId2
 
-      // Mock for new widget creation (new Widget().save())
-      // The global jest.mock('mongoose') handles new Widget() and its save method.
-      // We need to ensure the save mock resolves correctly for the new widget.
-      // The default save mock in jest.mock('mongoose') resolves with { ...data, _id: idForThisInstance }
-      // We can capture the constructor call to identify the instance and its save mock if needed,
-      // but for this test, we'll primarily verify the constructor call and trust the global save mock.
-      // If we need to ensure a *specific* _id for the new widget, we'd have to make the constructor mock more complex
-      // or mock Widget.create if that's what the helper uses for new items.
-      // Let's assume the helper uses `new Widget(data).save()` and the global mock is sufficient.
-      // The `Widget` constructor mock from `jest.mock('mongoose')` will be called.
+      const resultWidgetIds = await updateWidgetsForDisplay(displayObject, newWidgetsToSubmit, creatorId);
 
-      // Mock for update
-      (Widget.findByIdAndUpdate as jest.Mock).mockImplementation(async (id, data) => {
-        if (id.toString() === widgetToUpdateId.toString()) {
-          return { ...data, _id: widgetToUpdateId }; // Return the updated document
-        }
-        return null;
-      });
+      expect(Widget.create).toHaveBeenCalledTimes(1);
+      expect(Widget.create).toHaveBeenCalledWith({ ...newWidgetData, creator_id: creatorId });
 
-      // Mock for delete
-      (Widget.deleteMany as jest.Mock).mockResolvedValue({ acknowledged: true, deletedCount: 1 });
+      expect(Widget.findByIdAndUpdate).toHaveBeenCalledTimes(2);
+      expect(Widget.findByIdAndUpdate).toHaveBeenCalledWith(existingWidgetId1.toString(), updateDataForId1, { new: true, runValidators: true });
+      expect(Widget.findByIdAndUpdate).toHaveBeenCalledWith(existingWidgetId3.toString(), updateDataForId3, { new: true, runValidators: true });
 
-      const resultWidgetObjectIds = await updateWidgetsForDisplay(currentDisplayObject as any, newWidgetsDataArray, creatorId, Widget as any);
+      expect(Widget.deleteMany).toHaveBeenCalledTimes(1);
+      // Only existingWidgetId2 should be deleted
+      expect(Widget.deleteMany).toHaveBeenCalledWith({ _id: { $in: [existingWidgetId2] } });
 
-      // --- Assertions ---
 
-      // Create: Widget constructor and save
-      const constructorMock = Widget as jest.Mock;
-      expect(constructorMock).toHaveBeenCalledWith(expect.objectContaining({
-        ...newWidgetData,
-        creator_id: creatorId,
-      }));
-      // Find the instance that was created with newWidgetData
-      const newWidgetInstance = constructorMock.mock.results.find(res => res.value.name === newWidgetData.name)?.value;
-      expect(newWidgetInstance).toBeDefined();
-      expect(newWidgetInstance.save).toHaveBeenCalledTimes(1);
-      const savedNewWidget = await newWidgetInstance.save.mock.results[0].value; // This is what save resolved to
+      const expectedReturnedIds = [createdWidgetId.toString(), existingWidgetId1.toString(), existingWidgetId3.toString()].sort();
+      expect(resultWidgetIds.map(id => id.toString()).sort()).toEqual(expectedReturnedIds);
+      expect(displayObject.widgets).toEqual([existingWidgetId1, existingWidgetId2, existingWidgetId3]); // Should not be modified
+    });
 
-      // Update
-      expect(Widget.findByIdAndUpdate).toHaveBeenCalledWith(
-        widgetToUpdateId.toString(),
-        expect.objectContaining({ name: 'Updated Existing Widget' }),
-        { new: true, runValidators: true }
-      );
+    it('should make no DB calls for create/delete if widgets are only updated (no change in set)', async () => {
+        // displayObject.widgets has existingWidgetId1, existingWidgetId2, existingWidgetId3
+        const updateData1 = { _id: existingWidgetId1.toString(), name: "Name 1" };
+        const updateData2 = { _id: existingWidgetId2.toString(), name: "Name 2" };
+        const updateData3 = { _id: existingWidgetId3.toString(), name: "Name 3" };
+        const newWidgetsToSubmit = [updateData1, updateData2, updateData3];
 
-      // Delete
-      expect(Widget.deleteMany).toHaveBeenCalledWith({
-        _id: { $in: [widgetToDeleteId] }
-      });
+        (Widget.findByIdAndUpdate as jest.Mock)
+            .mockResolvedValueOnce({ ...updateData1, _id: existingWidgetId1 })
+            .mockResolvedValueOnce({ ...updateData2, _id: existingWidgetId2 })
+            .mockResolvedValueOnce({ ...updateData3, _id: existingWidgetId3 });
+        // deleteMany should not be called if all current widgets are in newWidgetsToSubmit
 
-      // Return Value
-      expect(Array.isArray(resultWidgetObjectIds)).toBe(true);
-      const resultWidgetIdsAsStrings = resultWidgetObjectIds.map((id: any) => id.toString()).sort();
+        const resultWidgetIds = await updateWidgetsForDisplay(displayObject, newWidgetsToSubmit, creatorId);
 
-      // The returned IDs should be from the new widget and the updated widget.
-      // The new widget's ID comes from `savedNewWidget._id`.
-      const expectedResultIds = [
-        savedNewWidget._id.toString(),
-        widgetToUpdateId.toString()
-      ].sort();
-      expect(resultWidgetIdsAsStrings).toEqual(expectedResultIds);
+        expect(Widget.create).not.toHaveBeenCalled();
+        expect(Widget.findByIdAndUpdate).toHaveBeenCalledTimes(3);
+        expect(Widget.deleteMany).not.toHaveBeenCalled(); // Crucial for this test
 
-      // Non-mutation of original displayObject.widgets array
-      expect(currentDisplayObject.widgets).toEqual(initialDisplayWidgetObjectIds);
+        const expectedReturnedIds = [existingWidgetId1.toString(), existingWidgetId2.toString(), existingWidgetId3.toString()].sort();
+        expect(resultWidgetIds.map(id => id.toString()).sort()).toEqual(expectedReturnedIds);
+        expect(displayObject.widgets).toEqual([existingWidgetId1, existingWidgetId2, existingWidgetId3]);
     });
 
     describe('Error Handling', () => {
       let consoleErrorSpy: jest.SpyInstance;
-      let currentDisplayObject: any;
-      let widgetToUpdateId: mongoose.Types.ObjectId;
-      let widgetToDeleteId: mongoose.Types.ObjectId;
-      let initialDisplayWidgetObjectIds: mongoose.Types.ObjectId[];
-      let newWidgetData: any;
-      let updatedWidgetData: any;
-      let newWidgetsDataArray: any[];
-
+      // Use existingWidgetId1, existingWidgetId2 from outer scope for simplicity if they fit
+      // displayObject will be reset using these IDs in beforeEach of this inner describe
 
       beforeEach(() => {
         consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
-
-        widgetToUpdateId = new mongoose.Types.ObjectId();
-        widgetToDeleteId = new mongoose.Types.ObjectId();
-        initialDisplayWidgetObjectIds = [widgetToDeleteId, widgetToUpdateId];
-
-        currentDisplayObject = {
-          _id: new mongoose.Types.ObjectId(),
-          name: 'Test Display Error Handling',
-          widgets: [...initialDisplayWidgetObjectIds],
-        };
-
-        newWidgetData = { name: 'New Widget For Error Test', type: WidgetType.ANNOUNCEMENT, data: { title: 'New Error' }, x:0,y:0,w:1,h:1 };
-        updatedWidgetData = { _id: widgetToUpdateId.toString(), name: 'Updated Widget For Error Test', type: WidgetType.IMAGE, data: { url: 'http://example.com/updated_error.jpg' }, x:1,y:1,w:1,h:1 };
-        newWidgetsDataArray = [newWidgetData, updatedWidgetData];
-
-        // Reset static mocks
-        if ((Widget.findByIdAndUpdate as jest.Mock)?.mockReset) (Widget.findByIdAndUpdate as jest.Mock).mockReset();
-        if ((Widget.deleteMany as jest.Mock)?.mockReset) (Widget.deleteMany as jest.Mock).mockReset();
-        if ((Widget.create as jest.Mock)?.mockReset) (Widget.create as jest.Mock).mockReset();
-
-
-        // Restore Widget constructor to its default mock implementation from jest.mock('mongoose')
-        const originalMongoose = jest.requireActual('mongoose');
-        (Widget as jest.Mock).mockImplementation(data => {
-          const idForThisInstance = new originalMongoose.Types.ObjectId();
-          // Ensure all necessary fields for a widget are present if the constructor expects them
-          const instanceData = {
-            name: 'Default Mock Name',
-            type: WidgetType.EMPTY,
-            x: 0, y: 0, w: 1, h: 1,
-            creator_id: new originalMongoose.Types.ObjectId(),
-            ...data,
-            _id: idForThisInstance
-          };
-          return {
-            ...instanceData,
-            save: jest.fn().mockResolvedValue(instanceData), // .save() resolves with the instance data
-            toJSON: jest.fn().mockReturnValue(instanceData),
-          };
-        });
-
-        // Default successful mocks for static methods, can be overridden in specific tests
-        (Widget.findByIdAndUpdate as jest.Mock).mockResolvedValue({ _id: widgetToUpdateId, ...updatedWidgetData });
-        (Widget.deleteMany as jest.Mock).mockResolvedValue({ acknowledged: true, deletedCount: 1 });
-
+        // Reset displayObject to a known state for error tests
+        displayObject.widgets = [existingWidgetId1, existingWidgetId2]; // Keep it simple
       });
 
       afterEach(() => {
         consoleErrorSpy.mockRestore();
       });
 
-      it('Error during new widget creation: should process other operations and log error', async () => {
-        const newWidgetError = new Error('New widget save failed');
+      it('should log error and continue if Widget.create fails for one widget', async () => {
+        const newWidgetGood = { name: 'Good New Widget', type:WidgetType.TEXT, x:0,y:0,w:1,h:1,data:{text:"good"} };
+        const newWidgetBad = { name: 'Bad New Widget', type:WidgetType.TEXT, x:0,y:0,w:1,h:1,data:{text:"bad"} };
+        const updateData = { _id: existingWidgetId1.toString(), name: 'Update during create fail' };
+        const newWidgetsToSubmit = [newWidgetGood, newWidgetBad, updateData];
 
-        // Mock constructor to make 'save' reject for the specific new widget
-        (Widget as jest.Mock).mockImplementation((data: any) => {
-          const idForThisInstance = new mongoose.Types.ObjectId();
-          let saveMock = jest.fn().mockResolvedValue({ ...data, _id: idForThisInstance, creator_id: data.creator_id });
-          if (data.name === newWidgetData.name) { // Identify the widget that should fail
-            saveMock = jest.fn().mockRejectedValue(newWidgetError);
-          }
-          return { ...data, _id: idForThisInstance, save: saveMock, toJSON: () => ({...data, _id: idForThisInstance}) };
-        });
+        const goodCreatedId = new mongoose.Types.ObjectId();
+        const creationError = new Error('DB create failed');
 
-        (Widget.findByIdAndUpdate as jest.Mock).mockResolvedValue({ ...updatedWidgetData, _id: widgetToUpdateId });
+        (Widget.create as jest.Mock)
+          .mockImplementation(async (data: any) => {
+            if (data.name === 'Good New Widget') return { ...data, _id: goodCreatedId, creator_id: creatorId };
+            if (data.name === 'Bad New Widget') throw creationError;
+            return null; // Should not happen
+          });
+        (Widget.findByIdAndUpdate as jest.Mock).mockResolvedValue({ ...updateData, _id: existingWidgetId1 });
+        // existingWidgetId2 should be deleted
         (Widget.deleteMany as jest.Mock).mockResolvedValue({ acknowledged: true, deletedCount: 1 });
 
-        const resultWidgetObjectIds = await updateWidgetsForDisplay(currentDisplayObject as any, newWidgetsDataArray, creatorId, Widget as any);
 
-        expect(consoleErrorSpy).toHaveBeenCalledWith('Error creating new widget:', newWidgetError);
-        expect(Widget.findByIdAndUpdate).toHaveBeenCalledTimes(1);
-        expect(Widget.deleteMany).toHaveBeenCalledTimes(1);
+        const resultWidgetIds = await updateWidgetsForDisplay(displayObject, newWidgetsToSubmit, creatorId);
 
-        expect(resultWidgetObjectIds.map(id=>id.toString()).sort()).toEqual([widgetToUpdateId.toString()].sort());
-        expect(currentDisplayObject.widgets).toEqual(initialDisplayWidgetObjectIds);
+        expect(consoleErrorSpy).toHaveBeenCalledWith('Error creating new widget:', creationError);
+        expect(Widget.create).toHaveBeenCalledTimes(2); // Both attempts
+        expect(Widget.findByIdAndUpdate).toHaveBeenCalledTimes(1); // Update should still happen
+        expect(Widget.deleteMany).toHaveBeenCalledWith({ _id: { $in: [existingWidgetId2] } }); // Deletion should still happen
+
+        const expectedReturnedIds = [goodCreatedId.toString(), existingWidgetId1.toString()].sort();
+        expect(resultWidgetIds.map(id => id.toString()).sort()).toEqual(expectedReturnedIds);
+        expect(displayObject.widgets).toEqual([existingWidgetId1, existingWidgetId2]); // Not modified
       });
 
-      it('Error during widget update: should process other operations and log error', async () => {
-        const updateError = new Error('Widget update failed');
-        (Widget.findByIdAndUpdate as jest.Mock).mockRejectedValue(updateError);
-        // New widget creation should succeed (default mock for constructor + save)
-        (Widget.deleteMany as jest.Mock).mockResolvedValue({ acknowledged: true, deletedCount: 1 });
+      it('should log error and continue if Widget.findByIdAndUpdate fails for one widget', async () => {
+        const newWidgetGood = { name: 'Good New Widget during update fail', type:WidgetType.TEXT, x:0,y:0,w:1,h:1,data:{text:"good"} };
+        const updateDataGood = { _id: existingWidgetId1.toString(), name: 'Good Update' };
+        const updateDataBad = { _id: existingWidgetId2.toString(), name: 'Bad Update' }; // This one will fail
+        const newWidgetsToSubmit = [newWidgetGood, updateDataGood, updateDataBad];
 
-        const resultWidgetObjectIds = await updateWidgetsForDisplay(currentDisplayObject as any, newWidgetsDataArray, creatorId, Widget as any);
+        const goodCreatedId = new mongoose.Types.ObjectId();
+        const updateError = new Error('DB update failed');
 
-        expect(consoleErrorSpy).toHaveBeenCalledWith(`Error updating widget ${widgetToUpdateId.toString()}:`, updateError);
+        (Widget.create as jest.Mock).mockResolvedValue({ ...newWidgetGood, _id: goodCreatedId, creator_id: creatorId });
+        (Widget.findByIdAndUpdate as jest.Mock)
+          .mockImplementation(async (id, data) => {
+            if (id.toString() === existingWidgetId1.toString()) return { ...data, _id: existingWidgetId1 };
+            if (id.toString() === existingWidgetId2.toString()) throw updateError;
+            return null;
+          });
+        // No deletions in this specific setup as all original widgets are in newWidgetsToSubmit (either updated or failed update)
+        (Widget.deleteMany as jest.Mock).mockResolvedValue({ acknowledged: true, deletedCount: 0 });
 
-        const constructorMock = Widget as jest.Mock;
-        expect(constructorMock).toHaveBeenCalledWith(expect.objectContaining(newWidgetData));
-        const newWidgetInstance = constructorMock.mock.results.find(res => res.value.name === newWidgetData.name)?.value;
-        expect(newWidgetInstance?.save).toHaveBeenCalledTimes(1);
-        const savedNewWidget = await newWidgetInstance.save.mock.results[0].value;
 
-        expect(Widget.deleteMany).toHaveBeenCalledTimes(1);
+        const resultWidgetIds = await updateWidgetsForDisplay(displayObject, newWidgetsToSubmit, creatorId);
 
-        expect(resultWidgetObjectIds.map(id=>id.toString()).sort()).toEqual([savedNewWidget._id.toString()].sort());
-        expect(currentDisplayObject.widgets).toEqual(initialDisplayWidgetObjectIds);
+        expect(consoleErrorSpy).toHaveBeenCalledWith(`Error updating widget ${existingWidgetId2.toString()}:`, updateError);
+        expect(Widget.create).toHaveBeenCalledTimes(1);
+        expect(Widget.findByIdAndUpdate).toHaveBeenCalledTimes(2); // Both attempts
+        // Deletion will be called with an empty list if current widgets = new widgets (after create/update logic)
+        // display.widgets = [eW1, eW2]. newWidgetIds before delete = [goodCreatedId, eW1 (good update), eW2 (bad update, but id still passed for update attempt)]
+        // String lists for delete: current=[eW1, eW2], new=[goodCreatedId, eW1, eW2]. So no actual IDs to delete.
+        expect(Widget.deleteMany).toHaveBeenCalledWith({ _id: { $in: [] } });
+
+
+        const expectedReturnedIds = [goodCreatedId.toString(), existingWidgetId1.toString()].sort();
+         // existingWidgetId2 is not returned as its update failed
+        expect(resultWidgetIds.map(id => id.toString()).sort()).toEqual(expectedReturnedIds);
+        expect(displayObject.widgets).toEqual([existingWidgetId1, existingWidgetId2]); // Not modified
       });
 
-      it('Error during widget deletion: should process other operations and log error', async () => {
-        const deleteError = new Error('Widget deletion failed');
+      it('should log error and continue if Widget.deleteMany fails', async () => {
+        // existingWidgetId1 will be updated, existingWidgetId2 will be targeted for deletion
+        const newWidgetGood = { name: 'Good New Widget during delete fail', type:WidgetType.TEXT,x:0,y:0,w:1,h:1,data:{text:"good"}};
+        const updateDataGood = { _id: existingWidgetId1.toString(), name: 'Good Update during delete fail' };
+        const newWidgetsToSubmit = [newWidgetGood, updateDataGood]; // existingWidgetId2 is omitted, so it should be deleted
+
+        const goodCreatedId = new mongoose.Types.ObjectId();
+        const deleteError = new Error('DB delete failed');
+
+        (Widget.create as jest.Mock).mockResolvedValue({ ...newWidgetGood, _id: goodCreatedId, creator_id: creatorId });
+        (Widget.findByIdAndUpdate as jest.Mock).mockResolvedValue({ ...updateDataGood, _id: existingWidgetId1 });
         (Widget.deleteMany as jest.Mock).mockRejectedValue(deleteError);
-        // New widget creation and update should succeed
-        (Widget.findByIdAndUpdate as jest.Mock).mockResolvedValue({ ...updatedWidgetData, _id: widgetToUpdateId });
 
-        const resultWidgetObjectIds = await updateWidgetsForDisplay(currentDisplayObject as any, newWidgetsDataArray, creatorId, Widget as any);
+        const resultWidgetIds = await updateWidgetsForDisplay(displayObject, newWidgetsToSubmit, creatorId);
 
         expect(consoleErrorSpy).toHaveBeenCalledWith('Error deleting old widgets:', deleteError);
-
-        const constructorMock = Widget as jest.Mock;
-        expect(constructorMock).toHaveBeenCalledWith(expect.objectContaining(newWidgetData));
-        const newWidgetInstance = constructorMock.mock.results.find(res => res.value.name === newWidgetData.name)?.value;
-        expect(newWidgetInstance?.save).toHaveBeenCalledTimes(1);
-        const savedNewWidget = await newWidgetInstance.save.mock.results[0].value;
-
+        expect(Widget.create).toHaveBeenCalledTimes(1);
         expect(Widget.findByIdAndUpdate).toHaveBeenCalledTimes(1);
+        expect(Widget.deleteMany).toHaveBeenCalledWith({ _id: { $in: [existingWidgetId2] } }); // Attempted deletion
 
-        const expectedIds = [savedNewWidget._id.toString(), widgetToUpdateId.toString()].sort();
-        expect(resultWidgetObjectIds.map(id=>id.toString()).sort()).toEqual(expectedIds);
-        expect(currentDisplayObject.widgets).toEqual(initialDisplayWidgetObjectIds);
+        const expectedReturnedIds = [goodCreatedId.toString(), existingWidgetId1.toString()].sort();
+        expect(resultWidgetIds.map(id => id.toString()).sort()).toEqual(expectedReturnedIds);
+        expect(displayObject.widgets).toEqual([existingWidgetId1, existingWidgetId2]); // Not modified
       });
     });
   });

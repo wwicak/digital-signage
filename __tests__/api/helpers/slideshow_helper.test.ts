@@ -184,6 +184,191 @@ describe('validateSlidesExist', () => {
 // describe('deleteSlideFromSystem', () => { /* ... */ });
 // describe('getDisplayWithWidgets', () => { /* ... */ });
 
+// Import the functions to be tested
+import { populateSlideshowSlides, getAllSlideshowsWithPopulatedSlides } from '../../../api/helpers/slideshow_helper';
+import Slideshow from '../../../api/models/Slideshow'; // Import the Slideshow model
+
+
+describe('populateSlideshowSlides', () => {
+  let consoleErrorSpy: jest.SpyInstance;
+  let mockSlideshow: any;
+  const slideshowId = new mongoose.Types.ObjectId();
+  const slideId1 = new mongoose.Types.ObjectId();
+  const slideId2 = new mongoose.Types.ObjectId();
+
+  beforeEach(() => {
+    consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+    mockSlideshow = {
+      _id: slideshowId,
+      name: 'Test Slideshow',
+      slides: [slideId1, slideId2],
+      // populate will be mocked per test or added if it's a full Mongoose document mock
+    };
+
+    // Reset static method mocks on Slideshow model
+    if ((Slideshow.findById as jest.Mock)?.mockReset) {
+      (Slideshow.findById as jest.Mock).mockReset();
+    }
+    // Ensure the default mock for findById returns a query object
+    const mockQuery = {
+        populate: jest.fn().mockReturnThis(),
+        exec: jest.fn().mockResolvedValue(null), // Default exec for findById
+    };
+    (Slideshow.findById as jest.Mock).mockReturnValue(mockQuery);
+  });
+
+  afterEach(() => {
+    consoleErrorSpy.mockRestore();
+  });
+
+  it('should return null if slideshow input is null', async () => {
+    const result = await populateSlideshowSlides(null);
+    expect(result).toBeNull();
+    expect(consoleErrorSpy).not.toHaveBeenCalled();
+  });
+
+  it('should populate slides using slideshow.populate if it exists and is a function', async () => {
+    const populatedSlides = [{ _id: slideId1, title: 'Slide 1' }, { _id: slideId2, title: 'Slide 2' }];
+    const mockPopulatedSlideshow = { ...mockSlideshow, slides: populatedSlides };
+    mockSlideshow.populate = jest.fn().mockResolvedValue(mockPopulatedSlideshow);
+
+    const result = await populateSlideshowSlides(mockSlideshow);
+
+    expect(mockSlideshow.populate).toHaveBeenCalledWith('slides');
+    expect(result).toEqual(mockPopulatedSlideshow);
+    expect(Slideshow.findById).not.toHaveBeenCalled();
+  });
+
+  it('should return original slideshow and log error if slideshow.populate fails', async () => {
+    const error = new Error('Population failed');
+    mockSlideshow.populate = jest.fn().mockRejectedValue(error);
+
+    const result = await populateSlideshowSlides(mockSlideshow);
+
+    expect(mockSlideshow.populate).toHaveBeenCalledWith('slides');
+    expect(consoleErrorSpy).toHaveBeenCalledWith(`Error populating slideshow ${mockSlideshow._id}:`, error);
+    expect(result).toBe(mockSlideshow); // Returns original on failure
+  });
+
+  it('should use Slideshow.findById().populate() if slideshow.populate is not a function', async () => {
+    const plainSlideshowObject = { // Does not have a .populate method
+      _id: slideshowId,
+      name: 'Plain Slideshow',
+      slides: [slideId1, slideId2],
+    };
+    const populatedSlides = [{ _id: slideId1, title: 'Slide 1 Full' }, { _id: slideId2, title: 'Slide 2 Full' }];
+    const dbPopulatedSlideshow = { ...plainSlideshowObject, slides: populatedSlides };
+
+    const mockQuery = {
+      populate: jest.fn().mockReturnThis(),
+      exec: jest.fn().mockResolvedValue(dbPopulatedSlideshow),
+    };
+    (Slideshow.findById as jest.Mock).mockReturnValue(mockQuery);
+
+    const result = await populateSlideshowSlides(plainSlideshowObject as any);
+
+    expect(Slideshow.findById).toHaveBeenCalledWith(slideshowId);
+    expect(mockQuery.populate).toHaveBeenCalledWith('slides');
+    expect(mockQuery.exec).toHaveBeenCalledTimes(1);
+    expect(result).toEqual(dbPopulatedSlideshow);
+  });
+
+  it('should return original slideshow and log error if Slideshow.findById().populate().exec() rejects', async () => {
+    const plainSlideshowObject = {
+      _id: slideshowId,
+      name: 'Plain Slideshow Error Case',
+      slides: [slideId1],
+    };
+    const dbError = new Error('DB find/populate failed');
+
+    const mockQuery = {
+      populate: jest.fn().mockReturnThis(),
+      exec: jest.fn().mockRejectedValue(dbError),
+    };
+    (Slideshow.findById as jest.Mock).mockReturnValue(mockQuery);
+
+    const result = await populateSlideshowSlides(plainSlideshowObject as any);
+
+    expect(Slideshow.findById).toHaveBeenCalledWith(slideshowId);
+    expect(mockQuery.populate).toHaveBeenCalledWith('slides');
+    expect(mockQuery.exec).toHaveBeenCalledTimes(1);
+    expect(consoleErrorSpy).toHaveBeenCalledWith(`Error populating slideshow ${slideshowId}:`, dbError);
+    expect(result).toBe(plainSlideshowObject); // Returns original on failure
+  });
+});
+
+describe('getAllSlideshowsWithPopulatedSlides', () => {
+  let consoleErrorSpy: jest.SpyInstance;
+  const slideId1 = new mongoose.Types.ObjectId();
+  const slideId2 = new mongoose.Types.ObjectId();
+
+  beforeEach(() => {
+    consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+
+    // Reset static method mocks on Slideshow model
+    if ((Slideshow.find as jest.Mock)?.mockReset) {
+        (Slideshow.find as jest.Mock).mockReset();
+    }
+    // Ensure the default mock for find returns a query object
+    const mockQuery = {
+        populate: jest.fn().mockReturnThis(),
+        exec: jest.fn().mockResolvedValue([]), // Default exec for find
+    };
+    (Slideshow.find as jest.Mock).mockReturnValue(mockQuery);
+  });
+
+  afterEach(() => {
+    consoleErrorSpy.mockRestore();
+  });
+
+  it('should return populated slideshows on successful retrieval', async () => {
+    const mockPopulatedSlideshows = [
+      { _id: new mongoose.Types.ObjectId(), name: 'Slideshow 1', slides: [{ _id: slideId1, title: 'S1' }] },
+      { _id: new mongoose.Types.ObjectId(), name: 'Slideshow 2', slides: [{ _id: slideId2, title: 'S2' }] },
+    ];
+
+    const mockQuery = (Slideshow.find as jest.Mock).mock.results[0].value; // Get the query object returned by Slideshow.find()
+    (mockQuery.populate as jest.Mock).mockReturnThis(); // Ensure populate is chainable
+    (mockQuery.exec as jest.Mock).mockResolvedValue(mockPopulatedSlideshows); // Configure exec
+
+    const result = await getAllSlideshowsWithPopulatedSlides();
+
+    expect(Slideshow.find).toHaveBeenCalledTimes(1);
+    expect(mockQuery.populate).toHaveBeenCalledWith('slides');
+    expect(mockQuery.exec).toHaveBeenCalledTimes(1);
+    expect(result).toEqual(mockPopulatedSlideshows);
+  });
+
+  it('should return an empty array and log error if find/populate fails', async () => {
+    const dbError = new Error('DB query failed');
+    const mockQuery = (Slideshow.find as jest.Mock).mock.results[0].value;
+    (mockQuery.populate as jest.Mock).mockReturnThis();
+    (mockQuery.exec as jest.Mock).mockRejectedValue(dbError);
+
+    const result = await getAllSlideshowsWithPopulatedSlides();
+
+    expect(Slideshow.find).toHaveBeenCalledTimes(1);
+    expect(mockQuery.populate).toHaveBeenCalledWith('slides');
+    expect(mockQuery.exec).toHaveBeenCalledTimes(1);
+    expect(consoleErrorSpy).toHaveBeenCalledWith('Error fetching all slideshows with populated slides:', dbError);
+    expect(result).toEqual([]);
+  });
+
+  it('should return an empty array if Slideshow.find() resolves with an empty array', async () => {
+    const mockQuery = (Slideshow.find as jest.Mock).mock.results[0].value;
+    (mockQuery.populate as jest.Mock).mockReturnThis();
+    (mockQuery.exec as jest.Mock).mockResolvedValue([]);
+
+    const result = await getAllSlideshowsWithPopulatedSlides();
+
+    expect(Slideshow.find).toHaveBeenCalledTimes(1);
+    expect(mockQuery.populate).toHaveBeenCalledWith('slides');
+    expect(mockQuery.exec).toHaveBeenCalledTimes(1);
+    expect(result).toEqual([]);
+    expect(consoleErrorSpy).not.toHaveBeenCalled();
+  });
+});
+
 describe('reorderSlidesInSlideshow', () => {
   let slideId1: mongoose.Types.ObjectId;
   let slideId2: mongoose.Types.ObjectId;

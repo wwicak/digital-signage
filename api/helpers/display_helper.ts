@@ -67,59 +67,117 @@ export const createWidgetsForDisplay = async (
  */
 export const updateWidgetsForDisplay = async (
   display: IDisplay,
-  newWidgetsData: Partial<IWidget>[], // Widgets can be partial for update, new ones won't have _id
+  newWidgetsData: Partial<IWidget>[],
   creatorId: mongoose.Types.ObjectId | string
 ): Promise<mongoose.Types.ObjectId[]> => {
-  const currentWidgetIds = display.widgets.map(id => id.toString());
-  const newWidgetIds: string[] = [];
-  const updatedWidgetObjectIds: mongoose.Types.ObjectId[] = [];
+  const widgetsToCreate: WidgetData[] = [];
+  const widgetsToUpdate: Partial<IWidget>[] = []; // Assuming IWidget includes _id
 
-  // Update existing widgets or create new ones
+  newWidgetsData.forEach(widget => {
+    if (widget._id) {
+      widgetsToUpdate.push(widget);
+    } else {
+      // Type assertion might be needed if WidgetData and Partial<IWidget> are very different
+      // For now, assume widget data for creation matches WidgetData structure.
+      widgetsToCreate.push(widget as WidgetData);
+    }
+  });
+
+  const createdWidgetIds = await _createWidgets(widgetsToCreate, creatorId);
+  const updatedWidgetIds = await _updateWidgets(widgetsToUpdate);
+
+  const allNewWidgetIds = [
+    ...createdWidgetIds.map(id => id.toString()),
+    ...updatedWidgetIds.map(id => id.toString())
+  ];
+
+  // Note: display.widgets contains mongoose.Types.ObjectId[], so mapping to string for comparison
+  const currentWidgetIdsStr = display.widgets.map(id => id.toString());
+  await _deleteWidgets(currentWidgetIdsStr, allNewWidgetIds);
+
+  // The function should return ObjectIds of all widgets that should currently be on the display
+  return [...createdWidgetIds, ...updatedWidgetIds];
+};
+
+
+/**
+ * (Private) Creates new widgets.
+ * @param {WidgetData[]} newWidgetsData - Array of widget data for new widgets (without _id).
+ * @param {mongoose.Types.ObjectId | string} creatorId - The ID of the creator.
+ * @returns {Promise<mongoose.Types.ObjectId[]>} - An array of ObjectIds for the created widgets.
+ */
+const _createWidgets = async (
+  newWidgetsData: WidgetData[],
+  creatorId: mongoose.Types.ObjectId | string
+): Promise<mongoose.Types.ObjectId[]> => {
+  if (!newWidgetsData || newWidgetsData.length === 0) {
+    return [];
+  }
+  const createdWidgetObjectIds: mongoose.Types.ObjectId[] = [];
   for (const widgetData of newWidgetsData) {
-    if (widgetData._id) { // Existing widget
-      const widgetIdStr = widgetData._id.toString();
-      newWidgetIds.push(widgetIdStr);
-      try {
-        await Widget.findByIdAndUpdate(widgetData._id, widgetData, { new: true, runValidators: true });
-        updatedWidgetObjectIds.push(new mongoose.Types.ObjectId(widgetData._id));
-      } catch (error) {
-        console.error(`Error updating widget ${widgetData._id}:`, error);
-        // Decide if one failed update should stop the whole process
-      }
-    } else { // New widget
-      try {
-        const newWidget = new Widget({
-          ...widgetData,
-          creator_id: creatorId
-        });
-        const savedWidget = await newWidget.save();
-        newWidgetIds.push(savedWidget._id.toString());
-        updatedWidgetObjectIds.push(savedWidget._id);
-      } catch (error) {
-        console.error('Error creating new widget:', error);
-      }
+    try {
+      // Widget.create() can take an array, but to handle individual errors as per prompt:
+      const newWidget = await Widget.create({
+        ...widgetData,
+        creator_id: creatorId
+      });
+      createdWidgetObjectIds.push(newWidget._id);
+    } catch (error) {
+      console.error('Error creating new widget:', error);
+      // Depending on requirements, could throw, or collect errors, or just log and continue
     }
   }
+  return createdWidgetObjectIds;
+};
 
-  // Identify and remove widgets that are no longer in the display
+/**
+ * (Private) Updates existing widgets.
+ * @param {Partial<IWidget>[]} widgetsToUpdateData - Array of widget data for existing widgets (must include _id).
+ * @returns {Promise<mongoose.Types.ObjectId[]>} - An array of ObjectIds for the updated widgets.
+ */
+const _updateWidgets = async (
+  widgetsToUpdateData: Partial<IWidget>[]
+): Promise<mongoose.Types.ObjectId[]> => {
+  if (!widgetsToUpdateData || widgetsToUpdateData.length === 0) {
+    return [];
+  }
+  const updatedWidgetObjectIds: mongoose.Types.ObjectId[] = [];
+  for (const widgetData of widgetsToUpdateData) {
+    if (!widgetData._id) { // Should not happen if logic in calling function is correct
+      console.error('Widget data for update is missing _id:', widgetData);
+      continue;
+    }
+    try {
+      await Widget.findByIdAndUpdate(widgetData._id, widgetData, { new: true, runValidators: true });
+      // Ensure widgetData._id is correctly typed as ObjectId if it comes from client as string
+      updatedWidgetObjectIds.push(new mongoose.Types.ObjectId(widgetData._id.toString()));
+    } catch (error) {
+      console.error(`Error updating widget ${widgetData._id}:`, error);
+      // Error handling strategy
+    }
+  }
+  return updatedWidgetObjectIds;
+};
+
+/**
+ * (Private) Deletes widgets that are not in the new list of widgets.
+ * @param {string[]} currentWidgetIds - Array of current widget IDs (as strings).
+ * @param {string[]} newWidgetIds - Array of new widget IDs (as strings) that should remain.
+ * @returns {Promise<void>}
+ */
+const _deleteWidgets = async (
+  currentWidgetIds: string[],
+  newWidgetIds: string[]
+): Promise<void> => {
   const widgetsToRemove = currentWidgetIds.filter(id => !newWidgetIds.includes(id));
   if (widgetsToRemove.length > 0) {
     try {
       await Widget.deleteMany({ _id: { $in: widgetsToRemove.map(id => new mongoose.Types.ObjectId(id)) } });
     } catch (error) {
       console.error('Error deleting old widgets:', error);
-      // Decide error handling strategy
+      // Error handling strategy
     }
   }
-  
-  // Update the display's widget list
-  // display.widgets = updatedWidgetObjectIds; // This line was in the original JS, ensure it's correct
-  // Caller is usually responsible for saving the parent 'display' document after this helper returns.
-  // If this helper is meant to be fully self-contained for widget manipulation including parent update:
-  // display.widgets = updatedWidgetObjectIds;
-  // await display.save();
-  
-  return updatedWidgetObjectIds; // Return the final list of widget IDs for the display
 };
 
 /**
