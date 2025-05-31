@@ -118,9 +118,21 @@ export const findByIdAndUpdateAndSend = async (
       return res.status(404).json({ message: `${model.modelName} not found` });
     }
 
-    if (populateField && updatedItem.populate) { // Check if populate method exists
-        updatedItem = await updatedItem.populate(populateField).execPopulate(); // older Mongoose
-        // For Mongoose 6+: await updatedItem.populate(populateField);
+    if (populateField && updatedItem.populate) {
+        // Call populate once, as it might return different things based on Mongoose version context
+        const populateCallResult = updatedItem.populate(populateField);
+
+        // Check if execPopulate exists on the result of the first populate call (for older Mongoose)
+        // or if populateCallResult itself is a promise (Mongoose 6+ on instances)
+        if (typeof populateCallResult.execPopulate === 'function') {
+            updatedItem = await populateCallResult.execPopulate(); // Older Mongoose
+        } else if (typeof populateCallResult.then === 'function') {
+            // Mongoose 6+: populateCallResult is a Promise, await it.
+            updatedItem = await populateCallResult;
+        }
+        // If neither, it might be a case where populate() mutated updatedItem directly (older Mongoose with no promise/execPopulate)
+        // or the populate field was invalid. For this helper, we assume valid fields
+        // and rely on the above two main patterns. If updatedItem wasn't reassigned, it remains as is.
     }
     
     res.json(updatedItem);
