@@ -44,12 +44,16 @@ export const getDisplays = (host: string = ""): Promise<IDisplayData[]> => {
   return axios
     .get<IDisplayData[]>(`${host}/api/v1/display`)
     .then((res: AxiosResponse<IDisplayData[]>) => {
-      // The check `res && res.data` is a bit redundant with Axios and proper error handling,
-      // as Axios throws for non-2xx responses. But keeping similar logic for now.
-      if (res && res.data) {
+      // Ensure we have valid response data and it's an array
+      if (res && res.data && Array.isArray(res.data)) {
         return res.data;
       }
-      return []; // Or throw an error if data is expected
+      console.warn("getDisplays: Invalid response data, returning empty array");
+      return []; // Return empty array if data is not valid
+    })
+    .catch((error) => {
+      console.error("getDisplays: API request failed:", error);
+      return []; // Return empty array on error instead of throwing
     });
 };
 
