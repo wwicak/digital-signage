@@ -53,6 +53,6 @@ uploads/*
 
 dist
 
-tsconfig.tsbuildinfo
+*.tsbuildinfo
 type-check-errors.log
 bun.lockb

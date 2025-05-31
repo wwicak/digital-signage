@@ -247,7 +247,7 @@ class Input extends Component<IInputProps> {
                         <span className={'link-text'}>{(value as File).name} (New)</span>
                      </div>
                 ) : (
-                  <div className={'photo-upload-text'}>Drag 'n' drop a photo here, or click to select</div>
+                  <div className={'photo-upload-text'}>Drag &apos;n&apos; drop a photo here, or click to select</div>
                 )}
               </div>
             )}

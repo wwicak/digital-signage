@@ -132,7 +132,7 @@ class Upload extends Component<IUploadProps, IUploadState> {
                 {isDragActive ? (
                   <p>Drop files here to add to the slideshow...</p>
                 ) : (
-                  <p>Drag 'n' drop some files here, or click to select files to add to the slideshow.</p> // More descriptive
+                  <p>Drag &apos;n&apos; drop some files here, or click to select files to add to the slideshow.</p> // More descriptive
                 )}
               </div>
             )

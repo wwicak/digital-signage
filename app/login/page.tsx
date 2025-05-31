@@ -72,7 +72,7 @@ const LoginContent = memo(function LoginContent() {
           {!alert && (
              <div className={'alert-info'}>
                 <span className={'alert-text'}>
-                Use the username "demo" and password "demo"
+                Use the username &quot;demo&quot; and password &quot;demo&quot;
                 </span>
             </div>
           )}
