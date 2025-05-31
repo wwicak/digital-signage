@@ -570,5 +570,140 @@ describe('Display Helper Functions', () => {
       expect(currentDisplayObject.widgets).toEqual(initialDisplayWidgetObjectIds);
     });
 
+    describe('Error Handling', () => {
+      let consoleErrorSpy: jest.SpyInstance;
+      let currentDisplayObject: any;
+      let widgetToUpdateId: mongoose.Types.ObjectId;
+      let widgetToDeleteId: mongoose.Types.ObjectId;
+      let initialDisplayWidgetObjectIds: mongoose.Types.ObjectId[];
+      let newWidgetData: any;
+      let updatedWidgetData: any;
+      let newWidgetsDataArray: any[];
+
+
+      beforeEach(() => {
+        consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+
+        widgetToUpdateId = new mongoose.Types.ObjectId();
+        widgetToDeleteId = new mongoose.Types.ObjectId();
+        initialDisplayWidgetObjectIds = [widgetToDeleteId, widgetToUpdateId];
+
+        currentDisplayObject = {
+          _id: new mongoose.Types.ObjectId(),
+          name: 'Test Display Error Handling',
+          widgets: [...initialDisplayWidgetObjectIds],
+        };
+
+        newWidgetData = { name: 'New Widget For Error Test', type: WidgetType.ANNOUNCEMENT, data: { title: 'New Error' }, x:0,y:0,w:1,h:1 };
+        updatedWidgetData = { _id: widgetToUpdateId.toString(), name: 'Updated Widget For Error Test', type: WidgetType.IMAGE, data: { url: 'http://example.com/updated_error.jpg' }, x:1,y:1,w:1,h:1 };
+        newWidgetsDataArray = [newWidgetData, updatedWidgetData];
+
+        // Reset static mocks
+        if ((Widget.findByIdAndUpdate as jest.Mock)?.mockReset) (Widget.findByIdAndUpdate as jest.Mock).mockReset();
+        if ((Widget.deleteMany as jest.Mock)?.mockReset) (Widget.deleteMany as jest.Mock).mockReset();
+        if ((Widget.create as jest.Mock)?.mockReset) (Widget.create as jest.Mock).mockReset();
+
+
+        // Restore Widget constructor to its default mock implementation from jest.mock('mongoose')
+        const originalMongoose = jest.requireActual('mongoose');
+        (Widget as jest.Mock).mockImplementation(data => {
+          const idForThisInstance = new originalMongoose.Types.ObjectId();
+          // Ensure all necessary fields for a widget are present if the constructor expects them
+          const instanceData = {
+            name: 'Default Mock Name',
+            type: WidgetType.EMPTY,
+            x: 0, y: 0, w: 1, h: 1,
+            creator_id: new originalMongoose.Types.ObjectId(),
+            ...data,
+            _id: idForThisInstance
+          };
+          return {
+            ...instanceData,
+            save: jest.fn().mockResolvedValue(instanceData), // .save() resolves with the instance data
+            toJSON: jest.fn().mockReturnValue(instanceData),
+          };
+        });
+
+        // Default successful mocks for static methods, can be overridden in specific tests
+        (Widget.findByIdAndUpdate as jest.Mock).mockResolvedValue({ _id: widgetToUpdateId, ...updatedWidgetData });
+        (Widget.deleteMany as jest.Mock).mockResolvedValue({ acknowledged: true, deletedCount: 1 });
+
+      });
+
+      afterEach(() => {
+        consoleErrorSpy.mockRestore();
+      });
+
+      it('Error during new widget creation: should process other operations and log error', async () => {
+        const newWidgetError = new Error('New widget save failed');
+
+        // Mock constructor to make 'save' reject for the specific new widget
+        (Widget as jest.Mock).mockImplementation((data: any) => {
+          const idForThisInstance = new mongoose.Types.ObjectId();
+          let saveMock = jest.fn().mockResolvedValue({ ...data, _id: idForThisInstance, creator_id: data.creator_id });
+          if (data.name === newWidgetData.name) { // Identify the widget that should fail
+            saveMock = jest.fn().mockRejectedValue(newWidgetError);
+          }
+          return { ...data, _id: idForThisInstance, save: saveMock, toJSON: () => ({...data, _id: idForThisInstance}) };
+        });
+
+        (Widget.findByIdAndUpdate as jest.Mock).mockResolvedValue({ ...updatedWidgetData, _id: widgetToUpdateId });
+        (Widget.deleteMany as jest.Mock).mockResolvedValue({ acknowledged: true, deletedCount: 1 });
+
+        const resultWidgetObjectIds = await updateWidgetsForDisplay(currentDisplayObject as any, newWidgetsDataArray, creatorId, Widget as any);
+
+        expect(consoleErrorSpy).toHaveBeenCalledWith('Error creating new widget:', newWidgetError);
+        expect(Widget.findByIdAndUpdate).toHaveBeenCalledTimes(1);
+        expect(Widget.deleteMany).toHaveBeenCalledTimes(1);
+
+        expect(resultWidgetObjectIds.map(id=>id.toString()).sort()).toEqual([widgetToUpdateId.toString()].sort());
+        expect(currentDisplayObject.widgets).toEqual(initialDisplayWidgetObjectIds);
+      });
+
+      it('Error during widget update: should process other operations and log error', async () => {
+        const updateError = new Error('Widget update failed');
+        (Widget.findByIdAndUpdate as jest.Mock).mockRejectedValue(updateError);
+        // New widget creation should succeed (default mock for constructor + save)
+        (Widget.deleteMany as jest.Mock).mockResolvedValue({ acknowledged: true, deletedCount: 1 });
+
+        const resultWidgetObjectIds = await updateWidgetsForDisplay(currentDisplayObject as any, newWidgetsDataArray, creatorId, Widget as any);
+
+        expect(consoleErrorSpy).toHaveBeenCalledWith(`Error updating widget ${widgetToUpdateId.toString()}:`, updateError);
+
+        const constructorMock = Widget as jest.Mock;
+        expect(constructorMock).toHaveBeenCalledWith(expect.objectContaining(newWidgetData));
+        const newWidgetInstance = constructorMock.mock.results.find(res => res.value.name === newWidgetData.name)?.value;
+        expect(newWidgetInstance?.save).toHaveBeenCalledTimes(1);
+        const savedNewWidget = await newWidgetInstance.save.mock.results[0].value;
+
+        expect(Widget.deleteMany).toHaveBeenCalledTimes(1);
+
+        expect(resultWidgetObjectIds.map(id=>id.toString()).sort()).toEqual([savedNewWidget._id.toString()].sort());
+        expect(currentDisplayObject.widgets).toEqual(initialDisplayWidgetObjectIds);
+      });
+
+      it('Error during widget deletion: should process other operations and log error', async () => {
+        const deleteError = new Error('Widget deletion failed');
+        (Widget.deleteMany as jest.Mock).mockRejectedValue(deleteError);
+        // New widget creation and update should succeed
+        (Widget.findByIdAndUpdate as jest.Mock).mockResolvedValue({ ...updatedWidgetData, _id: widgetToUpdateId });
+
+        const resultWidgetObjectIds = await updateWidgetsForDisplay(currentDisplayObject as any, newWidgetsDataArray, creatorId, Widget as any);
+
+        expect(consoleErrorSpy).toHaveBeenCalledWith('Error deleting old widgets:', deleteError);
+
+        const constructorMock = Widget as jest.Mock;
+        expect(constructorMock).toHaveBeenCalledWith(expect.objectContaining(newWidgetData));
+        const newWidgetInstance = constructorMock.mock.results.find(res => res.value.name === newWidgetData.name)?.value;
+        expect(newWidgetInstance?.save).toHaveBeenCalledTimes(1);
+        const savedNewWidget = await newWidgetInstance.save.mock.results[0].value;
+
+        expect(Widget.findByIdAndUpdate).toHaveBeenCalledTimes(1);
+
+        const expectedIds = [savedNewWidget._id.toString(), widgetToUpdateId.toString()].sort();
+        expect(resultWidgetObjectIds.map(id=>id.toString()).sort()).toEqual(expectedIds);
+        expect(currentDisplayObject.widgets).toEqual(initialDisplayWidgetObjectIds);
+      });
+    });
   });
 });
