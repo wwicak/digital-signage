@@ -17,8 +17,8 @@ jest.mock('./ColorPicker', () => {
 });
 
 // Mock react-dropzone and its named exports like useDropzone
-const mockGetRootProps = jest.fn((props) => ({...props})); // Pass through props
-const mockGetInputProps = jest.fn((props) => ({...props}));
+const mockGetRootProps = jest.fn((props?: object) => ({...props})); // Make props explicitly optional
+const mockGetInputProps = jest.fn((props?: object) => ({...props})); // Make props explicitly optional
 const ActualMockDropzoneImplementation = jest.fn(({ children, onDropAccepted, onDropRejected, ...rest }) => {
   // Allow tests to simulate drop by calling these props
   (global as any).simulateDrop = (files: File[]) => {
@@ -219,24 +219,24 @@ describe('Input Component', () => {
   // Checkbox Input
   describe('Checkbox Input (type="checkbox")', () => {
     test('renders unchecked by default (value=false or undefined)', () => {
-      render(<Input type="checkbox" name="agree" onChange={mockOnChange} />);
+      render(<Input type="checkbox" name="agree" onChange={mockOnChange} checked={false} />);
       expect(screen.getByRole('checkbox')).not.toBeChecked();
     });
 
     test('renders checked when value is true', () => {
-      render(<Input type="checkbox" name="agree" value={true} onChange={mockOnChange} />);
+      render(<Input type="checkbox" name="agree" checked={true} onChange={mockOnChange} />);
       expect(screen.getByRole('checkbox')).toBeChecked();
     });
 
     test('calls onChange with boolean value', () => {
-      const { rerender } = render(<Input type="checkbox" name="agree" value={false} onChange={mockOnChange} />);
+      const { rerender } = render(<Input type="checkbox" name="agree" checked={false} onChange={mockOnChange} />);
       const checkboxElement = screen.getByRole('checkbox');
 
       fireEvent.click(checkboxElement);
       expect(mockOnChange).toHaveBeenCalledWith('agree', true, expect.anything());
 
       // Re-render with new value (true) to simulate prop change
-      rerender(<Input type="checkbox" name="agree" value={true} onChange={mockOnChange} />);
+      rerender(<Input type="checkbox" name="agree" checked={true} onChange={mockOnChange} />);
       fireEvent.click(checkboxElement); // Toggles to false (as current value is true)
       expect(mockOnChange).toHaveBeenCalledWith('agree', false, expect.anything());
     });

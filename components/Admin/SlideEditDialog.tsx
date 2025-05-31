@@ -4,8 +4,11 @@ import _ from 'lodash';
 import Dialog, { IDialogProps, DialogMethods } from '../Dialog'; // Assuming Dialog.tsx and its props
 import { Form, Input, Button, ButtonGroup, IInputProps, IChoice } from '../Form'; // Assuming Form components are/will be typed
 
-import { getSlide, addSlide, updateSlide, ISlideData, SlideAddPayload as SlideAddData, SlideUpdatePayload as SlideUpdateData, SlideActionDataSchema } from '../../actions/slide'; // Slide actions are typed
-import { SlideType, SlideData, SlideTypeZod, SlideDataZod } from '../../api/models/Slide';
+import { getSlide, addSlide, updateSlide, ISlideData, SlideAddPayload as SlideAddData, SlideUpdatePayload as SlideUpdateData, SlideActionDataSchema } from '../../actions/slide'; // Corrected import aliases
+import {
+  SlideType, SlideData, SlideTypeZod, SlideDataZod,
+  ImageSlideData, VideoSlideData, WebSlideData, MarkdownSlideData, PhotoSlideData, YoutubeSlideData // Import specific types
+} from '../../api/models/Slide';
 import * as z from 'zod';
 
 // Interface for methods exposed via ref - Zod is not typically used for ref method signatures
@@ -123,11 +126,11 @@ class SlideEditDialog extends Component<ISlideEditDialogProps, ISlideEditDialogS
     }
   };
 
-  handleChange = (name: keyof ISlideEditDialogState, value: any): void => {
+  handleChange = (name: string, value: any): void => { // name: string
     this.setState(prevState => {
       const newState = {
         ...prevState,
-        [name]: value,
+        [name as keyof ISlideEditDialogState]: value, // cast name
       } as ISlideEditDialogState; // Cast to assure TypeScript
       // Clean up data if the type of slide changed
       if (name === 'type') {
@@ -142,16 +145,20 @@ class SlideEditDialog extends Component<ISlideEditDialogProps, ISlideEditDialogS
   };
   
   // Handler specifically for the photo upload Input component
-  handlePhotoChange = (name: keyof ISlideEditDialogState, value: File | string | null): void => {
-    // 'name' would typically be 'upload' or 'data' depending on Input component's design
+  handlePhotoChange = (name: string, value: File | string | null): void => { // name: string
+    // 'name' will be 'upload' from the Input component props
     if (value instanceof File) {
-        this.setState({ upload: value, data: undefined });
+        // New file selected, set type to PHOTO, set upload, clear existing data (which might be URL)
+        this.setState({ upload: value, data: undefined, type: SlideType.PHOTO });
     } else if (typeof value === 'string') {
-        // This implies the input returned an existing URL, so it's not a new file upload.
-        this.setState({ data: value, upload: null });
+        // String value likely means user pasted a URL, or it's an initial URL value.
+        // Treat as a PHOTO type with this URL. Clear any file in 'upload'.
+        this.setState({ data: { url: value }, upload: null, type: SlideType.PHOTO });
     } else {
-        // Value is null (e.g., photo cleared)
-        this.setState({ upload: null, data: undefined }); // Clear both upload and any existing data URL if type is photo
+        // Value is null (e.g., photo cleared from input)
+        this.setState({ upload: null, data: undefined });
+        // Optionally: if type was PHOTO, maybe reset type or set data to an empty photo object.
+        // if (this.state.type === SlideType.PHOTO) this.setState({ data: {} });
     }
   }
 
@@ -162,43 +169,80 @@ class SlideEditDialog extends Component<ISlideEditDialogProps, ISlideEditDialogS
 
     // Constructing slideDetails for saving.
     // This object should conform to what `addSlide` or `updateSlide` expects for their metadata argument.
-    // SlideAddData and SlideUpdateData are Omit<Partial<ISlideData>, ...>
-    // We need to ensure the built object is compatible.
-    let slideDetailsPayload: Partial<ISlideData> = {
-        name: title,
-        description: description, // Assuming description is part of ISlideData or handled by backend
+    let slideDetailsPayloadBase: Omit<Partial<ISlideData>, 'data'> = { // Base payload without 'data' field yet
+        name: title, // ISlideData from actions/slide.ts expects 'name'
+        description: description,
         type: type,
         duration: Number(duration) || 5,
     };
 
-    // Handle the 'data' field based on type
+    let structuredSlideData: SlideData | undefined;
+
     if (type === SlideType.PHOTO) {
-        // If it's a photo, the 'data' field in the database usually stores the URL.
-        // If a new 'upload' is present, the backend will handle creating the URL.
-        // If no new 'upload', and 'this.state.data' is a string (existing URL), it should be preserved.
-        // The `updateSlide` and `addSlide` actions take `upload` (File) separately.
-        // The `data` field in `slideDetailsPayload` here should be for non-file data.
-        if (upload) { // New file being uploaded
-            slideDetailsPayload.data = undefined; // Backend will generate new URL/data from file
-        } else if (typeof data === 'string' && data.startsWith('http')) { // Existing photo URL
-            slideDetailsPayload.data = data;
+        if (upload) { // New file is being uploaded
+            structuredSlideData = undefined; // Backend handles URL generation from 'upload' File object
+        } else if (data && typeof data === 'object' && 'url' in data) { // data is already {url: string} e.g. from refresh or handlePhotoChange
+            structuredSlideData = data as PhotoSlideData;
+        } else if (typeof data === 'string' && data.startsWith('http')) { // data is a string URL (e.g. initial load)
+             structuredSlideData = { url: data }; // Convert to PhotoSlideData object
         } else {
-             slideDetailsPayload.data = undefined; // Or handle as error if photo type has no data/upload
+            structuredSlideData = undefined; // No new file, no existing valid URL or data object
+        }
+    } else if (type === SlideType.MARKDOWN) {
+        structuredSlideData = { content: (typeof data === 'string' ? data : (data as MarkdownSlideData)?.content) || '' };
+    } else if (type === SlideType.YOUTUBE) {
+        if (typeof data === 'string') { // data is the URL string from input
+            const videoIdMatch = data.match(/(?:v=|\/embed\/|\/\d{1,2}\/|\/vi\/|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
+            structuredSlideData = { url: data, videoId: videoIdMatch ? videoIdMatch[1] : "" }; // Ensure videoId is string
+        } else if (typeof data === 'object' && data && 'url' in data && 'videoId' in data) {
+            structuredSlideData = data as YoutubeSlideData;
+        } else {
+             structuredSlideData = { url: '', videoId: ''}; // Default empty
+        }
+    } else if (type === SlideType.WEB || type === SlideType.IMAGE || type === SlideType.VIDEO) {
+        // These types expect { url: string, ...other_optional_fields }
+        if (typeof data === 'string') { // data is the URL string from input
+            structuredSlideData = { url: data };
+        } else if (typeof data === 'object' && data && 'url' in data) {
+            structuredSlideData = data as WebSlideData | ImageSlideData | VideoSlideData;
+        } else {
+            structuredSlideData = { url: '' }; // Default empty
         }
     } else {
-        // For other types, 'data' is directly from state (e.g., URL for youtube/web, content for markdown)
-        slideDetailsPayload.data = data;
+        // Fallback or for types where data might be structured differently or not set via simple input
+        structuredSlideData = data as SlideData; // This might be undefined if data was never set
     }
 
-    // Filter out undefined values before sending
-    slideDetailsPayload = _.pickBy(slideDetailsPayload, v => v !== undefined) as Partial<ISlideData>;
+    const slideDetailsPayload: Partial<ISlideData> = {
+        ...slideDetailsPayloadBase,
+        data: structuredSlideData,
+    };
+
+    // Filter out undefined values before sending, but allow 'data' to be undefined (e.g. for new photo upload)
+    // Filter out undefined values before sending, but allow 'data' to be undefined (e.g. for new photo upload)
+    const finalPayload = _.pickBy(slideDetailsPayload, (value, key) => {
+        return key === 'data' ? true : value !== undefined;
+        // We allow 'data' to be explicitly undefined (e.g. for photo uploads where file is separate)
+        // or if it was truly not set for other types.
+        // The actions/slide.ts ISlideData type has 'data: SlideDataZod', which is not optional itself.
+        // So 'data' should always be provided to actions, even if it's an empty object for some types,
+        // or specific like {url: ''} if URL is required but empty.
+        // Let's ensure 'data' is always at least an empty object if undefined and type is not PHOTO with upload.
+        // However, SlideAddPayload/SlideUpdatePayload in actions/slide.ts OMIT 'data' from Partial<ISlideData>
+        // and then add [key:string]: any. This means 'data' is passed at top level of payload.
+        // This structure is confusing. Assuming slideDetailsPayload IS the payload.
+        // And ISlideData in actions/slide.ts has data: SlideDataZod (the union of objects).
+        // So slideDetailsPayload.data must be one of those objects.
+        // My structuredSlideData should conform. If structuredSlideData is undefined (new photo), it's fine.
+        return value !== undefined || key === 'data'; // Keep data field even if undefined
+    }) as Partial<ISlideData>;
 
 
     try {
       if (slideshowId) { // Adding a new slide
-        await addSlide(slideshowId, upload || null, slideDetailsPayload as SlideAddData);
+        await addSlide(slideshowId, upload || null, finalPayload as SlideAddData);
       } else if (slideId) { // Updating an existing slide
-        await updateSlide(slideId, upload || null, slideDetailsPayload as SlideUpdateData);
+        await updateSlide(slideId, upload || null, finalPayload as SlideUpdateData);
       }
       this.close();
     } catch (error) {

@@ -12,37 +12,37 @@ export enum SlideType {
 }
 
 // Define specific data types for each slide type
-export interface ImageSlideData {
+export interface ImageSlideData { // Already exported, ensure all are
   url: string;
   alt?: string;
   caption?: string;
 }
 
-export interface VideoSlideData {
+export interface VideoSlideData { // Ensure export
   url: string;
   autoplay?: boolean;
   loop?: boolean;
   muted?: boolean;
 }
 
-export interface WebSlideData {
+export interface WebSlideData { // Ensure export
   url: string;
   scale?: number;
   allowInteraction?: boolean;
 }
 
-export interface MarkdownSlideData {
+export interface MarkdownSlideData { // Ensure export
   content: string;
   theme?: string;
 }
 
-export interface PhotoSlideData {
+export interface PhotoSlideData { // Ensure export
   url: string;
   caption?: string;
   effects?: string[];
 }
 
-export interface YoutubeSlideData {
+export interface YoutubeSlideData { // Ensure export
   videoId: string;
   url: string;
   autoplay?: boolean;

@@ -207,7 +207,7 @@ class Input extends Component<IInputProps> {
                 type="checkbox"
                 name={name}
                 className={className}
-                checked={!!value} // Checkbox checked state is boolean
+                checked={!!cbProps.checked} // Use the checked prop
                 onChange={this.handleHtmlInputChange} // This will pass boolean for 'checked'
                 disabled={disabled}
                 value={cbProps.value || 'on'} // Actual value attribute for checkbox if needed by form

@@ -44,50 +44,50 @@ const ensureAuthenticated = (req: Request, res: Response, next: NextFunction) =>
   if (req.isAuthenticated && req.isAuthenticated()) {
     return next();
   }
-  res.status(401).json({ message: 'User not authenticated' });
+  // Ensure response is returned to stop execution
+  return res.status(401).json({ message: 'User not authenticated' });
 };
 
 // GET all slideshows for the logged-in user
-router.get('/', ensureAuthenticated, async (req: Request, res: Response) => {
+router.get('/', ensureAuthenticated, async (req: Request, res: Response): Promise<void> => { // Added : Promise<void> for consistency
   const user = req.user as IUser;
   if (!user || !user._id) {
-    res.status(400).json({ message: 'User information not found.' });
-    return;
+    // Add return to ensure handler exits
+    return res.status(400).json({ message: 'User information not found.' });
   }
   try {
     const slideshows = await Slideshow.find({ creator_id: user._id }).populate('slides');
-    res.json(slideshows);
+    // Add return to ensure handler exits
+    return res.json(slideshows);
   } catch (error: any) {
-    res.status(500).json({ message: 'Error fetching slideshows.', error: error.message });
+    // Add return to ensure handler exits
+    return res.status(500).json({ message: 'Error fetching slideshows.', error: error.message });
   }
 });
 
 // GET a specific slideshow by ID, populated with slides
-router.get('/:id', ensureAuthenticated, async (req: Request<{ id: string }>, res: Response) => {
+router.get('/:id', ensureAuthenticated, async (req: Request<{ id: string }>, res: Response): Promise<void> => {
   const user = req.user as IUser;
   if (!user || !user._id) {
-    res.status(400).json({ message: 'User information not found.' });
-    return;
+    return res.status(400).json({ message: 'User information not found.' });
   }
   try {
     const slideshow = await Slideshow.findOne({ _id: req.params.id, creator_id: user._id })
                                      .populate('slides'); 
     if (!slideshow) {
-      res.status(404).json({ message: 'Slideshow not found or not authorized.' });
-      return;
+      return res.status(404).json({ message: 'Slideshow not found or not authorized.' });
     }
-    res.json(slideshow);
+    return res.json(slideshow);
   } catch (error: any) {
-    res.status(500).json({ message: 'Error fetching slideshow.', error: error.message });
+    return res.status(500).json({ message: 'Error fetching slideshow.', error: error.message });
   }
 });
 
 // POST (create) a new slideshow
-router.post('/', ensureAuthenticated, async (req: Request, res: Response) => {
+router.post('/', ensureAuthenticated, async (req: Request, res: Response): Promise<void> => {
   const user = req.user as IUser;
   if (!user || !user._id) {
-    res.status(400).json({ message: 'User information not found.' });
-    return;
+    return res.status(400).json({ message: 'User information not found.' });
   }
 
   const result = CreateSlideshowSchema.safeParse(req.body);
@@ -101,8 +101,7 @@ router.post('/', ensureAuthenticated, async (req: Request, res: Response) => {
   if (slide_ids && slide_ids.length > 0) {
     const slidesValid = await validateSlidesExist(slide_ids);
     if (!slidesValid) {
-      res.status(400).json({ message: 'One or more provided slide IDs are invalid or do not exist.' });
-      return;
+      return res.status(400).json({ message: 'One or more provided slide IDs are invalid or do not exist.' });
     }
   }
 
@@ -117,23 +116,21 @@ router.post('/', ensureAuthenticated, async (req: Request, res: Response) => {
   try {
     const savedSlideshow = await newSlideshowDoc.save();
     const populatedSlideshow = await populateSlideshowSlides(savedSlideshow);
-    res.status(201).json(populatedSlideshow);
+    return res.status(201).json(populatedSlideshow);
   } catch (error: any) {
     console.error('Error creating slideshow:', error);
     if (error.name === 'ValidationError') {
-      res.status(400).json({ message: 'Validation Error', errors: error.errors });
-      return;
+      return res.status(400).json({ message: 'Validation Error', errors: error.errors });
     }
-    res.status(500).json({ message: 'Error creating slideshow', error: error.message });
+    return res.status(500).json({ message: 'Error creating slideshow', error: error.message });
   }
 });
 
 // PUT (update) a slideshow by ID
-router.put('/:id', ensureAuthenticated, async (req: Request<{ id: string }>, res: Response) => {
+router.put('/:id', ensureAuthenticated, async (req: Request<{ id: string }>, res: Response): Promise<void> => {
   const user = req.user as IUser;
   if (!user || !user._id) {
-    res.status(400).json({ message: 'User information not found.' });
-    return;
+    return res.status(400).json({ message: 'User information not found.' });
   }
 
   const slideshowId = req.params.id;
@@ -151,8 +148,7 @@ router.put('/:id', ensureAuthenticated, async (req: Request<{ id: string }>, res
     const slideshowToUpdate = await Slideshow.findOne({ _id: slideshowId, creator_id: userId });
 
     if (!slideshowToUpdate) {
-      res.status(404).json({ message: 'Slideshow not found or not authorized' });
-      return;
+      return res.status(404).json({ message: 'Slideshow not found or not authorized' });
     }
 
     if (typeof oldIndex === 'number' && typeof newIndex === 'number') {
@@ -164,8 +160,7 @@ router.put('/:id', ensureAuthenticated, async (req: Request<{ id: string }>, res
         if (slide_ids.length > 0) { // Allow empty array to clear slides
             const slidesValid = await validateSlidesExist(slide_ids);
             if (!slidesValid) {
-              res.status(400).json({ message: 'One or more provided slide IDs are invalid or do not exist.' });
-              return;
+              return res.status(400).json({ message: 'One or more provided slide IDs are invalid or do not exist.' });
             }
         }
         slideshowToUpdate.slides = slide_ids.map(id => new mongoose.Types.ObjectId(id as string)); // Cast id to string
@@ -174,44 +169,40 @@ router.put('/:id', ensureAuthenticated, async (req: Request<{ id: string }>, res
 
     const savedSlideshow = await slideshowToUpdate.save();
     const populatedSlideshow = await populateSlideshowSlides(savedSlideshow);
-    res.json(populatedSlideshow);
+    return res.json(populatedSlideshow);
 
   } catch (error: any) {
     console.error(`Error updating slideshow ${slideshowId}:`, error);
     if (error.name === 'ValidationError') {
-      res.status(400).json({ message: 'Validation Error', errors: error.errors });
-      return;
+      return res.status(400).json({ message: 'Validation Error', errors: error.errors });
     }
     if (error.message === 'Invalid slide indices for reordering.') {
-        res.status(400).json({ message: error.message });
-        return;
+        return res.status(400).json({ message: error.message });
     }
-    res.status(500).json({ message: 'Error updating slideshow', error: error.message });
+    return res.status(500).json({ message: 'Error updating slideshow', error: error.message });
   }
 });
 
 // DELETE a slideshow by ID
-router.delete('/:id', ensureAuthenticated, async (req: Request<{ id: string }>, res: Response) => {
+router.delete('/:id', ensureAuthenticated, async (req: Request<{ id: string }>, res: Response): Promise<void> => {
   const user = req.user as IUser;
    if (!user || !user._id) {
-    res.status(400).json({ message: 'User information not found.' });
-    return;
+    return res.status(400).json({ message: 'User information not found.' });
   }
   const slideshowId = req.params.id;
 
   try {
     const slideshow = await Slideshow.findOne({ _id: slideshowId, creator_id: user._id });
     if (!slideshow) {
-      res.status(404).json({ message: 'Slideshow not found or not authorized' });
-      return;
+      return res.status(404).json({ message: 'Slideshow not found or not authorized' });
     }
     
     await Slideshow.findByIdAndDelete(slideshowId);
-    res.json({ message: 'Slideshow deleted successfully' });
+    return res.json({ message: 'Slideshow deleted successfully' });
 
   } catch (error: any) {
     console.error(`Error deleting slideshow ${slideshowId}:`, error);
-    res.status(500).json({ message: 'Error deleting slideshow', error: error.message });
+    return res.status(500).json({ message: 'Error deleting slideshow', error: error.message });
   }
 });
 

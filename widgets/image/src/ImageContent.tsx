@@ -26,9 +26,9 @@ export const ImageContentPropsSchema = z.object({
 });
 export type IImageContentProps = z.infer<typeof ImageContentPropsSchema>;
 
-const DEFAULT_COLOR = '#2d3436'; // Dark Gray
-const DEFAULT_FIT: TImageFit = 'contain';
-const DEFAULT_ALT_TEXT = 'Displayed image';
+export const DEFAULT_COLOR = '#2d3436'; // Dark Gray
+export const DEFAULT_FIT: TImageFit = 'contain';
+export const DEFAULT_ALT_TEXT = 'Displayed image';
 
 class ImageContent extends Component<IImageContentProps> {
   // The iframe ref was unused in the original component, so it's removed.
