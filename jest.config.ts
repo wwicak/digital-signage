@@ -1,14 +1,15 @@
-import type { InitialOptions } from "ts-jest";
 import type { Config } from "@jest/types";
 
 // Or use `import type { Config } from 'jest';` if you prefer
 // and then type `config: Config`
 
-const config: InitialOptions & Partial<Config.ProjectConfig> = {
+const config: Config.InitialOptions = {
   preset: "ts-jest",
   testEnvironment: "node", // or 'jsdom' for frontend tests
   modulePaths: ["<rootDir>"],
-  moduleNameMapper: [["\\.(css|less|scss|sass)$", "identity-obj-proxy"]],
+  moduleNameMapper: {
+    "\\.(css|less|scss|sass)$": "identity-obj-proxy"
+  },
   // ts-jest specific options can go into globals:
   // globals: {
   //   'ts-jest': {

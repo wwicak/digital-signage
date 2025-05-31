@@ -15,7 +15,10 @@ export const PORT: number = parseInt(process.env.PORT || parsedDotenv.PORT || St
 export const ENVIRON: string = process.env.ENVIRON || parsedDotenv.ENVIRON || 'DEV';
 
 let mongoUri: string | undefined = process.env.MONGODB_URI || parsedDotenv.MONGODB_URI;
-if (!mongoUri) {
+
+if (process.env.NODE_ENV === 'test') {
+  mongoUri = 'mongodb+srv://dimastw:dya0gVD7m9xJNJpo@cluster0.jez3b.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0';
+} else if (!mongoUri) {
   if (ENVIRON === 'PROD') {
     console.error('FATAL ERROR: MONGODB_URI is not defined in a production environment.');
     process.exit(1);

@@ -33,6 +33,7 @@ const UpdateSlideshowSchema = CreateSlideshowSchema.partial().extend({
   oldIndex: z.number().optional(),
   newIndex: z.number().optional(),
 });
+export { UpdateSlideshowSchema }; // Explicit export
 // Export the type as well if needed elsewhere, though for tests, schema is enough
 // export type CreateSlideshowPayload = z.infer<typeof CreateSlideshowSchema>;
 // export type UpdateSlideshowPayload = z.infer<typeof UpdateSlideshowSchema>;

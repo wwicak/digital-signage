@@ -1,6 +1,7 @@
 import { addWidget, deleteWidget } from "../../../api/helpers/widget_helper"; // Adjusted path assuming widget_helper.ts is in root of helpers
 import Display from "../../../api/models/Display"; // Adjusted path
 import { Request, Response } from "express"; // For typing req/res
+// Using Jest globals: describe, beforeEach, it, expect, jest
 
 // Mock the Display model
 jest.mock("../../../api/models/Display");
@@ -31,10 +32,11 @@ describe("widget_helper", () => {
     };
 
     // Clear all mocks before each test
-    (Display.findById as jest.Mock).mockClear();
+    if (typeof (Display.findById as jest.Mock)?.mockClear === 'function') { // Check if it's a Jest mock
+        (Display.findById as jest.Mock).mockClear();
+    }
     // A new mock for each test for prototype methods like save
-    // We cast Display to any to mock its prototype, which is a common pattern.
-    (Display.prototype.save as jest.Mock) = jest.fn();
+    (Display.prototype.save as jest.Mock) = jest.fn(); // Re-assign to a fresh Jest mock
   });
 
   describe("addWidget", () => {
@@ -49,14 +51,17 @@ describe("widget_helper", () => {
       mockDisplayInstance = {
         _id: "display123",
         widgets: [],
-        save: jest.fn(), // Initialize save as a mock function
+        save: jest.fn(), // Initialize save as a Jest mock function
       };
       // Now that mockDisplayInstance is defined, set its resolved value
       mockDisplayInstance.save.mockResolvedValue(mockDisplayInstance);
       (Display.findById as jest.Mock).mockResolvedValue(mockDisplayInstance);
-      (mockDisplayInstance.save as jest.Mock).mockResolvedValue(
-        mockDisplayInstance
-      );
+      // Ensure the save mock on the instance is the one being called and checked
+      // (mockDisplayInstance.save as jest.Mock).mockResolvedValue(mockDisplayInstance); // Already done by line above
+      // This line below was trying to assert on a different mock instance if not careful
+      // For this test, we are checking that Display.findById returns an object whose .save method is called.
+      //   mockDisplayInstance // Removed dangling variable
+      // ); // Removed dangling parenthesis
 
       await expect(
         addWidget(mockReq as Request, mockRes as Response, mockWidgetData)
@@ -90,7 +95,7 @@ describe("widget_helper", () => {
       const mockDisplayInstance: MockDisplayInstance = {
         _id: "display123",
         widgets: [],
-        save: jest.fn().mockResolvedValue(null), // Simulate failed save
+        save: jest.fn().mockResolvedValue(null), // Simulate failed save with a Jest mock
       };
       (Display.findById as jest.Mock).mockResolvedValue(mockDisplayInstance);
 
@@ -124,7 +129,7 @@ describe("widget_helper", () => {
       const mockDisplayInstance: MockDisplayInstance = {
         _id: "display123",
         widgets: [],
-        save: jest.fn().mockRejectedValue(new Error("DB save error")),
+        save: jest.fn().mockRejectedValue(new Error("DB save error")), // Jest mock
       };
       (Display.findById as jest.Mock).mockResolvedValue(mockDisplayInstance);
 
@@ -175,14 +180,14 @@ describe("widget_helper", () => {
       mockDisplayInstance = {
         _id: "display123",
         widgets: [mockWidgetId, "widget456"],
-        save: jest.fn(), // Initialize save as a mock function
+        save: jest.fn(), // Initialize save as a Jest mock function
       };
       // Now that mockDisplayInstance is defined, set its resolved value
       mockDisplayInstance.save.mockResolvedValue(mockDisplayInstance);
       (Display.findById as jest.Mock).mockResolvedValue(mockDisplayInstance);
-      (mockDisplayInstance.save as jest.Mock).mockResolvedValue(
-        mockDisplayInstance
-      );
+      // (mockDisplayInstance.save as jest.Mock).mockResolvedValue(mockDisplayInstance); // Already done
+      //   mockDisplayInstance // Removed dangling variable
+      // ); // Removed dangling parenthesis
 
       await expect(
         deleteWidget(mockReq as Request, mockRes as Response, mockWidgetData)
@@ -236,8 +241,7 @@ describe("widget_helper", () => {
       const mockDisplayInstance: MockDisplayInstance = {
         _id: "display123",
         widgets: ["widget123"],
-        save: jest
-          .fn()
+        save: jest.fn() // Jest mock
           .mockRejectedValue(new Error("DB save error for delete")),
       };
       (Display.findById as jest.Mock).mockResolvedValue(mockDisplayInstance);
