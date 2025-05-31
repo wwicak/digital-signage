@@ -218,7 +218,7 @@ export default function LayoutAdminPage() {
             <div key={widget._id}>
               <EditableWidget
                 id={widget._id}
-                type={widget.type as string}
+                type={widget.type as WidgetType}
                 onDelete={() => handleDeleteWidget(widget._id)}
                 layout={context.state.layout || 'compact'}
               />

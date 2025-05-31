@@ -152,7 +152,7 @@ class SlideList extends Component<ISlideListProps, ISlideListState> {
     getSlides(slideshowId)
       .then(slides => {
         this.setState({
-          slides: slides.map((slide, index) => ({...slide, order: slide.position ?? index })) as ExtendedSlideData[],
+          slides: slides.map((slide, index) => ({...slide, order: index })) as ExtendedSlideData[],
         });
       })
       .catch(error => {

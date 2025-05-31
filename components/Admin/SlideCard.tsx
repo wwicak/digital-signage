@@ -24,6 +24,9 @@ export const SlideCardPropsSchema = z.object({
 // Derive TypeScript type from Zod schema
 export type ISlideCardProps = z.infer<typeof SlideCardPropsSchema>;
 
+// Export ExtendedSlideData type for use in SlideList
+export type ExtendedSlideData = z.infer<typeof SlideCardValueSchema>;
+
 const SlideCard: React.FC<ISlideCardProps> = ({ value, refresh = () => {} }) => {
   const [loading, setLoading] = useState(false);
   const dialogRef = useRef<SlideEditDialog>(null);

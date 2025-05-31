@@ -76,7 +76,7 @@ class ImageOptions extends Component<IImageOptionsProps, IImageOptionsState> {
       if (value instanceof File) { // Ensure 'value' is a File object
         try {
           const resp = await standaloneUpload(value); // Assuming standaloneUpload returns { data: { url: string } }
-          finalValue = resp.data.url;
+          finalValue = resp.url;
         } catch (error) {
           console.error("Image upload failed:", error);
           // Optionally, set an error state or provide user feedback
