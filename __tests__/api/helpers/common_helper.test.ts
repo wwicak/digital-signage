@@ -93,17 +93,31 @@ describe('Common Helper Functions', () => {
     // Removed local beforeEach for `res` as it's handled by the parent.
 
     it('should find a document by ID and send it', async () => {
-      const model = mockGeneralModel();
-      const query = mockQueryChain(testData);
-      model.findById.mockReturnValue(query);
+
+      const docId = new mongoose.Types.ObjectId().toString(); // Ensure docId is defined for this test
+      const mockDoc = { _id: docId, name: 'Test Doc' };
+      model = mockModel('MockedItem'); // model is already defined in beforeEach, this re-initializes.
+
+      // Get the query object that model.findById() will return by default from mockQueryChain
+      // model.findById is already a jest.fn() that returns a mockQueryChain object.
+      // We need to configure the 'exec' and 'populate' on the object *that will be returned*.
+
+      const mockQueryReturnedByFindById = mockQueryChain(mockDoc); // This creates a fresh query chain object
+      // We need model.findById to return this specific object so we can spy on its methods.
+      model.findById.mockReturnValue(mockQueryReturnedByFindById);
+
+      // Now spy on the methods of the *specific object* that will be returned and used.
+      const populateSpy = jest.spyOn(mockQueryReturnedByFindById, 'populate').mockReturnThis();
+      const execSpy = jest.spyOn(mockQueryReturnedByFindById, 'exec').mockResolvedValue(mockDoc); // exec is already a mock, spyOn wraps it.
 
       // Use the res from the beforeEach in the parent describe
       await findByIdAndSend(model, testId, res);
 
-      expect(model.findById).toHaveBeenCalledWith(testId);
-      expect(query.populate).not.toHaveBeenCalled();
-      expect(query.exec).toHaveBeenCalled();
-      expect(res.json).toHaveBeenCalledWith(testData);
+      expect(model.findById).toHaveBeenCalledWith(docId);
+      expect(populateSpy).toHaveBeenCalledWith('someField');
+      expect(execSpy).toHaveBeenCalled();
+      expect(res.json).toHaveBeenCalledWith(mockDoc);
+      expect(res.status).not.toHaveBeenCalled();
     });
 
     it('should find a document by ID, populate a field, and send it', async () => {
