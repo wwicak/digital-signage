@@ -15,6 +15,8 @@ export interface IDisplay extends Document {
     color?: string;
     elements: string[]; // e.g., ['clock', 'weather', 'logo']
   };
+  onlineStatus?: boolean;
+  clientCount?: number;
 }
 
 const DisplaySchema = new Schema<IDisplay>(
@@ -87,6 +89,8 @@ export const DisplaySchemaZod = z.object({
   last_update: z.date().optional(),   // Defaulted by Mongoose timestamps
   layout: z.string().default('spaced'),
   statusBar: StatusBarSchemaZod.default({ enabled: true, elements: [] }), // Provide default for the object itself
+  onlineStatus: z.boolean().optional(),
+  clientCount: z.number().optional(),
   __v: z.number().optional(),
 });
 

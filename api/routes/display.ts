@@ -19,7 +19,7 @@ import {
   deleteWidgetsForDisplay 
 } from '../helpers/display_helper';
 import { sendSseEvent } from '../helpers/common_helper';
-import { addClient, removeClient, sendEventToDisplay } from '../sse_manager';
+import { addClient, removeClient, sendEventToDisplay, sseClients } from '../sse_manager';
 
 
 const router: Router = express.Router();
@@ -63,8 +63,23 @@ router.get('/', ensureAuthenticated, (req: Request, res: Response) => {
     res.status(400).json({ message: 'User information not found.' });
     return;
   }
-  // findAllAndSend will handle the response
-  findAllAndSend(Display, res, 'widgets', { creator_id: user._id });
+  try {
+    const displays = await Display.find({ creator_id: user._id }).populate('widgets').lean();
+    const displaysWithStatus = displays.map(display => {
+      // Ensure display._id is correctly accessed; .lean() should provide it.
+      const displayId = display._id.toString();
+      const clientCount = sseClients[displayId]?.length || 0;
+      return {
+        ...display,
+        clientCount,
+        onlineStatus: clientCount > 0,
+      };
+    });
+    res.json(displaysWithStatus);
+  } catch (error: any) {
+    console.error('Error fetching displays:', error);
+    res.status(500).json({ message: 'Error fetching displays', error: error.message });
+  }
 });
 
 // GET a specific display by ID

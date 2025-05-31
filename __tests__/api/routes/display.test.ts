@@ -16,7 +16,14 @@ jest.mock('../../../api/models/User');
 jest.mock('passport');
 jest.mock('../../../api/helpers/common_helper');
 jest.mock('../../../api/helpers/display_helper');
-jest.mock('../../../api/sse_manager');
+jest.mock('../../../api/sse_manager', () => ({
+  ...jest.requireActual('../../../api/sse_manager'), // Import and retain default behavior for other exports
+  sseClients: {}, // Mock sseClients specifically
+  // Mock other specific exports if needed, otherwise they default to jest.fn() due to the top-level mock
+  addClient: jest.fn(),
+  removeClient: jest.fn(),
+  sendEventToDisplay: jest.fn(),
+}));
 
 const mockUser = { _id: 'testUserId', name: 'Test User', email: 'test@example.com', role: 'user' } as IUser;
 
@@ -34,6 +41,7 @@ const validObjectIdString = () => new mongoose.Types.ObjectId().toString();
 
 describe('Display API Routes', () => {
   let app: Express;
+  let sseManagerModule: any; // To hold the imported sse_manager for manipulating sseClients
 
   // Spies
   let displayFindSpy: jest.SpyInstance;
@@ -42,17 +50,17 @@ describe('Display API Routes', () => {
   let displayFindByIdAndDeleteSpy: jest.SpyInstance;
 
   // Mocked helpers
-  const mockedFindAllAndSend = commonHelper.findAllAndSend as jest.Mock;
-  const mockedSendSseEvent = commonHelper.sendSseEvent as jest.Mock; // from common_helper based on usage
+  // const mockedFindAllAndSend = commonHelper.findAllAndSend as jest.Mock; // No longer used directly by GET /
+  const mockedSendSseEvent = commonHelper.sendSseEvent as jest.Mock;
   const mockedCreateWidgetsForDisplay = displayHelper.createWidgetsForDisplay as jest.Mock;
   const mockedUpdateWidgetsForDisplay = displayHelper.updateWidgetsForDisplay as jest.Mock;
   const mockedDeleteWidgetsForDisplay = displayHelper.deleteWidgetsForDisplay as jest.Mock;
-  const mockedAddClient = sseManager.addClient as jest.Mock;
-  const mockedRemoveClient = sseManager.removeClient as jest.Mock;
-  const mockedSendEventToDisplay = sseManager.sendEventToDisplay as jest.Mock;
-
+  // sseManager mocks are handled by jest.mock at the top
 
   beforeEach(() => {
+    sseManagerModule = require('../../../api/sse_manager'); // Get the mocked module
+    // Reset sseClients before each test if needed, or set specifically in test cases
+    sseManagerModule.sseClients = {};
     app = express();
     app.use(express.json());
     app.use(session({ secret: 'jest-test-secret', resave: false, saveUninitialized: false }));
@@ -72,17 +80,25 @@ describe('Display API Routes', () => {
     displayFindByIdAndDeleteSpy = jest.spyOn(Display, 'findByIdAndDelete');
 
     // Reset mocks
-    mockedFindAllAndSend.mockReset();
+    // mockedFindAllAndSend.mockReset(); // No longer used directly by GET /
     mockedSendSseEvent.mockReset();
     mockedCreateWidgetsForDisplay.mockReset();
     mockedUpdateWidgetsForDisplay.mockReset();
     mockedDeleteWidgetsForDisplay.mockReset();
-    mockedAddClient.mockReset();
-    mockedRemoveClient.mockReset();
-    mockedSendEventToDisplay.mockReset();
+
+    // Reset sseManager specific function mocks if they were called
+    if (sseManagerModule.addClient.mockReset) sseManagerModule.addClient.mockReset();
+    if (sseManagerModule.removeClient.mockReset) sseManagerModule.removeClient.mockReset();
+    if (sseManagerModule.sendEventToDisplay.mockReset) sseManagerModule.sendEventToDisplay.mockReset();
+
 
     // Default spy implementations
-    displayFindSpy.mockImplementation(() => mockQueryChain([]));
+    // For GET /, Display.find().populate().lean() is used.
+    // We will mock the full chain for GET / tests specifically.
+    displayFindSpy.mockImplementation(() => ({
+      populate: jest.fn().mockReturnThis(),
+      lean: jest.fn().mockResolvedValue([]), // Default to empty array for lean queries
+    }));
     displayFindOneSpy.mockImplementation(() => mockQueryChain(null));
     displayProtoSaveSpy.mockResolvedValue({ _id: 'defaultId' } as any); // Default save
   });
@@ -92,35 +108,92 @@ describe('Display API Routes', () => {
   });
 
   describe('GET /', () => {
-    it('should use findAllAndSend to fetch all displays for the user', async () => {
-      mockedFindAllAndSend.mockImplementation((model, res) => {
-        res.status(200).json([{ name: 'mockDisplay' }]);
-      });
+    // This test is removed as findAllAndSend is no longer directly used by the GET / route.
+    // The functionality is now custom logic within the route handler.
+    // it('should use findAllAndSend to fetch all displays for the user', async () => { ... });
 
-      const response = await request(app).get('/api/v1/displays');
-
-      expect(response.status).toBe(200);
-      expect(response.body).toEqual([{ name: 'mockDisplay' }]);
-      expect(mockedFindAllAndSend).toHaveBeenCalledWith(Display, expect.any(Object), 'widgets', { creator_id: mockUser._id });
-    });
-
-    it('should return 400 if user information is not found', async () => {
-      const tempApp = express();
+    it('should return 400 if user information is not found (original test adapted)', async () => {
+      const tempApp = express(); // Use a temporary app to change auth middleware
       tempApp.use(express.json());
+      // Simulate unauthenticated user
       tempApp.use((req: any, res, next) => {
-        req.user = undefined;
-        req.isAuthenticated = () => true;
+        req.user = undefined; // No user on request
+        req.isAuthenticated = () => false; // Not authenticated
         next();
       });
-      tempApp.use('/api/v1/displays', DisplayRouter);
-      await request(tempApp).get('/api/v1/displays');
-      // findAllAndSend is mocked, so it might not hit the user check if not carefully handled.
-      // The route itself has the user check before calling findAllAndSend.
-      // This test is to ensure that check is hit.
-      // We expect the route to handle it directly.
-      const res = await request(tempApp).get('/api/v1/displays')
-      expect(res.status).toBe(400);
-      expect(res.body.message).toBe('User information not found.');
+      tempApp.use('/api/v1/displays', DisplayRouter); // Mount the original router
+
+      const response = await request(tempApp).get('/api/v1/displays');
+      expect(response.status).toBe(400); // Adjusted to reflect actual route behavior for unauthenticated user
+      expect(response.body.message).toBe('User information not found.');
+    });
+
+    it('should return displays with onlineStatus=false and clientCount=0 when no clients are connected', async () => {
+      const display1Id = new mongoose.Types.ObjectId().toString();
+      const display2Id = new mongoose.Types.ObjectId().toString();
+      const mockDisplays = [
+        { _id: display1Id, name: 'Display 1', creator_id: mockUser._id, widgets: [] },
+        { _id: display2Id, name: 'Display 2', creator_id: mockUser._id, widgets: [] },
+      ];
+
+      displayFindSpy.mockImplementation(() => ({
+        populate: jest.fn().mockReturnThis(),
+        lean: jest.fn().mockResolvedValue(mockDisplays.map(d => ({...d, _id: new mongoose.Types.ObjectId(d._id)}))), // lean returns plain objects
+      }));
+      sseManagerModule.sseClients = {}; // No clients
+
+      const response = await request(app).get('/api/v1/displays');
+      expect(response.status).toBe(200);
+      expect(response.body).toEqual(
+        mockDisplays.map(d => ({
+          ...d,
+          onlineStatus: false,
+          clientCount: 0,
+        }))
+      );
+      expect(displayFindSpy).toHaveBeenCalledWith({ creator_id: mockUser._id });
+    });
+
+    it('should return displays with correct onlineStatus and clientCount based on sseClients', async () => {
+      const display1Id = new mongoose.Types.ObjectId().toString();
+      const display2Id = new mongoose.Types.ObjectId().toString();
+      const display3Id = new mongoose.Types.ObjectId().toString();
+      const mockDisplays = [
+        { _id: display1Id, name: 'Display 1', creator_id: mockUser._id, widgets: [] },
+        { _id: display2Id, name: 'Display 2', creator_id: mockUser._id, widgets: [] },
+        { _id: display3Id, name: 'Display 3', creator_id: mockUser._id, widgets: [] },
+      ];
+
+      displayFindSpy.mockImplementation(() => ({
+        populate: jest.fn().mockReturnThis(),
+        lean: jest.fn().mockResolvedValue(mockDisplays.map(d => ({...d, _id: new mongoose.Types.ObjectId(d._id)}))),
+      }));
+
+      sseManagerModule.sseClients = {
+        [display1Id]: [{}, {}], // 2 clients
+        [display2Id]: [{}],     // 1 client
+        // display3Id has no clients
+      };
+
+      const response = await request(app).get('/api/v1/displays');
+      expect(response.status).toBe(200);
+      expect(response.body).toEqual([
+        { ...mockDisplays[0], onlineStatus: true, clientCount: 2 },
+        { ...mockDisplays[1], onlineStatus: true, clientCount: 1 },
+        { ...mockDisplays[2], onlineStatus: false, clientCount: 0 },
+      ]);
+      expect(displayFindSpy).toHaveBeenCalledWith({ creator_id: mockUser._id });
+    });
+
+    it('should return 500 if database query fails', async () => {
+      displayFindSpy.mockImplementation(() => ({
+        populate: jest.fn().mockReturnThis(),
+        lean: jest.fn().mockRejectedValue(new Error('DB error')),
+      }));
+
+      const response = await request(app).get('/api/v1/displays');
+      expect(response.status).toBe(500);
+      expect(response.body.message).toBe('Error fetching displays');
     });
   });
 

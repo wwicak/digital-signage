@@ -5,17 +5,18 @@ import type { Config } from "@jest/types";
 
 const config: Config.InitialOptions = {
   preset: "ts-jest",
-  testEnvironment: "node", // or 'jsdom' for frontend tests
+  testEnvironment: "jsdom", // or 'jsdom' for frontend tests
   modulePaths: ["<rootDir>"],
   moduleNameMapper: {
     "\\.(css|less|scss|sass)$": "identity-obj-proxy"
   },
-  // ts-jest specific options can go into globals:
-  // globals: {
-  //   'ts-jest': {
-  //     tsconfig: 'tsconfig.jest.json' // if you have a specific tsconfig for jest
-  //   }
-  // }
+  transform: {
+    '^.+\\.(ts|tsx)$': ['ts-jest', {
+      babelConfig: true, // Instruct ts-jest to use the created babel.config.js
+      // tsconfig: 'tsconfig.jest.json', // Optional: if you have a separate tsconfig for jest
+    }],
+  },
+  setupFilesAfterEnv: ['<rootDir>/jest-setup.ts'],
 };
 
 export default config;

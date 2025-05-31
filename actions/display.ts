@@ -31,6 +31,8 @@ export interface IDisplayData {
   creator_id?: string; // Assuming it's part of the display data
   creation_date?: string; // Or Date
   last_update?: string; // Or Date
+  onlineStatus?: boolean;
+  clientCount?: number;
   // Add any other fields that are part of the display object
 }
 

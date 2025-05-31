@@ -15,6 +15,8 @@ const ScreenCardValueSchema = z.object({
   _id: z.string(),
   name: z.string().optional(), // Based on usage: value.name || 'Untitled Display'
   widgets: z.array(z.union([z.string(), z.object({})])).optional(), // Based on usage: Array.isArray(value.widgets)
+  onlineStatus: z.boolean().optional(),
+  clientCount: z.number().optional(),
   // Add other fields from IDisplayData if they were directly used by ScreenCard and need validation.
   // For this component, only _id, name, and widgets structure seem directly accessed.
 });
@@ -75,11 +77,11 @@ const ScreenCard: React.FC<IScreenCardProps> = ({ value, refresh = () => {} }) =
                   <FontAwesomeIcon icon={faChromecast as IconProp} fixedWidth color='#878787' />
                 </div>
                 {/* TODO: Client count is hardcoded, should come from data if available */}
-                <span className='text'>1 client paired</span>
+                <span className='text'>{value.clientCount || 0} client{value.clientCount === 1 ? '' : 's'} paired</span>
               </div>
-              <div className='online'>
+              <div className={value.onlineStatus ? 'online' : 'offline'}>
                 {/* TODO: Online status is hardcoded, should come from data if available */}
-                <span className='text'>online</span>
+                <span className='text'>{value.onlineStatus ? 'online' : 'offline'}</span>
               </div>
             </div>
           </div>
@@ -199,6 +201,18 @@ const ScreenCard: React.FC<IScreenCardProps> = ({ value, refresh = () => {} }) =
                 line-height: 14px; /* Align with text */
                 margin-right: 4px; /* Spacing from text */
                 vertical-align: middle; /* Better alignment */
+              }
+
+              .offline {
+                color: #878787; /* Grey text for offline */
+              }
+              .offline::before {
+                content: '•';
+                color: #878787; /* Grey dot for offline */
+                font-size: 32px;
+                line-height: 14px;
+                margin-right: 4px;
+                vertical-align: middle;
               }
 
               .middle {
