@@ -1,0 +1,81 @@
+{
+  "extends": ["next/core-web-vitals", "plugin:@typescript-eslint/recommended"],
+  "parser": "@typescript-eslint/parser",
+  "plugins": ["@typescript-eslint", "react"],
+  "parserOptions": {
+    "ecmaVersion": "latest",
+    "sourceType": "module",
+    "ecmaFeatures": {
+      "jsx": true
+    },
+    "project": "./tsconfig.json"
+  },
+  "env": {
+    "browser": true,
+    "es6": true,
+    "node": true,
+    "jest": true
+  },
+  "rules": {
+    // Preserve your existing code style preferences
+    "camelcase": ["error", { "properties": "always" }],
+    "no-undef": "warn",
+    "no-extra-semi": "warn",
+    "no-underscore-dangle": "off",
+    "no-console": ["warn", { "allow": ["warn", "error"] }],
+    "no-unused-vars": "off",
+    "@typescript-eslint/no-unused-vars": "warn",
+    "no-trailing-spaces": ["warn", { "skipBlankLines": true }],
+    "no-unreachable": "warn",
+    "no-alert": "off",
+    "react/jsx-uses-react": "warn",
+    "react/jsx-uses-vars": "warn",
+    "quotes": ["error", "single", "avoid-escape"],
+    "jsx-quotes": ["warn", "prefer-single"],
+    "semi": ["error", "never"],
+    "max-len": [
+      "warn",
+      { "code": 120, "ignoreUrls": true, "ignoreStrings": true }
+    ],
+    "multiline-comment-style": "off",
+
+    // Modern TypeScript rules for better performance (relaxed for migration)
+    "@typescript-eslint/no-explicit-any": "warn",
+    "@typescript-eslint/no-empty-function": "warn",
+    "@typescript-eslint/prefer-const": "off",
+
+    // Next.js optimizations
+    "@next/next/no-img-element": "warn",
+    "@next/next/no-html-link-for-pages": "error",
+
+    // Disable some strict rules that might slow down builds
+    "@typescript-eslint/ban-ts-comment": "warn",
+    "@typescript-eslint/no-var-requires": "warn"
+  },
+  "overrides": [
+    {
+      "files": ["*.js", "*.jsx"],
+      "rules": {
+        "@typescript-eslint/no-var-requires": "off"
+      }
+    },
+    {
+      "files": ["__tests__/**/*", "**/*.test.*", "**/*.spec.*"],
+      "env": {
+        "jest": true
+      },
+      "rules": {
+        "@typescript-eslint/no-explicit-any": "off",
+        "max-len": "off"
+      }
+    }
+  ],
+  "ignorePatterns": [
+    "node_modules/",
+    ".next/",
+    "dist/",
+    "build/",
+    "uploads/",
+    "*.config.js"
+  ]
+}

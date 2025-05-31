@@ -1,7 +1,7 @@
-import Link from 'next/link';
-import React, { useState, useEffect } from 'react';
-import Router, { NextRouter, withRouter } from 'next/router';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import Link from 'next/link'
+import React, { useState, useEffect } from 'react'
+import Router, { NextRouter, withRouter } from 'next/router'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import {
   faKey,
   faTv,
@@ -11,12 +11,12 @@ import {
   faSignOutAlt,
   faCaretDown, // Added missing caret-down
   IconDefinition,
-} from '@fortawesome/free-solid-svg-icons';
-import DropdownButton, { IDropdownChoice } from '../DropdownButton'; // Already .tsx
+} from '@fortawesome/free-solid-svg-icons'
+import DropdownButton, { IDropdownChoice } from '../DropdownButton' // Already .tsx
 
-import { logout } from '../../helpers/auth'; // Assuming auth.js will be typed or allowJs
-import { useDisplayContext } from '../../contexts/DisplayContext';
-import { getDisplays, IDisplayData } from '../../actions/display'; // Already .tsx
+import { logout } from '../../helpers/auth' // Assuming auth.js will be typed or allowJs
+import { useDisplayContext } from '../../contexts/DisplayContext'
+import { getDisplays, IDisplayData } from '../../actions/display' // Already .tsx
 
 // Simplified display data for local state
 interface ISimpleDisplay {
@@ -42,30 +42,30 @@ export interface ISidebarProps extends WithRouterProps {
 }
 
 const Sidebar: React.FC<ISidebarProps> = ({ router, loggedIn, displayId }) => {
-    const [displays, setDisplays] = useState<ISimpleDisplay[]>([]);
-    const context = useDisplayContext();
+    const [displays, setDisplays] = useState<ISimpleDisplay[]>([])
+    const context = useDisplayContext()
   
     useEffect(() => {
       const fetchDisplays = async () => {
         // host determination for client-side only
-        const host = typeof window !== 'undefined' ? window.location.origin : '';
+        const host = typeof window !== 'undefined' ? window.location.origin : ''
         try {
-          const displaysData: IDisplayData[] = await getDisplays(host);
-          setDisplays(displaysData.map(d => ({ _id: d._id, name: d.name })));
+          const displaysData: IDisplayData[] = await getDisplays(host)
+          setDisplays(displaysData.map(d => ({ _id: d._id, name: d.name })))
         } catch (error) {
-          console.error("Failed to fetch displays for sidebar:", error);
-          setDisplays([]);
+          console.error('Failed to fetch displays for sidebar:', error)
+          setDisplays([])
         }
-      };
+      }
   
-      fetchDisplays();
-    }, []);
+      fetchDisplays()
+    }, [])
   
     const navigateToAdmin = (id: string): void => {
       // This method is called by DropdownButton with the key of the selected choice (which is display._id)
-      Router.push(`/layout?display=${id}`);
-      context.setId(id); // Update the context
-    };
+      Router.push(`/layout?display=${id}`)
+      context.setId(id) // Update the context
+    }
   
     const handleLogout = (): void => {
       logout()
@@ -73,12 +73,12 @@ const Sidebar: React.FC<ISidebarProps> = ({ router, loggedIn, displayId }) => {
           // Router.push('/login'); // Or wherever logout should redirect
         })
         .catch(error => {
-          console.error("Logout failed:", error);
-        });
-    };
+          console.error('Logout failed:', error)
+        })
+    }
   
     // Use displayId prop for constructing menu paths if available, otherwise fallback to context or first display
-    const currentDisplayId = displayId || context.state.id || (displays.length > 0 ? displays[0]._id : '');
+    const currentDisplayId = displayId || context.state.id || (displays.length > 0 ? displays[0]._id : '')
 
   const menu: IMenuItem[] = loggedIn
     ? [
@@ -114,12 +114,12 @@ const Sidebar: React.FC<ISidebarProps> = ({ router, loggedIn, displayId }) => {
           path: `/login?display=${currentDisplayId}`,
           icon: faKey,
         },
-      ];
+      ]
 
   const dropdownChoices: IDropdownChoice[] = displays.map(d => ({
     key: d._id,
     name: d.name,
-  }));
+  }))
 
   return (
     <div className='sidebar'>
@@ -160,7 +160,7 @@ const Sidebar: React.FC<ISidebarProps> = ({ router, loggedIn, displayId }) => {
         ))}
       </ul>
       {loggedIn && (
-        <div className='logout' onClick={handleLogout} role="button" tabIndex={0} onKeyPress={(e) => {if(e.key === 'Enter' || e.key === ' ') handleLogout()}}>
+        <div className='logout' onClick={handleLogout} role='button' tabIndex={0} onKeyPress={(e) => {if(e.key === 'Enter' || e.key === ' ') handleLogout()}}>
           {/* Anchor tag is not strictly necessary if onClick is on div, but kept for style consistency */}
           <a>
             <FontAwesomeIcon icon={faSignOutAlt} fixedWidth />
@@ -306,7 +306,7 @@ const Sidebar: React.FC<ISidebarProps> = ({ router, loggedIn, displayId }) => {
         `}
       </style>
     </div>
-  );
-};
+  )
+}
 
-export default withRouter(Sidebar);
+export default withRouter(Sidebar)

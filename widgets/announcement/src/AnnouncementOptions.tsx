@@ -1,16 +1,18 @@
-import React, { Component } from 'react';
-import { Form, Input, InlineInputGroup, IInputProps } from '../../../components/Form';
-import { IWidgetOptionsEditorProps } from '../../../components/Admin/WidgetEditDialog'; // This is z.infer<typeof WidgetOptionsEditorPropsSchema>
-import * as z from 'zod';
+import React, { Component } from 'react'
+import { Form, Input, InlineInputGroup, IInputProps } from '../../../components/Form'
+import { IWidgetOptionsEditorProps } from '../../../components/Admin/WidgetEditDialog' // This is z.infer<typeof WidgetOptionsEditorPropsSchema>
+import * as z from 'zod'
 
-import AnnouncementContent, { AnnouncementWidgetContentDataSchema, IAnnouncementWidgetData } from './AnnouncementContent'; // IAnnouncementWidgetData is z.infer<typeof AnnouncementWidgetContentDataSchema>
+import AnnouncementContent, { AnnouncementWidgetContentDataSchema, IAnnouncementWidgetData } from './AnnouncementContent' // IAnnouncementWidgetData is z.infer<typeof AnnouncementWidgetContentDataSchema>
 
-// Zod schema for AnnouncementOptions props
-// This needs to align with IWidgetOptionsEditorProps but typed for AnnouncementWidgetContentDataSchema
+/*
+ * Zod schema for AnnouncementOptions props
+ * This needs to align with IWidgetOptionsEditorProps but typed for AnnouncementWidgetContentDataSchema
+ */
 export const AnnouncementOptionsPropsSchema = z.object({
   data: AnnouncementWidgetContentDataSchema.optional(),
   onChange: z.function().args(AnnouncementWidgetContentDataSchema).returns(z.void()),
-});
+})
 export type IAnnouncementOptionsProps = z.infer<typeof AnnouncementOptionsPropsSchema>;
 
 // State for AnnouncementOptions will also use IAnnouncementWidgetData (inferred from AnnouncementWidgetContentDataSchema)
@@ -18,7 +20,7 @@ type IAnnouncementOptionsState = IAnnouncementWidgetData; // This is already an 
 
 class AnnouncementOptions extends Component<IAnnouncementOptionsProps, IAnnouncementOptionsState> {
   constructor(props: IAnnouncementOptionsProps) {
-    super(props);
+    super(props)
     // Initialize state from props.data, providing defaults if not present
     const {
       text = '',
@@ -27,7 +29,7 @@ class AnnouncementOptions extends Component<IAnnouncementOptionsProps, IAnnounce
       titleTextColor = '#fff0f0',
       accentColor = '#EDC951',
       title = 'Announcement', // Default title if not in props.data
-    } = props.data || {};
+    } = props.data || {}
 
     this.state = {
       text,
@@ -36,16 +38,18 @@ class AnnouncementOptions extends Component<IAnnouncementOptionsProps, IAnnounce
       titleTextColor,
       accentColor,
       title,
-    };
+    }
   }
 
   // If props.data can change from parent after initial mount, update state here
   componentDidUpdate(prevProps: IAnnouncementOptionsProps) {
     if (this.props.data !== prevProps.data) {
-      // This might lead to an infinite loop if onChange also updates props.data immediately.
-      // A common pattern is to only use props.data for initial state or use a key prop on this component.
-      // For now, keeping simple update. Consider a deep comparison if props.data is complex.
-      this.setState({ ...this.props.data });
+      /*
+       * This might lead to an infinite loop if onChange also updates props.data immediately.
+       * A common pattern is to only use props.data for initial state or use a key prop on this component.
+       * For now, keeping simple update. Consider a deep comparison if props.data is complex.
+       */
+      this.setState({ ...this.props.data })
     }
   }
 
@@ -56,11 +60,11 @@ class AnnouncementOptions extends Component<IAnnouncementOptionsProps, IAnnounce
       () => {
         // Call props.onChange with the full current state
         if (this.props.onChange) {
-          this.props.onChange(this.state);
+          this.props.onChange(this.state)
         }
       }
-    );
-  };
+    )
+  }
 
   render() {
     // All state fields are optional in IAnnouncementWidgetData, provide fallbacks for rendering
@@ -71,12 +75,12 @@ class AnnouncementOptions extends Component<IAnnouncementOptionsProps, IAnnounce
       titleTextColor = '#fff0f0',
       accentColor = '#EDC951',
       title = 'Announcement', // Used for preview, not directly an input here
-    } = this.state;
+    } = this.state
 
     // Data for the preview
     const previewData: IAnnouncementWidgetData = {
         text, color, textColor, titleTextColor, accentColor, title
-    };
+    }
 
     return (
       <div className={'options-container'}> {/* Renamed class */}
@@ -177,8 +181,8 @@ class AnnouncementOptions extends Component<IAnnouncementOptionsProps, IAnnounce
           `}
         </style>
       </div>
-    );
+    )
   }
 }
 
-export default AnnouncementOptions;
+export default AnnouncementOptions

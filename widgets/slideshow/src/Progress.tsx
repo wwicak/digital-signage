@@ -3,7 +3,7 @@
  * is the currently displayed slide.
  */
 
-import React, { Component } from 'react';
+import React, { Component } from 'react'
 
 interface Slide {
   // Define other properties of a slide object if they exist and are used
@@ -22,7 +22,7 @@ interface ProgressState {} // No state used
 
 class Progress extends Component<ProgressProps, ProgressState> {
   render() {
-    const { current, defaultDuration, orderedSlides, ready } = this.props;
+    const { current, defaultDuration, orderedSlides, ready } = this.props
     return (
       <div className='progress-bar'>
         {orderedSlides.map((slide, i) => (
@@ -69,8 +69,8 @@ class Progress extends Component<ProgressProps, ProgressState> {
           `}
         </style>
       </div>
-    );
+    )
   }
 }
 
-export default Progress;
+export default Progress

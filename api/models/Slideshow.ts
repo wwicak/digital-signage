@@ -1,6 +1,6 @@
-import mongoose, { Document, Model, Schema } from 'mongoose';
-import * as z from 'zod';
-import { ISlide } from './Slide'; // Assuming Slide.ts exists and exports ISlide
+import mongoose, { Document, Model, Schema } from 'mongoose'
+import * as z from 'zod'
+import { ISlide, SlideSchemaZod as ImportedSlideSchemaZod } from './Slide' // Import Zod schema for ISlide
 
 export interface ISlideshow extends Document {
   name: string;
@@ -52,32 +52,29 @@ const SlideshowSchema = new Schema<ISlideshow>(
   {
     timestamps: { createdAt: 'creation_date', updatedAt: 'last_update' }
   }
-);
+)
 
 // Pre-save middleware to update `last_update` field
 SlideshowSchema.pre('save', function(next) {
   if (this.isModified()) {
-    this.last_update = new Date();
+    this.last_update = new Date()
   }
-  next();
-});
+  next()
+})
 
-const SlideshowModel: Model<ISlideshow> = mongoose.model<ISlideshow>('Slideshow', SlideshowSchema);
+const SlideshowModel: Model<ISlideshow> = mongoose.model<ISlideshow>('Slideshow', SlideshowSchema)
 
 // Zod schema for ISlideshow
 export const SlideshowSchemaZod = z.object({
   _id: z.instanceof(mongoose.Types.ObjectId).optional(),
   name: z.string(),
   description: z.string().optional(),
-  // For slides, allowing an array of ObjectIds or populated slide objects (hence z.any() for populated)
-  // A more specific Zod schema for populated slides could be used if ISlide's Zod schema is available
-  // and circular dependencies are handled.
-  slides: z.array(z.union([z.instanceof(mongoose.Types.ObjectId), z.any()])).default([]),
+  slides: z.array(z.union([z.instanceof(mongoose.Types.ObjectId), ImportedSlideSchemaZod])).default([]),
   creator_id: z.instanceof(mongoose.Types.ObjectId),
   creation_date: z.date().optional(), // Defaulted by Mongoose
   last_update: z.date().optional(),   // Defaulted by Mongoose
   is_enabled: z.boolean().default(true),
   __v: z.number().optional(),
-});
+})
 
-export default SlideshowModel;
+export default SlideshowModel

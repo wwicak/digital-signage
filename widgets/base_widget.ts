@@ -1,7 +1,7 @@
-import React, { ComponentType } from "react";
-import EmptyWidget from "../components/Widgets/EmptyWidget"; // Assuming .js or .tsx
-import EmptyWidgetOptions from "../components/Widgets/EmptyWidgetOptions"; // Assuming .js or .tsx
-import { IconProp } from "@fortawesome/fontawesome-svg-core"; // For the 'icon' field
+import React, { ComponentType } from 'react'
+import EmptyWidget from '../components/Widgets/EmptyWidget' // Assuming .js or .tsx
+import EmptyWidgetOptions from '../components/Widgets/EmptyWidgetOptions' // Assuming .js or .tsx
+import { IconProp } from '@fortawesome/fontawesome-svg-core' // For the 'icon' field
 
 // Generic widget content props interface
 export interface IWidgetContentProps<T = Record<string, any>> {
@@ -41,8 +41,10 @@ export interface IWidgetDefinitionArgs<TData = Record<string, any>> {
   [key: string]: any; // Allow other properties specific to the widget definition
 }
 
-// Interface for the BaseWidget instance structure
-// This defines what properties an instance of BaseWidget (or its derivatives) will have.
+/*
+ * Interface for the BaseWidget instance structure
+ * This defines what properties an instance of BaseWidget (or its derivatives) will have.
+ */
 export interface IBaseWidget<TData = Record<string, any>> {
   name: string;
   type: string;
@@ -55,19 +57,19 @@ export interface IBaseWidget<TData = Record<string, any>> {
 }
 
 const REQUIRED_DEF_FIELDS: Array<
-  keyof Pick<IWidgetDefinitionArgs, "name" | "version" | "icon" | "type">
-> = ["name", "type", "version", "icon"];
+  keyof Pick<IWidgetDefinitionArgs, 'name' | 'version' | 'icon' | 'type'>
+> = ['name', 'type', 'version', 'icon']
 
 class BaseWidget implements IBaseWidget {
   // Declare properties that will be set by the constructor from definition
-  public name: string;
-  public type: string;
-  public version: string;
-  public icon: IconProp;
-  public defaultData?: Record<string, any>;
+  public name: string
+  public type: string
+  public version: string
+  public icon: IconProp
+  public defaultData?: Record<string, any>
 
   // Store the components passed in definition, or use defaults
-  private _WidgetComponent: ComponentType<IWidgetContentProps<any>>;
+  private _WidgetComponent: ComponentType<IWidgetContentProps<any>>
   private _OptionsComponent: ComponentType<IWidgetOptionsEditorProps<any>>;
 
   // Index signature to allow dynamic properties
@@ -78,40 +80,42 @@ class BaseWidget implements IBaseWidget {
       if (!(reqField in definition)) {
         throw new Error(
           `Field '${reqField}' is a required property for new widget definitions.`
-        );
+        )
       }
     }
 
-    // Assign all definition fields to this instance
-    // Object.assign(this, definition); // This is less type-safe
+    /*
+     * Assign all definition fields to this instance
+     * Object.assign(this, definition); // This is less type-safe
+     */
 
-    this.name = definition.name;
-    this.type = definition.type;
-    this.version = definition.version;
-    this.icon = definition.icon;
-    this.defaultData = definition.defaultData;
+    this.name = definition.name
+    this.type = definition.type
+    this.version = definition.version
+    this.icon = definition.icon
+    this.defaultData = definition.defaultData
 
     // Assign other fields from definition dynamically
     for (const defField of Object.keys(definition)) {
       if (!(this as any).hasOwnProperty(defField)) {
         // Avoid re-assigning already declared properties
-        (this as any)[defField] = definition[defField];
+        (this as any)[defField] = definition[defField]
       }
     }
 
-    this._WidgetComponent = definition.WidgetComponent || EmptyWidget;
-    this._OptionsComponent = definition.OptionsComponent || EmptyWidgetOptions;
+    this._WidgetComponent = definition.WidgetComponent || EmptyWidget
+    this._OptionsComponent = definition.OptionsComponent || EmptyWidgetOptions
   }
 
   // Getter for the React component that renders the widget
   public get Widget(): ComponentType<IWidgetContentProps<any>> {
-    return this._WidgetComponent;
+    return this._WidgetComponent
   }
 
   // Getter for the React component that renders the widget's options/settings form
   public get Options(): ComponentType<IWidgetOptionsEditorProps<any>> {
-    return this._OptionsComponent;
+    return this._OptionsComponent
   }
 }
 
-export default BaseWidget;
+export default BaseWidget

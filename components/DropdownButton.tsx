@@ -1,14 +1,14 @@
-'use client';
+'use client'
 
-import React, { Component, ReactNode, CSSProperties } from 'react';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { library, config, IconProp, IconPrefix } from '@fortawesome/fontawesome-svg-core';
-import { fas } from '@fortawesome/free-solid-svg-icons';
-import { fab } from '@fortawesome/free-brands-svg-icons';
+import React, { Component, ReactNode, CSSProperties } from 'react'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { library, config, IconProp, IconPrefix } from '@fortawesome/fontawesome-svg-core'
+import { fas } from '@fortawesome/free-solid-svg-icons'
+import { fab } from '@fortawesome/free-brands-svg-icons'
 
-config.autoAddCss = false;
-library.add(fas);
-library.add(fab);
+config.autoAddCss = false
+library.add(fas)
+library.add(fab)
 
 export interface IDropdownChoice {
   key: string; // Used as the value for onSelect
@@ -33,53 +33,55 @@ interface IDropdownButtonState {
 }
 
 class DropdownButton extends Component<IDropdownButtonProps, IDropdownButtonState> {
-  private dropdownMenu: HTMLDivElement | null = null;
+  private dropdownMenu: HTMLDivElement | null = null
 
   constructor(props: IDropdownButtonProps) {
-    super(props);
+    super(props)
 
     this.state = {
       showMenu: false,
-    };
+    }
 
-    // Binding in constructor is generally preferred over arrow functions for class methods
-    // if not using experimental class properties syntax.
-    this.showMenu = this.showMenu.bind(this);
-    this.closeMenu = this.closeMenu.bind(this);
+    /*
+     * Binding in constructor is generally preferred over arrow functions for class methods
+     * if not using experimental class properties syntax.
+     */
+    this.showMenu = this.showMenu.bind(this)
+    this.closeMenu = this.closeMenu.bind(this)
   }
 
   showMenu(event: React.MouseEvent | React.KeyboardEvent): void {
-    event.preventDefault();
-    event.stopPropagation(); // Prevent event from immediately triggering closeMenu if it bubbles to document
+    event.preventDefault()
+    event.stopPropagation() // Prevent event from immediately triggering closeMenu if it bubbles to document
 
     this.setState({ showMenu: true }, () => {
-      document.addEventListener('click', this.closeMenu);
-      document.addEventListener('touchend', this.closeMenu); // For touch devices
-    });
+      document.addEventListener('click', this.closeMenu)
+      document.addEventListener('touchend', this.closeMenu) // For touch devices
+    })
   }
 
   closeMenu(event?: MouseEvent | TouchEvent, force: boolean = false): void {
     // Check if the click is outside the dropdown menu
     if (force || (this.dropdownMenu && event && !this.dropdownMenu.contains(event.target as Node))) {
       this.setState({ showMenu: false }, () => {
-        document.removeEventListener('click', this.closeMenu);
-        document.removeEventListener('touchend', this.closeMenu);
-      });
+        document.removeEventListener('click', this.closeMenu)
+        document.removeEventListener('touchend', this.closeMenu)
+      })
     }
   }
 
   componentWillUnmount() {
     // Clean up event listeners when the component is unmounted
-    document.removeEventListener('click', this.closeMenu);
-    document.removeEventListener('touchend', this.closeMenu);
+    document.removeEventListener('click', this.closeMenu)
+    document.removeEventListener('touchend', this.closeMenu)
   }
 
   handleChoiceClick = (key: string): void => {
-    this.closeMenu(undefined, true /* force close */);
+    this.closeMenu(undefined, true /* force close */)
     if (this.props.onSelect) {
-      this.props.onSelect(key);
+      this.props.onSelect(key)
     }
-  };
+  }
 
   render() {
     const {
@@ -89,16 +91,16 @@ class DropdownButton extends Component<IDropdownButtonProps, IDropdownButtonStat
       style = {},
       menuStyle = {},
       children,
-    } = this.props;
+    } = this.props
 
     return (
       <div className={'dropdownContainer'}>
         {children ? (
-          <div style={style} onClick={this.showMenu} role="button" tabIndex={0} onKeyPress={(e) => { if (e.key === 'Enter' || e.key === ' ') this.showMenu(e); }}>
+          <div style={style} onClick={this.showMenu} role='button' tabIndex={0} onKeyPress={(e) => { if (e.key === 'Enter' || e.key === ' ') this.showMenu(e) }}>
             {children}
           </div>
         ) : (
-          <button type="button" className={'btn'} onClick={this.showMenu} style={style}>
+          <button type='button' className={'btn'} onClick={this.showMenu} style={style}>
             {icon && <div className={'btnIcon'}><FontAwesomeIcon icon={icon} /></div>}
             {text}
           </button>
@@ -108,13 +110,13 @@ class DropdownButton extends Component<IDropdownButtonProps, IDropdownButtonStat
           <div
             className='menu'
             ref={element => {
-              this.dropdownMenu = element;
+              this.dropdownMenu = element
             }}
             style={menuStyle}
           >
             {choices.map(choice => (
               <button
-                type="button"
+                type='button'
                 key={choice.key}
                 className={'choice'}
                 onClick={() => this.handleChoiceClick(choice.key)}
@@ -198,8 +200,8 @@ class DropdownButton extends Component<IDropdownButtonProps, IDropdownButtonStat
           `}
         </style>
       </div>
-    );
+    )
   }
 }
 
-export default DropdownButton;
+export default DropdownButton

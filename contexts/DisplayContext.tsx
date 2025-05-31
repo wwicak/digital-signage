@@ -1,8 +1,8 @@
-import React, { createContext, useContext, useReducer, useCallback } from 'react';
-import _ from 'lodash';
-import shortid from 'shortid';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { getDisplay, updateDisplay, IDisplayData } from '../actions/display';
+import React, { createContext, useContext, useReducer, useCallback } from 'react'
+import _ from 'lodash'
+import shortid from 'shortid'
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { getDisplay, updateDisplay, IDisplayData } from '../actions/display'
 
 // Types
 interface IWidget {
@@ -25,7 +25,7 @@ interface IStatusBar {
 interface DisplayState {
   id: string | null;
   name: string | null;
-  layout: "spaced" | "compact" | null;
+  layout: 'spaced' | 'compact' | null;
   statusBar: IStatusBar;
   widgets: IWidget[];
 }
@@ -34,7 +34,7 @@ type DisplayAction =
   | { type: 'SET_DISPLAY_DATA'; payload: IDisplayData }
   | { type: 'SET_ID'; payload: string | null }
   | { type: 'SET_NAME'; payload: string }
-  | { type: 'SET_LAYOUT'; payload: "spaced" | "compact" }
+  | { type: 'SET_LAYOUT'; payload: 'spaced' | 'compact' }
   | { type: 'SET_STATUS_BAR'; payload: IStatusBar }
   | { type: 'SET_WIDGETS'; payload: IWidget[] }
   | { type: 'ADD_STATUS_BAR_ITEM'; payload: string }
@@ -47,7 +47,7 @@ const initialState: DisplayState = {
   layout: null,
   statusBar: { enabled: false, elements: [] },
   widgets: [],
-};
+}
 
 function displayReducer(state: DisplayState, action: DisplayAction): DisplayState {
   switch (action.type) {
@@ -59,41 +59,41 @@ function displayReducer(state: DisplayState, action: DisplayAction): DisplayStat
         layout: action.payload.layout || null,
         statusBar: action.payload.statusBar || { enabled: false, elements: [] },
         widgets: action.payload.widgets || [],
-      };
+      }
     case 'SET_ID':
-      return { ...state, id: action.payload };
+      return { ...state, id: action.payload }
     case 'SET_NAME':
-      return { ...state, name: action.payload };
+      return { ...state, name: action.payload }
     case 'SET_LAYOUT':
-      return { ...state, layout: action.payload };
+      return { ...state, layout: action.payload }
     case 'SET_STATUS_BAR':
-      return { ...state, statusBar: action.payload };
+      return { ...state, statusBar: action.payload }
     case 'SET_WIDGETS':
-      return { ...state, widgets: action.payload };
+      return { ...state, widgets: action.payload }
     case 'ADD_STATUS_BAR_ITEM':
-      const newElements = [...(state.statusBar.elements || []), action.payload + "_" + shortid.generate()];
+      const newElements = [...(state.statusBar.elements || []), action.payload + '_' + shortid.generate()]
       return {
         ...state,
         statusBar: { ...state.statusBar, elements: newElements },
-      };
+      }
     case 'REMOVE_STATUS_BAR_ITEM':
-      const elements = state.statusBar.elements || [];
-      const filteredElements = [...elements.slice(0, action.payload), ...elements.slice(action.payload + 1)];
+      const elements = state.statusBar.elements || []
+      const filteredElements = [...elements.slice(0, action.payload), ...elements.slice(action.payload + 1)]
       return {
         ...state,
         statusBar: { ...state.statusBar, elements: filteredElements },
-      };
+      }
     case 'REORDER_STATUS_BAR_ITEMS':
-      const { startIndex, endIndex } = action.payload;
-      const reorderElements = Array.from(state.statusBar.elements || []);
-      const [removed] = reorderElements.splice(startIndex, 1);
-      reorderElements.splice(endIndex, 0, removed);
+      const { startIndex, endIndex } = action.payload
+      const reorderElements = Array.from(state.statusBar.elements || [])
+      const [removed] = reorderElements.splice(startIndex, 1)
+      reorderElements.splice(endIndex, 0, removed)
       return {
         ...state,
         statusBar: { ...state.statusBar, elements: reorderElements },
-      };
+      }
     default:
-      return state;
+      return state
   }
 }
 
@@ -102,7 +102,7 @@ interface DisplayContextType {
   setId: (id: string) => Promise<void>;
   setName: (name: string) => void;
   updateName: (name: string) => void;
-  updateLayout: (layout: "spaced" | "compact") => void;
+  updateLayout: (layout: 'spaced' | 'compact') => void;
   updateWidgets: (widgets: IWidget[]) => void;
   addStatusBarItem: (type: string) => Promise<void>;
   removeStatusBarItem: (index: number) => void;
@@ -112,13 +112,13 @@ interface DisplayContextType {
   error: any;
 }
 
-const DisplayContext = createContext<DisplayContextType | undefined>(undefined);
+const DisplayContext = createContext<DisplayContextType | undefined>(undefined)
 export const DisplayProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [state, dispatch] = useReducer(displayReducer, initialState);
-  const queryClient = useQueryClient();
+  const [state, dispatch] = useReducer(displayReducer, initialState)
+  const queryClient = useQueryClient()
   // Use TanStack Query to fetch display data with optimized settings
   const { data: displayData, isLoading, error } = useQuery({
-    queryKey: ["display", state.id],
+    queryKey: ['display', state.id],
     queryFn: () => getDisplay(state.id!),
     enabled: !!state.id,
     staleTime: 10 * 60 * 1000, // 10 minutes - longer stale time for better performance
@@ -126,7 +126,7 @@ export const DisplayProvider: React.FC<{ children: React.ReactNode }> = ({ child
     retry: 2,
     refetchOnWindowFocus: false, // Disable refetch on window focus for digital signage
     refetchOnReconnect: true, // Keep refetch on reconnect for reliability
-  });
+  })
 
   // Mutation for updating display data
   const updateDisplayMutation = useMutation({
@@ -134,102 +134,104 @@ export const DisplayProvider: React.FC<{ children: React.ReactNode }> = ({ child
       updateDisplay(id, data),
     onSuccess: (data, variables) => {
       // Update the specific display cache
-      queryClient.invalidateQueries({ queryKey: ["display", variables.id] });
+      queryClient.invalidateQueries({ queryKey: ['display', variables.id] })
     },
-  });
+  })
 
   // Update local state when display data changes
   React.useEffect(() => {
     if (displayData) {
-      dispatch({ type: 'SET_DISPLAY_DATA', payload: displayData });
+      dispatch({ type: 'SET_DISPLAY_DATA', payload: displayData })
     }
-  }, [displayData]);
+  }, [displayData])
 
   // Throttled update function with proper cleanup
   const updateDisplayThrottled = useCallback(
     _.debounce((id: string, data: Partial<IDisplayData>) => {
-      updateDisplayMutation.mutate({ id, data });
+      updateDisplayMutation.mutate({ id, data })
     }, 300),
     [updateDisplayMutation]
-  );
+  )
 
   // Clean up debounced function when component unmounts or dependencies change
   React.useEffect(() => {
     return () => {
-      updateDisplayThrottled.cancel();
-    };
-  }, [updateDisplayThrottled]);
+      updateDisplayThrottled.cancel()
+    }
+  }, [updateDisplayThrottled])
 
   const setId = useCallback(async (id: string): Promise<void> => {
-    if (!id) return;
-    dispatch({ type: 'SET_ID', payload: id });
+    if (!id) return
+    dispatch({ type: 'SET_ID', payload: id })
     
-    // No need to fetch data here - React Query will handle it automatically
-    // when the queryKey changes due to the new ID
-  }, []);
+    /*
+     * No need to fetch data here - React Query will handle it automatically
+     * when the queryKey changes due to the new ID
+     */
+  }, [])
 
   const setName = useCallback((name: string) => {
-    if (!name) return;
-    dispatch({ type: 'SET_NAME', payload: name });
-  }, []);
+    if (!name) return
+    dispatch({ type: 'SET_NAME', payload: name })
+  }, [])
 
   const updateName = useCallback((name: string) => {
-    if (!name || !state.id) return;
-    dispatch({ type: 'SET_NAME', payload: name });
-    updateDisplayThrottled(state.id, { name });
-  }, [state.id, updateDisplayThrottled]);
+    if (!name || !state.id) return
+    dispatch({ type: 'SET_NAME', payload: name })
+    updateDisplayThrottled(state.id, { name })
+  }, [state.id, updateDisplayThrottled])
 
-  const updateLayout = useCallback((layout: "spaced" | "compact") => {
-    if (!layout || !["spaced", "compact"].includes(layout) || !state.id) return;
-    dispatch({ type: 'SET_LAYOUT', payload: layout });
-    updateDisplayThrottled(state.id, { layout });
-  }, [state.id, updateDisplayThrottled]);
+  const updateLayout = useCallback((layout: 'spaced' | 'compact') => {
+    if (!layout || !['spaced', 'compact'].includes(layout) || !state.id) return
+    dispatch({ type: 'SET_LAYOUT', payload: layout })
+    updateDisplayThrottled(state.id, { layout })
+  }, [state.id, updateDisplayThrottled])
 
   const updateWidgets = useCallback((widgets: IWidget[]) => {
-    if (!state.id) return;
-    dispatch({ type: 'SET_WIDGETS', payload: widgets });
-    updateDisplayThrottled(state.id, { widgets });
-  }, [state.id, updateDisplayThrottled]);
+    if (!state.id) return
+    dispatch({ type: 'SET_WIDGETS', payload: widgets })
+    updateDisplayThrottled(state.id, { widgets })
+  }, [state.id, updateDisplayThrottled])
 
   const addStatusBarItem = useCallback(async (type: string): Promise<void> => {
-    if (!state.id) return Promise.resolve();
+    if (!state.id) return Promise.resolve()
 
-    dispatch({ type: 'ADD_STATUS_BAR_ITEM', payload: type });
+    dispatch({ type: 'ADD_STATUS_BAR_ITEM', payload: type })
     // Update will be handled by the reducer, then we sync with server
-    const newElements = [...(state.statusBar.elements || []), type + "_" + shortid.generate()];
-    const newStatusBar = { ...state.statusBar, elements: newElements };
-    updateDisplayThrottled(state.id, { statusBar: newStatusBar });
-    return Promise.resolve();
-  }, [state.id, state.statusBar, updateDisplayThrottled]);
+    const newElements = [...(state.statusBar.elements || []), type + '_' + shortid.generate()]
+    const newStatusBar = { ...state.statusBar, elements: newElements }
+    updateDisplayThrottled(state.id, { statusBar: newStatusBar })
+    return Promise.resolve()
+  }, [state.id, state.statusBar, updateDisplayThrottled])
 
   const removeStatusBarItem = useCallback((index: number) => {
-    const elements = state.statusBar.elements || [];
-    if (!state.id || index < 0 || index >= elements.length) return;
+    const elements = state.statusBar.elements || []
+    if (!state.id || index < 0 || index >= elements.length) return
     
-    dispatch({ type: 'REMOVE_STATUS_BAR_ITEM', payload: index });
-    const newElements = [...elements.slice(0, index), ...elements.slice(index + 1)];
-    const newStatusBar = { ...state.statusBar, elements: newElements };
-    updateDisplayThrottled(state.id, { statusBar: newStatusBar });
-  }, [state.id, state.statusBar, updateDisplayThrottled]);
+    dispatch({ type: 'REMOVE_STATUS_BAR_ITEM', payload: index })
+    const newElements = [...elements.slice(0, index), ...elements.slice(index + 1)]
+    const newStatusBar = { ...state.statusBar, elements: newElements }
+    updateDisplayThrottled(state.id, { statusBar: newStatusBar })
+  }, [state.id, state.statusBar, updateDisplayThrottled])
 
   const reorderStatusBarItems = useCallback((startIndex: number, endIndex: number) => {
-    const elements = state.statusBar.elements || [];
-    if (!state.id || elements.length === 0) return;
+    const elements = state.statusBar.elements || []
+    if (!state.id || elements.length === 0) return
 
-    dispatch({ type: 'REORDER_STATUS_BAR_ITEMS', payload: { startIndex, endIndex } });
-    const result = Array.from(elements);
-    const [removed] = result.splice(startIndex, 1);
-    result.splice(endIndex, 0, removed);
-    const newStatusBar = { ...state.statusBar, elements: result };
-    updateDisplayThrottled(state.id, { statusBar: newStatusBar });
-  }, [state.id, state.statusBar, updateDisplayThrottled]);
+    dispatch({ type: 'REORDER_STATUS_BAR_ITEMS', payload: { startIndex, endIndex } })
+    const result = Array.from(elements)
+    const [removed] = result.splice(startIndex, 1)
+    result.splice(endIndex, 0, removed)
+    const newStatusBar = { ...state.statusBar, elements: result }
+    updateDisplayThrottled(state.id, { statusBar: newStatusBar })
+  }, [state.id, state.statusBar, updateDisplayThrottled])
 
   // Add a method to refresh display data (for SSE usage)
   const refreshDisplayData = useCallback(() => {
     if (state.id) {
-      queryClient.invalidateQueries({ queryKey: ["display", state.id] });
+      queryClient.invalidateQueries({ queryKey: ['display', state.id] })
     }
-  }, [state.id, queryClient]);
+  }, [state.id, queryClient])
 
   const value: DisplayContextType = {
     state,
@@ -244,19 +246,19 @@ export const DisplayProvider: React.FC<{ children: React.ReactNode }> = ({ child
     refreshDisplayData,
     isLoading,
     error,
-  };
+  }
 
   return (
     <DisplayContext.Provider value={value}>
       {children}
     </DisplayContext.Provider>
-  );
-};
+  )
+}
 
 export const useDisplayContext = () => {
-  const context = useContext(DisplayContext);
+  const context = useContext(DisplayContext)
   if (context === undefined) {
-    throw new Error('useDisplayContext must be used within a DisplayProvider');
+    throw new Error('useDisplayContext must be used within a DisplayProvider')
   }
-  return context;
-};
+  return context
+}

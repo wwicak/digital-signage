@@ -1,35 +1,35 @@
-import React from 'react';
+import React from 'react'
 
-import Frame from '../components/Admin/Frame';
-import SlideshowListWithQuery from '../components/Admin/SlideshowListWithQuery';
-import Dialog from '../components/Dialog';
-import { Button } from '../components/Form';
+import Frame from '../components/Admin/Frame'
+import SlideshowListWithQuery from '../components/Admin/SlideshowListWithQuery'
+import Dialog from '../components/Dialog'
+import { Button } from '../components/Form'
 
-import { protect, ProtectProps } from '../helpers/auth';
-import { useDisplayContext } from '../contexts/DisplayContext';
-import { useAddSlideshow } from '../hooks/useSlideshows';
+import { protect, ProtectProps } from '../helpers/auth'
+import { useDisplayContext } from '../contexts/DisplayContext'
+import { useAddSlideshow } from '../hooks/useSlideshows'
 
 interface SlideshowsWithQueryProps extends ProtectProps {
   displayId?: string;
 }
 
 const SlideshowsWithQuery: React.FC<SlideshowsWithQueryProps> = ({ loggedIn, displayId }) => {
-  const addSlideshowMutation = useAddSlideshow();
-  const { setId } = useDisplayContext();
+  const addSlideshowMutation = useAddSlideshow()
+  const { setId } = useDisplayContext()
 
   React.useEffect(() => {
     if (displayId) {
-      setId(displayId);
+      setId(displayId)
     }
-  }, [displayId, setId]);
+  }, [displayId, setId])
 
   const handleAddSlideshow = async () => {
     try {
-      await addSlideshowMutation.mutateAsync({});
+      await addSlideshowMutation.mutateAsync({})
     } catch (error) {
-      console.error('Failed to add slideshow:', error);
+      console.error('Failed to add slideshow:', error)
     }
-  };
+  }
 
   return (
     <Frame loggedIn={loggedIn}>
@@ -60,7 +60,7 @@ const SlideshowsWithQuery: React.FC<SlideshowsWithQueryProps> = ({ loggedIn, dis
         `}
       </style>
     </Frame>
-  );
-};
+  )
+}
 
-export default protect(SlideshowsWithQuery);
+export default protect(SlideshowsWithQuery)

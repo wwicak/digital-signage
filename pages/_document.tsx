@@ -5,9 +5,9 @@ import Document, {
   NextScript,
   DocumentContext,
   DocumentInitialProps,
-} from 'next/document';
-import { ServerStyleSheet } from 'styled-components';
-import React, { JSX } from 'react';
+} from 'next/document'
+import { ServerStyleSheet } from 'styled-components'
+import React, { JSX } from 'react'
 
 interface IAppDocumentProps extends DocumentInitialProps {
   styleTags?: React.ReactElement[]; // From styled-components
@@ -15,29 +15,29 @@ interface IAppDocumentProps extends DocumentInitialProps {
 
 class AppDocument extends Document<IAppDocumentProps> {
   static async getInitialProps(ctx: DocumentContext): Promise<IAppDocumentProps> {
-    const sheet = new ServerStyleSheet();
-    const originalRenderPage = ctx.renderPage;
+    const sheet = new ServerStyleSheet()
+    const originalRenderPage = ctx.renderPage
 
     try {
       ctx.renderPage = () =>
         originalRenderPage({
           enhanceApp: (App) => (props) => sheet.collectStyles(<App {...props} />),
-        });
+        })
 
-      const initialProps = await Document.getInitialProps(ctx);
+      const initialProps = await Document.getInitialProps(ctx)
 
       return {
         ...initialProps,
         styleTags: sheet.getStyleElement(), // styled-components styles
-      };
+      }
     } finally {
-      sheet.seal();
+      sheet.seal()
     }
   }
 
   render(): JSX.Element {
     return (
-      <Html lang="en">
+      <Html lang='en'>
         <Head>
           {/* styled-components styles */}
           {this.props.styleTags}
@@ -53,8 +53,8 @@ class AppDocument extends Document<IAppDocumentProps> {
           <NextScript />
         </body>
       </Html>
-    );
+    )
   }
 }
 
-export default AppDocument;
+export default AppDocument

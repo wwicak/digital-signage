@@ -1,6 +1,6 @@
-import React, { Component } from 'react';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { config, IconDefinition } from '@fortawesome/fontawesome-svg-core';
+import React, { Component } from 'react'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { config, IconDefinition } from '@fortawesome/fontawesome-svg-core'
 import {
   faBolt,
   faSmog,
@@ -11,9 +11,9 @@ import {
   faCloudMoonRain,
   faSnowflake,
   faCloudMoon,
-} from '@fortawesome/free-solid-svg-icons';
+} from '@fortawesome/free-solid-svg-icons'
 
-config.autoAddCss = false;
+config.autoAddCss = false
 
 // Define a type for the weather icon codes for better type safety
 type WeatherIconCode =
@@ -37,42 +37,42 @@ class WeatherIcon extends Component<WeatherIconProps, WeatherIconState> {
   convertIcon(iconCode: WeatherIconCode | undefined): IconDefinition {
     switch (iconCode) {
       case '01d':
-        return faSun;
+        return faSun
       case '01n': // Typically night clear, might use faMoon if available and distinct
-        return faCloudSun; // Original was faCloudSun, consider faMoon if theme supports night icons
+        return faCloudSun // Original was faCloudSun, consider faMoon if theme supports night icons
       case '02d':
-        return faCloudSun;
+        return faCloudSun
       case '02n':
-        return faCloudMoon;
+        return faCloudMoon
       case '03d':
       case '03n':
       case '04d':
       case '04n':
-        return faCloud;
+        return faCloud
       case '09d': // Shower rain
       case '10d': // Rain
-        return faCloudRain;
+        return faCloudRain
       case '09n': // Shower rain night
       case '10n': // Rain night
-        return faCloudMoonRain;
+        return faCloudMoonRain
       case '11d': // Thunderstorm
       case '11n':
-        return faBolt;
+        return faBolt
       case '13d': // Snow
       case '13n':
-        return faSnowflake;
+        return faSnowflake
       case '50d': // Mist
       case '50n':
-        return faSmog;
+        return faSmog
       default:
-        return faCloud; // Default icon
+        return faCloud // Default icon
     }
   }
 
   render() {
-    const { icon } = this.props; // icon will be undefined if not provided, matching original default of ''
-    return <FontAwesomeIcon icon={this.convertIcon(icon)} size={'2x'} />;
+    const { icon } = this.props // icon will be undefined if not provided, matching original default of ''
+    return <FontAwesomeIcon icon={this.convertIcon(icon)} size={'2x'} />
   }
 }
 
-export default WeatherIcon;
+export default WeatherIcon

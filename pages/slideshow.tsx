@@ -1,18 +1,18 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faPencilAlt, IconDefinition } from '@fortawesome/free-solid-svg-icons';
-import _ from 'lodash';
+import React, { useState, useEffect, useRef, memo } from 'react'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { faPencilAlt, IconDefinition } from '@fortawesome/free-solid-svg-icons'
+import _ from 'lodash'
 
-import Frame from '../components/Admin/Frame';
-import SlideListComponent, { ISlideListProps } from '../components/Admin/SlideList';
-import SlideEditDialogComponent, { ISlideEditDialogRef } from '../components/Admin/SlideEditDialog';
-import Upload from '../components/Upload';
-import Button from '../components/Form/Button';
-import Dialog from '../components/Dialog';
+import Frame from '../components/Admin/Frame'
+import SlideListComponent, { ISlideListProps } from '../components/Admin/SlideList'
+import SlideEditDialogComponent, { ISlideEditDialogRef } from '../components/Admin/SlideEditDialog'
+import Upload from '../components/Upload'
+import Button from '../components/Form/Button'
+import Dialog from '../components/Dialog'
 
-import { getSlideshow, updateSlideshow, ISlideshowData } from '../actions/slideshow';
-import { protect, IProtectedPageProps } from '../helpers/auth';
-import { useDisplayContext } from '../contexts/DisplayContext';
+import { getSlideshow, updateSlideshow, ISlideshowData } from '../actions/slideshow'
+import { protect, IProtectedPageProps } from '../helpers/auth'
+import { useDisplayContext } from '../contexts/DisplayContext'
 
 // Define the structure of a slideshow object
 interface SlideshowData extends ISlideshowData {
@@ -22,60 +22,62 @@ interface SlideshowData extends ISlideshowData {
 // Props for the Slideshow component
 interface SlideshowProps extends IProtectedPageProps {
   slideshow?: SlideshowData; // slideshow can be undefined if ID is new or not found
-  // host and loggedIn are already in IProtectedPageProps
-  // displayId is already in IProtectedPageProps
+  /*
+   * host and loggedIn are already in IProtectedPageProps
+   * displayId is already in IProtectedPageProps
+   */
 }
 
 // Throttled update function
 const updateSlideshowThrottled = _.debounce((id: string, data: Partial<SlideshowData>) => {
-  return updateSlideshow(id, data);
-}, 300);
+  return updateSlideshow(id, data)
+}, 300)
 
-const SlideshowPage = ({ slideshow: initialSlideshow, loggedIn, displayId, host }: SlideshowProps) => {
-  const [slideshow, setSlideshow] = useState<SlideshowData | undefined>(initialSlideshow);
-  const slideListRef = useRef<SlideListComponent>(null);
-  const dialogRef = useRef<SlideEditDialogComponent>(null);
-  const displayContext = useDisplayContext();
+const SlideshowPageComponent = memo(function SlideshowPageComponent({ slideshow: initialSlideshow, loggedIn, displayId, host }: SlideshowProps) {
+  const [slideshow, setSlideshow] = useState<SlideshowData | undefined>(initialSlideshow)
+  const slideListRef = useRef<SlideListComponent>(null)
+  const dialogRef = useRef<SlideEditDialogComponent>(null)
+  const displayContext = useDisplayContext()
 
   // Set display ID in context when component mounts
   useEffect(() => {
     if (displayId && displayContext.state.id !== displayId) {
-      displayContext.setId(displayId);
+      displayContext.setId(displayId)
     }
-  }, [displayId, displayContext]);
+  }, [displayId, displayContext])
 
   const refresh = async (): Promise<void> => {
     if (slideshow && slideshow._id) {
       try {
-        const updatedSlideshow = await getSlideshow(slideshow._id, host);
-        setSlideshow(updatedSlideshow);
+        const updatedSlideshow = await getSlideshow(slideshow._id, host)
+        setSlideshow(updatedSlideshow)
         if (slideListRef.current) {
-          slideListRef.current.refresh();
+          slideListRef.current.refresh()
         }
       } catch (error) {
-        console.error("Refresh failed:", error);
+        console.error('Refresh failed:', error)
       }
     }
-  };
+  }
 
   const openAddDialog = (): Promise<void> => {
     if (dialogRef.current) {
-      dialogRef.current.open();
+      dialogRef.current.open()
     }
-    return Promise.resolve();
-  };
+    return Promise.resolve()
+  }
 
   const handleTitleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const newTitle = event.target.value;
+    const newTitle = event.target.value
     
     if (slideshow) {
-      const updatedSlideshow = { ...slideshow, name: newTitle };
-      setSlideshow(updatedSlideshow);
+      const updatedSlideshow = { ...slideshow, name: newTitle }
+      setSlideshow(updatedSlideshow)
       
       // Update on server with throttling
-      updateSlideshowThrottled(slideshow._id, { name: newTitle });
+      updateSlideshowThrottled(slideshow._id, { name: newTitle })
     }
-  };
+  }
 
   return (
     <Frame loggedIn={loggedIn}>
@@ -151,26 +153,29 @@ const SlideshowPage = ({ slideshow: initialSlideshow, loggedIn, displayId, host 
         `}
       </style>
     </Frame>
-  );
-};
+  )
+})
+
+// Create a wrapper component for getInitialProps
+const SlideshowPage = (props: SlideshowProps) => <SlideshowPageComponent {...props} />
 
 SlideshowPage.getInitialProps = async (ctx: any): Promise<Partial<SlideshowProps>> => {
-  const id = ctx.query.id as string | undefined;
+  const id = ctx.query.id as string | undefined
   const host =
     ctx.req && ctx.req.headers && ctx.req.headers.host
       ? (ctx.req.socket?.encrypted ? 'https://' : 'http://') + ctx.req.headers.host
-      : (typeof window !== 'undefined' ? window.location.origin : '');
+      : (typeof window !== 'undefined' ? window.location.origin : '')
   
   if (id) {
     try {
-      const slideshow = await getSlideshow(id, host);
-      return { slideshow, host, displayId: ctx.query.displayId as string | undefined };
+      const slideshow = await getSlideshow(id, host)
+      return { slideshow, host, displayId: ctx.query.displayId as string | undefined }
     } catch (error) {
-      console.error("Failed to get slideshow:", error);
-      return { host, displayId: ctx.query.displayId as string | undefined };
+      console.error('Failed to get slideshow:', error)
+      return { host, displayId: ctx.query.displayId as string | undefined }
     }
   }
-  return { host, displayId: ctx.query.displayId as string | undefined };
-};
+  return { host, displayId: ctx.query.displayId as string | undefined }
+}
 
-export default protect(SlideshowPage);
+export default protect(SlideshowPage)

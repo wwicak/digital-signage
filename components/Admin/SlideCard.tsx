@@ -1,98 +1,98 @@
-import React, { useState, useRef } from 'react';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { IconProp } from '@fortawesome/fontawesome-svg-core';
-import { faClock } from '@fortawesome/free-regular-svg-icons';
-import { faTrash, faEdit, faPlay, faGlobe, faFileImage, faFileVideo, faFileAlt } from '@fortawesome/free-solid-svg-icons';
-import * as z from 'zod';
+import React, { useState, useRef } from 'react'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { IconProp } from '@fortawesome/fontawesome-svg-core'
+import { faClock } from '@fortawesome/free-regular-svg-icons'
+import { faTrash, faEdit, faPlay, faGlobe, faFileImage, faFileVideo, faFileAlt } from '@fortawesome/free-solid-svg-icons'
+import * as z from 'zod'
 
-import SlideEditDialog from './SlideEditDialog'; // Removed ISlideEditDialogRef, assuming default export or internal typing
-import { deleteSlide, SlideActionDataSchema, ISlideData } from '../../actions/slide'; // ISlideData is z.infer<typeof SlideActionDataSchema>
+import SlideEditDialog from './SlideEditDialog' // Removed ISlideEditDialogRef, assuming default export or internal typing
+import { deleteSlide, SlideActionDataSchema, ISlideData } from '../../actions/slide' // ISlideData is z.infer<typeof SlideActionDataSchema>
 
 // Zod schema for the 'value' prop, extending SlideActionDataSchema
 const SlideCardValueSchema = SlideActionDataSchema.extend({
   order: z.number().optional(),
   title: z.string().optional(), // To cover the ExtendedSlideData interface's title field
-});
+})
 
 // Zod schema for SlideCard props
 export const SlideCardPropsSchema = z.object({
   value: SlideCardValueSchema,
   refresh: z.function(z.tuple([]), z.void()).optional(),
   // Draggable props would be added here if needed, e.g., using z.any() or more specific schemas
-});
+})
 
 // Derive TypeScript type from Zod schema
 export type ISlideCardProps = z.infer<typeof SlideCardPropsSchema>;
 
-// Export ExtendedSlideData type for use in SlideList
+// Define and export ExtendedSlideData based on the schema for the value prop
 export type ExtendedSlideData = z.infer<typeof SlideCardValueSchema>;
 
 const SlideCard: React.FC<ISlideCardProps> = ({ value, refresh = () => {} }) => {
-  const [loading, setLoading] = useState(false);
-  const dialogRef = useRef<SlideEditDialog>(null);
+  const [loading, setLoading] = useState(false)
+  const dialogRef = useRef<SlideEditDialog>(null)
 
   const handleEdit = (): void => {
-    dialogRef.current?.open();
-  };
+    dialogRef.current?.open()
+  }
 
   const handleDelete = (): void => {
-    if (loading) return;
+    if (loading) return
 
-    setLoading(true);
+    setLoading(true)
     deleteSlide(value._id)
       .then(() => {
-        refresh();
+        refresh()
         // No need to setLoading(false) if component is unmounted by refresh
       })
       .catch(error => {
-        console.error('Failed to delete slide:', error);
-        setLoading(false);
-      });
-  };
+        console.error('Failed to delete slide:', error)
+        setLoading(false)
+      })
+  }
 
   const getThumbnailIcon = (slideType: string): IconProp => {
     switch (slideType) {
       case 'youtube': // Assuming 'youtube' is a value for ISlideData.type
       case 'video': // Or if ISlideData.type can be 'video'
-        return faPlay;
+        return faPlay
       case 'web':
-        return faGlobe;
+        return faGlobe
       case 'image': // Assuming 'image' type
       case 'photo': // From original JS
-        return faFileImage;
+        return faFileImage
       case 'markdown':
-        return faFileAlt;
+        return faFileAlt
       default:
-        return faFileVideo; // A generic fallback
+        return faFileVideo // A generic fallback
     }
-  };
+  }
 
   const getThumbnailBackgroundColor = (slideType: string): string => {
     switch (slideType) {
       case 'youtube':
       case 'video':
-        return '#c23616'; // Dark red
+        return '#c23616' // Dark red
       case 'web':
-        return '#0097e6'; // Blue
+        return '#0097e6' // Blue
       case 'image':
       case 'photo':
-        return 'transparent'; // No background if image is shown via backgroundImage
+        return 'transparent' // No background if image is shown via backgroundImage
       case 'markdown':
-        return '#333'; // Dark grey for markdown
+        return '#333' // Dark grey for markdown
       default:
-        return '#grey'; // Default grey
+        return '#grey' // Default grey
     }
-  };
+  }
 
-  const slideTitle = value.title || value.name || 'Untitled slide';
-  const slideType = value.type || 'unknown'; // Ensure type has a fallback
+  const slideTitle = value.title || value.name || 'Untitled slide'
+  const slideType = value.type || 'unknown' // Ensure type has a fallback
 
   // Determine if thumbnail should be an icon or background image
-  const showBackgroundImage = slideType === 'image';
+  const showBackgroundImage = slideType === 'image'
   const thumbnailStyle: React.CSSProperties = {
     backgroundImage: showBackgroundImage && value.data ? `url(${value.data})` : 'none',
     backgroundColor: getThumbnailBackgroundColor(slideType),
-  };
+  }
 
   return (
     <div className='slide-card'>
@@ -114,10 +114,10 @@ const SlideCard: React.FC<ISlideCardProps> = ({ value, refresh = () => {} }) => 
         </div>
       </div>
       <div className='right-actions'>
-        <div className='action-icon' onClick={handleEdit} role="button" tabIndex={0} onKeyPress={(e) => {if(e.key === 'Enter' || e.key === ' ') handleEdit()}} aria-label="Edit slide">
+        <div className='action-icon' onClick={handleEdit} role='button' tabIndex={0} onKeyPress={(e) => {if(e.key === 'Enter' || e.key === ' ') handleEdit()}} aria-label='Edit slide'>
           <FontAwesomeIcon icon={faEdit} fixedWidth color='#828282' />
         </div>
-        <div className='action-icon' onClick={!loading ? handleDelete : undefined} role="button" tabIndex={!loading ? 0 : -1} onKeyPress={(e) => {if(!loading && (e.key === 'Enter' || e.key === ' ')) handleDelete()}} aria-label="Delete slide" aria-disabled={loading}>
+        <div className='action-icon' onClick={!loading ? handleDelete : undefined} role='button' tabIndex={!loading ? 0 : -1} onKeyPress={(e) => {if(!loading && (e.key === 'Enter' || e.key === ' ')) handleDelete()}} aria-label='Delete slide' aria-disabled={loading}>
           <FontAwesomeIcon
             icon={faTrash}
             fixedWidth
@@ -242,8 +242,8 @@ const SlideCard: React.FC<ISlideCardProps> = ({ value, refresh = () => {} }) => 
         `}
       </style>
     </div>
-  );
-};
+  )
+}
 
 // Not wrapped with view() in original, so keeping it that way.
-export default SlideCard;
+export default SlideCard

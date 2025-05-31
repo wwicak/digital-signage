@@ -1,55 +1,59 @@
-import React from 'react';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { IconProp } from '@fortawesome/fontawesome-svg-core';
-import { faWindowRestore } from '@fortawesome/free-regular-svg-icons';
-import { faChromecast } from '@fortawesome/free-brands-svg-icons';
-import { faTrash, faTv, faEye, faLink } from '@fortawesome/free-solid-svg-icons';
-import Link from 'next/link';
-import * as z from 'zod';
+import React from 'react'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { IconProp } from '@fortawesome/fontawesome-svg-core'
+import { faWindowRestore } from '@fortawesome/free-regular-svg-icons'
+import { faChromecast } from '@fortawesome/free-brands-svg-icons'
+import { faTrash, faTv, faEye, faLink } from '@fortawesome/free-solid-svg-icons'
+import Link from 'next/link'
+import * as z from 'zod'
 
-// Assuming IDisplayData is an interface. We'll define a Zod schema for the 'value' prop
-// that matches the expected structure of IDisplayData used in this component.
-// For a more robust solution, actions/display.ts should export a DisplayActionDataSchema.
-// For now, we define what ScreenCard expects from IDisplayData.
+/*
+ * Assuming IDisplayData is an interface. We'll define a Zod schema for the 'value' prop
+ * that matches the expected structure of IDisplayData used in this component.
+ * For a more robust solution, actions/display.ts should export a DisplayActionDataSchema.
+ * For now, we define what ScreenCard expects from IDisplayData.
+ */
 const ScreenCardValueSchema = z.object({
   _id: z.string(),
   name: z.string().optional(), // Based on usage: value.name || 'Untitled Display'
   widgets: z.array(z.union([z.string(), z.object({})])).optional(), // Based on usage: Array.isArray(value.widgets)
-  // Add other fields from IDisplayData if they were directly used by ScreenCard and need validation.
-  // For this component, only _id, name, and widgets structure seem directly accessed.
-});
+  /*
+   * Add other fields from IDisplayData if they were directly used by ScreenCard and need validation.
+   * For this component, only _id, name, and widgets structure seem directly accessed.
+   */
+})
 
 // Import the original IDisplayData to ensure compatibility or use if it becomes a Zod type later.
-import { deleteDisplay, IDisplayData } from '../../actions/display';
+import { deleteDisplay, IDisplayData } from '../../actions/display'
 
 // Zod schema for ScreenCard props
 export const ScreenCardPropsSchema = z.object({
   value: ScreenCardValueSchema, // Use the locally defined Zod schema for the 'value' prop
   refresh: z.function(z.tuple([]), z.void()).optional(),
-});
+})
 
 // Derive TypeScript type from Zod schema
 export type IScreenCardProps = z.infer<typeof ScreenCardPropsSchema>;
 
 const ScreenCard: React.FC<IScreenCardProps> = ({ value, refresh = () => {} }) => {
   const handleDelete = (event: React.MouseEvent): void => {
-    event.preventDefault(); // Prevent Link navigation when clicking delete icon
-    event.stopPropagation(); // Stop event from bubbling further
+    event.preventDefault() // Prevent Link navigation when clicking delete icon
+    event.stopPropagation() // Stop event from bubbling further
 
     if (value && value._id) {
       deleteDisplay(value._id)
         .then(() => {
-          refresh();
+          refresh()
         })
         .catch(error => {
-          console.error('Failed to delete display:', error);
+          console.error('Failed to delete display:', error)
           // Optionally, provide user feedback here
-        });
+        })
     }
-  };
+  }
 
   // Fallback for widgets if undefined (though IDisplayData defines it as optional IWidget[] or string[])
-  const widgetCount = Array.isArray(value.widgets) ? value.widgets.length : 0;
+  const widgetCount = Array.isArray(value.widgets) ? value.widgets.length : 0
 
   return (
     // The outer Link wraps the entire card. Clicks on action icons inside need stopPropagation.
@@ -86,22 +90,22 @@ const ScreenCard: React.FC<IScreenCardProps> = ({ value, refresh = () => {} }) =
           <div className='right'>
             {/* Edit Layout Link */}
             <Link href={`/layout?display=${value._id}`}>
-              <a className='actionIcon' onClick={(e) => e.stopPropagation()} aria-label="Edit Layout">
+              <a className='actionIcon' onClick={(e) => e.stopPropagation()} aria-label='Edit Layout'>
                 <FontAwesomeIcon icon={faEye as IconProp} fixedWidth color='#828282' />
               </a>
             </Link>
             {/* View Display Link */}
             <Link href={`/display/${value._id}`}>
-              <a className='actionIcon' onClick={(e) => e.stopPropagation()} aria-label="View Display">
+              <a className='actionIcon' onClick={(e) => e.stopPropagation()} aria-label='View Display'>
                 <FontAwesomeIcon icon={faLink as IconProp} fixedWidth color='#828282' />
               </a>
             </Link>
             {/* Delete Action */}
             <div className='actionIcon' onClick={handleDelete}
-              role="button"
+              role='button'
               tabIndex={0}
-              onKeyPress={(e: React.KeyboardEvent<HTMLDivElement>) => { if (e.key === 'Enter' || e.key === ' ') handleDelete(e as any);}}
-              aria-label="Delete Display"
+              onKeyPress={(e: React.KeyboardEvent<HTMLDivElement>) => { if (e.key === 'Enter' || e.key === ' ') handleDelete(e as any)}}
+              aria-label='Delete Display'
             >
               <FontAwesomeIcon
                 icon={faTrash as IconProp}
@@ -254,7 +258,7 @@ const ScreenCard: React.FC<IScreenCardProps> = ({ value, refresh = () => {} }) =
         </div>
       </a>
     </Link>
-  );
-};
+  )
+}
 
-export default ScreenCard;
+export default ScreenCard

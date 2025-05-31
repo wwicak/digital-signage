@@ -1,5 +1,5 @@
-import axios, { AxiosResponse } from "axios";
-import { WidgetType, WidgetData } from "../api/models/Widget";
+import axios, { AxiosResponse } from 'axios'
+import { WidgetType, WidgetData } from '../api/models/Widget'
 
 export interface IWidgetData {
   _id: string;
@@ -28,12 +28,14 @@ export interface INewWidgetData {
   data?: WidgetData;
 }
 
-// Interface for the data sent when updating a widget
-// Most fields are optional.
+/*
+ * Interface for the data sent when updating a widget
+ * Most fields are optional.
+ */
 export interface IUpdateWidgetData
   extends Omit<
     Partial<IWidgetData>,
-    "_id" | "display_id" | "creator_id" | "creation_date" | "last_update"
+    '_id' | 'display_id' | 'creator_id' | 'creation_date' | 'last_update'
   > {
   // No additional fields needed here usually, but can be extended
 }
@@ -46,76 +48,78 @@ interface IDeleteResponse {
 
 export const addWidget = (
   widgetDetails: INewWidgetData,
-  host: string = ""
+  host: string = ''
 ): Promise<IWidgetData> => {
   return axios
     .post<IWidgetData>(`${host}/api/v1/widgets`, widgetDetails)
     .then((res: AxiosResponse<IWidgetData>) => {
       if (res && res.data) {
-        return res.data;
+        return res.data
       }
-      throw new Error("Failed to add widget: no data received");
-    });
-};
+      throw new Error('Failed to add widget: no data received')
+    })
+}
 
 export const getWidgets = (
   displayId: string,
-  host: string = ""
+  host: string = ''
 ): Promise<IWidgetData[]> => {
   return axios
     .get<IWidgetData[]>(`${host}/api/v1/display/${displayId}/widgets`)
     .then((res: AxiosResponse<IWidgetData[]>) => {
       if (res && res.data) {
-        return res.data;
+        return res.data
       }
-      return []; // Or throw an error if data is always expected
-    });
-};
+      return [] // Or throw an error if data is always expected
+    })
+}
 
 export const deleteWidget = (
   id: string,
-  host: string = ""
+  host: string = ''
 ): Promise<IDeleteResponse> => {
   return axios
     .delete(`${host}/api/v1/widgets/${id}`)
     .then((res: AxiosResponse<IDeleteResponse>) => {
       if (res && res.data) {
-        return res.data;
+        return res.data
       }
-      // If server doesn't send a body on delete, this might be an empty object or string.
-      // Adjust expected type or handling if necessary.
-      // For now, assuming a JSON response like { message: "deleted" }.
+      /*
+       * If server doesn't send a body on delete, this might be an empty object or string.
+       * Adjust expected type or handling if necessary.
+       * For now, assuming a JSON response like { message: "deleted" }.
+       */
       throw new Error(
         `Failed to delete widget ${id}: no confirmation received`
-      );
-    });
-};
+      )
+    })
+}
 
 export const updateWidget = (
   id: string,
   data: IUpdateWidgetData,
-  host: string = ""
+  host: string = ''
 ): Promise<IWidgetData> => {
   return axios
     .put<IWidgetData>(`${host}/api/v1/widgets/${id}`, data)
     .then((res: AxiosResponse<IWidgetData>) => {
       if (res && res.data) {
-        return res.data;
+        return res.data
       }
-      throw new Error(`Failed to update widget ${id}: no data received`);
-    });
-};
+      throw new Error(`Failed to update widget ${id}: no data received`)
+    })
+}
 
 export const getWidget = (
   id: string,
-  host: string = ""
+  host: string = ''
 ): Promise<IWidgetData> => {
   return axios
     .get<IWidgetData>(`${host}/api/v1/widgets/${id}`)
     .then((res: AxiosResponse<IWidgetData>) => {
       if (res && res.data) {
-        return res.data;
+        return res.data
       }
-      throw new Error(`Failed to get widget ${id}: no data received`);
-    });
-};
+      throw new Error(`Failed to get widget ${id}: no data received`)
+    })
+}

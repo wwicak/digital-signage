@@ -1,46 +1,52 @@
-import React, { Component, ReactNode, JSX } from 'react';
-import Clock from 'react-live-clock'; // react-live-clock might need @types/react-live-clock if not inherently typed
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faWifi } from '@fortawesome/free-solid-svg-icons';
-import { IconProp } from '@fortawesome/fontawesome-svg-core';
+import React, { Component, ReactNode, JSX } from 'react'
+import Clock from 'react-live-clock' // react-live-clock might need @types/react-live-clock if not inherently typed
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { faWifi } from '@fortawesome/free-solid-svg-icons'
+import { IconProp } from '@fortawesome/fontawesome-svg-core'
 
-// Define the structure for status bar items if they become more complex.
-// For now, it's an array of strings like "type_id" or just "type".
-// Example: 'date', 'time_1', 'connection_main'
-import * as z from 'zod';
+/*
+ * Define the structure for status bar items if they become more complex.
+ * For now, it's an array of strings like "type_id" or just "type".
+ * Example: 'date', 'time_1', 'connection_main'
+ */
+import * as z from 'zod'
 
 export const DisplayFramePropsSchema = z.object({
   children: z.custom<ReactNode>((val) => {
     // Basic placeholder validation for ReactNode
-    return true;
+    return true
   }),
   statusBar: z.array(z.string()).optional(),
-});
+})
 
 export type IDisplayFrameProps = z.infer<typeof DisplayFramePropsSchema>;
 
-// No local state for this component
-// interface IDisplayFrameState {}
+/*
+ * No local state for this component
+ * interface IDisplayFrameState {}
+ */
 
 const Frame: React.FC<IDisplayFrameProps> = React.memo(({ children, statusBar = [] }) => {
   const renderStatusBarItem = React.useCallback((itemKey: string, index: number): JSX.Element | null => {
     // Assuming itemKey could be "type_uniqueId" or just "type"
-    const type = itemKey.includes('_') ? itemKey.split('_')[0] : itemKey;
+    const type = itemKey.includes('_') ? itemKey.split('_')[0] : itemKey
 
     switch (type) {
       case 'date':
-        return <Clock key={`${type}-${index}`} ticking={true} format={'dddd, MMMM Do.'} />;
+        return <Clock key={`${type}-${index}`} ticking={true} format={'dddd, MMMM Do.'} />
       case 'connection':
-        return <FontAwesomeIcon key={`${type}-${index}`} className={'wifi-icon'} icon={faWifi as IconProp} />;
+        return <FontAwesomeIcon key={`${type}-${index}`} className={'wifi-icon'} icon={faWifi as IconProp} />
       case 'time':
-        return <Clock key={`${type}-${index}`} ticking={true} format={'H:mm'} />;
+        return <Clock key={`${type}-${index}`} ticking={true} format={'H:mm'} />
       default:
-        // Return a spacer or null for unknown types to maintain flex layout integrity if needed
-        // Or log a warning for unrecognized types.
-        console.warn(`Unknown status bar item type: ${type}`);
-        return <span key={`${type}-${index}`}>&nbsp;</span>; // Render a space to maintain structure
+        /*
+         * Return a spacer or null for unknown types to maintain flex layout integrity if needed
+         * Or log a warning for unrecognized types.
+         */
+        console.warn(`Unknown status bar item type: ${type}`)
+        return <span key={`${type}-${index}`}>&nbsp;</span> // Render a space to maintain structure
     }
-  }, []);
+  }, [])
 
   return (
     <div className='display-frame'>
@@ -54,7 +60,7 @@ const Frame: React.FC<IDisplayFrameProps> = React.memo(({ children, statusBar = 
           ))}
         </div>
       )}
-      <div className="display-content">
+      <div className='display-content'>
           {children}
       </div>
       <style jsx>
@@ -100,9 +106,9 @@ const Frame: React.FC<IDisplayFrameProps> = React.memo(({ children, statusBar = 
         `}
       </style>
     </div>
-  );
-});
+  )
+})
 
-Frame.displayName = 'Frame';
+Frame.displayName = 'Frame'
 
-export default Frame;
+export default Frame

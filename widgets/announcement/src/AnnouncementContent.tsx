@@ -1,12 +1,12 @@
-import React from 'react';
-import { library, config, IconProp } from '@fortawesome/fontawesome-svg-core';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { fas, faExclamationTriangle } from '@fortawesome/free-solid-svg-icons';
+import React from 'react'
+import { library, config, IconProp } from '@fortawesome/fontawesome-svg-core'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { fas, faExclamationTriangle } from '@fortawesome/free-solid-svg-icons'
 
-import AutoScroll from '../../../components/AutoScroll';
-import * as z from 'zod';
+import AutoScroll from '../../../components/AutoScroll'
+import * as z from 'zod'
 
-config.autoAddCss = false;
+config.autoAddCss = false
 
 // Zod schema for the announcement widget's content data, matching the component's internal usage
 export const AnnouncementWidgetContentDataSchema = z.object({
@@ -16,28 +16,28 @@ export const AnnouncementWidgetContentDataSchema = z.object({
   titleTextColor: z.string().optional(), // Text color for the "Announcement" title bar
   accentColor: z.string().optional(), // Color for accents like the border-left of title bar
   title: z.string().optional(), // Optional title for the announcement content itself (not widget frame)
-});
+})
 export type IAnnouncementWidgetData = z.infer<typeof AnnouncementWidgetContentDataSchema>;
 
 // Zod schema for AnnouncementContent component props
 export const AnnouncementContentPropsSchema = z.object({
   data: AnnouncementWidgetContentDataSchema.optional(),
   isPreview: z.boolean().optional(),
-});
+})
 export type IAnnouncementContentProps = z.infer<typeof AnnouncementContentPropsSchema>;
 
-const DEFAULT_COLOR = '#708090'; // Slate gray
-const DEFAULT_TEXT_COLOR = '#ffffff'; // White
-const DEFAULT_ACCENT_COLOR = '#EDC951'; // Goldenrod
-const DEFAULT_TEXT = '';
-const DEFAULT_TITLE_TEXT_COLOR = '#fff0f0'; // Snow
+const DEFAULT_COLOR = '#708090' // Slate gray
+const DEFAULT_TEXT_COLOR = '#ffffff' // White
+const DEFAULT_ACCENT_COLOR = '#EDC951' // Goldenrod
+const DEFAULT_TEXT = ''
+const DEFAULT_TITLE_TEXT_COLOR = '#fff0f0' // Snow
 
 const AnnouncementContent: React.FC<IAnnouncementContentProps> = React.memo(({ data = {}, isPreview }) => {
-  const text = data.text ?? DEFAULT_TEXT;
-  const textColor = data.textColor ?? DEFAULT_TEXT_COLOR;
-  const titleTextColor = data.titleTextColor ?? DEFAULT_TITLE_TEXT_COLOR;
-  const color = data.color ?? DEFAULT_COLOR;
-  const accentColor = data.accentColor ?? DEFAULT_ACCENT_COLOR;
+  const text = data.text ?? DEFAULT_TEXT
+  const textColor = data.textColor ?? DEFAULT_TEXT_COLOR
+  const titleTextColor = data.titleTextColor ?? DEFAULT_TITLE_TEXT_COLOR
+  const color = data.color ?? DEFAULT_COLOR
+  const accentColor = data.accentColor ?? DEFAULT_ACCENT_COLOR
 
   return (
     <div className='announce-widget-content'>
@@ -110,9 +110,9 @@ const AnnouncementContent: React.FC<IAnnouncementContentProps> = React.memo(({ d
         `}
       </style>
     </div>
-  );
-});
+  )
+})
 
-AnnouncementContent.displayName = 'AnnouncementContent';
+AnnouncementContent.displayName = 'AnnouncementContent'
 
-export default AnnouncementContent;
+export default AnnouncementContent

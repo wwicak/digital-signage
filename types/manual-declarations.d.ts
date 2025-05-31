@@ -1,24 +1,24 @@
 // types/manual-declarations.d.ts
-declare module "dotenv";
-declare module "next";
+declare module 'dotenv';
+declare module 'next';
 // declare module 'boxen'; // If boxen still causes issues with @types/boxen
 
 // Fix for styled-jsx/server module
-declare module "styled-jsx/server" {
+declare module 'styled-jsx/server' {
   export function flushToHTML(): any;
-  export default function flush(): any;
+  export default function flush(): any
 }
 
 // Fix for react-easy-state Store import
-declare module "react-easy-state" {
+declare module 'react-easy-state' {
   export function store<T extends object>(obj: T): T;
-  export const Store: typeof store; // Add Store as alias to store
+  export const Store: typeof store // Add Store as alias to store
   export function view<T extends React.ComponentType<any>>(component: T): T;
   export function batch(fn: () => void): void;
 }
 
 // Fix for react-dropzone FileRejection
-declare module "react-dropzone" {
+declare module 'react-dropzone' {
   export interface FileRejection {
     file: File;
     errors: Array<{
@@ -93,13 +93,13 @@ declare module "react-dropzone" {
         }
       ) => React.ReactNode;
     }
-  ): React.ReactElement;
+  ): React.ReactElement
 
   export type DropzoneProps = DropzoneOptions;
 }
 
 // Fix for react-youtube
-declare module "react-youtube" {
+declare module 'react-youtube' {
   export interface YouTubePlayer {
     playVideo(): void;
     pauseVideo(): void;
@@ -140,7 +140,7 @@ declare module "react-youtube" {
       playerVars?: {
         autoplay?: 0 | 1;
         cc_load_policy?: 0 | 1;
-        color?: "red" | "white";
+        color?: 'red' | 'white';
         controls?: 0 | 1;
         disablekb?: 0 | 1;
         enablejsapi?: 0 | 1;
@@ -149,7 +149,7 @@ declare module "react-youtube" {
         hl?: string;
         iv_load_policy?: 1 | 3;
         list?: string;
-        listType?: "playlist" | "search" | "user_uploads";
+        listType?: 'playlist' | 'search' | 'user_uploads';
         loop?: 0 | 1;
         modestbranding?: 0 | 1;
         origin?: string;
@@ -158,8 +158,8 @@ declare module "react-youtube" {
         rel?: 0 | 1;
         showinfo?: 0 | 1;
         start?: number;
-        wmode?: "transparent" | "opaque";
-        theme?: "dark" | "light";
+        wmode?: 'transparent' | 'opaque';
+        theme?: 'dark' | 'light';
       };
     };
     onReady?: (event: YouTubeEvent) => void;
@@ -176,7 +176,7 @@ declare module "react-youtube" {
 }
 
 // Fix for ts-jest
-declare module "ts-jest" {
+declare module 'ts-jest' {
   export interface InitialOptions {
     preset?: string;
     globals?: Record<string, any>;
@@ -193,27 +193,27 @@ declare module "ts-jest" {
 }
 
 // Fix for FontAwesome icon type conflicts
-declare module "@fortawesome/react-fontawesome" {
-  import { IconDefinition } from "@fortawesome/fontawesome-common-types";
+declare module '@fortawesome/react-fontawesome' {
+  import { IconDefinition } from '@fortawesome/fontawesome-common-types'
 
   export type IconProp = IconDefinition | string;
 
   export interface FontAwesomeIconProps {
     icon: IconProp;
     size?:
-      | "xs"
-      | "sm"
-      | "lg"
-      | "1x"
-      | "2x"
-      | "3x"
-      | "4x"
-      | "5x"
-      | "6x"
-      | "7x"
-      | "8x"
-      | "9x"
-      | "10x";
+      | 'xs'
+      | 'sm'
+      | 'lg'
+      | '1x'
+      | '2x'
+      | '3x'
+      | '4x'
+      | '5x'
+      | '6x'
+      | '7x'
+      | '8x'
+      | '9x'
+      | '10x';
     fixedWidth?: boolean;
     color?: string;
     className?: string;
@@ -225,14 +225,14 @@ declare module "@fortawesome/react-fontawesome" {
   ): React.ReactElement;
 }
 
-declare module "@fortawesome/fontawesome-svg-core" {
-  import { IconDefinition } from "@fortawesome/fontawesome-common-types";
+declare module '@fortawesome/fontawesome-svg-core' {
+  import { IconDefinition } from '@fortawesome/fontawesome-common-types'
 
   export type IconProp = IconDefinition | string;
   export type IconPrefix = string;
 
   // Re-export IconDefinition for convenience
-  export { IconDefinition };
+  export { IconDefinition }
 
   export interface Config {
     autoAddCss: boolean;
@@ -250,89 +250,91 @@ declare module "@fortawesome/fontawesome-svg-core" {
     add(...icons: (IconDefinition | Record<string, IconDefinition>)[]): void;
   }
 
-  export const library: Library;
-  export const config: Config;
+  export const library: Library
+  export const config: Config
 }
 
-// Make all FontAwesome icons compatible
-// Make all FontAwesome icons compatible
-declare module "@fortawesome/free-solid-svg-icons" {
-  import { IconDefinition } from "@fortawesome/fontawesome-common-types";
+/*
+ * Make all FontAwesome icons compatible
+ * Make all FontAwesome icons compatible
+ */
+declare module '@fortawesome/free-solid-svg-icons' {
+  import { IconDefinition } from '@fortawesome/fontawesome-common-types'
 
-  export const faClock: IconDefinition;
-  export const faEdit: IconDefinition;
-  export const faTrash: IconDefinition;
-  export const faTimes: IconDefinition;
-  export const faPencilAlt: IconDefinition;
-  export const faTh: IconDefinition;
-  export const faThLarge: IconDefinition;
-  export const faRss: IconDefinition;
-  export const faGripVertical: IconDefinition;
-  export const faCalendarAlt: IconDefinition;
-  export const faSun: IconDefinition;
-  export const faCloudSun: IconDefinition;
-  export const faCloudMoon: IconDefinition;
-  export const faCloud: IconDefinition;
-  export const faCloudRain: IconDefinition;
-  export const faCloudMoonRain: IconDefinition;
-  export const faBolt: IconDefinition;
-  export const faSnowflake: IconDefinition;
-  export const faSmog: IconDefinition;
-  export const faWifi: IconDefinition;
-  export const faMapMarkerAlt: IconDefinition;
-  export const faExclamationTriangle: IconDefinition;
-  export const faPlay: IconDefinition;
-  export const faGlobe: IconDefinition;
-  export const faFileImage: IconDefinition;
-  export const faFileVideo: IconDefinition;
-  export const faFileAlt: IconDefinition;
-  export const faTv: IconDefinition;
-  export const faCheck: IconDefinition;
-  export const faAngleLeft: IconDefinition;
-  export const faFont: IconDefinition;
-  export const faList: IconDefinition;
-  export const faMousePointer: IconDefinition;
-  export const faCalendar: IconDefinition;
-  export const faCog: IconDefinition;
-  export const faEye: IconDefinition;
-  export const faLink: IconDefinition;
-  export const faKey: IconDefinition;
-  export const faImages: IconDefinition;
-  export const faSignOutAlt: IconDefinition;
-  export const faCaretDown: IconDefinition;
-  export const faGifts: IconDefinition;
-  export const faImage: IconDefinition;
-  export const faListUl: IconDefinition;
+  export const faClock: IconDefinition
+  export const faEdit: IconDefinition
+  export const faTrash: IconDefinition
+  export const faTimes: IconDefinition
+  export const faPencilAlt: IconDefinition
+  export const faTh: IconDefinition
+  export const faThLarge: IconDefinition
+  export const faRss: IconDefinition
+  export const faGripVertical: IconDefinition
+  export const faCalendarAlt: IconDefinition
+  export const faSun: IconDefinition
+  export const faCloudSun: IconDefinition
+  export const faCloudMoon: IconDefinition
+  export const faCloud: IconDefinition
+  export const faCloudRain: IconDefinition
+  export const faCloudMoonRain: IconDefinition
+  export const faBolt: IconDefinition
+  export const faSnowflake: IconDefinition
+  export const faSmog: IconDefinition
+  export const faWifi: IconDefinition
+  export const faMapMarkerAlt: IconDefinition
+  export const faExclamationTriangle: IconDefinition
+  export const faPlay: IconDefinition
+  export const faGlobe: IconDefinition
+  export const faFileImage: IconDefinition
+  export const faFileVideo: IconDefinition
+  export const faFileAlt: IconDefinition
+  export const faTv: IconDefinition
+  export const faCheck: IconDefinition
+  export const faAngleLeft: IconDefinition
+  export const faFont: IconDefinition
+  export const faList: IconDefinition
+  export const faMousePointer: IconDefinition
+  export const faCalendar: IconDefinition
+  export const faCog: IconDefinition
+  export const faEye: IconDefinition
+  export const faLink: IconDefinition
+  export const faKey: IconDefinition
+  export const faImages: IconDefinition
+  export const faSignOutAlt: IconDefinition
+  export const faCaretDown: IconDefinition
+  export const faGifts: IconDefinition
+  export const faImage: IconDefinition
+  export const faListUl: IconDefinition
 
   // Re-export IconDefinition for convenience
-  export { IconDefinition };
+  export { IconDefinition }
 
   // Export icon pack
-  export const fas: Record<string, IconDefinition>;
+  export const fas: Record<string, IconDefinition>
 
   // Export all other icons as IconDefinition
-  const icons: Record<string, IconDefinition>;
+  const icons: Record<string, IconDefinition>
   export = icons;
 }
-declare module "@fortawesome/free-brands-svg-icons" {
-  import { IconDefinition } from "@fortawesome/fontawesome-common-types";
+declare module '@fortawesome/free-brands-svg-icons' {
+  import { IconDefinition } from '@fortawesome/fontawesome-common-types'
 
-  export const faChromecast: IconDefinition;
-  export const faYoutube: IconDefinition;
+  export const faChromecast: IconDefinition
+  export const faYoutube: IconDefinition
 
-  export const fab: Record<string, IconDefinition>;
+  export const fab: Record<string, IconDefinition>
 
-  const icons: Record<string, IconDefinition>;
+  const icons: Record<string, IconDefinition>
   export = icons;
 }
 
-declare module "@fortawesome/free-regular-svg-icons" {
-  import { IconDefinition } from "@fortawesome/fontawesome-common-types";
+declare module '@fortawesome/free-regular-svg-icons' {
+  import { IconDefinition } from '@fortawesome/fontawesome-common-types'
 
-  export const faClock: IconDefinition;
-  export const faWindowRestore: IconDefinition;
-  export const faImages: IconDefinition;
+  export const faClock: IconDefinition
+  export const faWindowRestore: IconDefinition
+  export const faImages: IconDefinition
 
-  const icons: Record<string, IconDefinition>;
+  const icons: Record<string, IconDefinition>
   export = icons;
 }

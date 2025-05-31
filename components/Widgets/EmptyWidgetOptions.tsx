@@ -1,5 +1,5 @@
-import React from 'react';
-import { IWidgetOptionsEditorProps } from '../../widgets/base_widget';
+import React from 'react'
+import { IWidgetOptionsEditorProps } from '../../widgets/base_widget'
 
 // Define prop types to match the expected interface
 interface EmptyWidgetOptionsProps extends IWidgetOptionsEditorProps<Record<string, any>> {}
@@ -25,8 +25,8 @@ class EmptyWidgetOptions extends React.Component<EmptyWidgetOptionsProps, EmptyW
           `}
         </style>
       </div>
-    );
+    )
   }
 }
 
-export default EmptyWidgetOptions;
+export default EmptyWidgetOptions

@@ -1,21 +1,21 @@
-import React from 'react';
-import StyledComponentsRegistry from './lib/registry';
+import React from 'react'
+import StyledComponentsRegistry from './lib/registry'
 
 // Import global styles
-import '../styles/globals.css';
-import '../styles/GridLayoutStyles.css';
-import 'react-resizable/css/styles.css';
-import '@fortawesome/fontawesome-svg-core/styles.css';
+import '../styles/globals.css'
+import '../styles/GridLayoutStyles.css'
+import 'react-resizable/css/styles.css'
+import '@fortawesome/fontawesome-svg-core/styles.css'
 
 export const metadata = {
   title: 'Digital Signage',
   description: 'A user interface for dynamic digital signage',
-};
+}
 
 export const viewport = {
   width: 'device-width',
   initialScale: 1,
-};
+}
 
 export default function RootLayout({
   children,
@@ -23,11 +23,11 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en">
+    <html lang='en'>
       <head>
         <link
-          href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,600,700,800"
-          rel="stylesheet"
+          href='https://fonts.googleapis.com/css?family=Open+Sans:300,400,600,700,800'
+          rel='stylesheet'
         />
         <style>{'body { margin: 0 } /* custom! */'}</style>
       </head>
@@ -37,5 +37,5 @@ export default function RootLayout({
         </StyledComponentsRegistry>
       </body>
     </html>
-  );
+  )
 }

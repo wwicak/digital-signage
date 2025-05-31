@@ -8,7 +8,7 @@ import React from 'react'
 import Image from 'next/image'
 
 class PhotoSlide extends GenericSlide {
-  private image: React.RefObject<HTMLImageElement | null>;
+  private image: React.RefObject<HTMLImageElement | null>
 
   constructor(props: GenericSlideProps) {
     super(props)
@@ -16,7 +16,7 @@ class PhotoSlide extends GenericSlide {
   }
 
   componentDidMount(): void {
-    super.componentDidMount();
+    super.componentDidMount()
     if (this.image && this.image.current && this.image.current.complete) {
       this.handleImageLoaded()
     }
@@ -56,7 +56,7 @@ class PhotoSlide extends GenericSlide {
         />
         <Image
           src={data}
-          alt="Slide photo"
+          alt='Slide photo'
           width={1}
           height={1}
           className='invisible'

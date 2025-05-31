@@ -1,7 +1,7 @@
-'use client';
+'use client'
 
-import React from 'react';
-import DisplayComponent from '../../../components/Display/Display';
+import React, { memo } from 'react'
+import DisplayComponent from '../../../components/Display/Display'
 
 interface DisplayPageProps {
   params: {
@@ -9,8 +9,8 @@ interface DisplayPageProps {
   };
 }
 
-function DisplayPage({ params }: DisplayPageProps) {
-  const { id: displayId } = params;
+const DisplayPage = memo(function DisplayPage({ params }: DisplayPageProps) {
+  const { id: displayId } = params
 
   return (
     <div className={'container'}>
@@ -40,7 +40,7 @@ function DisplayPage({ params }: DisplayPageProps) {
         `}
       </style>
     </div>
-  );
-}
+  )
+})
 
-export default DisplayPage;
+export default DisplayPage

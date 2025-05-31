@@ -15,9 +15,9 @@
 
 class StressTestMonitor {
   constructor() {
-    this.isRunning = false;
-    this.startTime = null;
-    this.intervals = [];
+    this.isRunning = false
+    this.startTime = null
+    this.intervals = []
     this.data = {
       memory: [],
       performance: [],
@@ -28,7 +28,7 @@ class StressTestMonitor {
         disconnections: 0,
         events: 0,
       },
-    };
+    }
 
     this.thresholds = {
       memoryGrowthRateMB: 10, // MB per hour
@@ -36,88 +36,88 @@ class StressTestMonitor {
       maxCPUPercent: 80,
       maxErrorsPerHour: 5,
       minFPS: 20,
-    };
+    }
 
-    this.setupErrorTracking();
-    this.setupSSETracking();
+    this.setupErrorTracking()
+    this.setupSSETracking()
   }
 
   setupErrorTracking() {
-    const originalError = console.error;
+    const originalError = console.error
     console.error = (...args) => {
       this.data.errors.push({
         timestamp: Date.now(),
-        message: args.join(" "),
-        type: "console.error",
-      });
-      originalError.apply(console, args);
-    };
+        message: args.join(' '),
+        type: 'console.error',
+      })
+      originalError.apply(console, args)
+    }
 
-    window.addEventListener("error", (event) => {
+    window.addEventListener('error', (event) => {
       this.data.errors.push({
         timestamp: Date.now(),
         message: event.message,
         source: event.filename,
         line: event.lineno,
-        type: "javascript.error",
-      });
-    });
+        type: 'javascript.error',
+      })
+    })
 
-    window.addEventListener("unhandledrejection", (event) => {
+    window.addEventListener('unhandledrejection', (event) => {
       this.data.errors.push({
         timestamp: Date.now(),
         message: event.reason.toString(),
-        type: "promise.rejection",
-      });
-    });
+        type: 'promise.rejection',
+      })
+    })
   }
 
   setupSSETracking() {
     // Monitor SSE connections by intercepting EventSource
-    const originalEventSource = window.EventSource;
-    const monitor = this;
+    const originalEventSource = window.EventSource
+    const monitor = this
 
     window.EventSource = function (...args) {
-      const eventSource = new originalEventSource(...args);
+      const eventSource = new originalEventSource(...args)
 
-      eventSource.addEventListener("open", () => {
-        monitor.data.sse.connections++;
+      eventSource.addEventListener('open', () => {
+        monitor.data.sse.connections++
         console.log(
           `[SSE Monitor] Connection opened. Total: ${monitor.data.sse.connections}`
-        );
-      });
+        )
+      })
 
-      eventSource.addEventListener("error", () => {
-        monitor.data.sse.disconnections++;
+      eventSource.addEventListener('error', () => {
+        monitor.data.sse.disconnections++
         console.log(
           `[SSE Monitor] Connection error. Total disconnections: ${monitor.data.sse.disconnections}`
-        );
-      });
+        )
+      })
 
       // Track all events
-      const originalAddEventListener = eventSource.addEventListener;
+      const originalAddEventListener = eventSource.addEventListener
       eventSource.addEventListener = function (type, listener, ...rest) {
         const wrappedListener = (event) => {
-          monitor.data.sse.events++;
-          if (type !== "error" && type !== "open") {
-            console.log(`[SSE Monitor] Event received: ${type}`);
+          monitor.data.sse.events++
+          if (type !== 'error' && type !== 'open') {
+            console.log(`[SSE Monitor] Event received: ${type}`)
           }
-          listener(event);
-        };
-        originalAddEventListener.call(this, type, wrappedListener, ...rest);
-      };
+          listener(event)
+        }
+        originalAddEventListener.call(this, type, wrappedListener, ...rest)
+      }
 
-      return eventSource;
-    };
+      return eventSource
+    }
   }
 
   collectMemoryData() {
-    const memoryInfo = performance.memory;
+    const memoryInfo = performance.memory
     if (!memoryInfo) {
       console.warn(
-        "[Monitor] Performance.memory not available in this browser"
-      );
-      return null;
+        '[Monitor] Performance.memory not available in this browser'
+      )
+      return null
     }
 
     const data = {
@@ -125,49 +125,49 @@ class StressTestMonitor {
       used: Math.round(memoryInfo.usedJSHeapSize / 1024 / 1024), // MB
       total: Math.round(memoryInfo.totalJSHeapSize / 1024 / 1024), // MB
       limit: Math.round(memoryInfo.jsHeapSizeLimit / 1024 / 1024), // MB
-      domNodes: document.querySelectorAll("*").length,
+      domNodes: document.querySelectorAll('*').length,
       eventListeners: this.countEventListeners(),
-    };
+    }
 
-    this.data.memory.push(data);
-    return data;
+    this.data.memory.push(data)
+    return data
   }
 
   countEventListeners() {
     // Approximate count - actual count is browser-dependent
-    let count = 0;
+    let count = 0
     try {
-      const allElements = document.querySelectorAll("*");
+      const allElements = document.querySelectorAll('*')
       allElements.forEach((el) => {
         // This is a rough approximation
-        if (el.onclick || el.onload || el.onerror) count++;
-      });
+        if (el.onclick || el.onload || el.onerror) count++
+      })
     } catch (e) {
       // Fallback - just return a placeholder
-      count = -1;
+      count = -1
     }
-    return count;
+    return count
   }
 
   collectPerformanceData() {
     const data = {
       timestamp: Date.now(),
-      navigation: performance.getEntriesByType("navigation")[0] || {},
-      resources: performance.getEntriesByType("resource").length,
-      measures: performance.getEntriesByType("measure").length,
-    };
+      navigation: performance.getEntriesByType('navigation')[0] || {},
+      resources: performance.getEntriesByType('resource').length,
+      measures: performance.getEntriesByType('measure').length,
+    }
 
-    this.data.performance.push(data);
-    return data;
+    this.data.performance.push(data)
+    return data
   }
 
   analyzeWidgets() {
-    const widgets = [];
+    const widgets = []
 
     // Look for widget containers
     const widgetElements = document.querySelectorAll(
       '.widget-wrapper, [class*="widget"]'
-    );
+    )
 
     widgetElements.forEach((el) => {
       const widget = {
@@ -180,95 +180,95 @@ class StressTestMonitor {
         },
         children: el.children.length,
         hasErrors: el.querySelector('.error, [class*="error"]') !== null,
-      };
-      widgets.push(widget);
-    });
+      }
+      widgets.push(widget)
+    })
 
-    this.data.widgets = widgets;
-    return widgets;
+    this.data.widgets = widgets
+    return widgets
   }
 
   detectWidgetType(element) {
     // Try to detect widget type from class names or content
-    const className = element.className;
-    if (className.includes("slideshow")) return "slideshow";
-    if (className.includes("weather")) return "weather";
-    if (className.includes("youtube")) return "youtube";
-    if (className.includes("web")) return "web";
-    if (className.includes("announcement")) return "announcement";
-    if (className.includes("congrats")) return "congrats";
-    if (className.includes("image")) return "image";
-    if (className.includes("list")) return "list";
+    const className = element.className
+    if (className.includes('slideshow')) return 'slideshow'
+    if (className.includes('weather')) return 'weather'
+    if (className.includes('youtube')) return 'youtube'
+    if (className.includes('web')) return 'web'
+    if (className.includes('announcement')) return 'announcement'
+    if (className.includes('congrats')) return 'congrats'
+    if (className.includes('image')) return 'image'
+    if (className.includes('list')) return 'list'
 
     // Try to detect from content
-    if (element.querySelector("iframe")) return "web";
-    if (element.querySelector("img")) return "slideshow";
-    if (element.querySelector('[class*="weather"]')) return "weather";
+    if (element.querySelector('iframe')) return 'web'
+    if (element.querySelector('img')) return 'slideshow'
+    if (element.querySelector('[class*="weather"]')) return 'weather'
 
-    return "unknown";
+    return 'unknown'
   }
 
   isElementVisible(element) {
-    const rect = element.getBoundingClientRect();
+    const rect = element.getBoundingClientRect()
     return (
       rect.width > 0 &&
       rect.height > 0 &&
       rect.top < window.innerHeight &&
       rect.bottom > 0
-    );
+    )
   }
 
   checkThresholds() {
-    const warnings = [];
-    const latest = this.data.memory[this.data.memory.length - 1];
+    const warnings = []
+    const latest = this.data.memory[this.data.memory.length - 1]
 
-    if (!latest) return warnings;
+    if (!latest) return warnings
 
     // Memory usage check
     if (latest.used > this.thresholds.maxMemoryMB) {
       warnings.push(
         `HIGH MEMORY USAGE: ${latest.used}MB exceeds threshold of ${this.thresholds.maxMemoryMB}MB`
-      );
+      )
     }
 
     // Memory growth rate check
     if (this.data.memory.length > 4) {
-      const hourAgo = latest.timestamp - 60 * 60 * 1000;
-      const oldMemory = this.data.memory.find((m) => m.timestamp >= hourAgo);
+      const hourAgo = latest.timestamp - 60 * 60 * 1000
+      const oldMemory = this.data.memory.find((m) => m.timestamp >= hourAgo)
       if (oldMemory) {
-        const growthRate = latest.used - oldMemory.used;
+        const growthRate = latest.used - oldMemory.used
         if (growthRate > this.thresholds.memoryGrowthRateMB) {
           warnings.push(
             `MEMORY LEAK DETECTED: Growing at ${growthRate}MB/hour (threshold: ${this.thresholds.memoryGrowthRateMB}MB/hour)`
-          );
+          )
         }
       }
     }
 
     // Error rate check
-    const hoursRunning = (Date.now() - this.startTime) / (1000 * 60 * 60);
-    const errorRate = this.data.errors.length / Math.max(hoursRunning, 0.1);
+    const hoursRunning = (Date.now() - this.startTime) / (1000 * 60 * 60)
+    const errorRate = this.data.errors.length / Math.max(hoursRunning, 0.1)
     if (errorRate > this.thresholds.maxErrorsPerHour) {
       warnings.push(
         `HIGH ERROR RATE: ${errorRate.toFixed(1)} errors/hour (threshold: ${
           this.thresholds.maxErrorsPerHour
         }/hour)`
-      );
+      )
     }
 
-    return warnings;
+    return warnings
   }
 
   generateReport() {
     const runningTime = this.startTime
       ? (Date.now() - this.startTime) / 1000 / 60
-      : 0; // minutes
-    const latest = this.data.memory[this.data.memory.length - 1];
+      : 0 // minutes
+    const latest = this.data.memory[this.data.memory.length - 1]
 
     const report = {
       summary: {
         runningTimeMinutes: Math.round(runningTime),
-        currentMemoryMB: latest ? latest.used : "N/A",
+        currentMemoryMB: latest ? latest.used : 'N/A',
         totalErrors: this.data.errors.length,
         sseConnections: this.data.sse.connections,
         sseDisconnections: this.data.sse.disconnections,
@@ -288,148 +288,148 @@ class StressTestMonitor {
         total: this.data.widgets.length,
         types: this.getWidgetTypeCounts(),
       },
-    };
+    }
 
-    return report;
+    return report
   }
 
   calculateMemoryTrend() {
-    if (this.data.memory.length < 2) return "insufficient_data";
+    if (this.data.memory.length < 2) return 'insufficient_data'
 
-    const recent = this.data.memory.slice(-5);
-    const trend = recent[recent.length - 1].used - recent[0].used;
+    const recent = this.data.memory.slice(-5)
+    const trend = recent[recent.length - 1].used - recent[0].used
 
-    if (trend > 5) return "increasing";
-    if (trend < -5) return "decreasing";
-    return "stable";
+    if (trend > 5) return 'increasing'
+    if (trend < -5) return 'decreasing'
+    return 'stable'
   }
 
   getWidgetTypeCounts() {
-    const counts = {};
+    const counts = {}
     this.data.widgets.forEach((w) => {
-      counts[w.type] = (counts[w.type] || 0) + 1;
-    });
-    return counts;
+      counts[w.type] = (counts[w.type] || 0) + 1
+    })
+    return counts
   }
 
   start(intervalMinutes = 5) {
     if (this.isRunning) {
-      console.warn("[Monitor] Already running!");
-      return;
+      console.warn('[Monitor] Already running!')
+      return
     }
 
-    this.isRunning = true;
-    this.startTime = Date.now();
+    this.isRunning = true
+    this.startTime = Date.now()
 
     console.log(
       `[Monitor] Starting stress test monitoring with ${intervalMinutes} minute intervals`
-    );
-    console.log("[Monitor] Use stopStressTestMonitoring() to stop");
+    )
+    console.log('[Monitor] Use stopStressTestMonitoring() to stop')
 
     // Initial data collection
-    this.collectMemoryData();
-    this.collectPerformanceData();
-    this.analyzeWidgets();
+    this.collectMemoryData()
+    this.collectPerformanceData()
+    this.analyzeWidgets()
 
     // Set up periodic collection
     const interval = setInterval(() => {
       try {
-        const memory = this.collectMemoryData();
-        this.collectPerformanceData();
-        this.analyzeWidgets();
+        const memory = this.collectMemoryData()
+        this.collectPerformanceData()
+        this.analyzeWidgets()
 
         if (memory) {
           console.log(
             `[Monitor] Memory: ${memory.used}MB used, ${memory.domNodes} DOM nodes`
-          );
+          )
         }
 
-        const warnings = this.checkThresholds();
+        const warnings = this.checkThresholds()
         warnings.forEach((warning) => {
-          console.warn(`[Monitor] ⚠️ ${warning}`);
-        });
+          console.warn(`[Monitor] ⚠️ ${warning}`)
+        })
 
         // Auto-export data if running for more than 2 hours
-        const runningHours = (Date.now() - this.startTime) / 1000 / 60 / 60;
+        const runningHours = (Date.now() - this.startTime) / 1000 / 60 / 60
         if (runningHours > 2 && runningHours % 2 < intervalMinutes / 60) {
-          this.exportData();
+          this.exportData()
         }
       } catch (error) {
-        console.error("[Monitor] Error during data collection:", error);
+        console.error('[Monitor] Error during data collection:', error)
       }
-    }, intervalMinutes * 60 * 1000);
+    }, intervalMinutes * 60 * 1000)
 
-    this.intervals.push(interval);
+    this.intervals.push(interval)
   }
 
   stop() {
     if (!this.isRunning) {
-      console.warn("[Monitor] Not currently running!");
-      return;
+      console.warn('[Monitor] Not currently running!')
+      return
     }
 
-    this.isRunning = false;
-    this.intervals.forEach((interval) => clearInterval(interval));
-    this.intervals = [];
+    this.isRunning = false
+    this.intervals.forEach((interval) => clearInterval(interval))
+    this.intervals = []
 
-    console.log("[Monitor] Stopped monitoring");
-    console.log("[Monitor] Final report:");
-    console.table(this.generateReport().summary);
+    console.log('[Monitor] Stopped monitoring')
+    console.log('[Monitor] Final report:')
+    console.table(this.generateReport().summary)
 
-    return this.generateReport();
+    return this.generateReport()
   }
 
   exportData() {
-    const report = this.generateReport();
+    const report = this.generateReport()
     const filename = `stress-test-${new Date()
       .toISOString()
       .slice(0, 19)
-      .replace(/:/g, "-")}.json`;
+      .replace(/:/g, '-')}.json`
 
     try {
       const blob = new Blob([JSON.stringify(report, null, 2)], {
-        type: "application/json",
-      });
-      const url = URL.createObjectURL(blob);
+        type: 'application/json',
+      })
+      const url = URL.createObjectURL(blob)
 
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = filename;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
+      const a = document.createElement('a')
+      a.href = url
+      a.download = filename
+      document.body.appendChild(a)
+      a.click()
+      document.body.removeChild(a)
+      URL.revokeObjectURL(url)
 
-      console.log(`[Monitor] Data exported to ${filename}`);
+      console.log(`[Monitor] Data exported to ${filename}`)
     } catch (error) {
-      console.error("[Monitor] Failed to export data:", error);
-      console.log("[Monitor] Raw data:", report);
+      console.error('[Monitor] Failed to export data:', error)
+      console.log('[Monitor] Raw data:', report)
     }
   }
 
   getReport() {
-    return this.generateReport();
+    return this.generateReport()
   }
 }
 
 // Global instance
-window.stressTestMonitor = new StressTestMonitor();
+window.stressTestMonitor = new StressTestMonitor()
 
 // Convenience functions for console use
 function startStressTestMonitoring(intervalMinutes = 5) {
-  window.stressTestMonitor.start(intervalMinutes);
+  window.stressTestMonitor.start(intervalMinutes)
 }
 
 function stopStressTestMonitoring() {
-  return window.stressTestMonitor.stop();
+  return window.stressTestMonitor.stop()
 }
 
 function getStressTestReport() {
-  return window.stressTestMonitor.getReport();
+  return window.stressTestMonitor.getReport()
 }
 
 function exportStressTestData() {
-  window.stressTestMonitor.exportData();
+  window.stressTestMonitor.exportData()
 }
 
 // Display help
@@ -444,4 +444,4 @@ Available commands:
 
 Example:
 startStressTestMonitoring(2); // Start with 2-minute intervals
-`);
+`)

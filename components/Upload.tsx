@@ -1,24 +1,26 @@
-import React, { Component } from 'react';
-import dynamic from 'next/dynamic';
-import ContentLoader from 'react-content-loader';
-import { FileRejection, DropzoneProps, DropEvent } from 'react-dropzone'; // Import types
+import React, { Component } from 'react'
+import dynamic from 'next/dynamic'
+import ContentLoader from 'react-content-loader'
+import { FileRejection, DropzoneProps, DropEvent } from 'react-dropzone' // Import types
 
 // Assuming SlideEditDialog.tsx exports ISlideEditDialogRef for its ref methods
-import SlideEditDialog, { ISlideEditDialogRef } from './Admin/SlideEditDialog';
+import SlideEditDialog, { ISlideEditDialogRef } from './Admin/SlideEditDialog'
 
-// Dynamically import react-dropzone for client-side only
-// Ensure the path to react-dropzone is correct if it's different in your node_modules
+/*
+ * Dynamically import react-dropzone for client-side only
+ * Ensure the path to react-dropzone is correct if it's different in your node_modules
+ */
 const DropzoneWithNoSSR = dynamic(
   () => import('react-dropzone'), // Default export for react-dropzone
   {
     ssr: false,
     loading: () => (
-      <ContentLoader height={120} width={640} speed={2} backgroundColor="#f3f3f3" foregroundColor="#ecebeb">
-        <rect x="0" y="0" rx="5" ry="5" width="100%" height="100" />
+      <ContentLoader height={120} width={640} speed={2} backgroundColor='#f3f3f3' foregroundColor='#ecebeb'>
+        <rect x='0' y='0' rx='5' ry='5' width='100%' height='100' />
       </ContentLoader>
     ),
   }
-);
+)
 
 // Extend File type to include our custom preview property
 interface IFileWithPreview extends File {
@@ -40,20 +42,22 @@ interface IUploadState {
 
 class Upload extends Component<IUploadProps, IUploadState> {
   // Ref to SlideEditDialog instance
-  private dialogRef = React.createRef<SlideEditDialog>();
+  private dialogRef = React.createRef<SlideEditDialog>()
 
   constructor(props: IUploadProps) {
-    super(props);
+    super(props)
     this.state = {
       lastFile: null,
-    };
+    }
   }
   
-  // Note: It's good practice to revoke object URLs when they are no longer needed
-  // to free up resources. This can be done in componentWillUnmount or when lastFile changes.
+  /*
+   * Note: It's good practice to revoke object URLs when they are no longer needed
+   * to free up resources. This can be done in componentWillUnmount or when lastFile changes.
+   */
   componentWillUnmount() {
       if (this.state.lastFile?.preview) {
-          URL.revokeObjectURL(this.state.lastFile.preview);
+          URL.revokeObjectURL(this.state.lastFile.preview)
       }
   }
 
@@ -62,41 +66,45 @@ class Upload extends Component<IUploadProps, IUploadState> {
     if (acceptedFiles.length > 0) {
       // Revoke previous object URL if it exists
       if (this.state.lastFile?.preview) {
-        URL.revokeObjectURL(this.state.lastFile.preview);
+        URL.revokeObjectURL(this.state.lastFile.preview)
       }
 
-      const file = acceptedFiles[acceptedFiles.length - 1] as IFileWithPreview;
-      // Create a preview URL
-      // Check if createObjectURL is available (it should be in modern browsers)
+      const file = acceptedFiles[acceptedFiles.length - 1] as IFileWithPreview
+      /*
+       * Create a preview URL
+       * Check if createObjectURL is available (it should be in modern browsers)
+       */
       if (URL && URL.createObjectURL) {
-        file.preview = URL.createObjectURL(file);
+        file.preview = URL.createObjectURL(file)
       } else if (typeof window !== 'undefined' && window.webkitURL) {
         // Fallback for older Safari
-        file.preview = window.webkitURL.createObjectURL(file);
+        file.preview = window.webkitURL.createObjectURL(file)
       } else {
-        file.preview = undefined; // Or some placeholder/error state
+        file.preview = undefined // Or some placeholder/error state
       }
 
       this.setState({ lastFile: file }, () => {
         // Open the dialog after the file is set in state
-        this.dialogRef.current?.open();
-      });
+        this.dialogRef.current?.open()
+      })
     }
-  };
+  }
 
   handleOnDropRejected = (rejectedFiles: FileRejection[], event: DropEvent): void => {
     if (rejectedFiles.length > 0) {
-      // Get the file name from the first rejected file.
-      // rejectedFiles[0] is an object { file: File, errors: Error[] }
-      const firstRejectedFile = rejectedFiles[0].file;
-      const fileName = firstRejectedFile?.name || 'this file type';
-      alert(`File type not allowed or file too large: ${fileName}`);
+      /*
+       * Get the file name from the first rejected file.
+       * rejectedFiles[0] is an object { file: File, errors: Error[] }
+       */
+      const firstRejectedFile = rejectedFiles[0].file
+      const fileName = firstRejectedFile?.name || 'this file type'
+      alert(`File type not allowed or file too large: ${fileName}`)
     }
-  };
+  }
 
   render() {
-    const { slideshowId, refresh, accept = {'image/*': []}, maxSize, multiple = false } = this.props;
-    const { lastFile } = this.state;
+    const { slideshowId, refresh, accept = {'image/*': []}, maxSize, multiple = false } = this.props
+    const { lastFile } = this.state
 
     // Props for react-dropzone
     const dropzoneProps: DropzoneProps = {
@@ -105,10 +113,10 @@ class Upload extends Component<IUploadProps, IUploadState> {
       multiple: multiple,
       accept: accept, // e.g. 'image/*' or { 'image/png': ['.png'], 'image/jpeg': ['.jpg', '.jpeg'] }
       ...(maxSize && { maxSize }),
-    };
+    }
 
     return (
-      <div className="upload-widget-container">
+      <div className='upload-widget-container'>
         <SlideEditDialog
           slideshowId={slideshowId} // Pass slideshowId to know where to add the new slide
           upload={lastFile} // Pass the selected file (with preview) to the dialog
@@ -124,10 +132,10 @@ class Upload extends Component<IUploadProps, IUploadState> {
                 {isDragActive ? (
                   <p>Drop files here to add to the slideshow...</p>
                 ) : (
-                  <p>Drag 'n' drop some files here, or click to select files to add to the slideshow.</p> // More descriptive
+                  <p>Drag &apos;n&apos; drop some files here, or click to select files to add to the slideshow.</p> // More descriptive
                 )}
               </div>
-            );
+            )
           }}
         </DropzoneWithNoSSR>
         <style jsx>
@@ -157,8 +165,8 @@ class Upload extends Component<IUploadProps, IUploadState> {
           `}
         </style>
       </div>
-    );
+    )
   }
 }
 
-export default Upload;
+export default Upload

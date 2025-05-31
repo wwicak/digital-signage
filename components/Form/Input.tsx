@@ -1,8 +1,8 @@
-import React, { Component, ChangeEvent, KeyboardEvent, ReactNode, CSSProperties } from 'react';
-import dynamic from 'next/dynamic';
-import ContentLoader from 'react-content-loader';
+import React, { Component, ChangeEvent, KeyboardEvent, ReactNode, CSSProperties } from 'react'
+import dynamic from 'next/dynamic'
+import ContentLoader from 'react-content-loader'
 
-import ColorPicker, { IColorPickerProps } from './ColorPicker'; // Assuming ColorPicker.tsx
+import ColorPicker, { IColorPickerProps } from './ColorPicker' // Assuming ColorPicker.tsx
 
 // --- Types and Interfaces ---
 export interface IChoice {
@@ -57,12 +57,12 @@ const DropzoneWithNoSSR = dynamic(
   {
     ssr: false,
     loading: () => (
-      <ContentLoader height={80} width={400} speed={2} backgroundColor="#f3f3f3" foregroundColor="#ecebeb">
-        <rect x="0" y="0" rx="4" ry="4" width="100%" height="80" />
+      <ContentLoader height={80} width={400} speed={2} backgroundColor='#f3f3f3' foregroundColor='#ecebeb'>
+        <rect x='0' y='0' rx='4' ry='4' width='100%' height='80' />
       </ContentLoader>
     ),
   }
-);
+)
 
 
 class Input extends Component<IInputProps> {
@@ -72,60 +72,66 @@ class Input extends Component<IInputProps> {
   handleHtmlInputChange = (
     event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
   ): void => {
-    const { name, onChange } = this.props;
-    const target = event.target;
-    let value: string | number | boolean | undefined;
+    const { name, onChange } = this.props
+    const target = event.target
+    let value: string | number | boolean | undefined
 
     if (target.type === 'checkbox') {
-      value = (target as HTMLInputElement).checked;
+      value = (target as HTMLInputElement).checked
     } else if (target.type === 'number') {
-      value = (target as HTMLInputElement).valueAsNumber;
-      if(isNaN(value)) value = undefined; // or props.value if want to revert, or ''
+      value = (target as HTMLInputElement).valueAsNumber
+      if(isNaN(value)) value = undefined // or props.value if want to revert, or ''
     }
      else {
-      value = target.value;
+      value = target.value
     }
-    onChange(name, value, event);
-  };
+    onChange(name, value, event)
+  }
 
   // Handler for ColorPicker component
   handleColorChange = (colorHex: string): void => {
-    const { name, onChange } = this.props;
-    onChange(name, colorHex);
-  };
+    const { name, onChange } = this.props
+    onChange(name, colorHex)
+  }
 
-  // Handler for react-dropzone (photo upload)
-  // react-dropzone v11+ onDrop type: (acceptedFiles: File[], rejectedFiles: FileRejection[], event: DropEvent) => void
+  /*
+   * Handler for react-dropzone (photo upload)
+   * react-dropzone v11+ onDrop type: (acceptedFiles: File[], rejectedFiles: FileRejection[], event: DropEvent) => void
+   */
   handlePhotoDrop = (acceptedFiles: File[]): void => {
-    const { name, onChange } = this.props;
+    const { name, onChange } = this.props
     if (acceptedFiles.length > 0) {
-      const file = acceptedFiles[0];
-      // Create a preview URL. Ensure to revoke it when component unmounts or file changes if it's a new preview.
-      // For simplicity, assuming parent handles preview logic if it receives a File object.
-      // The original code assigned a 'preview' property to the File object.
-      // This is generally not recommended. It's better to manage previews in component state if needed.
-      // (file as any).preview = URL.createObjectURL(file); // Avoid modifying File object prototype
+      const file = acceptedFiles[0]
+      /*
+       * Create a preview URL. Ensure to revoke it when component unmounts or file changes if it's a new preview.
+       * For simplicity, assuming parent handles preview logic if it receives a File object.
+       * The original code assigned a 'preview' property to the File object.
+       * This is generally not recommended. It's better to manage previews in component state if needed.
+       * (file as any).preview = URL.createObjectURL(file); // Avoid modifying File object prototype
+       */
       
-      // The original JS used 'upload' as the 'name' for onChange.
-      // If this specific Input instance for photo has name="upload", it will pass 'upload'.
-      // Otherwise, it passes its actual 'name' prop.
-      onChange(name, file, undefined); // Pass the File object
+      /*
+       * The original JS used 'upload' as the 'name' for onChange.
+       * If this specific Input instance for photo has name="upload", it will pass 'upload'.
+       * Otherwise, it passes its actual 'name' prop.
+       */
+      onChange(name, file, undefined) // Pass the File object
     }
-  };
+  }
 
   handlePhotoDropRejected = (rejectedFiles: any[]): void => {
     // Using any[] for rejectedFiles as FileRejection type might need specific import from dropzone
     if (rejectedFiles.length > 0) {
       // Get the specific file object from the rejection if possible
-      const firstRejectedFile = rejectedFiles[0]?.file || rejectedFiles[0];
-      const fileName = firstRejectedFile?.name || 'this file type';
-      alert(`File type not allowed: ${fileName}`);
+      const firstRejectedFile = rejectedFiles[0]?.file || rejectedFiles[0]
+      const fileName = firstRejectedFile?.name || 'this file type'
+      alert(`File type not allowed: ${fileName}`)
     }
-  };
+  }
 
 
   renderInput() {
-    const { type, value, placeholder, disabled, onKeyDown, className, name } = this.props;
+    const { type, value, placeholder, disabled, onKeyDown, className, name } = this.props
 
     switch (type) {
       case 'text':
@@ -145,12 +151,12 @@ class Input extends Component<IInputProps> {
             disabled={disabled}
             onKeyDown={onKeyDown}
           />
-        );
+        )
       case 'number':
-        const numProps = this.props as INumberInputProps;
+        const numProps = this.props as INumberInputProps
         return (
           <input
-            type="number"
+            type='number'
             name={name}
             className={className}
             placeholder={placeholder}
@@ -162,9 +168,9 @@ class Input extends Component<IInputProps> {
             max={numProps.max}
             step={numProps.step}
           />
-        );
+        )
       case 'textarea':
-        const taProps = this.props as ITextAreaProps;
+        const taProps = this.props as ITextAreaProps
         return (
           <textarea
             name={name}
@@ -176,9 +182,9 @@ class Input extends Component<IInputProps> {
             onKeyDown={onKeyDown}
             rows={taProps.rows}
           />
-        );
+        )
       case 'select':
-        const selProps = this.props as ISelectProps;
+        const selProps = this.props as ISelectProps
         return (
           <select
             name={name}
@@ -188,7 +194,7 @@ class Input extends Component<IInputProps> {
             disabled={disabled}
             onKeyDown={onKeyDown}
           >
-            <option value={""} disabled={selProps.placeholder === undefined}>
+            <option value={''} disabled={selProps.placeholder === undefined}>
               {selProps.placeholder || 'Choose an option...'}
             </option>
             {selProps.choices.map(choice => (
@@ -197,26 +203,28 @@ class Input extends Component<IInputProps> {
               </option>
             ))}
           </select>
-        );
+        )
       case 'color':
-        return <ColorPicker color={value as string} onChange={this.handleColorChange} />;
+        return <ColorPicker color={value as string} onChange={this.handleColorChange} />
       case 'checkbox':
-        const cbProps = this.props as ICheckboxProps;
+        const cbProps = this.props as ICheckboxProps
         return (
             <input
-                type="checkbox"
+                type='checkbox'
                 name={name}
                 className={className}
-                checked={!!value} // Checkbox checked state is boolean
+                checked={!!cbProps.checked} // Use the checked prop
                 onChange={this.handleHtmlInputChange} // This will pass boolean for 'checked'
                 disabled={disabled}
                 value={cbProps.value || 'on'} // Actual value attribute for checkbox if needed by form
             />
-        );
+        )
       case 'photo':
-        const photoProps = this.props as IPhotoUploadProps;
-        // `value` for photo can be a string (URL of existing image) or a File object (new upload)
-        // Dropzone typically handles display of preview or existing image.
+        const photoProps = this.props as IPhotoUploadProps
+        /*
+         * `value` for photo can be a string (URL of existing image) or a File object (new upload)
+         * Dropzone typically handles display of preview or existing image.
+         */
         return (
           <DropzoneWithNoSSR
             onDropAccepted={this.handlePhotoDrop}
@@ -239,12 +247,12 @@ class Input extends Component<IInputProps> {
                         <span className={'link-text'}>{(value as File).name} (New)</span>
                      </div>
                 ) : (
-                  <div className={'photo-upload-text'}>Drag 'n' drop a photo here, or click to select</div>
+                  <div className={'photo-upload-text'}>Drag &apos;n&apos; drop a photo here, or click to select</div>
                 )}
               </div>
             )}
           </DropzoneWithNoSSR>
-        );
+        )
       default: // Should be textarea as per original JS
         return (
           <textarea
@@ -256,15 +264,15 @@ class Input extends Component<IInputProps> {
             disabled={disabled}
             onKeyDown={onKeyDown}
           />
-        );
+        )
     }
   }
 
   render() {
-    const { label, inline = true, expand = true, helpText, error, style } = this.props;
+    const { label, inline = false, expand = true, helpText, error, style } = this.props
 
     // Determine error state for styling
-    const hasError = typeof error === 'string' ? !!error : !!error;
+    const hasError = typeof error === 'string' ? !!error : !!error
 
     return (
       <div
@@ -272,10 +280,10 @@ class Input extends Component<IInputProps> {
         style={style}
       >
         {label && <label htmlFor={this.props.name}>{label}</label>}
-        <div className="input-field-container">
+        <div className='input-field-container'>
           {this.renderInput()}
-          {helpText && !hasError && <small className="help-text">{helpText}</small>}
-          {typeof error === 'string' && hasError && <small className="error-text">{error}</small>}
+          {helpText && !hasError && <small className='help-text'>{helpText}</small>}
+          {typeof error === 'string' && hasError && <small className='error-text'>{error}</small>}
         </div>
         {/* Original JSX styles were complex and dependent on props.inline and props.expand.
             It's generally better to handle these with more structured CSS or utility classes.
@@ -453,8 +461,8 @@ class Input extends Component<IInputProps> {
 
         `}</style>
       </div>
-    );
+    )
   }
 }
 
-export default Input;
+export default Input

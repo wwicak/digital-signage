@@ -52,3 +52,7 @@ node_modules
 uploads/*
 
 dist
+
+*.tsbuildinfo
+type-check-errors.log
+bun.lockb

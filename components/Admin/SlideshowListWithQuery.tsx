@@ -1,9 +1,9 @@
-import React from 'react';
-import ContentLoader from 'react-content-loader';
+import React from 'react'
+import ContentLoader from 'react-content-loader'
 
-import SlideshowCard from './SlideshowCard';
-import { ISlideshowData } from '../../actions/slideshow';
-import { useSlideshows } from '../../hooks/useSlideshows';
+import SlideshowCard from './SlideshowCard'
+import { ISlideshowData } from '../../actions/slideshow'
+import { useSlideshows } from '../../hooks/useSlideshows'
 
 // Props interface for the component
 export interface ISlideshowListWithQueryProps {
@@ -11,18 +11,18 @@ export interface ISlideshowListWithQueryProps {
 }
 
 const SlideshowListWithQuery: React.FC<ISlideshowListWithQueryProps> = () => {
-  const { data: slideshows, isLoading, error, refetch } = useSlideshows();
+  const { data: slideshows, isLoading, error, refetch } = useSlideshows()
 
   // Handle error state
   if (error) {
     return (
-      <div className="error-message">
+      <div className='error-message'>
         Failed to load slideshows. Please try again later.
         <button onClick={() => refetch()} style={{ marginLeft: '10px' }}>
           Retry
         </button>
       </div>
-    );
+    )
   }
 
   return (
@@ -43,14 +43,14 @@ const SlideshowListWithQuery: React.FC<ISlideshowListWithQueryProps> = () => {
                 height={100}
                 width={640}
                 speed={2}
-                backgroundColor="#f3f3f3"
-                foregroundColor="#ecebeb"
+                backgroundColor='#f3f3f3'
+                foregroundColor='#ecebeb'
               >
-                <rect x="0" y="10" rx="4" ry="4" width="50" height="50" />
-                <rect x="60" y="10" rx="3" ry="3" width="300" height="15" />
-                <rect x="60" y="30" rx="3" ry="3" width="80" height="10" />
-                <rect x="150" y="30" rx="3" ry="3" width="80" height="10" />
-                <rect x="600" y="25" rx="3" ry="3" width="20" height="20" />
+                <rect x='0' y='10' rx='4' ry='4' width='50' height='50' />
+                <rect x='60' y='10' rx='3' ry='3' width='300' height='15' />
+                <rect x='60' y='30' rx='3' ry='3' width='80' height='10' />
+                <rect x='150' y='30' rx='3' ry='3' width='80' height='10' />
+                <rect x='600' y='25' rx='3' ry='3' width='20' height='20' />
               </ContentLoader>
             ))}
       <style jsx>
@@ -69,7 +69,7 @@ const SlideshowListWithQuery: React.FC<ISlideshowListWithQueryProps> = () => {
         `}
       </style>
     </div>
-  );
-};
+  )
+}
 
-export default SlideshowListWithQuery;
+export default SlideshowListWithQuery

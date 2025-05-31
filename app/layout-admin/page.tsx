@@ -1,70 +1,79 @@
-'use client';
+'use client'
 
-import React, { useState, useEffect, Suspense } from 'react';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faThLarge, faTh, faPencilAlt } from '@fortawesome/free-solid-svg-icons';
-import GridLayout, { Layout as RglLayout } from 'react-grid-layout';
-import { useSearchParams } from 'next/navigation';
-import { DragDropContext, Droppable, DropResult } from '@hello-pangea/dnd';
+import React, { useState, useEffect, useCallback, Suspense, memo } from 'react'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { faThLarge, faTh, faPencilAlt } from '@fortawesome/free-solid-svg-icons'
+import GridLayout, { Layout as RglLayout } from 'react-grid-layout'
+import { useSearchParams } from 'next/navigation'
+import { DragDropContext, Droppable, DropResult } from '@hello-pangea/dnd'
 
-import Frame from '../../components/Admin/Frame';
-import EditableWidget from '../../components/Admin/EditableWidget';
-import StatusBarElement from '../../components/Admin/StatusBarElement';
-import WidthProvider from '../../components/Widgets/WidthProvider';
-import DropdownButton from '../../components/DropdownButton';
-import { Form, Switch } from '../../components/Form';
-import { useDisplayContext } from '../../contexts/DisplayContext';
+import Frame from '../../components/Admin/Frame'
+import EditableWidget from '../../components/Admin/EditableWidget'
+import StatusBarElement from '../../components/Admin/StatusBarElement'
+import WidthProvider from '../../components/Widgets/WidthProvider'
+import DropdownButton from '../../components/DropdownButton'
+import { Form, Switch } from '../../components/Form'
+import { useDisplayContext } from '../../contexts/DisplayContext'
 
-import { StatusBarElementTypes } from '../../helpers/statusbar';
-import Widgets from '../../widgets';
+import { StatusBarElementTypes } from '../../helpers/statusbar'
+import Widgets from '../../widgets'
 
-import { addWidget, getWidgets, deleteWidget, updateWidget, IWidgetData, INewWidgetData, IUpdateWidgetData } from '../../actions/widgets';
-import { WidgetType } from '../../api/models/Widget';
+import { addWidget, getWidgets, deleteWidget, updateWidget, IWidgetData, INewWidgetData, IUpdateWidgetData } from '../../actions/widgets'
+import { WidgetType } from '../../api/models/Widget'
 
-const GridLayoutWithWidth = WidthProvider(GridLayout as any);
+const GridLayoutWithWidth = WidthProvider(GridLayout as any)
 
-function LayoutAdminContent() {
-  const [widgets, setWidgets] = useState<IWidgetData[]>([]);
-  const searchParams = useSearchParams();
-  const context = useDisplayContext();
+const LayoutAdminContent = memo(function LayoutAdminContent() {
+  const [widgets, setWidgets] = useState<IWidgetData[]>([])
+  const searchParams = useSearchParams()
+  const context = useDisplayContext()
+
+  // Memoize refreshWidgets to stabilize useEffect dependency
+  const refreshWidgets = useCallback((displayId: string): Promise<void> => {
+    return getWidgets(displayId).then(apiWidgets => { // Renamed to avoid confusion with state
+      setWidgets(apiWidgets)
+    }).catch(error => {
+      console.error('Failed to refresh widgets:', error)
+      setWidgets([]) // Ensure widgets is cleared or handled on error
+    })
+  }, []) // Assuming getWidgets and setWidgets are stable or have no dependencies from component scope
 
   useEffect(() => {
     // Get display ID from URL search params (e.g., ?display=ID)
-    const displayIdFromUrl = searchParams?.get('display');
-    const id = displayIdFromUrl || 'default-display-id'; // Fallback to default
+    const displayIdFromUrl = searchParams?.get('display')
+    const id = displayIdFromUrl || 'default-display-id' // Fallback to default
     
     // Set the display ID in context, which will trigger data fetching
-    context.setId(id);
-    refreshWidgets(id);
-  }, [searchParams, context]);
-
-  const refreshWidgets = (displayId: string): Promise<void> => {
-    return getWidgets(displayId).then(widgets => {
-      setWidgets(widgets);
-    }).catch(error => {
-      console.error("Failed to refresh widgets:", error);
-      setWidgets([]);
-    });
-  };
+    context.setId(id)
+    refreshWidgets(id)
+  }, [searchParams, context.setId, refreshWidgets]) // Updated dependencies
 
   const handleAddWidget = (type: string): void => {
-    const widgetDefinition = Widgets[type];
+    if (!context.state.id) {
+      console.error('Display ID not set, cannot add widget.')
+      return
+    }
+    const widgetDefinition = Widgets[type]
     const newWidgetData: Partial<INewWidgetData> = {
-        display: context.state.id!,
+        display: context.state.id,
         type: type as WidgetType,
         data: widgetDefinition?.defaultData || {},
-    };
+    }
 
     addWidget(newWidgetData as INewWidgetData)
-        .then(() => refreshWidgets(context.state.id!))
-        .catch(error => console.error("Failed to add widget:", error));
-  };
+        .then(() => refreshWidgets(context.state.id!)) // context.state.id should be stable if refreshWidgets is called
+        .catch(error => console.error('Failed to add widget:', error))
+  }
 
   const handleDeleteWidget = (id: string): void => {
+    if (!context.state.id) {
+      console.error('Display ID not set, cannot delete widget.')
+      return
+    }
     deleteWidget(id)
-        .then(() => refreshWidgets(context.state.id!))
-        .catch(error => console.error("Failed to delete widget:", error));
-  };
+        .then(() => refreshWidgets(context.state.id!)) // context.state.id should be stable
+        .catch(error => console.error('Failed to delete widget:', error))
+  }
 
   const handleLayoutChange = (layout: RglLayout[]): void => {
     for (const widgetLayout of layout) {
@@ -73,27 +82,27 @@ function LayoutAdminContent() {
         y: widgetLayout.y,
         w: widgetLayout.w,
         h: widgetLayout.h,
-      };
+      }
       updateWidget(widgetLayout.i, widgetData)
-        .catch(error => console.error(`Failed to update widget ${widgetLayout.i} layout:`, error));
+        .catch(error => console.error(`Failed to update widget ${widgetLayout.i} layout:`, error))
     }
-  };
+  }
 
   const handleDragEnd = (result: DropResult): void => {
     if (!result.destination || !context.state.id) {
-      return;
+      return
     }
-    context.reorderStatusBarItems(result.source.index, result.destination.index);
-  };
+    context.reorderStatusBarItems(result.source.index, result.destination.index)
+  }
 
   const handleTitleChange = (event: React.ChangeEvent<HTMLInputElement>): void => {
-    const title = event.target.value;
-    context.updateName(title);
-  };
+    const title = event.target.value
+    context.updateName(title)
+  }
   
   const handleLayoutTypeChange = (name: string, checked: boolean): void => {
-    context.updateLayout(checked ? 'spaced' : 'compact');
-  };
+    context.updateLayout(checked ? 'spaced' : 'compact')
+  }
 
   const rglLayout: RglLayout[] = widgets.map(widget => ({
     i: widget._id,
@@ -101,25 +110,25 @@ function LayoutAdminContent() {
     y: widget.y || 0,
     w: widget.w || 1,
     h: widget.h || 1,
-  }));
+  }))
 
   const statusBarChoices = Object.keys(StatusBarElementTypes).map(key => {
-    const elType = StatusBarElementTypes[key as keyof typeof StatusBarElementTypes];
+    const elType = StatusBarElementTypes[key as keyof typeof StatusBarElementTypes]
     return {
       key: key,
       name: elType.name,
       icon: elType.icon,
-    };
-  });
+    }
+  })
 
   const widgetChoices = Object.keys(Widgets).map(key => {
-      const widgetDef = Widgets[key];
+      const widgetDef = Widgets[key]
       return {
           key: widgetDef.type || key,
           name: widgetDef.name,
           icon: widgetDef.icon,
-      };
-  });
+      }
+  })
 
   return (
     <Frame loggedIn={true}>
@@ -193,7 +202,7 @@ function LayoutAdminContent() {
         />
         <Form>
           <Switch
-            name="layoutStyle"
+            name='layoutStyle'
             checkedLabel={'Compact'}
             uncheckedLabel={'Spaced'}
             checkedIcon={faTh}
@@ -287,13 +296,13 @@ function LayoutAdminContent() {
         `}
       </style>
     </Frame>
-  );
-}
+  )
+})
 
 export default function LayoutAdminPage() {
   return (
     <Suspense fallback={<div>Loading...</div>}>
       <LayoutAdminContent />
     </Suspense>
-  );
+  )
 }

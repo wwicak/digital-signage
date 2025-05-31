@@ -1,6 +1,8 @@
-// This file simply lists the available widget types.
-// The actual widget definitions are expected to be handled elsewhere,
-// likely in an index file that imports these types and corresponding widget definition files.
+/*
+ * This file simply lists the available widget types.
+ * The actual widget definitions are expected to be handled elsewhere,
+ * likely in an index file that imports these types and corresponding widget definition files.
+ */
 
 const widgetTypes: string[] = [
   'slideshow',
@@ -11,6 +13,6 @@ const widgetTypes: string[] = [
   'image',
   'list',
   'announcement',
-];
+]
 
-export default widgetTypes;
+export default widgetTypes

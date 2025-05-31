@@ -1,13 +1,15 @@
-import React, { Component } from 'react';
-import ContentLoader from 'react-content-loader';
+import React, { Component } from 'react'
+import ContentLoader from 'react-content-loader'
 
-import ScreenCard, { IScreenCardProps } from './ScreenCard'; // Assuming ScreenCard.tsx and its props
-import { getDisplays, IDisplayData } from '../../actions/display'; // IDisplayData is already defined
+import ScreenCard, { IScreenCardProps } from './ScreenCard' // Assuming ScreenCard.tsx and its props
+import { getDisplays, IDisplayData } from '../../actions/display' // IDisplayData is already defined
 
 // This component doesn't seem to receive any specific props from its parent in the current usage.
 export interface IScreenListProps {
-  // Add any props if they are passed from a parent component.
-  // For example: filterCriteria?: string;
+  /*
+   * Add any props if they are passed from a parent component.
+   * For example: filterCriteria?: string;
+   */
 }
 
 interface IScreenListState {
@@ -17,41 +19,41 @@ interface IScreenListState {
 
 class ScreenList extends Component<IScreenListProps, IScreenListState> {
   constructor(props: IScreenListProps) {
-    super(props);
+    super(props)
 
     this.state = {
       screens: null,
       error: null,
-    };
+    }
   }
 
   componentDidMount() {
-    this.refresh();
+    this.refresh()
   }
 
   refresh = (): void => {
     // Reset error state on refresh
-    this.setState({ screens: null, error: null }); 
+    this.setState({ screens: null, error: null })
     getDisplays()
       .then(screens => {
         this.setState({
           screens: screens || [], // Ensure screens is always an array if API returns null/undefined
-        });
+        })
       })
       .catch(error => {
-        console.error("Failed to fetch screens:", error);
+        console.error('Failed to fetch screens:', error)
         this.setState({
           screens: [], // Set to empty array on error to stop showing loaders
-          error: "Failed to load screens. Please try again later.",
-        });
-      });
-  };
+          error: 'Failed to load screens. Please try again later.',
+        })
+      })
+  }
 
   render() {
-    const { screens, error } = this.state;
+    const { screens, error } = this.state
 
     if (error) {
-      return <div className="error-message">{error}</div>;
+      return <div className='error-message'>{error}</div>
     }
 
     return (
@@ -72,8 +74,8 @@ class ScreenList extends Component<IScreenListProps, IScreenListState> {
                   height={120} // Height of one card placeholder
                   width={640}  // Max width of card or list area
                   speed={2}
-                  backgroundColor="#f3f3f3"
-                  foregroundColor="#ecebeb"
+                  backgroundColor='#f3f3f3'
+                  foregroundColor='#ecebeb'
                 >
                   {/* Placeholder for ScreenCard structure */}
                   <rect x='0' y='10' rx='4' ry='4' width='60' height='60' /> {/* Thumbnail */}
@@ -100,11 +102,13 @@ class ScreenList extends Component<IScreenListProps, IScreenListState> {
           `}
         </style>
       </div>
-    );
+    )
   }
 }
 
-// Note: The original component was not wrapped with `view` from react-easy-state.
-// If it needs to react to global store changes, it should be.
-// For now, keeping it as it was.
-export default ScreenList;
+/*
+ * Note: The original component was not wrapped with `view` from react-easy-state.
+ * If it needs to react to global store changes, it should be.
+ * For now, keeping it as it was.
+ */
+export default ScreenList

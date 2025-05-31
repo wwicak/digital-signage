@@ -1,11 +1,11 @@
-'use client';
+'use client'
 
-import React from 'react';
-import Link from 'next/link';
-import { redirect } from 'next/navigation';
+import React from 'react'
+import Link from 'next/link'
+import { redirect } from 'next/navigation'
 
-import DropdownButton from '../components/DropdownButton';
-import { getDisplays } from '../actions/display';
+import DropdownButton from '../components/DropdownButton'
+import { getDisplays } from '../actions/display'
 
 // Simplified display data for the dropdown
 interface IDisplaySummary {
@@ -17,38 +17,38 @@ async function getDisplaysData(): Promise<IDisplaySummary[]> {
   try {
     const host = process.env.NODE_ENV === 'development'
       ? 'http://localhost:3000'
-      : 'https://your-domain.com'; // Update this with your production domain
+      : 'https://your-domain.com' // Update this with your production domain
     
-    const fullDisplayList = await getDisplays(host);
+    const fullDisplayList = await getDisplays(host)
     
     // Ensure fullDisplayList is an array before calling map
     if (!Array.isArray(fullDisplayList)) {
-      console.error("getDisplays() did not return an array:", fullDisplayList);
-      return [];
+      console.error('getDisplays() did not return an array:', fullDisplayList)
+      return []
     }
     
     return fullDisplayList.map(display => ({
       _id: display._id,
       name: display.name,
-    }));
+    }))
   } catch (error) {
-    console.error("Failed to fetch displays:", error);
-    return [];
+    console.error('Failed to fetch displays:', error)
+    return []
   }
 }
 
 export default async function HomePage() {
-  const displays = await getDisplaysData();
+  const displays = await getDisplaysData()
 
   // Ensure displays is an array before calling map
   const dropdownChoices = Array.isArray(displays) ? displays.map(display => ({
     key: display._id,
     name: display.name,
-  })) : [];
+  })) : []
 
   const navigateToDisplay = (id: string) => {
-    redirect('/display/' + id);
-  };
+    redirect('/display/' + id)
+  }
 
   return (
     <div className='home'>
@@ -101,7 +101,7 @@ export default async function HomePage() {
         `}
       </style>
     </div>
-  );
+  )
 }
 
 const styles = {
@@ -112,4 +112,4 @@ const styles = {
     borderRadius: 4,
     fontSize: 16,
   },
-};
+}
