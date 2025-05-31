@@ -4,14 +4,33 @@ import { IWidgetOptionsEditorProps } from '../../../components/Admin/WidgetEditD
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faTrash } from '@fortawesome/free-solid-svg-icons';
 import { IconProp } from '@fortawesome/fontawesome-svg-core';
+import * as z from 'zod';
 
-import ListContent, { IListWidgetData } from './ListContent'; // IListWidgetData is effectively IListDefaultData
-import { IListDefaultData, IListItem } from '../index'; // Actual default data structure and list item type
+import ListContent from './ListContent'; // IListWidgetData (now inferred) is not directly used here.
+import { IListDefaultData, IListItem } from '../index'; // IListItem is interface, IListDefaultData is interface
+import { ListItemSchema } from './ListContent'; // Import Zod schema for IListItem
 
-export interface IListOptionsProps extends IWidgetOptionsEditorProps<IListDefaultData> {}
+// Zod schema for IListDefaultData (used for props.data and state)
+export const ListOptionsDataSchema = z.object({
+  title: z.string().nullable().optional(),
+  color: z.string(), // Required
+  textColor: z.string(), // Required
+  list: z.array(ListItemSchema), // Required array of ListItemSchema
+  ordered: z.boolean().optional(),
+  fontSize: z.number().optional(),
+});
+// type IListOptionsState = z.infer<typeof ListOptionsDataSchema>; // This will be the state type
 
-// State for ListOptions will hold the fields of IListDefaultData
-type IListOptionsState = IListDefaultData;
+// Zod schema for ListOptions props
+// IWidgetOptionsEditorProps<T> has data: T | undefined, onChange: (newData: T) => void
+export const ListOptionsPropsSchema = z.object({
+  data: ListOptionsDataSchema.optional(),
+  onChange: z.function().args(ListOptionsDataSchema).returns(z.void()),
+});
+export type IListOptionsProps = z.infer<typeof ListOptionsPropsSchema>;
+
+// State for ListOptions will use the Zod-inferred type
+type IListOptionsState = z.infer<typeof ListOptionsDataSchema>;
 
 class ListOptions extends Component<IListOptionsProps, IListOptionsState> {
   constructor(props: IListOptionsProps) {

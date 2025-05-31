@@ -11,13 +11,12 @@ import { useDisplayContext } from '../../contexts/DisplayContext';
 
 // --- Component Props and State ---
 export type DisplayLayoutType = 'spaced' | 'compact';
+import * as z from 'zod';
 
-export interface IDisplayComponentProps {
-  // host prop was in pages/display.tsx but not used by this Display component directly.
-  // If needed for constructing SSE URL or other purposes, it should be added.
-  // For now, assuming SSE URL is relative or host is configured elsewhere.
-  display: string | undefined; // The display ID (from URL/props)
-}
+export const DisplayComponentPropsSchema = z.object({
+  display: z.string().optional(),
+});
+export type IDisplayComponentProps = z.infer<typeof DisplayComponentPropsSchema>;
 
 // --- Constants ---
 const DEFAULT_STATUS_BAR: string[] = [];

@@ -3,24 +3,31 @@ import { config as FaConfig } from '@fortawesome/fontawesome-svg-core'; // Only 
 import getVideoId from 'get-video-id'; // Assuming @types/get-video-id or it returns any
 import YouTube, { YouTubeProps, YouTubePlayer } from 'react-youtube'; // Import YouTube component and its types
 
-import { IYoutubeDefaultData } from '../index'; // Data structure from widget's index.ts
+import { IYoutubeDefaultData } from '../index'; // This is an interface
+import * as z from 'zod';
 
 FaConfig.autoAddCss = false;
 
-// Data structure for the YouTube widget's content
-// This should align with IYoutubeDefaultData from youtube/index.ts
-export interface IYoutubeWidgetData extends IYoutubeDefaultData {
-  // All fields are already optional or have defaults in IYoutubeDefaultData
-}
+// Zod schema for IYoutubeDefaultData (used in props.data)
+export const YoutubeWidgetDataSchema = z.object({
+  video_id: z.string().nullable(),
+  autoplay: z.boolean().optional(),
+  loop: z.boolean().optional(),
+  show_controls: z.boolean().optional(),
+  start_time: z.number().optional(),
+  end_time: z.number().optional(),
+  show_captions: z.boolean().optional(),
+});
+export type IYoutubeWidgetData = z.infer<typeof YoutubeWidgetDataSchema>; // For internal consistency
 
-// Props for the YoutubeContent component
-export interface IYoutubeContentProps {
-  data?: IYoutubeWidgetData;
-  isPreview?: boolean;
-  // Props from react-grid-layout if this component is directly used as a grid item
-  // style?: React.CSSProperties; // For width/height from RGL
-  // className?: string;
-}
+// Zod schema for YoutubeContent component props
+export const YoutubeContentPropsSchema = z.object({
+  data: YoutubeWidgetDataSchema.optional(),
+  isPreview: z.boolean().optional(),
+  // style: z.record(z.any()).optional(), // For React.CSSProperties if needed
+  // className: z.string().optional(),
+});
+export type IYoutubeContentProps = z.infer<typeof YoutubeContentPropsSchema>;
 
 // Default values from original JS, though IYoutubeDefaultData has its own defaults
 const DEFAULT_YT_URL_FOR_ID_EXTRACTION = 'https://www.youtube.com/watch?v=9xwazD5SyVg';

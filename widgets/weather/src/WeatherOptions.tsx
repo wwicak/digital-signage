@@ -1,14 +1,21 @@
 import React, { Component } from 'react';
 import { Form, Input, IChoice, InlineInputGroup } from '../../../components/Form'; // Assuming Form components are/will be typed
-import { IWidgetOptionsEditorProps } from '../../../components/Admin/WidgetEditDialog'; // Props from WidgetEditDialog
+import { IWidgetOptionsEditorProps } from '../../../components/Admin/WidgetEditDialog';
+import * as z from 'zod';
 
-import { IWeatherDefaultData, TWeatherUnit } from '../index'; // Data structure and types from weather/index.ts
+import { IWeatherDefaultData, TWeatherUnit } from '../index'; // IWeatherDefaultData is interface
+import { WeatherWidgetDataSchema } from './WeatherContent'; // Import Zod schema for IWeatherDefaultData
 
-// Props for WeatherOptions should conform to IWidgetOptionsEditorProps
-export interface IWeatherOptionsProps extends IWidgetOptionsEditorProps<IWeatherDefaultData> {}
+// Zod schema for WeatherOptions props
+// IWidgetOptionsEditorProps<T> has data: T | undefined, onChange: (newData: T) => void
+export const WeatherOptionsPropsSchema = z.object({
+  data: WeatherWidgetDataSchema.optional(),
+  onChange: z.function().args(WeatherWidgetDataSchema).returns(z.void()),
+});
+export type IWeatherOptionsProps = z.infer<typeof WeatherOptionsPropsSchema>;
 
-// State for WeatherOptions will hold the fields of IWeatherDefaultData
-type IWeatherOptionsState = IWeatherDefaultData;
+// State for WeatherOptions will use the Zod-inferred type
+type IWeatherOptionsState = z.infer<typeof WeatherWidgetDataSchema>;
 
 // Define available 'unit' choices
 const unitChoices: IChoice[] = [

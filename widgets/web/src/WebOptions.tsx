@@ -1,15 +1,21 @@
 import React, { Component } from 'react';
 import { Form, Input, InlineInputGroup, IInputProps } from '../../../components/Form'; // Assuming Form components are/will be typed
-import { IWidgetOptionsEditorProps } from '../../../components/Admin/WidgetEditDialog'; // Props from WidgetEditDialog
+import { IWidgetOptionsEditorProps } from '../../../components/Admin/WidgetEditDialog';
+import * as z from 'zod';
 
-import { IWebDefaultData } from '../index'; // Data structure from web/index.ts
-import WebContent from './WebContent'; // For potential preview
+import { IWebDefaultData } from '../index'; // This is an interface
+import WebContent, { WebWidgetDataSchema } from './WebContent'; // Import Zod schema
 
-// Props for WebOptions should conform to IWidgetOptionsEditorProps
-export interface IWebOptionsProps extends IWidgetOptionsEditorProps<IWebDefaultData> {}
+// Zod schema for WebOptions props
+// IWidgetOptionsEditorProps<T> has data: T | undefined, onChange: (newData: T) => void
+export const WebOptionsPropsSchema = z.object({
+  data: WebWidgetDataSchema.optional(),
+  onChange: z.function().args(WebWidgetDataSchema).returns(z.void()),
+});
+export type IWebOptionsProps = z.infer<typeof WebOptionsPropsSchema>;
 
-// State for WebOptions will hold the fields of IWebDefaultData
-type IWebOptionsState = IWebDefaultData;
+// State for WebOptions will use the Zod-inferred type
+type IWebOptionsState = z.infer<typeof WebWidgetDataSchema>;
 
 class WebOptions extends Component<IWebOptionsProps, IWebOptionsState> {
   constructor(props: IWebOptionsProps) {

@@ -1,25 +1,30 @@
 import React, { Component, CSSProperties } from 'react';
-import { config } from '@fortawesome/fontawesome-svg-core'; // Only config is used from fontawesome here
+import { config } from '@fortawesome/fontawesome-svg-core';
+import * as z from 'zod';
 
 import { TImageFit } from '../index'; // Import TImageFit from the widget index
 
 config.autoAddCss = false;
 
-// Data structure for the image widget's content
-// Should align with IImageDefaultData from image/index.ts
-export interface IImageWidgetData {
-  title?: string | null;
-  url?: string | null; // URL of the image
-  fit?: TImageFit;
-  color?: string; // Background color, useful if image is transparent or doesn't cover fully
-  altText?: string; // Alt text for accessibility
-}
+// Zod schema for TImageFit (based on its definition in ../index.ts)
+export const TImageFitSchema = z.enum(["contain", "cover", "fill", "none", "scale-down"]);
 
-// Props for the ImageContent component
-export interface IImageContentProps {
-  data?: IImageWidgetData;
-  isPreview?: boolean;
-}
+// Zod schema for the image widget's content data
+export const ImageWidgetContentDataSchema = z.object({
+  title: z.string().nullable().optional(),
+  url: z.string().url().nullable().optional(), // Assuming URL if not null
+  fit: TImageFitSchema.optional(),
+  color: z.string().optional(), // Background color
+  altText: z.string().optional(),
+});
+export type IImageWidgetData = z.infer<typeof ImageWidgetContentDataSchema>;
+
+// Zod schema for ImageContent component props
+export const ImageContentPropsSchema = z.object({
+  data: ImageWidgetContentDataSchema.optional(),
+  isPreview: z.boolean().optional(),
+});
+export type IImageContentProps = z.infer<typeof ImageContentPropsSchema>;
 
 const DEFAULT_COLOR = '#2d3436'; // Dark Gray
 const DEFAULT_FIT: TImageFit = 'contain';

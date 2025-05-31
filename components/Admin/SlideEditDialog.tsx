@@ -4,42 +4,41 @@ import _ from 'lodash';
 import Dialog, { IDialogProps, DialogMethods } from '../Dialog'; // Assuming Dialog.tsx and its props
 import { Form, Input, Button, ButtonGroup, IInputProps, IChoice } from '../Form'; // Assuming Form components are/will be typed
 
-import { getSlide, addSlide, updateSlide, ISlideData, SlideAddData, SlideUpdateData } from '../../actions/slide'; // Slide actions are typed
-import { SlideType, SlideData } from '../../api/models/Slide';
+import { getSlide, addSlide, updateSlide, ISlideData, SlideAddData, SlideUpdateData, SlideActionDataSchema } from '../../actions/slide'; // Slide actions are typed
+import { SlideType, SlideData, SlideTypeZod, SlideDataZod } from '../../api/models/Slide';
+import * as z from 'zod';
 
-// Interface for methods exposed via ref
+// Interface for methods exposed via ref - Zod is not typically used for ref method signatures
 export interface ISlideEditDialogRef {
   open: () => void;
   close: () => void;
   refreshSlideData: () => Promise<void>;
-  // If the internal dialog ref also needs to be accessed, it would be here,
-  // but generally, we want to expose only the minimal public API.
-  // For the purpose of the ref in slideshow.tsx, these are the primary methods.
 }
 
-export interface ISlideEditDialogProps {
-  slideId?: string; // ID of the slide to edit (if editing)
-  slideshowId?: string; // ID of the slideshow to add this slide to (if adding)
-  upload?: File | null; // For new photo uploads
-  refresh?: () => void; // Callback after save/close to refresh parent list
-  // OptionsComponent was passed from EditableWidget in the original JS but not used here.
-  // It was also passed to WidgetEditDialog not SlideEditDialog.
-  // This Dialog is for SLIDES. WidgetEditDialog is different.
-}
+// Zod schema for SlideEditDialog props
+export const SlideEditDialogPropsSchema = z.object({
+  slideId: z.string().optional(),
+  slideshowId: z.string().optional(),
+  upload: z.instanceof(File).nullable().optional(),
+  refresh: z.function(z.tuple([]), z.void()).optional(),
+});
+export type ISlideEditDialogProps = z.infer<typeof SlideEditDialogPropsSchema>;
 
-interface ISlideEditDialogState extends Partial<Omit<ISlideData, '_id' | 'creator_id' | 'creation_date' | 'last_update' | 'slideshow_ids' | 'data'>> {
-  // Fields from ISlideData that are editable:
-  // name?: string; // ISlideData might use 'name', original JS used 'title' in state.
-  // type?: SlideType; // From ISlideData.type
-  // duration?: number;
-  
-  // State specific to this dialog's form handling:
-  title?: string; // Corresponds to slide's name/title
-  description?: string; // A field not explicitly in ISlideData, maybe for internal use or needs adding to ISlideData
-  upload?: File | null; // Current file being uploaded/edited
-  data?: string | SlideData; // Allow both string (for URLs/text input) and SlideData (for structured data)
-}
-
+// Zod schema for SlideEditDialog state
+// This reflects the form fields and data being edited.
+const SlideEditDialogStateSchema = z.object({
+  title: z.string().optional(),
+  description: z.string().optional(),
+  upload: z.instanceof(File).nullable().optional(), // For new file uploads
+  // 'data' can be a string (URL for web/youtube) or structured SlideData for other types (though often simplified to string input).
+  // For 'photo' type, this 'data' field might hold the existing image URL if not a new 'upload'.
+  data: z.union([z.string(), SlideDataZod]).optional(),
+  type: SlideTypeZod.optional(),
+  duration: z.number().optional(),
+  // Include other fields from ISlideData if they are directly managed in the state and form
+  // Example: is_enabled: z.boolean().optional(),
+});
+type ISlideEditDialogState = z.infer<typeof SlideEditDialogStateSchema>;
 
 class SlideEditDialog extends Component<ISlideEditDialogProps, ISlideEditDialogState> implements ISlideEditDialogRef {
   private dialog = React.createRef<DialogMethods>(); // Ref to Dialog.tsx component instance
@@ -124,32 +123,35 @@ class SlideEditDialog extends Component<ISlideEditDialogProps, ISlideEditDialogS
     }
   };
 
-  handleChange = (name: string, value: any): void => {
-    this.setState(prevState => ({
-      ...prevState,
-      [name]: value,
+  handleChange = (name: keyof ISlideEditDialogState, value: any): void => {
+    this.setState(prevState => {
+      const newState = {
+        ...prevState,
+        [name]: value,
+      } as ISlideEditDialogState; // Cast to assure TypeScript
       // Clean up data if the type of slide changed
-      ...(name === 'type' ? { data: '' } : {}),
-    }), () => {
-        // If type changed to 'photo', and there's an existing 'data' (URL), clear it.
-        // The 'upload' field will handle the new photo.
-        if (name === 'type' && this.state.type === SlideType.PHOTO && typeof this.state.data === 'string' && this.state.data.startsWith('http')) {
+      if (name === 'type') {
+        newState.data = undefined; // Clear data when type changes
+      }
+      return newState;
+    }, () => {
+        if (name === 'type' && this.state.type === SlideType.PHOTO && typeof this.state.data === 'string' && this.state.data?.startsWith('http')) {
             this.setState({ data: undefined });
         }
     });
   };
   
   // Handler specifically for the photo upload Input component
-  handlePhotoChange = (name: string, value: File | string | null): void => {
+  handlePhotoChange = (name: keyof ISlideEditDialogState, value: File | string | null): void => {
+    // 'name' would typically be 'upload' or 'data' depending on Input component's design
     if (value instanceof File) {
-        this.setState({ upload: value, data: undefined }); // New file takes precedence, clear existing data URL
+        this.setState({ upload: value, data: undefined });
     } else if (typeof value === 'string') {
-        // This case might happen if the photo input somehow returns a URL string (e.g. existing photo)
-        // However, typical file inputs provide File objects.
-        // For existing photos, 'data' field should hold the URL, and 'upload' should be null.
+        // This implies the input returned an existing URL, so it's not a new file upload.
         this.setState({ data: value, upload: null });
     } else {
-        this.setState({ upload: null }); // Clear upload if value is null
+        // Value is null (e.g., photo cleared)
+        this.setState({ upload: null, data: undefined }); // Clear both upload and any existing data URL if type is photo
     }
   }
 
@@ -158,24 +160,47 @@ class SlideEditDialog extends Component<ISlideEditDialogProps, ISlideEditDialogS
     const { slideId, slideshowId } = this.props;
     const { upload, title, description, type, data, duration } = this.state;
 
-    // Consolidate data for saving, picking only relevant fields
-    // ISlideData uses 'name' for title, ensure mapping if state uses 'title'
-    const slideDetails: Partial<ISlideData> = _.pickBy({
-      name: title, // Map state.title to slide.name
-      description: description, // If description is part of ISlideData
-      type: type,
-      data: (type === SlideType.PHOTO && upload) ? undefined : data, // `data` field is for URL/text, not the file itself for 'photo' type if new upload
-      duration: Number(duration) || 5, // Ensure duration is a number
-    }, v => v !== undefined);
+    // Constructing slideDetails for saving.
+    // This object should conform to what `addSlide` or `updateSlide` expects for their metadata argument.
+    // SlideAddData and SlideUpdateData are Omit<Partial<ISlideData>, ...>
+    // We need to ensure the built object is compatible.
+    let slideDetailsPayload: Partial<ISlideData> = {
+        name: title,
+        description: description, // Assuming description is part of ISlideData or handled by backend
+        type: type,
+        duration: Number(duration) || 5,
+    };
+
+    // Handle the 'data' field based on type
+    if (type === SlideType.PHOTO) {
+        // If it's a photo, the 'data' field in the database usually stores the URL.
+        // If a new 'upload' is present, the backend will handle creating the URL.
+        // If no new 'upload', and 'this.state.data' is a string (existing URL), it should be preserved.
+        // The `updateSlide` and `addSlide` actions take `upload` (File) separately.
+        // The `data` field in `slideDetailsPayload` here should be for non-file data.
+        if (upload) { // New file being uploaded
+            slideDetailsPayload.data = undefined; // Backend will generate new URL/data from file
+        } else if (typeof data === 'string' && data.startsWith('http')) { // Existing photo URL
+            slideDetailsPayload.data = data;
+        } else {
+             slideDetailsPayload.data = undefined; // Or handle as error if photo type has no data/upload
+        }
+    } else {
+        // For other types, 'data' is directly from state (e.g., URL for youtube/web, content for markdown)
+        slideDetailsPayload.data = data;
+    }
+
+    // Filter out undefined values before sending
+    slideDetailsPayload = _.pickBy(slideDetailsPayload, v => v !== undefined) as Partial<ISlideData>;
 
 
     try {
       if (slideshowId) { // Adding a new slide
-        await addSlide(slideshowId, upload || null, slideDetails as SlideAddData); // Ensure upload is File | null
+        await addSlide(slideshowId, upload || null, slideDetailsPayload as SlideAddData);
       } else if (slideId) { // Updating an existing slide
-        await updateSlide(slideId, upload || null, slideDetails as SlideUpdateData); // Ensure upload is File | null
+        await updateSlide(slideId, upload || null, slideDetailsPayload as SlideUpdateData);
       }
-      this.close(); // Close dialog and trigger refresh via this.close()
+      this.close();
     } catch (error) {
       console.error('Failed to save slide:', error);
       // Handle save error (e.g., show message to user)

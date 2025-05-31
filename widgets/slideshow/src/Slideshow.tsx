@@ -6,35 +6,48 @@ import GenericSlide from './Slide/Generic';
 import PhotoSlide from './Slide/Photo';
 import YoutubeSlide from './Slide/Youtube';
 import WebSlide from './Slide/Web';
-import Progress from './Progress'; // Assuming Progress.js or Progress.tsx
+import Progress from './Progress';
+import * as z from 'zod';
 
-import { getSlides, ISlideData } from '../../../actions/slide'; // ISlideData is typed
-import { ISlideshowWidgetDefaultData } from '../index'; // Props from parent widget definition
+import { getSlides, ISlideData, SlideActionDataSchema } from '../../../actions/slide'; // ISlideData is z.infer<SlideActionDataSchema>
+import { ISlideshowWidgetDefaultData } from '../index'; // This is an interface
 
-const DEFAULT_SLIDE_DURATION_MS = 5000; // Default duration for a slide in milliseconds
+const DEFAULT_SLIDE_DURATION_MS = 5000;
 
-// Interface for methods/properties expected on slide component instances via refs
+// Interface for slide component refs - Zod not typically used here
 export interface ISlideInstance {
   play: () => void;
   stop: () => void;
-  loadedPromise: Promise<void>; // Promise that resolves when slide content is loaded
+  loadedPromise: Promise<void>;
 }
 
-// Props for the Slideshow content component
-export interface ISlideshowWidgetContentProps {
-  data?: ISlideshowWidgetDefaultData; // Data from the widget configuration
-  defaultDuration?: number; // Optional: default duration for slides in ms, overrides DEFAULT_SLIDE_DURATION_MS
-  isPreview?: boolean; // If the slideshow is in a preview context
-}
+// Zod schema for ISlideshowWidgetDefaultData
+export const SlideshowWidgetDefaultDataSchema = z.object({
+  slideshow_id: z.string().nullable(),
+  show_progressbar: z.boolean().optional(),
+  transition_time: z.number().optional(),
+  random_order: z.boolean().optional(),
+});
+// We don't infer type for ISlideshowWidgetDefaultData here as it's imported from index.ts
+// and used as a base for props.data. The schema is for validation if needed.
 
-// State for the Slideshow content component
-interface ISlideshowWidgetContentState {
-  currentSlideIndex: number | null; // Index of the currently active slide
-  slides: ISlideData[]; // Array of slide data objects
-  isLoading: boolean; // True when initially fetching slides
-  isCurrentSlideReady: boolean; // True if the current slide's content has loaded
-  error: string | null;
-}
+// Zod schema for Slideshow content component props
+export const SlideshowWidgetContentPropsSchema = z.object({
+  data: SlideshowWidgetDefaultDataSchema.optional(),
+  defaultDuration: z.number().optional(),
+  isPreview: z.boolean().optional(),
+});
+export type ISlideshowWidgetContentProps = z.infer<typeof SlideshowWidgetContentPropsSchema>;
+
+// Zod schema for Slideshow content component state
+export const SlideshowWidgetContentStateSchema = z.object({
+  currentSlideIndex: z.number().nullable(),
+  slides: z.array(SlideActionDataSchema), // Use SlideActionDataSchema from actions
+  isLoading: z.boolean(),
+  isCurrentSlideReady: z.boolean(),
+  error: z.string().nullable(),
+});
+type ISlideshowWidgetContentState = z.infer<typeof SlideshowWidgetContentStateSchema>;
 
 class Slideshow extends Component<ISlideshowWidgetContentProps, ISlideshowWidgetContentState> {
   private slideRefs: Array<ISlideInstance | null> = [];

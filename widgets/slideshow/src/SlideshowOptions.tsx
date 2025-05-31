@@ -1,24 +1,33 @@
 import React, { Component } from 'react';
-import { Form, Input, IChoice, InlineInputGroup } from '../../../components/Form'; // Assuming Form components are/will be typed
-import { IWidgetOptionsEditorProps } from '../../../components/Admin/WidgetEditDialog'; // Props from WidgetEditDialog
-import { getSlideshows, ISlideshowData } from '../../../actions/slideshow'; // Action and type for fetching slideshows
+import { Form, Input, IChoice, InlineInputGroup } from '../../../components/Form';
+import { IWidgetOptionsEditorProps } from '../../../components/Admin/WidgetEditDialog';
+import { getSlideshows, ISlideshowData } from '../../../actions/slideshow'; // ISlideshowData is z.infer<SlideshowActionDataSchema>
+import * as z from 'zod';
 
-import { ISlideshowWidgetDefaultData } from '../index'; // Data structure for this widget's config
+import { ISlideshowWidgetDefaultData } from '../index'; // This is an interface
+import { SlideshowWidgetDefaultDataSchema } from './Slideshow'; // Import the Zod schema defined in Slideshow.tsx
 
-// Props for SlideshowOptions should conform to IWidgetOptionsEditorProps
-export interface ISlideshowWidgetOptionsProps extends IWidgetOptionsEditorProps<ISlideshowWidgetDefaultData> {
-  // No additional props specific to SlideshowOptions itself
-}
+// Zod schema for IAvailableSlideshowChoice (used in state)
+export const AvailableSlideshowChoiceSchema = z.object({
+  id: z.string(),
+  label: z.string(),
+});
+export type IAvailableSlideshowChoice = z.infer<typeof AvailableSlideshowChoiceSchema>;
 
-interface IAvailableSlideshowChoice extends IChoice {
-  id: string; // Slideshow ID
-  label: string; // Slideshow Name
-}
+// Zod schema for SlideshowOptions state
+export const SlideshowWidgetOptionsStateSchema = z.object({
+  availableSlideshows: z.array(AvailableSlideshowChoiceSchema),
+  loadingError: z.string().nullable(),
+});
+type ISlideshowWidgetOptionsState = z.infer<typeof SlideshowWidgetOptionsStateSchema>;
 
-interface ISlideshowWidgetOptionsState {
-  availableSlideshows: IAvailableSlideshowChoice[];
-  loadingError: string | null;
-}
+// Zod schema for SlideshowOptions props
+// IWidgetOptionsEditorProps<T> has data: T | undefined, onChange: (newData: T) => void
+export const SlideshowOptionsPropsSchema = z.object({
+  data: SlideshowWidgetDefaultDataSchema.optional(),
+  onChange: z.function().args(SlideshowWidgetDefaultDataSchema).returns(z.void()),
+});
+export type ISlideshowWidgetOptionsProps = z.infer<typeof SlideshowOptionsPropsSchema>;
 
 class SlideshowOptions extends Component<ISlideshowWidgetOptionsProps, ISlideshowWidgetOptionsState> {
   constructor(props: ISlideshowWidgetOptionsProps) {

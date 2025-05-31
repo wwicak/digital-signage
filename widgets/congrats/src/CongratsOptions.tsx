@@ -1,17 +1,19 @@
 import React, { Component } from 'react';
-import { Form, Input, InlineInputGroup, IInputProps, IChoice } from '../../../components/Form'; // Assuming Form components are/will be typed
-import { IWidgetOptionsEditorProps } from '../../../components/Admin/WidgetEditDialog'; // Props from WidgetEditDialog
+import { Form, Input, InlineInputGroup, IInputProps, IChoice } from '../../../components/Form';
+import { IWidgetOptionsEditorProps } from '../../../components/Admin/WidgetEditDialog';
+import * as z from 'zod';
 
-import CongratsContent, { ICongratsWidgetData } from './CongratsContent'; // Data structure from content component
+import CongratsContent, { CongratsWidgetContentDataSchema, ICongratsWidgetData } from './CongratsContent'; // ICongratsWidgetData is z.infer
 
-// Props for CongratsOptions should conform to IWidgetOptionsEditorProps
-export interface ICongratsOptionsProps extends IWidgetOptionsEditorProps<ICongratsWidgetData> {
-  // No additional props specific to CongratsOptions itself
-}
+// Zod schema for CongratsOptions props
+export const CongratsOptionsPropsSchema = z.object({
+  data: CongratsWidgetContentDataSchema.optional(),
+  onChange: z.function().args(CongratsWidgetContentDataSchema).returns(z.void()),
+});
+export type ICongratsOptionsProps = z.infer<typeof CongratsOptionsPropsSchema>;
 
-// State for CongratsOptions will hold the fields of ICongratsWidgetData
-// ICongratsWidgetData defines fields as optional, direct use is fine.
-type ICongratsOptionsState = ICongratsWidgetData;
+// State for CongratsOptions will also use ICongratsWidgetData (inferred from CongratsWidgetContentDataSchema)
+type ICongratsOptionsState = ICongratsWidgetData; // This is already an inferred type
 
 // Define available animation choices
 const animationChoices: IChoice[] = [
