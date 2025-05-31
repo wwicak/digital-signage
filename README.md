@@ -127,38 +127,47 @@ Similar to the local setup, Dockerized environments require a `.env` file at the
     ```bash
     cp .env.example .env
     ```
-2.  Edit the `.env` file and provide necessary values, especially:
-    *   `MONGODB_URI`: **Crucial for both dev and prod.** The Docker containers will need to connect to a MongoDB instance. This can be:
-        *   A MongoDB Atlas SRV string.
-        *   A local MongoDB server running on your host machine. If using Docker Desktop, you might use `mongodb://host.docker.internal:27017/digitaldisplay` to connect from a container to a service on your host. For Linux, this might be `mongodb://172.17.0.1:27017/digitaldisplay` (the default Docker bridge IP).
-        *   Another MongoDB container (you would add this service to `docker-compose.yml`).
-    *   `SESSION_SECRET`: A long, random string.
-    *   `PORT`: Typically `3001` (the backend server port inside the container). This is exposed differently by Docker Compose for host access.
-    *   `ENVIRON`: Set to `DEV` for development-specific settings or `PROD` for production.
-    *   `SERVER_HOST`: e.g., `http://localhost:3001` (for dev, if accessed directly within Docker network or if Next.js needs it for absolute URLs during SSR/API calls from server components). For production, this would be your public domain.
+2.  Edit the `.env` file and provide necessary values. Key variables for the Docker setup include:
 
-    The `docker-compose.yml` file is configured to pass these variables from the `.env` file into the respective services.
+    *   `MONGODB_URI`: **Crucial for both dev and prod.** With the included MongoDB service in `docker-compose.yml`, you should configure this to connect to the `mongo` service.
+        *   Example: `mongodb://${MONGO_ROOT_USER}:${MONGO_ROOT_PASSWORD}@mongo:27017/${MONGO_DATABASE}?authSource=admin&directConnection=true`
+        *   The hostname `mongo` is resolvable by other services in the same Docker Compose network.
+        *   Ensure the credentials and database name here match the `MONGO_ROOT_USER`, `MONGO_ROOT_PASSWORD`, and `MONGO_DATABASE` variables below.
+    *   `MONGO_ROOT_USER`: The initial root username for the MongoDB instance. This is used by the `mongo` service on its first run to create a root user.
+        *   Example: `admin` (from `.env.example`)
+    *   `MONGO_ROOT_PASSWORD`: The password for the MongoDB root user.
+        *   Example: `secretpassword` (from `.env.example`)
+    *   `MONGO_DATABASE`: The name of the database to be created by MongoDB's initialization process and used by the application.
+        *   Example: `digitaldisplay` (from `.env.example`)
+    *   `SESSION_SECRET`: A long, random string.
+    *   `PORT`: Typically `3001` (the backend server port inside the container).
+    *   `ENVIRON`: Set to `DEV` for development-specific settings or `PROD` for production.
+    *   `SERVER_HOST`: e.g., `http://localhost:3001` (for dev). For production, this would be your public domain.
+
+    The `docker-compose.yml` file is configured to pass these variables from the `.env` file into the respective services. The `mongo` service uses `MONGO_ROOT_USER`, `MONGO_ROOT_PASSWORD`, and `MONGO_DATABASE` to initialize itself.
 
 ### Development Environment with Docker
 
-The development setup uses `Dockerfile.dev` and provides live reloading for code changes. It runs two services: one for the Next.js frontend and one for the backend API server.
+The development setup uses `Dockerfile.dev` and provides live reloading for code changes. It runs three main services: the Next.js frontend, the backend API server, and a MongoDB database instance.
 
 1.  **Build and Start Development Containers:**
+    This command starts the frontend, backend, and MongoDB services.
     ```bash
-    docker-compose up app-dev-frontend app-dev-backend
+    docker-compose up app-dev-frontend app-dev-backend mongo
     ```
     Or, to run in detached mode:
     ```bash
-    docker-compose up -d app-dev-frontend app-dev-backend
+    docker-compose up -d app-dev-frontend app-dev-backend mongo
     ```
 
 2.  **Accessing the Application (Development):**
     *   Frontend (Next.js): `http://localhost:3000`
     *   Backend API: `http://localhost:3001` (or as consumed by the frontend)
+    *   MongoDB (if port 27017 is mapped to host in `docker-compose.yml`): `localhost:27017` (can be used with tools like MongoDB Compass, using the `MONGO_ROOT_USER` and `MONGO_ROOT_PASSWORD` from your `.env` file).
 
 3.  **Key Features (Development):**
     *   **Live Reloading**: Changes to your local source code (frontend and backend) will trigger automatic rebuilds and restarts inside the containers.
-    *   **Separate Services**: Frontend and backend run in separate containers, similar to common development practices (`next dev` and a separate API server).
+    *   **Separate Services**: Frontend, backend, and database run in separate containers, promoting modularity.
     *   **Uses `Dockerfile.dev`**: Optimized for development speed and tooling.
 
 4.  **Stopping Development Containers:**
@@ -166,37 +175,73 @@ The development setup uses `Dockerfile.dev` and provides live reloading for code
     ```bash
     docker-compose down
     ```
+    This command stops and removes the containers defined in your `docker-compose.yml`. Add `-v` to also remove named volumes if you want a complete cleanup (e.g., `docker-compose down -v`).
 
 ### Production Environment with Docker
 
-The production setup uses a multi-stage `Dockerfile` to create an optimized, smaller image for deployment.
+The production setup uses a multi-stage `Dockerfile` to create an optimized, smaller image for deployment. It runs the application service and the MongoDB database service.
 
 1.  **Build and Start Production Container:**
+    This command builds the `app-prod` image (if not already built) and starts both the `app-prod` service and the `mongo` service it depends on.
+    ```bash
+    docker-compose up -d app-prod mongo
+    ```
+    If you only want to start `app-prod` and its dependencies (like `mongo`), you can often just run:
     ```bash
     docker-compose up -d app-prod
     ```
-    This command will first build the production image using `Dockerfile` (if not already built) and then start the `app-prod` service in detached mode.
 
 2.  **Accessing the Application (Production):**
     The `docker-compose.yml` maps port `8080` on the host to port `3001` (the application's backend server port) in the container.
     *   Access the application at: `http://localhost:8080`
 
 3.  **Key Features (Production):**
-    *   **Optimized Image**: Uses a multi-stage build to minimize image size.
-    *   **Single Service**: The `app-prod` service runs the built Next.js app and the backend server together (as `server.ts` is designed to handle both).
-    *   **Uses `Dockerfile`**: Contains build and runtime optimizations.
+    *   **Optimized Image**: The `app-prod` service uses a multi-stage build to minimize image size.
+    *   **Integrated Services**: Runs the application and database services.
+    *   **Uses `Dockerfile`**: Contains build and runtime optimizations for the application.
 
 4.  **Stopping Production Container:**
     ```bash
-    docker-compose stop app-prod # To stop the service
-    docker-compose down          # To stop and remove the container
+    docker-compose stop app-prod mongo # To stop the services
+    docker-compose down                 # To stop and remove all related containers, networks
     ```
+
+### Data Persistence
+
+The Docker Compose setup ensures data persistence for critical components:
+*   **MongoDB Data**: Stored in a named Docker volume called `mongo_data`. This means your database contents will survive container restarts and removals.
+*   **Application Uploads**: Files uploaded to the application (e.g., images for slides) are stored in a named Docker volume called `uploads_data` and mounted into `/app/uploads` in both `app-dev-backend` and `app-prod` services. This ensures your uploaded files are also persistent.
+
+### Service Reliability
+
+Key services defined in `docker-compose.yml` (application services and MongoDB) are configured with a `restart: unless-stopped` policy. This means Docker will automatically attempt to restart these services if they crash or if the Docker daemon itself is restarted, enhancing the overall uptime and resilience of the deployment.
+
+#### Log Management
+
+*   **Container Logs**: Both the Next.js/Express application and the MongoDB service are configured to output their logs to `stdout` and `stderr`. Docker captures these logs automatically. You can view them using:
+    ```bash
+    docker-compose logs <service_name>
+    # Examples:
+    # docker-compose logs app-prod
+    # docker-compose logs app-dev-backend
+    # docker-compose logs mongo
+    ```
+    To follow logs in real-time:
+    ```bash
+    docker-compose logs -f <service_name>
+    ```
+
+*   **Production Logging**: For production environments, relying solely on `docker-compose logs` might not be sufficient for robust log management, aggregation, and analysis. Common strategies include:
+    *   **Docker Logging Drivers**: Configure Docker to use logging drivers (e.g., `json-file` with rotation options, `syslog`, `journald`, or drivers for cloud services like AWS CloudWatch Logs, Google Cloud Logging, Splunk, ELK stack). This is configured at the Docker daemon level or sometimes per container in `docker-compose.yml` via the `logging` directive.
+    *   **Log Aggregation Platforms**: Forward logs to dedicated log aggregation platforms (e.g., Datadog, Logz.io, Sematext, or a self-hosted ELK/EFK stack). Applications might use a logging library that can directly send logs to these platforms, or a logging driver can forward them.
+
+    Implementing advanced log rotation and aggregation is beyond the scope of this project's basic Docker setup but is a critical consideration for production deployments. The current setup ensures logs are accessible via Docker for immediate inspection.
 
 ### Managing Docker Resources
 
 *   **View running containers:** `docker ps`
 *   **View all containers (including stopped):** `docker ps -a`
-*   **View container logs:** `docker-compose logs <service_name>` (e.g., `docker-compose logs app-dev-frontend`)
+*   **View container logs:** `docker-compose logs <service_name>` (e.g., `docker-compose logs app-dev-frontend` or `docker-compose logs mongo`)
 *   **Remove unused images, containers, networks, and volumes:** `docker system prune` (use with caution)
 *   **Rebuild images:** Add the `--build` flag to `docker-compose up` commands (e.g., `docker-compose up --build -d app-prod`).
 
