@@ -1,5 +1,7 @@
 import React from 'react';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import StyledComponentsRegistry from './lib/registry';
+import { GlobalDisplayListProvider } from '../contexts/GlobalDisplayListContext';
 
 // Import global styles
 import '../styles/globals.css';
@@ -17,6 +19,9 @@ export const viewport = {
   initialScale: 1,
 };
 
+// Create a single QueryClient instance
+const queryClient = new QueryClient();
+
 export default function RootLayout({
   children,
 }: {
@@ -32,9 +37,13 @@ export default function RootLayout({
         <style>{'body { margin: 0 } /* custom! */'}</style>
       </head>
       <body>
-        <StyledComponentsRegistry>
-          {children}
-        </StyledComponentsRegistry>
+        <QueryClientProvider client={queryClient}>
+          <GlobalDisplayListProvider>
+            <StyledComponentsRegistry>
+              {children}
+            </StyledComponentsRegistry>
+          </GlobalDisplayListProvider>
+        </QueryClientProvider>
       </body>
     </html>
   );

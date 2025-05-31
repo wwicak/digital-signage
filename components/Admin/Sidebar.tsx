@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import React, { useState, useEffect } from 'react';
+import React, { useEffect } from 'react'; // Removed useState
 import Router, { NextRouter, withRouter } from 'next/router';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
@@ -16,13 +16,10 @@ import DropdownButton, { IDropdownChoice } from '../DropdownButton'; // Already 
 
 import { logout } from '../../helpers/auth'; // Assuming auth.js will be typed or allowJs
 import { useDisplayContext } from '../../contexts/DisplayContext';
-import { getDisplays, IDisplayData } from '../../actions/display'; // Already .tsx
-
-// Simplified display data for local state
-interface ISimpleDisplay {
-  _id: string;
-  name: string;
-}
+// getDisplays and IDisplayData are no longer directly used here for fetching
+// IDisplayData is still relevant for the type from useGlobalDisplayList
+import { IDisplayData } from '../../actions/display';
+import { useGlobalDisplayList } from '../../contexts/GlobalDisplayListContext';
 
 interface IMenuItem {
   id: string;
@@ -42,25 +39,15 @@ export interface ISidebarProps extends WithRouterProps {
 }
 
 const Sidebar: React.FC<ISidebarProps> = ({ router, loggedIn, displayId }) => {
-    const [displays, setDisplays] = useState<ISimpleDisplay[]>([]);
-    const context = useDisplayContext();
+    const context = useDisplayContext(); // This is for the currently selected display context
+    const { displays: globalDisplays, isLoading, error: globalDisplayError } = useGlobalDisplayList();
   
     useEffect(() => {
-      const fetchDisplays = async () => {
-        // host determination for client-side only
-        const host = typeof window !== 'undefined' ? window.location.origin : '';
-        try {
-          const displaysData: IDisplayData[] = await getDisplays(host);
-          setDisplays(displaysData.map(d => ({ _id: d._id, name: d.name })));
-        } catch (error) {
-          console.error("Failed to fetch displays for sidebar:", error);
-          setDisplays([]);
-        }
-      };
-  
-      fetchDisplays();
-    }, []);
-  
+      if (globalDisplayError) {
+        console.error("Error fetching global displays:", globalDisplayError);
+      }
+    }, [globalDisplayError]);
+
     const navigateToAdmin = (id: string): void => {
       // This method is called by DropdownButton with the key of the selected choice (which is display._id)
       Router.push(`/layout?display=${id}`);
@@ -78,7 +65,7 @@ const Sidebar: React.FC<ISidebarProps> = ({ router, loggedIn, displayId }) => {
     };
   
     // Use displayId prop for constructing menu paths if available, otherwise fallback to context or first display
-    const currentDisplayId = displayId || context.state.id || (displays.length > 0 ? displays[0]._id : '');
+    const currentDisplayId = displayId || context.state.id || (globalDisplays && globalDisplays.length > 0 ? globalDisplays[0]._id : '');
 
   const menu: IMenuItem[] = loggedIn
     ? [
@@ -116,10 +103,12 @@ const Sidebar: React.FC<ISidebarProps> = ({ router, loggedIn, displayId }) => {
         },
       ];
 
-  const dropdownChoices: IDropdownChoice[] = displays.map(d => ({
-    key: d._id,
-    name: d.name,
-  }));
+  const dropdownChoices: IDropdownChoice[] = globalDisplays
+    ? globalDisplays.map(d => ({ key: d._id, name: d.name }))
+    : [];
+
+  // TODO: Add a loading indicator for the dropdown if isLoading is true
+  // For now, it will just show an empty dropdown until displays are loaded
 
   return (
     <div className='sidebar'>
@@ -127,6 +116,7 @@ const Sidebar: React.FC<ISidebarProps> = ({ router, loggedIn, displayId }) => {
         <DropdownButton
           onSelect={navigateToAdmin}
           choices={dropdownChoices}
+          disabled={isLoading} // Disable dropdown while loading
           style={{ marginTop: 20, marginBottom: 20, width: 'calc(100% - 40px)', marginLeft: 20, marginRight: 20 }} // Adjusted style
           menuStyle={{ left: 20, top: 'calc(100% + 5px)', width: 'calc(100% - 40px)' }} // Adjusted style
         >
@@ -135,7 +125,7 @@ const Sidebar: React.FC<ISidebarProps> = ({ router, loggedIn, displayId }) => {
               <FontAwesomeIcon icon={faTv} fixedWidth color='#7bc043' />
             </div>
             <div className='info'>
-              <span className='name'>{context.state.name || 'Select Display'}</span>
+              <span className='name'>{isLoading ? "Loading..." : (context.state.name || 'Select Display')}</span>
               <span className='status online'>online</span> {/* TODO: Hardcoded status */}
             </div>
             <div className='caret'>
