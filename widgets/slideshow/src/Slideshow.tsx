@@ -78,14 +78,13 @@ class Slideshow extends Component<ISlideshowWidgetContentProps, ISlideshowWidget
       this.fetchSlidesAndStart();
     }
   }
-componentWillUnmount() {
-  this.isMounted = false;
-  this.clearAdvanceTimer();
-  // Optionally call stop() on the current slide if active
-  if (this.state.currentSlideIndex !== null && this.slideRefs[this.state.currentSlideIndex]) {
-      this.slideRefs[this.state.currentSlideIndex]?.stop();
-  }
-}
+  componentWillUnmount() {
+    this.isMounted = false;
+    this.clearAdvanceTimer();
+    // Optionally call stop() on the current slide if active
+    if (this.state.currentSlideIndex !== null && this.slideRefs[this.state.currentSlideIndex]) {
+        this.slideRefs[this.state.currentSlideIndex]?.stop();
+    }
   }
   
   clearAdvanceTimer(): void {
@@ -105,6 +104,12 @@ componentWillUnmount() {
     this.setState({ isLoading: true, error: null, currentSlideIndex: null, slides: [] });
     try {
       const slides = await getSlides(slideshowId);
+      
+      // Check if component is still mounted after async operation
+      if (!this.isMounted) {
+        return;
+      }
+      
       if (slides && slides.length > 0) {
         this.slideRefs = new Array(slides.length).fill(null);
         // Keep slides in the order they come from the API
@@ -112,15 +117,19 @@ componentWillUnmount() {
         const orderedSlides = slides;
         
         this.setState({ slides: orderedSlides, currentSlideIndex: 0, isLoading: false }, () => {
-          this.slideRefs[0]?.play(); // Play the first slide
-          this.waitForNextSlide();
+          if (this.isMounted) {
+            this.slideRefs[0]?.play(); // Play the first slide
+            this.waitForNextSlide();
+          }
         });
       } else {
         this.setState({ slides: [], currentSlideIndex: null, isLoading: false });
       }
     } catch (error) {
       console.error("Failed to fetch slides:", error);
-      this.setState({ isLoading: false, error: "Failed to load slides." });
+      if (this.isMounted) {
+        this.setState({ isLoading: false, error: "Failed to load slides." });
+      }
     }
   };
 
@@ -155,6 +164,9 @@ componentWillUnmount() {
     if (slideRef && currentSlideData) {
       slideRef.loadedPromise
         .then(() => {
+          // Check if component is still mounted before setting state or timers
+          if (!this.isMounted) return;
+          
           this.setState({ isCurrentSlideReady: true });
           const duration = (currentSlideData.duration || 0) * 1000; // Convert seconds to ms
           const effectiveDuration = duration > 0 ? duration : (this.props.defaultDuration ?? DEFAULT_SLIDE_DURATION_MS);
@@ -163,12 +175,17 @@ componentWillUnmount() {
         })
         .catch(error => {
           console.error("Error waiting for slide to load, advancing to next:", error);
+          // Check if component is still mounted before setting timers
+          if (!this.isMounted) return;
+          
           // Advance to next slide even if current one fails to load after a short delay
-          this.slideAdvanceTimeoutId = setTimeout(this.advanceToNextSlide, 2000); 
+          this.slideAdvanceTimeoutId = setTimeout(this.advanceToNextSlide, 2000);
         });
     } else {
         // If no slideRef or currentSlideData, try to advance after a short delay (e.g., if slides are empty)
-        this.slideAdvanceTimeoutId = setTimeout(this.advanceToNextSlide, (this.props.defaultDuration ?? DEFAULT_SLIDE_DURATION_MS));
+        if (this.isMounted) {
+          this.slideAdvanceTimeoutId = setTimeout(this.advanceToNextSlide, (this.props.defaultDuration ?? DEFAULT_SLIDE_DURATION_MS));
+        }
     }
   };
 

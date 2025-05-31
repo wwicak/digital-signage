@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faThLarge, faTh, faPencilAlt, IconDefinition } from '@fortawesome/free-solid-svg-icons';
-import { IconProp } from '@fortawesome/fontawesome-svg-core';
+import { faThLarge, faTh, faPencilAlt } from '@fortawesome/free-solid-svg-icons';
+import { IconProp, IconDefinition } from '@fortawesome/fontawesome-svg-core';
 import GridLayout, { Layout as RglLayout, Layouts as RglLayouts } from 'react-grid-layout';
 import { DragDropContext, Droppable, DropResult, DroppableProvided } from '@hello-pangea/dnd';
 
@@ -222,7 +222,7 @@ const LayoutPage: React.FC<ILayoutPageProps> = ({ loggedIn, displayId }) => {
             <div key={widget._id}>
               <EditableWidget
                 id={widget._id}
-                type={widget.type as string} // Cast if widget.type is more specific than string
+                type={widget.type as WidgetType} // Cast to the proper WidgetType enum
                 onDelete={() => handleDeleteWidget(widget._id)}
                 layout={displayContext.state.layout || 'compact'} // Provide a default if layout can be null
               />

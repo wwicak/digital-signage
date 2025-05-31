@@ -123,7 +123,7 @@ class SlideEditDialog extends Component<ISlideEditDialogProps, ISlideEditDialogS
     }
   };
 
-  handleChange = (name: keyof ISlideEditDialogState, value: any): void => {
+  handleChange = (name: string, value: any): void => {
     this.setState(prevState => {
       const newState = {
         ...prevState,
@@ -142,7 +142,7 @@ class SlideEditDialog extends Component<ISlideEditDialogProps, ISlideEditDialogS
   };
   
   // Handler specifically for the photo upload Input component
-  handlePhotoChange = (name: keyof ISlideEditDialogState, value: File | string | null): void => {
+  handlePhotoChange = (name: string, value: File | string | null): void => {
     // 'name' would typically be 'upload' or 'data' depending on Input component's design
     if (value instanceof File) {
         this.setState({ upload: value, data: undefined });
@@ -181,13 +181,13 @@ class SlideEditDialog extends Component<ISlideEditDialogProps, ISlideEditDialogS
         if (upload) { // New file being uploaded
             slideDetailsPayload.data = undefined; // Backend will generate new URL/data from file
         } else if (typeof data === 'string' && data.startsWith('http')) { // Existing photo URL
-            slideDetailsPayload.data = data;
+            slideDetailsPayload.data = data as any;
         } else {
              slideDetailsPayload.data = undefined; // Or handle as error if photo type has no data/upload
         }
     } else {
         // For other types, 'data' is directly from state (e.g., URL for youtube/web, content for markdown)
-        slideDetailsPayload.data = data;
+        slideDetailsPayload.data = data as any;
     }
 
     // Filter out undefined values before sending

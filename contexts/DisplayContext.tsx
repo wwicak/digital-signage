@@ -241,7 +241,7 @@ export const DisplayProvider: React.FC<{ children: React.ReactNode }> = ({ child
     addStatusBarItem,
     removeStatusBarItem,
     reorderStatusBarItems,
-  h  refreshDisplayData,
+    refreshDisplayData,
     isLoading,
     error,
   };
