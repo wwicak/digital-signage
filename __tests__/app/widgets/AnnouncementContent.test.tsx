@@ -1,7 +1,7 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import '@testing-library/jest-dom';
-import AnnouncementContent, { IAnnouncementContentProps } from './AnnouncementContent';
+import AnnouncementContent, { IAnnouncementContentProps } from '../../../widgets/announcement/src/AnnouncementContent';
 
 // Mock FontAwesomeIcon
 jest.mock('@fortawesome/react-fontawesome', () => ({

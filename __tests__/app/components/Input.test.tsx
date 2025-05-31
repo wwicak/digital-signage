@@ -1,10 +1,10 @@
 import React from 'react';
 import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
 import '@testing-library/jest-dom';
-import Input, { IInputProps, IChoice } from './Input';
+import Input, { IInputProps, IChoice } from '../../../components/Form/Input';
 
 // Mock ColorPicker
-jest.mock('./ColorPicker', () => {
+jest.mock('../../../components/Form/ColorPicker', () => {
   const MockColorPicker = jest.fn(({ color, onChange }) => (
     <input
       type="color"

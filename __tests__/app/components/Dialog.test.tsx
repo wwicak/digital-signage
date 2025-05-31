@@ -1,11 +1,11 @@
 import React, { createRef } from 'react';
 import { render, screen, act } from '@testing-library/react';
 import '@testing-library/jest-dom';
-import DialogWrapper, { DialogMethods as DialogWrapperMethods } from './Dialog'; // Renamed to DialogWrapper
+import DialogWrapper, { DialogMethods as DialogWrapperMethods } from '../../../components/Dialog'; // Renamed to DialogWrapper
 
 // Mock the DialogLegacy component
 // The mock implementation and its associated jest.fn() instances are defined inside the factory
-jest.mock('./ui/dialog-legacy', () => {
+jest.mock('../../../components/ui/dialog-legacy', () => {
   const mockLegacyOpen = jest.fn();
   const mockLegacyClose = jest.fn();
 

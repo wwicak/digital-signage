@@ -1,7 +1,7 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import '@testing-library/jest-dom';
-import DisplayPage from './page'; // Component to test
+import DisplayPage from '../../../app/display/[id]/page'; // Component to test
 
 // Mock the DisplayComponent
 jest.mock('../../../components/Display/Display', () => {

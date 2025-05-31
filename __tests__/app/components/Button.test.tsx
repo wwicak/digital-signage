@@ -1,11 +1,11 @@
 import React from 'react';
 import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
 import '@testing-library/jest-dom';
-import Button, { IButtonProps } from './Button';
+import Button, { IButtonProps } from '../../../components/Form/Button';
 
 // Mock the ButtonWithLoading component
 // The factory function for jest.mock now defines the mock implementation.
-jest.mock('../ui/button-with-loading', () => {
+jest.mock('../../../components/ui/button-with-loading', () => {
   const actualMockFn = jest.fn(
     ({ children, onClick, disabled, isLoading, variant, size, style, className, ...rest }) => {
       // Filter out custom props not meant for DOM button
@@ -39,7 +39,7 @@ describe('Button Component', () => {
     jest.clearAllMocks();
     // Dynamically require the mock inside beforeEach to get the fresh mock function for each test
     // This ensures MockedButtonWithLoading is the jest.fn instance from the mock factory
-    MockedButtonWithLoading = require('../ui/button-with-loading').ButtonWithLoading;
+    MockedButtonWithLoading = require('../../../components/ui/button-with-loading').ButtonWithLoading;
   });
 
   test('renders with default text', () => {

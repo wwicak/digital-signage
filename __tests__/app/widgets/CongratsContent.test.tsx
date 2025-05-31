@@ -4,9 +4,9 @@ import '@testing-library/jest-dom';
 import { Options as LottieOptions } from 'react-lottie';
 
 // Import the component to be tested
-import ActualCongratsContent from './CongratsContent';
+import ActualCongratsContent from '../../../widgets/congrats/src/CongratsContent';
 // Import the utility object we want to spy on
-import { animationUtils } from './animationUtils';
+import { animationUtils } from '../../../widgets/congrats/src/animationUtils';
 
 type ICongratsContentProps = React.ComponentProps<typeof ActualCongratsContent>;
 

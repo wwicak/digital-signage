@@ -4,10 +4,10 @@ import '@testing-library/jest-dom';
 import * as z from 'zod';
 
 // Import the schema from the new types.ts file for use in this test file
-import { CongratsWidgetContentDataSchema, ICongratsWidgetData } from './types';
+import { CongratsWidgetContentDataSchema, ICongratsWidgetData } from '../../../widgets/congrats/src/types';
 
 // Import the component to be tested
-import CongratsOptions, { ICongratsOptionsProps } from './CongratsOptions';
+import CongratsOptions, { ICongratsOptionsProps } from '../../../widgets/congrats/src/CongratsOptions';
 
 
 // Mock child components used by CongratsOptions

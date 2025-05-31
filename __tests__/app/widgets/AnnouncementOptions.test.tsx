@@ -1,8 +1,8 @@
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom';
-import AnnouncementOptions, { IAnnouncementOptionsProps } from './AnnouncementOptions';
-import { IAnnouncementWidgetData } from './AnnouncementContent';
+import AnnouncementOptions, { IAnnouncementOptionsProps } from '../../../widgets/announcement/src/AnnouncementOptions';
+import { IAnnouncementWidgetData } from '../../../widgets/announcement/src/AnnouncementContent';
 
 // Mock child components used by AnnouncementOptions
 jest.mock('../../../components/Form', () => ({
