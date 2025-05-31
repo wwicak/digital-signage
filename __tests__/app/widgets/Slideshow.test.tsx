@@ -4,6 +4,7 @@ import '@testing-library/jest-dom';
 
 import Slideshow, { ISlideshowWidgetContentProps, ISlideInstance } from '../../../widgets/slideshow/src/Slideshow';
 import { ISlideData, SlideActionDataSchema } from '../../../actions/slide'; // Assuming SlideActionDataSchema is the Zod schema for ISlideData
+import { SlideType } from '../../../api/models/Slide';
 
 // --- Mock child components and actions ---
 
@@ -55,9 +56,9 @@ const DEFAULT_SLIDE_DURATION_MS_TEST = 5000;
 describe('Slideshow', () => {
   const mockSlides: ISlideData[] = [
     // Zod validation might be strict, ensure data matches SlideActionDataSchema structure
-    { _id: 's1', type: 'photo', duration: 3, data: { title: 'Slide 1 Photo', url: 'url1.jpg' }, position: 0, isEnabled: true, name:'S1N', slideshow_id:'ss1' },
-    { _id: 's2', type: 'youtube', duration: 0, data: { title: 'Slide 2 Youtube', videoId: 'vid2' }, position: 1, isEnabled: true, name:'S2N', slideshow_id:'ss1' },
-    { _id: 's3', type: 'web', duration: 4, data: { title: 'Slide 3 Web', url: 'url3.html' }, position: 2, isEnabled: true, name:'S3N', slideshow_id:'ss1' },
+    { _id: 's1', type: SlideType.PHOTO, duration: 3, data: { url: 'url1.jpg', caption: 'Slide 1 Photo' }, is_enabled: true, name:'S1N', slideshow_ids:['ss1'], creator_id: 'user1' },
+    { _id: 's2', type: SlideType.YOUTUBE, duration: 0, data: { videoId: 'vid2', url: 'http://youtube.com/watch?v=vid2' }, is_enabled: true, name:'S2N', slideshow_ids:['ss1'], creator_id: 'user1' },
+    { _id: 's3', type: SlideType.WEB, duration: 4, data: { url: 'url3.html' }, is_enabled: true, name:'S3N', slideshow_ids:['ss1'], creator_id: 'user1' },
   ];
 
   const defaultProps: ISlideshowWidgetContentProps = {
@@ -72,14 +73,14 @@ describe('Slideshow', () => {
 
   const renderSlideshow = (props: Partial<ISlideshowWidgetContentProps> = {}) => {
     const mergedProps = { ...defaultProps, ...props, data: { ...defaultProps.data, ...props.data } };
-    return render(<Slideshow {...mergedProps} />);
+    return render(<Slideshow {...mergedProps as any} />);
   };
 
   beforeEach(() => {
     jest.useFakeTimers();
     actualMockGetSlides.mockClear();
-    mockSlideRef.play.mockClear();
-    mockSlideRef.stop.mockClear();
+    (mockSlideRef.play as jest.Mock).mockClear();
+    (mockSlideRef.stop as jest.Mock).mockClear();
     // Reset any other necessary mocks here
     (jest.requireMock('./Progress') as jest.Mock).mockClear();
   });
@@ -168,7 +169,7 @@ describe('Slideshow', () => {
 
   test('does not render Progress component when show_progressbar is false', async () => {
     actualMockGetSlides.mockResolvedValueOnce([...mockSlides]);
-    renderSlideshow({ data: { ...defaultProps.data, show_progressbar: false } });
+    renderSlideshow({ data: { slideshow_id: defaultProps.data?.slideshow_id || null, show_progressbar: false } });
     await waitFor(() => expect(actualMockGetSlides).toHaveBeenCalled()); // Ensure slides are loaded
     expect(screen.queryByTestId('mock-progress')).not.toBeInTheDocument();
   });
@@ -201,7 +202,7 @@ describe('Slideshow', () => {
     expect(actualMockGetSlides).toHaveBeenCalledTimes(1);
 
     const newSlides: ISlideData[] = [
-      { _id: 's4', type: 'generic', data: { title: 'New Slide 4' }, slideshow_id: 'new-id', isEnabled: true, name:'S4N', position:0 },
+      { _id: 's4', type: SlideType.IMAGE, duration: 5, data: { url: 'http://example.com/slide4.jpg', caption: 'New Slide 4' }, slideshow_ids: ['new-id'], is_enabled: true, name:'S4N', creator_id: 'user1' },
     ];
     actualMockGetSlides.mockResolvedValueOnce(newSlides); // Set up for the next call
 

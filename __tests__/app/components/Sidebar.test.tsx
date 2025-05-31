@@ -25,6 +25,7 @@ let currentMockRouterState: NextRouter = {
   replace: mockRouterReplace,
   reload: mockRouterReload,
   back: jest.fn(),
+  forward: jest.fn(),
   beforePopState: jest.fn(),
   events: {
     on: jest.fn(),
@@ -97,7 +98,7 @@ jest.mock('../DropdownButton', () => {
       </select>
     </div>
   ));
-  InnerMockDropdownButton.displayName = 'MockDropdownButton';
+  (InnerMockDropdownButton as any).displayName = 'MockDropdownButton';
   return {
     __esModule: true,
     default: InnerMockDropdownButton,
@@ -122,6 +123,7 @@ const initialMockRouterState: NextRouter = {
     replace: mockRouterReplace,
     reload: mockRouterReload,
     back: jest.fn(),
+    forward: jest.fn(),
     beforePopState: jest.fn(),
     events: {
       on: jest.fn(),
@@ -167,7 +169,7 @@ describe('Sidebar Component', () => {
     });
 
     getDisplaysMock.mockResolvedValue([
-      { _id: 'display1', name: 'Display One', creator_id: 'user1', slideshow_id: 's1', widgets: [] },
+      { _id: 'display1', name: 'Display One', creator_id: 'user1', widgets: [] },
       { _id: 'display2', name: 'Display Two', creator_id: 'user1', slideshow_id: 's2', widgets: [] },
     ] as IDisplayData[]);
   });
@@ -191,8 +193,8 @@ describe('Sidebar Component', () => {
   describe('Logged In State', () => {
     const loggedInProps: Partial<ISidebarProps> = { loggedIn: true };
     const initialDisplays: IDisplayData[] = [
-      { _id: 'display1', name: 'Display One', creator_id: 'user1', slideshow_id: 's1', widgets: [] },
-      { _id: 'display2', name: 'Display Two', creator_id: 'user1', slideshow_id: 's2', widgets: [] },
+      { _id: 'display1', name: 'Display One', creator_id: 'user1', widgets: [] },
+      { _id: 'display2', name: 'Display Two', creator_id: 'user1', widgets: [] },
     ];
 
     test('renders admin menu items with correct paths using context displayId', async () => {

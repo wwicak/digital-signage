@@ -94,7 +94,7 @@ describe('ListOptions', () => {
     renderListOptions();
     expect(screen.getByTestId('mock-input-title')).toHaveValue(defaultListData.title);
     // Explicitly cast .value to string for comparison, as JSDOM might return number for type="number"
-    expect(String(screen.getByTestId('mock-input-fontSize').value)).toBe(defaultListData.fontSize?.toString());
+    expect(String((screen.getByTestId('mock-input-fontSize') as HTMLInputElement).value)).toBe(defaultListData.fontSize?.toString());
     expect(screen.getByTestId('mock-input-color')).toHaveValue(defaultListData.color);
     expect(screen.getByTestId('mock-input-textColor')).toHaveValue(defaultListData.textColor);
     expect(screen.getByTestId('mock-input-ordered')).toHaveValue(defaultListData.ordered ? 'ordered' : 'unordered');

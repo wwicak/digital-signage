@@ -24,7 +24,7 @@ jest.mock('next/link', () => {
     return ({ children, href, ...rest }: { children: React.ReactNode, href: string, [key: string]: any }) => {
         // If the child is an <a> tag, clone it and add href. Otherwise, wrap with <a>.
         if (React.isValidElement(children) && children.type === 'a') {
-            return React.cloneElement(children as React.ReactElement<any>, { href, ...rest, ...children.props });
+            return React.cloneElement(children as React.ReactElement<any>, { href, ...rest, ...(children.props || {}) });
         }
         return <a href={href} {...rest}>{children}</a>;
     };
@@ -44,9 +44,11 @@ const mockRefresh = jest.fn();
 const defaultScreenValue: IDisplayData = {
   _id: 'screen123',
   name: 'Test Screen',
-  widgets: [{}, {}],
+  widgets: [
+    { _id: 'w1', name: 'Widget 1', type: 'announcement', x: 0, y: 0, w: 1, h: 1, data: {} },
+    { _id: 'w2', name: 'Widget 2', type: 'image', x: 1, y: 0, w: 1, h: 1, data: {} }
+  ],
   creator_id: 'user1',
-  slideshow_id: 's1',
 };
 
 const renderScreenCard = (props?: Partial<IScreenCardProps>) => {

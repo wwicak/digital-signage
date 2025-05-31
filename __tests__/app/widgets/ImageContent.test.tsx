@@ -118,7 +118,7 @@ describe('ImageContent', () => {
   });
 
   test('applies different fit values correctly', () => {
-    const fitValue: IImageContentProps['data']['fit'] = 'scale-down';
+    const fitValue: 'scale-down' = 'scale-down';
     renderImageContent({ data: { ...defaultProps.data, fit: fitValue } });
     const photoMain = screen.getByLabelText(defaultProps.data!.altText!).querySelector('.photo-main');
     expect(photoMain).toHaveStyle(`background-size: ${fitValue}`);

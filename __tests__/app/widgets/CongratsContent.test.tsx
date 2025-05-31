@@ -24,7 +24,7 @@ jest.mock('react-lottie', () => {
       Mock Lottie Content
     </div>
   ));
-  MockLottie.displayName = "MockLottie";
+  (MockLottie as any).displayName = "MockLottie";
   return { __esModule: true, default: MockLottie };
 });
 
@@ -35,7 +35,7 @@ jest.mock('../../../components/AutoScroll', () => {
       {children}
     </div>
   ));
-  MockAutoScroll.displayName = "MockAutoScroll";
+  (MockAutoScroll as any).displayName = "MockAutoScroll";
   return { __esModule: true, default: MockAutoScroll };
 });
 

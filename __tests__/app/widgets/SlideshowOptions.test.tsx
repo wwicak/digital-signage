@@ -73,8 +73,8 @@ jest.mock('../../../actions/slideshow', () => ({
 describe('SlideshowOptions', () => {
   const mockOnChange = jest.fn();
   const mockAvailableSlideshows: ISlideshowData[] = [
-    { _id: 'ss1', name: 'Summer Collection', slides: [], user_id: 'user1', isEnabled: true },
-    { _id: 'ss2', name: 'Winter Sale', slides: [], user_id: 'user1', isEnabled: true },
+    { _id: 'ss1', name: 'Summer Collection', slides: [], is_enabled: true },
+    { _id: 'ss2', name: 'Winter Sale', slides: [], is_enabled: true },
   ];
 
   const defaultWidgetData: ISlideshowWidgetDefaultData = {
@@ -123,7 +123,7 @@ describe('SlideshowOptions', () => {
 
     expect(screen.getByTestId('mock-input-slideshow_id')).toHaveValue(defaultWidgetData.slideshow_id!);
     // input.value is always a string, so compare with string version of the number.
-    expect(screen.getByTestId('mock-input-transition_time').value).toBe(defaultWidgetData.transition_time!.toString());
+    expect((screen.getByTestId('mock-input-transition_time') as HTMLInputElement).value).toBe(defaultWidgetData.transition_time!.toString());
     expect(screen.getByTestId('mock-input-show_progressbar')).toBeChecked();
     expect(screen.getByTestId('mock-input-random_order')).not.toBeChecked();
   });
