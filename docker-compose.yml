@@ -20,6 +20,7 @@ services:
       - NODE_ENV=development
     networks:
       - dev-network
+    restart: unless-stopped
 
   app-dev-backend:
     build:
@@ -32,6 +33,7 @@ services:
       - .:/app
       - /app/node_modules
       - /app/dist # Exclude dist from host mount
+      - uploads_data:/app/uploads # Persist uploads for dev backend
     command: bun run dev:server
     env_file:
       - .env
@@ -40,9 +42,27 @@ services:
       - ENVIRON=DEV
       # Add any other backend specific dev env vars here
     depends_on:
-      - app-dev-frontend # Optional: if backend depends on frontend build step or availability
+      # - app-dev-frontend # Optional: if backend depends on frontend build step or availability
+      - mongo
     networks:
       - dev-network
+    restart: unless-stopped
+
+  mongo:
+    image: mongo:latest # Or a specific version like mongo:5.0
+    container_name: digital-signage-mongo
+    ports:
+      - "27017:27017" # Expose MongoDB port to host (optional, for external tools)
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_ROOT_USER} # From .env
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_ROOT_PASSWORD} # From .env
+      MONGO_INITDB_DATABASE: ${MONGO_DATABASE} # From .env, e.g., digitaldisplay
+    volumes:
+      - mongo_data:/data/db # Persist MongoDB data
+    networks:
+      dev-network: # For dev services to connect
+      prod-network: # For prod service to connect
+    restart: unless-stopped # Add restart policy
 
   # Production Environment
   app-prod:
@@ -63,14 +83,18 @@ services:
       - NODE_ENV=production
       - ENVIRON=PROD
       # - PORT=3001 # Already set in server.ts, but can be overridden
-    # volumes:
-      # - uploads_data:/app/uploads # Example for persisting uploads if needed
+    volumes:
+      - uploads_data:/app/uploads # Persist uploads for production
+    depends_on:
+      - mongo
     networks:
       - prod-network
+    restart: unless-stopped
 
 # Define named volumes if used (e.g., for uploads persistence)
-# volumes:
-#   uploads_data:
+volumes:
+  mongo_data:
+  uploads_data: # New volume for application uploads
 
 networks:
   dev-network:
