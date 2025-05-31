@@ -1,72 +1,80 @@
-import React, { Component } from 'react';
-import { Form, Input, InlineInputGroup, IInputProps, IChoice } from '../../../components/Form';
-import { IWidgetOptionsEditorProps } from '../../../components/Admin/WidgetEditDialog';
-import getVideoId from 'get-video-id';
-import * as z from 'zod';
+import React, { Component } from 'react'
+import { Form, Input, InlineInputGroup, IInputProps, IChoice } from '../../../components/Form'
+import { IWidgetOptionsEditorProps } from '../../../components/Admin/WidgetEditDialog'
+import getVideoId from 'get-video-id'
+import * as z from 'zod'
 
-import { IYoutubeDefaultData } from '../index'; // This is an interface
-import YoutubeContent, { YoutubeWidgetDataSchema } from './YoutubeContent'; // Import Zod schema
+import { IYoutubeDefaultData } from '../index' // This is an interface
+import YoutubeContent, { YoutubeWidgetDataSchema } from './YoutubeContent' // Import Zod schema
 
-// Zod schema for YoutubeOptions props
-// IWidgetOptionsEditorProps<T> has data: T | undefined, onChange: (newData: T) => void
+/*
+ * Zod schema for YoutubeOptions props
+ * IWidgetOptionsEditorProps<T> has data: T | undefined, onChange: (newData: T) => void
+ */
 export const YoutubeOptionsPropsSchema = z.object({
   data: YoutubeWidgetDataSchema.optional(),
   onChange: z.function().args(YoutubeWidgetDataSchema).returns(z.void()),
-});
+})
 export type IYoutubeOptionsProps = z.infer<typeof YoutubeOptionsPropsSchema>;
 
 // Zod schema for the component's local state
 export const YoutubeOptionsComponentStateSchema = z.object({
   inputUrl: z.string(),
-});
+})
 type IYoutubeOptionsComponentState = z.infer<typeof YoutubeOptionsComponentStateSchema>;
 
 class YoutubeOptions extends Component<IYoutubeOptionsProps, IYoutubeOptionsComponentState> {
   constructor(props: IYoutubeOptionsProps) {
-    super(props);
-    // Initialize local state for the URL input field.
-    // If props.data.video_id exists, construct a sample URL for display,
-    // otherwise, use an empty string or a default example URL.
+    super(props)
+    /*
+     * Initialize local state for the URL input field.
+     * If props.data.video_id exists, construct a sample URL for display,
+     * otherwise, use an empty string or a default example URL.
+     */
     this.state = {
       inputUrl: props.data?.video_id ? `https://www.youtube.com/watch?v=${props.data.video_id}` : '',
-    };
+    }
   }
   
   componentDidUpdate(prevProps: IYoutubeOptionsProps) {
-    // If the video_id from parent data changes and it's different from what inputUrl would yield,
-    // update inputUrl. This is tricky because inputUrl could be a full URL or just an ID.
-    // A safer approach might be to primarily work with video_id and only use inputUrl for user input.
+    /*
+     * If the video_id from parent data changes and it's different from what inputUrl would yield,
+     * update inputUrl. This is tricky because inputUrl could be a full URL or just an ID.
+     * A safer approach might be to primarily work with video_id and only use inputUrl for user input.
+     */
     if (this.props.data?.video_id !== prevProps.data?.video_id) {
         this.setState({
             inputUrl: this.props.data?.video_id ? `https://www.youtube.com/watch?v=${this.props.data.video_id}` : ''
-        });
+        })
     }
   }
 
   // Handles changes for any field in IYoutubeDefaultData or the local inputUrl
   handleChange = (name: string, value: any): void => {
-    const { onChange, data: currentWidgetData } = this.props;
+    const { onChange, data: currentWidgetData } = this.props
 
     if (name === 'inputUrl') {
-      this.setState({ inputUrl: value as string });
+      this.setState({ inputUrl: value as string })
       // Try to extract video_id and update parent
-      const extracted = getVideoId(value as string);
+      const extracted = getVideoId(value as string)
       if (extracted && extracted.service === 'youtube' && extracted.id) {
         const newData: IYoutubeDefaultData = {
           ...(currentWidgetData || this.getDefaultWidgetData()), // Spread existing or default data
           video_id: extracted.id, // Update video_id
-        };
-        if (onChange) onChange(newData);
+        }
+        if (onChange) onChange(newData)
       } else if (!value) { // If URL is cleared, clear video_id
         const newData: IYoutubeDefaultData = {
             ...(currentWidgetData || this.getDefaultWidgetData()),
             video_id: null,
-        };
-        if (onChange) onChange(newData);
+        }
+        if (onChange) onChange(newData)
       }
-      // If invalid URL, video_id in parent remains unchanged or becomes null if input is empty.
-      // User will see their inputUrl, but the underlying video_id might not update.
-      return; 
+      /*
+       * If invalid URL, video_id in parent remains unchanged or becomes null if input is empty.
+       * User will see their inputUrl, but the underlying video_id might not update.
+       */
+      return
     }
     
     // For other fields, directly update the widget data object
@@ -74,10 +82,10 @@ class YoutubeOptions extends Component<IYoutubeOptionsProps, IYoutubeOptionsComp
       const newData: IYoutubeDefaultData = {
         ...(currentWidgetData || this.getDefaultWidgetData()), // Spread existing or default data
         [name]: value, // Update the changed field
-      };
-      onChange(newData);
+      }
+      onChange(newData)
     }
-  };
+  }
 
   // Helper to get default widget data structure
   getDefaultWidgetData = (): IYoutubeDefaultData => {
@@ -89,13 +97,13 @@ class YoutubeOptions extends Component<IYoutubeOptionsProps, IYoutubeOptionsComp
       start_time: 0,
       end_time: 0,
       show_captions: false,
-    };
+    }
   }
 
   render() {
     // Current widget data comes from props, managed by WidgetEditDialog
-    const { data: currentWidgetData } = this.props;
-    const { inputUrl } = this.state;
+    const { data: currentWidgetData } = this.props
+    const { inputUrl } = this.state
 
     // Use values from props.data for controlled components, with fallbacks to defaults
     const {
@@ -106,9 +114,9 @@ class YoutubeOptions extends Component<IYoutubeOptionsProps, IYoutubeOptionsComp
       start_time = 0,
       end_time = 0,
       show_captions = false,
-    } = currentWidgetData || this.getDefaultWidgetData();
+    } = currentWidgetData || this.getDefaultWidgetData()
     
-    const previewData: IYoutubeDefaultData = { video_id, autoplay, loop, show_controls, start_time, end_time, show_captions };
+    const previewData: IYoutubeDefaultData = { video_id, autoplay, loop, show_controls, start_time, end_time, show_captions }
 
     return (
       <div className={'options-container'}>
@@ -144,30 +152,30 @@ class YoutubeOptions extends Component<IYoutubeOptionsProps, IYoutubeOptionsComp
           </InlineInputGroup>
           <InlineInputGroup>
             <Input
-              type="checkbox"
-              name="autoplay"
-              label="Autoplay"
+              type='checkbox'
+              name='autoplay'
+              label='Autoplay'
               checked={autoplay}
               onChange={this.handleChange}
             />
             <Input
-              type="checkbox"
-              name="loop"
-              label="Loop"
+              type='checkbox'
+              name='loop'
+              label='Loop'
               checked={loop}
               onChange={this.handleChange}
             />
             <Input
-              type="checkbox"
-              name="show_controls"
-              label="Show Controls"
+              type='checkbox'
+              name='show_controls'
+              label='Show Controls'
               checked={show_controls}
               onChange={this.handleChange}
             />
             <Input
-              type="checkbox"
-              name="show_captions"
-              label="Show Captions"
+              type='checkbox'
+              name='show_captions'
+              label='Show Captions'
               checked={show_captions}
               onChange={this.handleChange}
             />
@@ -179,7 +187,7 @@ class YoutubeOptions extends Component<IYoutubeOptionsProps, IYoutubeOptionsComp
                 {video_id ? (
                     <YoutubeContent data={previewData} isPreview={true} />
                 ) : (
-                    <div className="no-video-preview">Enter a valid YouTube URL or Video ID</div>
+                    <div className='no-video-preview'>Enter a valid YouTube URL or Video ID</div>
                 )}
             </div>
         </div>
@@ -227,8 +235,8 @@ class YoutubeOptions extends Component<IYoutubeOptionsProps, IYoutubeOptionsComp
           `}
         </style>
       </div>
-    );
+    )
   }
 }
 
-export default YoutubeOptions;
+export default YoutubeOptions

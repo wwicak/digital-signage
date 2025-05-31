@@ -1,11 +1,11 @@
-import React, { ReactNode, forwardRef, useImperativeHandle, useState } from 'react';
+import React, { ReactNode, forwardRef, useImperativeHandle, useState } from 'react'
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
   DialogDescription,
-} from './dialog';
+} from './dialog'
 
 export interface IDialogProps {
   children: ReactNode;
@@ -21,12 +21,12 @@ export interface DialogRef {
 
 const DialogLegacy = forwardRef<DialogRef, IDialogProps>(
   ({ children, title, description, className }, ref) => {
-    const [isOpen, setIsOpen] = useState(false);
+    const [isOpen, setIsOpen] = useState(false)
 
     useImperativeHandle(ref, () => ({
       open: () => setIsOpen(true),
       close: () => setIsOpen(false),
-    }));
+    }))
 
     return (
       <Dialog open={isOpen} onOpenChange={setIsOpen}>
@@ -40,10 +40,10 @@ const DialogLegacy = forwardRef<DialogRef, IDialogProps>(
           {children}
         </DialogContent>
       </Dialog>
-    );
+    )
   }
-);
+)
 
-DialogLegacy.displayName = 'DialogLegacy';
+DialogLegacy.displayName = 'DialogLegacy'
 
-export default DialogLegacy;
+export default DialogLegacy

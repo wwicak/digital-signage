@@ -1,17 +1,17 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import axios, { AxiosResponse } from 'axios';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { config as FaConfig, IconProp } from '@fortawesome/fontawesome-svg-core';
-import { faMapMarkerAlt } from '@fortawesome/free-solid-svg-icons';
+import React, { useState, useEffect, useCallback } from 'react'
+import axios, { AxiosResponse } from 'axios'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { config as FaConfig, IconProp } from '@fortawesome/fontawesome-svg-core'
+import { faMapMarkerAlt } from '@fortawesome/free-solid-svg-icons'
 
-import WeatherIcon from './WeatherIcon';
-import { IWeatherDefaultData, TWeatherUnit } from '../index';
-import * as z from 'zod';
+import WeatherIcon from './WeatherIcon'
+import { IWeatherDefaultData, TWeatherUnit } from '../index'
+import * as z from 'zod'
 
-FaConfig.autoAddCss = false;
+FaConfig.autoAddCss = false
 
 // Zod schema for TWeatherUnit
-export const TWeatherUnitSchema = z.enum(["metric", "imperial"]);
+export const TWeatherUnitSchema = z.enum(['metric', 'imperial'])
 
 // Zod schema for IWeatherDefaultData (used in props.data)
 export const WeatherWidgetDataSchema = z.object({
@@ -20,13 +20,13 @@ export const WeatherWidgetDataSchema = z.object({
   showForecast: z.boolean().optional(),
   apiKey: z.string().optional(),
   locationName: z.string().optional(),
-});
+})
 
 // Zod schema for WeatherContent component props
 export const WeatherContentPropsSchema = z.object({
   data: WeatherWidgetDataSchema.optional(),
   isPreview: z.boolean().optional(),
-});
+})
 export type IWeatherContentProps = z.infer<typeof WeatherContentPropsSchema>;
 
 // Zod schema for WeatherContent component state
@@ -37,7 +37,7 @@ export const WeatherContentStateSchema = z.object({
   description: z.string().optional(),
   isLoading: z.boolean(),
   error: z.string().nullable(),
-});
+})
 type IWeatherContentState = z.infer<typeof WeatherContentStateSchema>;
 
 // --- OpenWeatherMap API Response Interfaces ---
@@ -97,42 +97,42 @@ interface IOpenWeatherCurrentResponse {
 }
 
 // --- Constants ---
-const DEFAULT_UNIT: TWeatherUnit = 'imperial';
-const DEFAULT_ZIP = '10001';
-const DEFAULT_API_KEY = 'da6ef4bf43eed800fdadd4a728766089';
-const API_BASE_URL = 'https://api.openweathermap.org/data/2.5';
+const DEFAULT_UNIT: TWeatherUnit = 'imperial'
+const DEFAULT_ZIP = '10001'
+const DEFAULT_API_KEY = 'da6ef4bf43eed800fdadd4a728766089'
+const API_BASE_URL = 'https://api.openweathermap.org/data/2.5'
 
 const WeatherContent: React.FC<IWeatherContentProps> = React.memo(({ data, isPreview }) => {
   const [weatherState, setWeatherState] = useState<IWeatherContentState>({
     isLoading: true,
     error: null,
-  });
+  })
 
   const fetchWeatherData = useCallback(async (): Promise<void> => {
-    const { zip = DEFAULT_ZIP, unit = DEFAULT_UNIT, apiKey = DEFAULT_API_KEY } = data || {};
+    const { zip = DEFAULT_ZIP, unit = DEFAULT_UNIT, apiKey = DEFAULT_API_KEY } = data || {}
     
     if (!apiKey) {
-      setWeatherState(prev => ({ ...prev, isLoading: false, error: "Weather API key is missing." }));
-      return;
+      setWeatherState(prev => ({ ...prev, isLoading: false, error: 'Weather API key is missing.' }))
+      return
     }
     if (!zip) {
-      setWeatherState(prev => ({ ...prev, isLoading: false, error: "Location (zip/city) is missing." }));
-      return;
+      setWeatherState(prev => ({ ...prev, isLoading: false, error: 'Location (zip/city) is missing.' }))
+      return
     }
 
-    setWeatherState(prev => ({ ...prev, isLoading: true, error: null }));
+    setWeatherState(prev => ({ ...prev, isLoading: true, error: null }))
 
     try {
-      const queryParam = /^\d+$/.test(zip) ? `zip=${zip},us` : `q=${zip}`;
+      const queryParam = /^\d+$/.test(zip) ? `zip=${zip},us` : `q=${zip}`
 
       const response: AxiosResponse<IOpenWeatherCurrentResponse> = await axios.get(
         `${API_BASE_URL}/weather?${queryParam}&apiKey=${apiKey}&units=${unit}`
-      );
+      )
 
-      const responseData = response.data;
+      const responseData = response.data
       if (responseData && responseData.weather && responseData.weather.length > 0) {
-        const { name, weather, main } = responseData;
-        const { icon, description } = weather[0];
+        const { name, weather, main } = responseData
+        const { icon, description } = weather[0]
         setWeatherState({
           locationName: name,
           iconCode: icon,
@@ -140,38 +140,38 @@ const WeatherContent: React.FC<IWeatherContentProps> = React.memo(({ data, isPre
           description,
           isLoading: false,
           error: null,
-        });
+        })
       } else {
-        throw new Error("Invalid weather data structure received.");
+        throw new Error('Invalid weather data structure received.')
       }
     } catch (error: any) {
-      console.error("Failed to fetch weather data:", error);
-      let errorMessage = "Could not retrieve weather information.";
+      console.error('Failed to fetch weather data:', error)
+      let errorMessage = 'Could not retrieve weather information.'
       if (error.response) {
-        errorMessage = `Error ${error.response.status}: ${error.response.data?.message || error.message}`;
+        errorMessage = `Error ${error.response.status}: ${error.response.data?.message || error.message}`
       } else if (error instanceof Error) {
-        errorMessage = error.message;
+        errorMessage = error.message
       }
-      setWeatherState(prev => ({ ...prev, isLoading: false, error: errorMessage }));
+      setWeatherState(prev => ({ ...prev, isLoading: false, error: errorMessage }))
     }
-  }, [data]);
+  }, [data])
 
   useEffect(() => {
-    fetchWeatherData();
-  }, [fetchWeatherData]);
+    fetchWeatherData()
+  }, [fetchWeatherData])
 
-  const { locationName, iconCode, temperature, description, isLoading, error } = weatherState;
+  const { locationName, iconCode, temperature, description, isLoading, error } = weatherState
 
   if (isLoading) {
-    return <div className="weather-loading">Loading Weather...</div>;
+    return <div className='weather-loading'>Loading Weather...</div>
   }
 
   if (error) {
-    return <div className="weather-error">Error: {error}</div>;
+    return <div className='weather-error'>Error: {error}</div>
   }
 
   if (!locationName) {
-    return <div className="weather-nodata">Weather data unavailable.</div>;
+    return <div className='weather-nodata'>Weather data unavailable.</div>
   }
 
   return (
@@ -276,9 +276,9 @@ const WeatherContent: React.FC<IWeatherContentProps> = React.memo(({ data, isPre
         `}
       </style>
     </div>
-  );
-});
+  )
+})
 
-WeatherContent.displayName = 'WeatherContent';
+WeatherContent.displayName = 'WeatherContent'
 
-export default WeatherContent;
+export default WeatherContent

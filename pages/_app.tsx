@@ -1,14 +1,14 @@
-import { AppProps } from 'next/app';
-import React from 'react';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
-import { DisplayProvider } from '../contexts/DisplayContext';
+import { AppProps } from 'next/app'
+import React from 'react'
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
+import { DisplayProvider } from '../contexts/DisplayContext'
 
 // Import global styles
-import '../styles/globals.css';
-import '../styles/GridLayoutStyles.css';
-import 'react-resizable/css/styles.css';
-import '@fortawesome/fontawesome-svg-core/styles.css'; // Prevent Font Awesome from adding its own CSS automatically
+import '../styles/globals.css'
+import '../styles/GridLayoutStyles.css'
+import 'react-resizable/css/styles.css'
+import '@fortawesome/fontawesome-svg-core/styles.css' // Prevent Font Awesome from adding its own CSS automatically
 
 // Create a client
 const queryClient = new QueryClient({
@@ -22,7 +22,7 @@ const queryClient = new QueryClient({
       retry: 1,
     },
   },
-});
+})
 
 // Modern functional App component using the new pattern for Next.js 12+
 export default function MyApp({ Component, pageProps }: AppProps) {
@@ -33,5 +33,5 @@ export default function MyApp({ Component, pageProps }: AppProps) {
         <ReactQueryDevtools initialIsOpen={false} />
       </DisplayProvider>
     </QueryClientProvider>
-  );
+  )
 }

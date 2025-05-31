@@ -1,6 +1,6 @@
-import mongoose, { Document, Model, Schema } from 'mongoose';
-import * as z from 'zod';
-import { IWidget } from './Widget'; // Assuming Widget.ts exists or will exist
+import mongoose, { Document, Model, Schema } from 'mongoose'
+import * as z from 'zod'
+import { IWidget } from './Widget' // Assuming Widget.ts exists or will exist
 
 export interface IDisplay extends Document {
   name: string;
@@ -56,24 +56,24 @@ const DisplaySchema = new Schema<IDisplay>(
   {
     timestamps: { createdAt: 'creation_date', updatedAt: 'last_update' } // Automatically manage creation_date and last_update
   }
-);
+)
 
 // Pre-save middleware to update `last_update` field
 DisplaySchema.pre('save', function(next) {
   if (this.isModified()) { // Check if any field is modified, not just specific ones
-    this.last_update = new Date();
+    this.last_update = new Date()
   }
-  next();
-});
+  next()
+})
 
-const DisplayModel: Model<IDisplay> = mongoose.model<IDisplay>('Display', DisplaySchema);
+const DisplayModel: Model<IDisplay> = mongoose.model<IDisplay>('Display', DisplaySchema)
 
 // Zod schema for StatusBar
 export const StatusBarSchemaZod = z.object({
   enabled: z.boolean().default(true),
   color: z.string().optional(),
   elements: z.array(z.string()).default([]), // Default to empty array
-});
+})
 
 // Zod schema for IDisplay
 export const DisplaySchemaZod = z.object({
@@ -88,6 +88,6 @@ export const DisplaySchemaZod = z.object({
   layout: z.string().default('spaced'),
   statusBar: StatusBarSchemaZod.default({ enabled: true, elements: [] }), // Provide default for the object itself
   __v: z.number().optional(),
-});
+})
 
-export default DisplayModel;
+export default DisplayModel

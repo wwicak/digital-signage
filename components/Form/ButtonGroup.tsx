@@ -1,4 +1,4 @@
-import React, { ReactNode, CSSProperties, HTMLAttributes } from 'react';
+import React, { ReactNode, CSSProperties, HTMLAttributes } from 'react'
 
 // Define allowed alignment values
 export type TButtonGroupAlignment = 'left' | 'center' | 'right';
@@ -22,13 +22,15 @@ const ButtonGroup: React.FC<IButtonGroupProps> = ({
 }) => {
   // Determine justifyContent based on align prop
   const justifyContent =
-    align === 'center' ? 'center' : align === 'left' ? 'flex-start' : 'flex-end';
+    align === 'center' ? 'center' : align === 'left' ? 'flex-start' : 'flex-end'
 
-  // Base styles are applied via JSX style tag for dynamic properties like justifyContent.
-  // Static parts can be in classes, dynamic parts via inline styles or CSS variables.
-  // For simplicity here, dynamic justifyContent is applied via JSX style.
-  // The 'flex: 1' from original might be too greedy if ButtonGroup is inside another flex container.
-  // It's often better to let the parent control flex sizing. Removed for now, can be added back via `style` prop if needed.
+  /*
+   * Base styles are applied via JSX style tag for dynamic properties like justifyContent.
+   * Static parts can be in classes, dynamic parts via inline styles or CSS variables.
+   * For simplicity here, dynamic justifyContent is applied via JSX style.
+   * The 'flex: 1' from original might be too greedy if ButtonGroup is inside another flex container.
+   * It's often better to let the parent control flex sizing. Removed for now, can be added back via `style` prop if needed.
+   */
 
   return (
     <div
@@ -54,7 +56,7 @@ const ButtonGroup: React.FC<IButtonGroupProps> = ({
         */
       `}</style>
     </div>
-  );
-};
+  )
+}
 
-export default ButtonGroup;
+export default ButtonGroup

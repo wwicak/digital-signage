@@ -1,10 +1,10 @@
-import { ComponentType } from "react";
-import { IconProp } from "@fortawesome/fontawesome-svg-core";
-import { faListUl } from "@fortawesome/free-solid-svg-icons"; // Using faListUl for a generic list icon
+import { ComponentType } from 'react'
+import { IconProp } from '@fortawesome/fontawesome-svg-core'
+import { faListUl } from '@fortawesome/free-solid-svg-icons' // Using faListUl for a generic list icon
 
-import BaseWidget, { IBaseWidget, IWidgetDefinitionArgs } from "../base_widget";
-import ListContent from "./src/ListContent"; // Assuming .js for now
-import ListOptions from "./src/ListOptions"; // Assuming .js for now
+import BaseWidget, { IBaseWidget, IWidgetDefinitionArgs } from '../base_widget'
+import ListContent from './src/ListContent' // Assuming .js for now
+import ListOptions from './src/ListOptions' // Assuming .js for now
 
 // Define the structure for a single list item
 export interface IListItem {
@@ -25,31 +25,31 @@ export interface IListDefaultData {
 
 // Define the widget definition arguments for the List widget
 const listDefinitionArgs: IWidgetDefinitionArgs = {
-  name: "List",
-  type: "list", // Added 'type' field as it's required
-  version: "0.1",
+  name: 'List',
+  type: 'list', // Added 'type' field as it's required
+  version: '0.1',
   icon: faListUl as IconProp, // Use the imported icon
   defaultData: {
     title: null,
-    color: "#34495e", // Wet Asphalt
-    textColor: "#ffffff", // White
-    list: [{ text: "First item", label: null }], // Default with one item
+    color: '#34495e', // Wet Asphalt
+    textColor: '#ffffff', // White
+    list: [{ text: 'First item', label: null }], // Default with one item
     ordered: false, // Default to unordered list
     fontSize: 16, // Default font size
   } as IListDefaultData,
   WidgetComponent: ListContent as ComponentType<any>,
   OptionsComponent: ListOptions as ComponentType<any>,
-};
+}
 
 // Renamed from List to ListWidget for consistency and to avoid potential conflicts
 class ListWidget extends BaseWidget {
   constructor() {
-    super(listDefinitionArgs);
+    super(listDefinitionArgs)
   }
 
   // Widget and Options getters are inherited from BaseWidget
 }
 
 // Export an instance of the ListWidget, typed as IBaseWidget
-const listWidget: IBaseWidget = new ListWidget();
-export default listWidget;
+const listWidget: IBaseWidget = new ListWidget()
+export default listWidget

@@ -1,14 +1,14 @@
-import React, { useRef, useEffect } from 'react';
-import { NextPageContext } from 'next';
+import React, { useRef, useEffect } from 'react'
+import { NextPageContext } from 'next'
 
-import Frame from '../components/Admin/Frame.tsx';
-import SlideshowListComponent from '../components/Admin/SlideshowList.tsx'; // Renamed
-import Dialog from '../components/Dialog.tsx';
-import { Button } from '../components/Form';
+import Frame from '../components/Admin/Frame.tsx'
+import SlideshowListComponent from '../components/Admin/SlideshowList.tsx' // Renamed
+import Dialog from '../components/Dialog.tsx'
+import { Button } from '../components/Form'
 
-import { addSlideshow } from '../actions/slideshow'; // Assuming .ts and typed
-import { protect, ProtectProps } from '../helpers/auth'; // Now .tsx
-import { useDisplayContext } from '../contexts/DisplayContext';
+import { addSlideshow } from '../actions/slideshow' // Assuming .ts and typed
+import { protect, ProtectProps } from '../helpers/auth' // Now .tsx
+import { useDisplayContext } from '../contexts/DisplayContext'
 
 // Placeholder for SlideshowList component instance type
 interface SlideshowListInstance {
@@ -20,25 +20,27 @@ interface SlideshowsProps extends ProtectProps {
 }
 
 const Slideshows: React.FC<SlideshowsProps> = ({ loggedIn, displayId }) => {
-  const slideshowList = useRef<SlideshowListInstance>(null);
-  const displayContext = useDisplayContext();
+  const slideshowList = useRef<SlideshowListInstance>(null)
+  const displayContext = useDisplayContext()
 
   // Example: If displayId comes from query for this page
   useEffect(() => {
     if (displayId) {
-      displayContext.setId(displayId);
+      displayContext.setId(displayId)
     }
-    // If displayId is not provided, consider the behavior of setId.
-    // It might default, or you might want to explicitly clear/set a default.
-  }, [displayId, displayContext]);
+    /*
+     * If displayId is not provided, consider the behavior of setId.
+     * It might default, or you might want to explicitly clear/set a default.
+     */
+  }, [displayId, displayContext])
 
   const add = (): Promise<void> => {
     return addSlideshow().then(() => {
       if (slideshowList && slideshowList.current) {
-        slideshowList.current.refresh();
+        slideshowList.current.refresh()
       }
-    });
-  };
+    })
+  }
 
   return (
     <Frame loggedIn={loggedIn}>
@@ -68,15 +70,15 @@ const Slideshows: React.FC<SlideshowsProps> = ({ loggedIn, displayId }) => {
         `}
       </style>
     </Frame>
-  );
-};
+  )
+}
 
 // Example: If displayId comes from query for this page
 const SlideshowsWithInitialProps = Object.assign(Slideshows, {
   getInitialProps: async (ctx: any): Promise<{ displayId?: string }> => {
-    const displayId = ctx.query.id as string | undefined;
-    return { displayId };
+    const displayId = ctx.query.id as string | undefined
+    return { displayId }
   }
-});
+})
 
-export default protect(SlideshowsWithInitialProps);
+export default protect(SlideshowsWithInitialProps)

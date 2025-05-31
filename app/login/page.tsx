@@ -1,46 +1,46 @@
-'use client';
+'use client'
 
-import { useState, Suspense, memo } from 'react';
-import Link from 'next/link';
-import { useRouter, useSearchParams } from 'next/navigation';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faTv, faCheck, faTimes, faAngleLeft } from '@fortawesome/free-solid-svg-icons';
+import { useState, Suspense, memo } from 'react'
+import Link from 'next/link'
+import { useRouter, useSearchParams } from 'next/navigation'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { faTv, faCheck, faTimes, faAngleLeft } from '@fortawesome/free-solid-svg-icons'
 
-import Frame from '../../components/Admin/Frame';
-import { login } from '../../helpers/auth';
+import Frame from '../../components/Admin/Frame'
+import { login } from '../../helpers/auth'
 
 const LoginContent = memo(function LoginContent() {
-  const router = useRouter();
-  const searchParams = useSearchParams();
-  const displayId = searchParams?.get('display');
+  const router = useRouter()
+  const searchParams = useSearchParams()
+  const displayId = searchParams?.get('display')
 
-  const [username, setUsername] = useState('');
-  const [password, setPassword] = useState('');
-  const [alert, setAlert] = useState<'success' | 'error' | 'info' | null>(null);
+  const [username, setUsername] = useState('')
+  const [password, setPassword] = useState('')
+  const [alert, setAlert] = useState<'success' | 'error' | 'info' | null>(null)
 
   const performLogin = async () => {
     try {
-      const resp = await login({ username, password }, undefined, displayId || undefined);
+      const resp = await login({ username, password }, undefined, displayId || undefined)
       if (!resp.success) {
-        setAlert('error');
+        setAlert('error')
       } else {
-        setAlert('success');
+        setAlert('success')
         // Redirect on success
         if (displayId) {
-          router.push(`/display/${displayId}`);
+          router.push(`/display/${displayId}`)
         } else {
-          router.push('/layout');
+          router.push('/layout')
         }
       }
     } catch (error) {
-      setAlert('error');
+      setAlert('error')
     }
-  };
+  }
 
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    performLogin();
-  };
+    event.preventDefault()
+    performLogin()
+  }
 
   return (
     <Frame loggedIn={false}>
@@ -63,9 +63,9 @@ const LoginContent = memo(function LoginContent() {
               <span className={'alert-text'}>
                 {alert === 'success'
                   ? 'Successfully logged in to your account.'
-                  : alert === 'error' 
+                  : alert === 'error'
                   ? 'Username or password not recognized.'
-                  : 'Use the username "demo" and password "demo"'} 
+                  : 'Use the username "demo" and password "demo"'}
               </span>
             </div>
           )}
@@ -94,7 +94,7 @@ const LoginContent = memo(function LoginContent() {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
           />
-          <button type="submit">Log In.</button>
+          <button type='submit'>Log In.</button>
         </form>
         <Link href='/'>
           <span className='back'>
@@ -212,13 +212,13 @@ const LoginContent = memo(function LoginContent() {
         `}
       </style>
     </Frame>
-  );
-});
+  )
+})
 
 export default function LoginPage() {
   return (
     <Suspense fallback={<div>Loading...</div>}>
       <LoginContent />
     </Suspense>
-  );
+  )
 }

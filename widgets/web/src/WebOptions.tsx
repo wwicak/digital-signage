@@ -1,17 +1,19 @@
-import React, { Component } from 'react';
-import { Form, Input, InlineInputGroup, IInputProps } from '../../../components/Form'; // Assuming Form components are/will be typed
-import { IWidgetOptionsEditorProps } from '../../../components/Admin/WidgetEditDialog';
-import * as z from 'zod';
+import React, { Component } from 'react'
+import { Form, Input, InlineInputGroup, IInputProps } from '../../../components/Form' // Assuming Form components are/will be typed
+import { IWidgetOptionsEditorProps } from '../../../components/Admin/WidgetEditDialog'
+import * as z from 'zod'
 
-import { IWebDefaultData } from '../index'; // This is an interface
-import WebContent, { WebWidgetDataSchema } from './WebContent'; // Import Zod schema
+import { IWebDefaultData } from '../index' // This is an interface
+import WebContent, { WebWidgetDataSchema } from './WebContent' // Import Zod schema
 
-// Zod schema for WebOptions props
-// IWidgetOptionsEditorProps<T> has data: T | undefined, onChange: (newData: T) => void
+/*
+ * Zod schema for WebOptions props
+ * IWidgetOptionsEditorProps<T> has data: T | undefined, onChange: (newData: T) => void
+ */
 export const WebOptionsPropsSchema = z.object({
   data: WebWidgetDataSchema.optional(),
   onChange: z.function().args(WebWidgetDataSchema).returns(z.void()),
-});
+})
 export type IWebOptionsProps = z.infer<typeof WebOptionsPropsSchema>;
 
 // State for WebOptions will use the Zod-inferred type
@@ -19,7 +21,7 @@ type IWebOptionsState = z.infer<typeof WebWidgetDataSchema>;
 
 class WebOptions extends Component<IWebOptionsProps, IWebOptionsState> {
   constructor(props: IWebOptionsProps) {
-    super(props);
+    super(props)
     // Initialize state from props.data, providing defaults from IWebDefaultData
     const {
       title = null,
@@ -28,7 +30,7 @@ class WebOptions extends Component<IWebOptionsProps, IWebOptionsState> {
       refreshInterval = 0,
       scale = 1.0,
       allowInteraction = false,
-    } = props.data || {};
+    } = props.data || {}
 
     this.state = {
       title,
@@ -37,13 +39,15 @@ class WebOptions extends Component<IWebOptionsProps, IWebOptionsState> {
       refreshInterval,
       scale,
       allowInteraction,
-    };
+    }
   }
 
   componentDidUpdate(prevProps: IWebOptionsProps) {
     if (this.props.data !== prevProps.data && this.props.data) {
-      // This can cause issues if not handled carefully.
-      // Update state if props.data changes, ensuring defaults are still applied if new data is partial.
+      /*
+       * This can cause issues if not handled carefully.
+       * Update state if props.data changes, ensuring defaults are still applied if new data is partial.
+       */
       const {
         title = this.state.title,
         url = this.state.url,
@@ -51,19 +55,19 @@ class WebOptions extends Component<IWebOptionsProps, IWebOptionsState> {
         refreshInterval = this.state.refreshInterval,
         scale = this.state.scale,
         allowInteraction = this.state.allowInteraction,
-      } = this.props.data;
-      this.setState({ title, url, color, refreshInterval, scale, allowInteraction });
+      } = this.props.data
+      this.setState({ title, url, color, refreshInterval, scale, allowInteraction })
     }
   }
 
   handleChange = (name: string, value: any): void => {
-    const { onChange } = this.props;
+    const { onChange } = this.props
     // Ensure numeric fields are stored as numbers
-    let processedValue = value;
+    let processedValue = value
     if (name === 'refreshInterval' || name === 'scale') {
-      processedValue = parseFloat(value as string) || 0;
+      processedValue = parseFloat(value as string) || 0
       if (name === 'scale' && (processedValue < 0.1 || processedValue > 5)) { // Example range for scale
-        processedValue = Math.max(0.1, Math.min(5, processedValue));
+        processedValue = Math.max(0.1, Math.min(5, processedValue))
       }
     }
 
@@ -72,11 +76,11 @@ class WebOptions extends Component<IWebOptionsProps, IWebOptionsState> {
       { [name]: processedValue } as Pick<IWebOptionsState, keyof IWebOptionsState>,
       () => {
         if (onChange) {
-          onChange(this.state); // Pass the entire current state upwards
+          onChange(this.state) // Pass the entire current state upwards
         }
       }
-    );
-  };
+    )
+  }
 
   render() {
     // Provide fallbacks for rendering if state values are somehow undefined/null
@@ -87,9 +91,9 @@ class WebOptions extends Component<IWebOptionsProps, IWebOptionsState> {
       refreshInterval = 0,
       scale = 1.0,
       allowInteraction = false,
-    } = this.state;
+    } = this.state
     
-    const previewData: IWebDefaultData = { title, url, color, refreshInterval, scale, allowInteraction };
+    const previewData: IWebDefaultData = { title, url, color, refreshInterval, scale, allowInteraction }
 
 
     return (
@@ -146,9 +150,9 @@ class WebOptions extends Component<IWebOptionsProps, IWebOptionsState> {
               expand={true}
             />
             <Input
-              type="checkbox"
-              name="allowInteraction"
-              label="Allow User Interaction"
+              type='checkbox'
+              name='allowInteraction'
+              label='Allow User Interaction'
               checked={allowInteraction}
               onChange={(name, checked) => this.handleChange(name as keyof IWebOptionsState, checked)}
               expand={false}
@@ -197,8 +201,8 @@ class WebOptions extends Component<IWebOptionsProps, IWebOptionsState> {
           `}
         </style>
       </div>
-    );
+    )
   }
 }
 
-export default WebOptions;
+export default WebOptions

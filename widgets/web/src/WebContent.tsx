@@ -1,10 +1,10 @@
-import React, { useState, useEffect, useRef, useCallback, CSSProperties } from 'react';
-import { config as FaConfig } from '@fortawesome/fontawesome-svg-core';
+import React, { useState, useEffect, useRef, useCallback, CSSProperties } from 'react'
+import { config as FaConfig } from '@fortawesome/fontawesome-svg-core'
 
-import { IWebDefaultData } from '../index';
-import * as z from 'zod';
+import { IWebDefaultData } from '../index'
+import * as z from 'zod'
 
-FaConfig.autoAddCss = false;
+FaConfig.autoAddCss = false
 
 // Zod schema for IWebDefaultData (used in props.data)
 export const WebWidgetDataSchema = z.object({
@@ -14,26 +14,26 @@ export const WebWidgetDataSchema = z.object({
   refreshInterval: z.number().optional(),
   scale: z.number().optional(),
   allowInteraction: z.boolean().optional(),
-});
+})
 export type IWebWidgetData = z.infer<typeof WebWidgetDataSchema>;
 
 // Zod schema for WebContent component props
 export const WebContentPropsSchema = z.object({
   data: WebWidgetDataSchema.optional(),
   isPreview: z.boolean().optional(),
-});
+})
 export type IWebContentProps = z.infer<typeof WebContentPropsSchema>;
 
-const DEFAULT_URL = 'https://compsci.lafayette.edu/';
-const DEFAULT_COLOR = '#FFFFFF';
-const DEFAULT_SCALE = 1.0;
-const DEFAULT_REFRESH_INTERVAL = 0;
-const DEFAULT_ALLOW_INTERACTION = false;
+const DEFAULT_URL = 'https://compsci.lafayette.edu/'
+const DEFAULT_COLOR = '#FFFFFF'
+const DEFAULT_SCALE = 1.0
+const DEFAULT_REFRESH_INTERVAL = 0
+const DEFAULT_ALLOW_INTERACTION = false
 
 const WebContent: React.FC<IWebContentProps> = React.memo(({ data, isPreview }) => {
-  const [iframeKey, setIframeKey] = useState<number>(Date.now());
-  const iframeRef = useRef<HTMLIFrameElement>(null);
-  const refreshTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const [iframeKey, setIframeKey] = useState<number>(Date.now())
+  const iframeRef = useRef<HTMLIFrameElement>(null)
+  const refreshTimerRef = useRef<NodeJS.Timeout | null>(null)
 
   const {
     title = null,
@@ -42,39 +42,39 @@ const WebContent: React.FC<IWebContentProps> = React.memo(({ data, isPreview }) 
     scale = DEFAULT_SCALE,
     allowInteraction = DEFAULT_ALLOW_INTERACTION,
     refreshInterval = DEFAULT_REFRESH_INTERVAL,
-  } = data || {};
+  } = data || {}
 
   const clearRefreshInterval = useCallback((): void => {
     if (refreshTimerRef.current) {
-      clearInterval(refreshTimerRef.current);
-      refreshTimerRef.current = null;
+      clearInterval(refreshTimerRef.current)
+      refreshTimerRef.current = null
     }
-  }, []);
+  }, [])
 
   const setupRefreshInterval = useCallback((): void => {
     if (refreshInterval > 0) {
       refreshTimerRef.current = setInterval(() => {
-        setIframeKey(Date.now());
-      }, refreshInterval * 1000);
+        setIframeKey(Date.now())
+      }, refreshInterval * 1000)
     }
-  }, [refreshInterval]);
+  }, [refreshInterval])
 
   useEffect(() => {
-    setupRefreshInterval();
-    return clearRefreshInterval;
-  }, [setupRefreshInterval, clearRefreshInterval]);
+    setupRefreshInterval()
+    return clearRefreshInterval
+  }, [setupRefreshInterval, clearRefreshInterval])
 
   // Force iframe reload when URL changes
   useEffect(() => {
-    setIframeKey(Date.now());
-  }, [url]);
+    setIframeKey(Date.now())
+  }, [url])
 
   const iframeContainerStyle: CSSProperties = React.useMemo(() => ({
     flex: 1,
     border: 'none',
     overflow: 'hidden',
     position: 'relative',
-  }), []);
+  }), [])
 
   const iframeStyle: CSSProperties = React.useMemo(() => ({
     border: 'none',
@@ -82,13 +82,13 @@ const WebContent: React.FC<IWebContentProps> = React.memo(({ data, isPreview }) 
     height: `${100 / scale}%`,
     transform: `scale(${scale})`,
     transformOrigin: 'top left',
-  }), [scale]);
+  }), [scale])
 
-  const sandboxPermissions = React.useMemo(() => 
-    allowInteraction 
-      ? "allow-scripts allow-same-origin allow-popups allow-forms allow-presentation allow-modals" 
-      : "allow-scripts allow-same-origin"
-  , [allowInteraction]);
+  const sandboxPermissions = React.useMemo(() =>
+    allowInteraction
+      ? 'allow-scripts allow-same-origin allow-popups allow-forms allow-presentation allow-modals'
+      : 'allow-scripts allow-same-origin'
+  , [allowInteraction])
 
   return (
     <div className='web-widget-content' style={{ background: color }}>
@@ -139,9 +139,9 @@ const WebContent: React.FC<IWebContentProps> = React.memo(({ data, isPreview }) 
         `}
       </style>
     </div>
-  );
-});
+  )
+})
 
-WebContent.displayName = 'WebContent';
+WebContent.displayName = 'WebContent'
 
-export default WebContent;
+export default WebContent

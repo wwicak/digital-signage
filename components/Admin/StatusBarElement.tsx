@@ -1,13 +1,13 @@
-import React, { Component } from 'react';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { library, config, IconProp } from '@fortawesome/fontawesome-svg-core';
-import { faTimes } from '@fortawesome/free-solid-svg-icons';
-import { Draggable, DraggableProvided, DraggableStateSnapshot } from '@hello-pangea/dnd';
+import React, { Component } from 'react'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { library, config, IconProp } from '@fortawesome/fontawesome-svg-core'
+import { faTimes } from '@fortawesome/free-solid-svg-icons'
+import { Draggable, DraggableProvided, DraggableStateSnapshot } from '@hello-pangea/dnd'
 
-import { StatusBarElementTypes, IStatusBarElementDefinition } from '../../helpers/statusbar'; // Assuming statusbar.js will be typed
+import { StatusBarElementTypes, IStatusBarElementDefinition } from '../../helpers/statusbar' // Assuming statusbar.js will be typed
 
-config.autoAddCss = false;
-library.add(faTimes);
+config.autoAddCss = false
+library.add(faTimes)
 
 export interface IStatusBarElementProps {
   item: string; // Unique ID for the draggable item, e.g., "type_uniqueId"
@@ -15,28 +15,32 @@ export interface IStatusBarElementProps {
   onDelete: () => void; // Callback when delete is clicked
 }
 
-// No local state for this component
-// interface IStatusBarElementState {}
+/*
+ * No local state for this component
+ * interface IStatusBarElementState {}
+ */
 
 class StatusBarElement extends Component<IStatusBarElementProps> {
   constructor(props: IStatusBarElementProps) {
-    super(props);
+    super(props)
   }
 
   handleDeleteClick = (e?: React.MouseEvent): void => {
-    if (e) e.stopPropagation(); // Prevent any parent Draggable event interference
-    this.props.onDelete();
-  };
+    if (e) e.stopPropagation() // Prevent any parent Draggable event interference
+    this.props.onDelete()
+  }
 
   render() {
-    const { item, index } = this.props;
-    // The 'item' prop is expected to be a string like "clock_uuid" or just "clock" if unique by type.
-    // If it contains an underscore, we parse the type. Otherwise, the item itself is the type.
-    const itemTypeKey = item.includes('_') ? item.split('_')[0] : item;
+    const { item, index } = this.props
+    /*
+     * The 'item' prop is expected to be a string like "clock_uuid" or just "clock" if unique by type.
+     * If it contains an underscore, we parse the type. Otherwise, the item itself is the type.
+     */
+    const itemTypeKey = item.includes('_') ? item.split('_')[0] : item
     
-    const elementType: IStatusBarElementDefinition | undefined = StatusBarElementTypes[itemTypeKey as keyof typeof StatusBarElementTypes];
-    const iconToDisplay: IconProp = (elementType?.icon as IconProp) || faTimes; // Fallback icon
-    const typeName: string = elementType?.name || itemTypeKey || 'Unknown';
+    const elementType: IStatusBarElementDefinition | undefined = StatusBarElementTypes[itemTypeKey as keyof typeof StatusBarElementTypes]
+    const iconToDisplay: IconProp = (elementType?.icon as IconProp) || faTimes // Fallback icon
+    const typeName: string = elementType?.name || itemTypeKey || 'Unknown'
 
     return (
       <Draggable key={item} draggableId={item} index={index}>
@@ -52,7 +56,7 @@ class StatusBarElement extends Component<IStatusBarElementProps> {
             }}
           >
             <div className={'controls-overlay'}> {/* Renamed class */}
-              <div className={'delete-btn'} onClick={this.handleDeleteClick} role="button" tabIndex={0} onKeyPress={(e) => {if(e.key === 'Enter' || e.key === ' ') this.handleDeleteClick()}} aria-label="Delete item"> {/* Renamed class */}
+              <div className={'delete-btn'} onClick={this.handleDeleteClick} role='button' tabIndex={0} onKeyPress={(e) => {if(e.key === 'Enter' || e.key === ' ') this.handleDeleteClick()}} aria-label='Delete item'> {/* Renamed class */}
                 <FontAwesomeIcon icon={faTimes} size={'xs'} fixedWidth />
               </div>
             </div>
@@ -148,8 +152,8 @@ class StatusBarElement extends Component<IStatusBarElementProps> {
           </div>
         )}
       </Draggable>
-    );
+    )
   }
 }
 
-export default StatusBarElement;
+export default StatusBarElement

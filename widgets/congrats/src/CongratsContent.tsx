@@ -1,38 +1,38 @@
-import React, { Component } from 'react';
-import Lottie, { LottieProps, Options as LottieOptions } from 'react-lottie';
-import { config } from '@fortawesome/fontawesome-svg-core';
-import AutoScroll from '../../../components/AutoScroll';
-import * as z from 'zod';
-import { CongratsWidgetContentDataSchema, ICongratsWidgetData } from './types';
-import { animationUtils } from './animationUtils'; // Import the utility
+import React, { Component } from 'react'
+import Lottie, { LottieProps, Options as LottieOptions } from 'react-lottie'
+import { config } from '@fortawesome/fontawesome-svg-core'
+import AutoScroll from '../../../components/AutoScroll'
+import * as z from 'zod'
+import { CongratsWidgetContentDataSchema, ICongratsWidgetData } from './types'
+import { animationUtils } from './animationUtils' // Import the utility
 
-config.autoAddCss = false;
+config.autoAddCss = false
 
 export const CongratsContentPropsSchema = z.object({
   data: CongratsWidgetContentDataSchema.optional(),
   isPreview: z.boolean().optional(),
-});
+})
 export type ICongratsContentProps = z.infer<typeof CongratsContentPropsSchema>;
 
-const DEFAULT_COLOR = '#34495e';
-const DEFAULT_TEXT_COLOR = '#ffffff';
-const DEFAULT_ANIMATION = 'confetti'; // Default animation style name
-const DEFAULT_TEXT = 'Congratulations!';
-const DEFAULT_FONT_SIZE = 16;
+const DEFAULT_COLOR = '#34495e'
+const DEFAULT_TEXT_COLOR = '#ffffff'
+const DEFAULT_ANIMATION = 'confetti' // Default animation style name
+const DEFAULT_TEXT = 'Congratulations!'
+const DEFAULT_FONT_SIZE = 16
 
 // getAnimationData function has been moved to animationUtils.ts
 
 class CongratsContent extends Component<ICongratsContentProps> {
   render() {
-    const { data = {} } = this.props;
-    const text = data.text ?? DEFAULT_TEXT;
-    const textColor = data.textColor ?? DEFAULT_TEXT_COLOR;
-    const animationName = data.animation ?? DEFAULT_ANIMATION;
-    const fontSize = data.fontSize ?? DEFAULT_FONT_SIZE;
-    const color = data.color ?? DEFAULT_COLOR;
+    const { data = {} } = this.props
+    const text = data.text ?? DEFAULT_TEXT
+    const textColor = data.textColor ?? DEFAULT_TEXT_COLOR
+    const animationName = data.animation ?? DEFAULT_ANIMATION
+    const fontSize = data.fontSize ?? DEFAULT_FONT_SIZE
+    const color = data.color ?? DEFAULT_COLOR
 
     // Use animationUtils to get animation data
-    const animationData = animationUtils.getAnimationData(animationName);
+    const animationData = animationUtils.getAnimationData(animationName)
 
     const lottieOptions: LottieOptions = {
       loop: true,
@@ -41,7 +41,7 @@ class CongratsContent extends Component<ICongratsContentProps> {
       rendererSettings: {
         preserveAspectRatio: 'xMidYMid slice',
       },
-    };
+    }
 
     return (
       <div className='congrats-widget-content'>
@@ -98,8 +98,8 @@ class CongratsContent extends Component<ICongratsContentProps> {
           `}
         </style>
       </div>
-    );
+    )
   }
 }
 
-export default CongratsContent;
+export default CongratsContent

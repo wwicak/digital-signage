@@ -1,12 +1,12 @@
-import React, { Component } from 'react';
-import { config as FaConfig } from '@fortawesome/fontawesome-svg-core'; // Only config is used
-import getVideoId from 'get-video-id'; // Assuming @types/get-video-id or it returns any
-import YouTube, { YouTubeProps, YouTubePlayer } from 'react-youtube'; // Import YouTube component and its types
+import React, { Component } from 'react'
+import { config as FaConfig } from '@fortawesome/fontawesome-svg-core' // Only config is used
+import getVideoId from 'get-video-id' // Assuming @types/get-video-id or it returns any
+import YouTube, { YouTubeProps, YouTubePlayer } from 'react-youtube' // Import YouTube component and its types
 
-import { IYoutubeDefaultData } from '../index'; // This is an interface
-import * as z from 'zod';
+import { IYoutubeDefaultData } from '../index' // This is an interface
+import * as z from 'zod'
 
-FaConfig.autoAddCss = false;
+FaConfig.autoAddCss = false
 
 // Zod schema for IYoutubeDefaultData (used in props.data)
 export const YoutubeWidgetDataSchema = z.object({
@@ -17,50 +17,54 @@ export const YoutubeWidgetDataSchema = z.object({
   start_time: z.number().optional(),
   end_time: z.number().optional(),
   show_captions: z.boolean().optional(),
-});
+})
 export type IYoutubeWidgetData = z.infer<typeof YoutubeWidgetDataSchema>; // For internal consistency
 
 // Zod schema for YoutubeContent component props
 export const YoutubeContentPropsSchema = z.object({
   data: YoutubeWidgetDataSchema.optional(),
   isPreview: z.boolean().optional(),
-  // style: z.record(z.any()).optional(), // For React.CSSProperties if needed
-  // className: z.string().optional(),
-});
+  /*
+   * style: z.record(z.any()).optional(), // For React.CSSProperties if needed
+   * className: z.string().optional(),
+   */
+})
 export type IYoutubeContentProps = z.infer<typeof YoutubeContentPropsSchema>;
 
 // Default values from original JS, though IYoutubeDefaultData has its own defaults
-const DEFAULT_YT_URL_FOR_ID_EXTRACTION = 'https://www.youtube.com/watch?v=9xwazD5SyVg';
+const DEFAULT_YT_URL_FOR_ID_EXTRACTION = 'https://www.youtube.com/watch?v=9xwazD5SyVg'
 // const DEFAULT_BG_COLOR = '#95a5a6'; // This color was for the widget frame, not really for YT player area
 
 class YoutubeContent extends Component<IYoutubeContentProps> {
   // The iframe ref from original JS was unused as react-youtube manages its own iframe.
-  private player: YouTubePlayer | null = null;
+  private player: YouTubePlayer | null = null
 
   constructor(props: IYoutubeContentProps) {
-    super(props);
+    super(props)
   }
 
   onPlayerReady: YouTubeProps['onReady'] = (event) => {
     // Access to player in all event handlers via event.target
-    this.player = event.target;
-    // Example: Mute video if not autoplaying or for preview
-    // if (!this.props.data?.autoplay || this.props.isPreview) {
-    //   event.target.mute();
-    // }
-  };
+    this.player = event.target
+    /*
+     * Example: Mute video if not autoplaying or for preview
+     * if (!this.props.data?.autoplay || this.props.isPreview) {
+     *   event.target.mute();
+     * }
+     */
+  }
   
   // Add other event handlers if needed, e.g., onEnd for looping
   onPlayerEnd: YouTubeProps['onEnd'] = (event) => {
     if (this.props.data?.loop) {
-      event.target.seekTo(this.props.data?.start_time || 0);
-      event.target.playVideo();
+      event.target.seekTo(this.props.data?.start_time || 0)
+      event.target.playVideo()
     }
-  };
+  }
 
 
   render() {
-    const { data } = this.props;
+    const { data } = this.props
     // Use defaults from IYoutubeDefaultData defined in ../index.ts via props.data
     const {
       video_id = null, // This is the primary field now
@@ -70,21 +74,27 @@ class YoutubeContent extends Component<IYoutubeContentProps> {
       start_time = 0,
       end_time = 0, // 0 means play to end
       show_captions = false,
-      // title and color from original JS data are less relevant here.
-      // If a title bar is needed, it should be a separate element.
-    } = data || {};
+      /*
+       * title and color from original JS data are less relevant here.
+       * If a title bar is needed, it should be a separate element.
+       */
+    } = data || {}
 
-    // The original JS used getVideoId(url). Now, video_id is directly configured.
-    // If a URL were still primary, extraction would be:
-    // const extracted = video_url ? getVideoId(video_url) : null;
-    // const currentVideoId = extracted && extracted.service === 'youtube' ? extracted.id : null;
-    const currentVideoId = video_id;
+    /*
+     * The original JS used getVideoId(url). Now, video_id is directly configured.
+     * If a URL were still primary, extraction would be:
+     * const extracted = video_url ? getVideoId(video_url) : null;
+     * const currentVideoId = extracted && extracted.service === 'youtube' ? extracted.id : null;
+     */
+    const currentVideoId = video_id
 
 
     const playerOpts: YouTubeProps['opts'] = {
-      // height and width are set by the container typically, or can be fixed
-      // height: '100%', // These might be overridden by react-youtube's default internal styling or props.style
-      // width: '100%',
+      /*
+       * height and width are set by the container typically, or can be fixed
+       * height: '100%', // These might be overridden by react-youtube's default internal styling or props.style
+       * width: '100%',
+       */
       playerVars: {
         autoplay: autoplay ? 1 : 0,
         controls: show_controls ? 1 : 0,
@@ -99,11 +109,13 @@ class YoutubeContent extends Component<IYoutubeContentProps> {
         rel: 0, // Do not show related videos when playback ends
         showinfo: 0, // Hide video title and uploader before playback starts
       },
-    };
+    }
 
-    // The background color from props.data.color was for the widget frame,
-    // YouTube player itself is black or shows video content.
-    // If a title bar is desired, it should be explicitly added outside the YouTube component.
+    /*
+     * The background color from props.data.color was for the widget frame,
+     * YouTube player itself is black or shows video content.
+     * If a title bar is desired, it should be explicitly added outside the YouTube component.
+     */
 
     return (
       <div className='youtube-widget-content'>
@@ -112,7 +124,7 @@ class YoutubeContent extends Component<IYoutubeContentProps> {
 
         <div className='youtube-iframe-container'> {/* Renamed class */}
           {!currentVideoId ? (
-            <div className="youtube-error-message">Invalid or missing YouTube Video ID.</div>
+            <div className='youtube-error-message'>Invalid or missing YouTube Video ID.</div>
           ) : (
             <YouTube
               videoId={currentVideoId}
@@ -178,8 +190,8 @@ class YoutubeContent extends Component<IYoutubeContentProps> {
           `}
         </style>
       </div>
-    );
+    )
   }
 }
 
-export default YoutubeContent;
+export default YoutubeContent

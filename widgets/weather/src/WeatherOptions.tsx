@@ -1,17 +1,19 @@
-import React, { Component } from 'react';
-import { Form, Input, IChoice, InlineInputGroup } from '../../../components/Form'; // Assuming Form components are/will be typed
-import { IWidgetOptionsEditorProps } from '../../../components/Admin/WidgetEditDialog';
-import * as z from 'zod';
+import React, { Component } from 'react'
+import { Form, Input, IChoice, InlineInputGroup } from '../../../components/Form' // Assuming Form components are/will be typed
+import { IWidgetOptionsEditorProps } from '../../../components/Admin/WidgetEditDialog'
+import * as z from 'zod'
 
-import { IWeatherDefaultData, TWeatherUnit } from '../index'; // IWeatherDefaultData is interface
-import { WeatherWidgetDataSchema } from './WeatherContent'; // Import Zod schema for IWeatherDefaultData
+import { IWeatherDefaultData, TWeatherUnit } from '../index' // IWeatherDefaultData is interface
+import { WeatherWidgetDataSchema } from './WeatherContent' // Import Zod schema for IWeatherDefaultData
 
-// Zod schema for WeatherOptions props
-// IWidgetOptionsEditorProps<T> has data: T | undefined, onChange: (newData: T) => void
+/*
+ * Zod schema for WeatherOptions props
+ * IWidgetOptionsEditorProps<T> has data: T | undefined, onChange: (newData: T) => void
+ */
 export const WeatherOptionsPropsSchema = z.object({
   data: WeatherWidgetDataSchema.optional(),
   onChange: z.function().args(WeatherWidgetDataSchema).returns(z.void()),
-});
+})
 export type IWeatherOptionsProps = z.infer<typeof WeatherOptionsPropsSchema>;
 
 // State for WeatherOptions will use the Zod-inferred type
@@ -21,11 +23,11 @@ type IWeatherOptionsState = z.infer<typeof WeatherWidgetDataSchema>;
 const unitChoices: IChoice[] = [
   { id: 'imperial', label: 'Fahrenheit (°F)' },
   { id: 'metric', label: 'Celsius (°C)' },
-];
+]
 
 class WeatherOptions extends Component<IWeatherOptionsProps, IWeatherOptionsState> {
   constructor(props: IWeatherOptionsProps) {
-    super(props);
+    super(props)
     // Initialize state from props.data, providing defaults from IWeatherDefaultData
     const {
       zip = '10001',
@@ -33,7 +35,7 @@ class WeatherOptions extends Component<IWeatherOptionsProps, IWeatherOptionsStat
       showForecast = true,
       apiKey = '', // Default to empty, user should provide their own
       locationName = '', // This might be display-only or editable based on requirements
-    } = props.data || {};
+    } = props.data || {}
 
     this.state = {
       zip,
@@ -41,35 +43,37 @@ class WeatherOptions extends Component<IWeatherOptionsProps, IWeatherOptionsStat
       showForecast,
       apiKey,
       locationName,
-    };
+    }
   }
 
   componentDidUpdate(prevProps: IWeatherOptionsProps) {
     if (this.props.data !== prevProps.data && this.props.data) {
-      // This can cause issues if not handled carefully.
-      // Update state if props.data changes, ensuring defaults are still applied if new data is partial.
+      /*
+       * This can cause issues if not handled carefully.
+       * Update state if props.data changes, ensuring defaults are still applied if new data is partial.
+       */
       const {
         zip = this.state.zip, // Keep current state if new prop doesn't have it
         unit = this.state.unit,
         showForecast = this.state.showForecast,
         apiKey = this.state.apiKey,
         locationName = this.state.locationName,
-      } = this.props.data;
-      this.setState({ zip, unit, showForecast, apiKey, locationName });
+      } = this.props.data
+      this.setState({ zip, unit, showForecast, apiKey, locationName })
     }
   }
 
   handleChange = (name: string, value: any): void => {
-    const { onChange } = this.props;
+    const { onChange } = this.props
     this.setState(
       { [name]: value } as Pick<IWeatherOptionsState, keyof IWeatherOptionsState>,
       () => {
         if (onChange) {
-          onChange(this.state); // Pass the entire current state upwards
+          onChange(this.state) // Pass the entire current state upwards
         }
       }
-    );
-  };
+    )
+  }
 
   render() {
     // Provide fallbacks for rendering if state values are somehow undefined/null
@@ -79,7 +83,7 @@ class WeatherOptions extends Component<IWeatherOptionsProps, IWeatherOptionsStat
       showForecast = true,
       apiKey = '',
       locationName = '', // Location name might be read-only if fetched by WeatherContent
-    } = this.state;
+    } = this.state
 
     return (
       <Form>
@@ -92,7 +96,7 @@ class WeatherOptions extends Component<IWeatherOptionsProps, IWeatherOptionsStat
           value={apiKey}
           placeholder={'Enter your OpenWeatherMap API Key'}
           onChange={this.handleChange}
-          helpText="An API key from OpenWeatherMap is required."
+          helpText='An API key from OpenWeatherMap is required.'
         />
         <InlineInputGroup>
             <Input
@@ -115,9 +119,9 @@ class WeatherOptions extends Component<IWeatherOptionsProps, IWeatherOptionsStat
             />
         </InlineInputGroup>
         <Input
-            type="checkbox"
-            name="showForecast" // Make sure this matches a key in IWeatherOptionsState
-            label="Show Multi-day Forecast"
+            type='checkbox'
+            name='showForecast' // Make sure this matches a key in IWeatherOptionsState
+            label='Show Multi-day Forecast'
             checked={showForecast} // Direct boolean binding
             onChange={(name, checked) => this.handleChange(name as keyof IWeatherOptionsState, checked)}
         />
@@ -130,7 +134,7 @@ class WeatherOptions extends Component<IWeatherOptionsProps, IWeatherOptionsStat
             value={locationName}
             placeholder={'e.g., New York City (auto-detected if empty)'}
             onChange={this.handleChange}
-            helpText="Overrides auto-detected name from API."
+            helpText='Overrides auto-detected name from API.'
         />
         <style jsx>
           {`
@@ -142,8 +146,8 @@ class WeatherOptions extends Component<IWeatherOptionsProps, IWeatherOptionsStat
           `}
         </style>
       </Form>
-    );
+    )
   }
 }
 
-export default WeatherOptions;
+export default WeatherOptions

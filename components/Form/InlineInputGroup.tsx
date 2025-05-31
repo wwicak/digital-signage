@@ -1,4 +1,4 @@
-import React, { ReactNode, HTMLAttributes, Children, isValidElement, cloneElement } from 'react';
+import React, { ReactNode, HTMLAttributes, Children, isValidElement, cloneElement } from 'react'
 
 // Props for the InlineInputGroup component
 export interface IInlineInputGroupProps extends HTMLAttributes<HTMLDivElement> {
@@ -14,8 +14,8 @@ const InlineInputGroup: React.FC<IInlineInputGroupProps> = ({
   style, // Allow passing custom style object
   ...restDivProps
 }) => {
-  const childArray = Children.toArray(children);
-  const numChildren = childArray.length;
+  const childArray = Children.toArray(children)
+  const numChildren = childArray.length
 
   return (
     <div
@@ -24,27 +24,33 @@ const InlineInputGroup: React.FC<IInlineInputGroupProps> = ({
       {...restDivProps}
     >
       {childArray.map((child, index) => {
-        // We need to wrap each child to apply margin, unless child can accept it directly
-        // or if we use CSS gap. For direct migration of margin logic:
-        const isLastChild = index === numChildren - 1;
+        /*
+         * We need to wrap each child to apply margin, unless child can accept it directly
+         * or if we use CSS gap. For direct migration of margin logic:
+         */
+        const isLastChild = index === numChildren - 1
         
-        // If the child is an Input component that has an 'expand' prop,
-        // we might want to apply flex: 1 to its wrapper.
-        // This requires checking the child's type and props, which can be complex.
-        // For now, a simpler approach is to let Input components manage their own expand behavior.
-        // The original JS logic for 'expand' was on the Input itself, not handled by group.
+        /*
+         * If the child is an Input component that has an 'expand' prop,
+         * we might want to apply flex: 1 to its wrapper.
+         * This requires checking the child's type and props, which can be complex.
+         * For now, a simpler approach is to let Input components manage their own expand behavior.
+         * The original JS logic for 'expand' was on the Input itself, not handled by group.
+         */
         
-        // Create a wrapper for each child to apply margin
-        // The key should be on the outermost element returned by map
+        /*
+         * Create a wrapper for each child to apply margin
+         * The key should be on the outermost element returned by map
+         */
         return (
           <div
             key={`input-group-child-${index}`}
-            className="input-group-item-wrapper"
+            className='input-group-item-wrapper'
             style={{ marginRight: isLastChild ? 0 : spacing }}
           >
             {child}
           </div>
-        );
+        )
       })}
       <style jsx>{`
         .inline-input-group {
@@ -75,7 +81,7 @@ const InlineInputGroup: React.FC<IInlineInputGroupProps> = ({
         */
       `}</style>
     </div>
-  );
-};
+  )
+}
 
-export default InlineInputGroup;
+export default InlineInputGroup

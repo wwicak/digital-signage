@@ -1,71 +1,71 @@
-import React, { useEffect, useState } from 'react';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faThLarge, faTh, faPencilAlt } from '@fortawesome/free-solid-svg-icons';
-import { IconProp, IconDefinition } from '@fortawesome/fontawesome-svg-core';
-import GridLayout, { Layout as RglLayout, Layouts as RglLayouts } from 'react-grid-layout';
-import { DragDropContext, Droppable, DropResult, DroppableProvided } from '@hello-pangea/dnd';
+import React, { useEffect, useState } from 'react'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { faThLarge, faTh, faPencilAlt } from '@fortawesome/free-solid-svg-icons'
+import { IconProp, IconDefinition } from '@fortawesome/fontawesome-svg-core'
+import GridLayout, { Layout as RglLayout, Layouts as RglLayouts } from 'react-grid-layout'
+import { DragDropContext, Droppable, DropResult, DroppableProvided } from '@hello-pangea/dnd'
 
-import Frame from '../components/Admin/Frame'; // Assuming .js or .tsx
-import EditableWidget from '../components/Admin/EditableWidget'; // Assuming .js or .tsx
-import StatusBarElement from '../components/Admin/StatusBarElement'; // Assuming .js or .tsx
-import WidthProvider from '../components/Widgets/WidthProvider'; // Assuming .js or .tsx
-import DropdownButton, { IDropdownChoice } from '../components/DropdownButton'; // Already .tsx
+import Frame from '../components/Admin/Frame' // Assuming .js or .tsx
+import EditableWidget from '../components/Admin/EditableWidget' // Assuming .js or .tsx
+import StatusBarElement from '../components/Admin/StatusBarElement' // Assuming .js or .tsx
+import WidthProvider from '../components/Widgets/WidthProvider' // Assuming .js or .tsx
+import DropdownButton, { IDropdownChoice } from '../components/DropdownButton' // Already .tsx
 
-import { Form, Switch } from '../components/Form'; // Assuming .js or .tsx
+import { Form, Switch } from '../components/Form' // Assuming .js or .tsx
 
-import { StatusBarElementTypes, IStatusBarElementDefinition } from '../helpers/statusbar'; // Assuming statusbar.js will be typed
+import { StatusBarElementTypes, IStatusBarElementDefinition } from '../helpers/statusbar' // Assuming statusbar.js will be typed
 
-import Widgets, { IWidgetDefinition } from '../widgets'; // Assuming widgets/index.js will be typed
+import Widgets, { IWidgetDefinition } from '../widgets' // Assuming widgets/index.js will be typed
 
-import { addWidget, getWidgets, deleteWidget, updateWidget, IWidgetData, INewWidgetData, IUpdateWidgetData } from '../actions/widgets'; // Already .tsx
-import { WidgetType } from '../api/models/Widget';
-import { protect, ProtectProps } from '../helpers/auth'; // Assuming auth.js will be typed or allowJs
-import { useDisplayContext } from '../contexts/DisplayContext';
+import { addWidget, getWidgets, deleteWidget, updateWidget, IWidgetData, INewWidgetData, IUpdateWidgetData } from '../actions/widgets' // Already .tsx
+import { WidgetType } from '../api/models/Widget'
+import { protect, ProtectProps } from '../helpers/auth' // Assuming auth.js will be typed or allowJs
+import { useDisplayContext } from '../contexts/DisplayContext'
 
-const GridLayoutWithWidth = WidthProvider(GridLayout as any);
+const GridLayoutWithWidth = WidthProvider(GridLayout as any)
 
 interface ILayoutPageProps extends ProtectProps {
   displayId?: string; // Assuming protect HOC ensures displayId is available
 }
 
 const LayoutPage: React.FC<ILayoutPageProps> = ({ loggedIn, displayId }) => {
-  const [widgets, setWidgets] = useState<IWidgetData[]>([]);
-  const displayContext = useDisplayContext();
+  const [widgets, setWidgets] = useState<IWidgetData[]>([])
+  const displayContext = useDisplayContext()
 
   useEffect(() => {
     if (displayId) {
-      displayContext.setId(displayId);
-      refreshWidgets(displayId);
+      displayContext.setId(displayId)
+      refreshWidgets(displayId)
     }
-  }, [displayId, displayContext]);
+  }, [displayId, displayContext])
 
   const refreshWidgets = (displayId: string): Promise<void> => {
     return getWidgets(displayId).then(widgets => {
-      setWidgets(widgets);
+      setWidgets(widgets)
     }).catch(error => {
-      console.error("Failed to refresh widgets:", error);
-      setWidgets([]); // Reset or handle error appropriately
-    });
+      console.error('Failed to refresh widgets:', error)
+      setWidgets([]) // Reset or handle error appropriately
+    })
   }
 
   const handleAddWidget = (type: string): void => {
-    const widgetDefinition: IWidgetDefinition | undefined = Widgets[type];
+    const widgetDefinition: IWidgetDefinition | undefined = Widgets[type]
     const newWidgetData: Partial<INewWidgetData> = { // Construct data for addWidget action
         display: displayContext.state.id!, // displayContext.state.id should be set
         type: type as WidgetType,
         data: widgetDefinition?.defaultData || {},
         // x, y, w, h can be omitted if server assigns defaults or if not needed immediately
-    };
+    }
 
     addWidget(newWidgetData as INewWidgetData) // Type assertion if confident structure is met
         .then(() => refreshWidgets(displayContext.state.id!))
-        .catch(error => console.error("Failed to add widget:", error));
+        .catch(error => console.error('Failed to add widget:', error))
   }
 
   const handleDeleteWidget = (id: string): void => {
     deleteWidget(id)
         .then(() => refreshWidgets(displayContext.state.id!))
-        .catch(error => console.error("Failed to delete widget:", error));
+        .catch(error => console.error('Failed to delete widget:', error))
   }
 
   const handleLayoutChange = (layout: RglLayout[]): void => {
@@ -75,27 +75,27 @@ const LayoutPage: React.FC<ILayoutPageProps> = ({ loggedIn, displayId }) => {
         y: widgetLayout.y,
         w: widgetLayout.w,
         h: widgetLayout.h,
-      };
+      }
       updateWidget(widgetLayout.i, widgetData)
-        .catch(error => console.error(`Failed to update widget ${widgetLayout.i} layout:`, error));
+        .catch(error => console.error(`Failed to update widget ${widgetLayout.i} layout:`, error))
       // Note: No refreshWidgets here to avoid jumpiness; optimistic update or server should confirm.
     }
   }
 
   const handleDragEnd = (result: DropResult): void => {
     if (!result.destination || !displayContext.state.id) {
-      return;
+      return
     }
-    displayContext.reorderStatusBarItems(result.source.index, result.destination.index);
+    displayContext.reorderStatusBarItems(result.source.index, result.destination.index)
   }
 
   const handleTitleChange = (event: React.ChangeEvent<HTMLInputElement>): void => {
-    const title = event.target.value;
-    displayContext.updateName(title); // updateName is debounced in the context
+    const title = event.target.value
+    displayContext.updateName(title) // updateName is debounced in the context
   }
   
   const handleLayoutTypeChange = (name: string, checked: boolean): void => {
-    displayContext.updateLayout(checked ? 'spaced' : 'compact');
+    displayContext.updateLayout(checked ? 'spaced' : 'compact')
   }
 
   const rglLayout: RglLayout[] = widgets.map(widget => ({
@@ -105,25 +105,25 @@ const LayoutPage: React.FC<ILayoutPageProps> = ({ loggedIn, displayId }) => {
     w: widget.w || 1,
     h: widget.h || 1,
     // Add min/max W/H if needed, or isDraggable/isResizable per item
-  }));
+  }))
 
   const statusBarChoices: IDropdownChoice[] = Object.keys(StatusBarElementTypes).map(key => {
-    const elType = StatusBarElementTypes[key as keyof typeof StatusBarElementTypes] as IStatusBarElementDefinition;
+    const elType = StatusBarElementTypes[key as keyof typeof StatusBarElementTypes] as IStatusBarElementDefinition
     return {
       key: key,
       name: elType.name,
       icon: elType.icon as IconDefinition, // Cast if confident icon is always IconDefinition
-    };
-  });
+    }
+  })
 
   const widgetChoices: IDropdownChoice[] = Object.keys(Widgets).map(key => {
-      const widgetDef = Widgets[key];
+      const widgetDef = Widgets[key]
       return {
           key: widgetDef.type || key, // Assuming Widgets might have a 'type' field or key is the type
           name: widgetDef.name,
           icon: widgetDef.icon as IconDefinition,
-      };
-  });
+      }
+  })
 
   return (
     <Frame loggedIn={loggedIn}>
@@ -197,7 +197,7 @@ const LayoutPage: React.FC<ILayoutPageProps> = ({ loggedIn, displayId }) => {
         />
         <Form>
           <Switch
-            name="layoutStyle" // Added name prop for Switch
+            name='layoutStyle' // Added name prop for Switch
             checkedLabel={'Compact'}
             uncheckedLabel={'Spaced'}
             checkedIcon={faTh}
@@ -292,8 +292,8 @@ const LayoutPage: React.FC<ILayoutPageProps> = ({ loggedIn, displayId }) => {
         `}
       </style>
     </Frame>
-  );
-};
+  )
+}
 
 // Removed view() HOC wrapping and only use protect HOC
-export default protect(LayoutPage);
+export default protect(LayoutPage)

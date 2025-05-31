@@ -1,9 +1,9 @@
-import React from 'react';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { config, IconDefinition } from '@fortawesome/fontawesome-svg-core';
-import { faTimes } from '@fortawesome/free-solid-svg-icons';
+import React from 'react'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { config, IconDefinition } from '@fortawesome/fontawesome-svg-core'
+import { faTimes } from '@fortawesome/free-solid-svg-icons'
 
-config.autoAddCss = false;
+config.autoAddCss = false
 
 // Define prop types, even if empty, for clarity and future use
 interface EmptyWidgetProps {}
@@ -52,8 +52,8 @@ class EmptyWidget extends React.Component<EmptyWidgetProps, EmptyWidgetState> {
           `}
         </style>
       </div>
-    );
+    )
   }
 }
 
-export default EmptyWidget;
+export default EmptyWidget

@@ -1,16 +1,16 @@
-import React, { Component } from 'react';
-import { Form, Input, InlineInputGroup, IInputProps, IChoice } from '../../../components/Form';
-import { IWidgetOptionsEditorProps } from '../../../components/Admin/WidgetEditDialog';
+import React, { Component } from 'react'
+import { Form, Input, InlineInputGroup, IInputProps, IChoice } from '../../../components/Form'
+import { IWidgetOptionsEditorProps } from '../../../components/Admin/WidgetEditDialog'
 // Import the schema from the new types.ts file
-import * as z from 'zod'; // z is still needed for CongratsOptionsPropsSchema
-import { CongratsWidgetContentDataSchema, ICongratsWidgetData } from './types';
-import CongratsContent from './CongratsContent'; // CongratsContent is for preview.
+import * as z from 'zod' // z is still needed for CongratsOptionsPropsSchema
+import { CongratsWidgetContentDataSchema, ICongratsWidgetData } from './types'
+import CongratsContent from './CongratsContent' // CongratsContent is for preview.
 
 // Zod schema for CongratsOptions props
 export const CongratsOptionsPropsSchema = z.object({
   data: CongratsWidgetContentDataSchema.optional(), // Use the imported schema
   onChange: z.function().args(CongratsWidgetContentDataSchema).returns(z.void()), // Use the imported schema
-});
+})
 export type ICongratsOptionsProps = z.infer<typeof CongratsOptionsPropsSchema>;
 
 // State for CongratsOptions will also use ICongratsWidgetData (inferred from CongratsWidgetContentDataSchema)
@@ -20,13 +20,15 @@ type ICongratsOptionsState = ICongratsWidgetData;
 const animationChoices: IChoice[] = [
   { id: 'confetti', label: 'Confetti' },
   { id: 'balloons', label: 'Balloons' },
-  // Add other animation choices here if they exist in ./animations/
-  // e.g. { id: 'fireworks', label: 'Fireworks' },
-];
+  /*
+   * Add other animation choices here if they exist in ./animations/
+   * e.g. { id: 'fireworks', label: 'Fireworks' },
+   */
+]
 
 class CongratsOptions extends Component<ICongratsOptionsProps, ICongratsOptionsState> {
   constructor(props: ICongratsOptionsProps) {
-    super(props);
+    super(props)
     // Initialize state from props.data, providing defaults
     const {
       animation = 'confetti',
@@ -35,7 +37,7 @@ class CongratsOptions extends Component<ICongratsOptionsProps, ICongratsOptionsS
       color = '#34495e',
       textColor = '#ffffff',
       recipient = '', // From ICongratsWidgetData
-    } = props.data || {};
+    } = props.data || {}
 
     this.state = {
       animation,
@@ -44,15 +46,17 @@ class CongratsOptions extends Component<ICongratsOptionsProps, ICongratsOptionsS
       fontSize,
       textColor,
       recipient,
-    };
+    }
   }
 
   componentDidUpdate(prevProps: ICongratsOptionsProps) {
     if (this.props.data !== prevProps.data) {
-      // This can cause issues if not handled carefully.
-      // A common pattern is to only use props.data for initial state,
-      // or to use a key prop on this component to force re-mount if data source changes.
-      this.setState({ ...this.props.data });
+      /*
+       * This can cause issues if not handled carefully.
+       * A common pattern is to only use props.data for initial state,
+       * or to use a key prop on this component to force re-mount if data source changes.
+       */
+      this.setState({ ...this.props.data })
     }
   }
 
@@ -61,11 +65,11 @@ class CongratsOptions extends Component<ICongratsOptionsProps, ICongratsOptionsS
       { [name]: value } as Pick<ICongratsOptionsState, keyof ICongratsOptionsState>,
       () => {
         if (this.props.onChange) {
-          this.props.onChange(this.state);
+          this.props.onChange(this.state)
         }
       }
-    );
-  };
+    )
+  }
 
   render() {
     // Provide fallbacks for rendering if state values are somehow undefined
@@ -76,9 +80,9 @@ class CongratsOptions extends Component<ICongratsOptionsProps, ICongratsOptionsS
       fontSize = 16,
       textColor = '#ffffff',
       recipient = '', // Though not used in an input, it's part of the state/data
-    } = this.state;
+    } = this.state
     
-    const previewData: ICongratsWidgetData = { animation, text, color, fontSize, textColor, recipient };
+    const previewData: ICongratsWidgetData = { animation, text, color, fontSize, textColor, recipient }
 
     return (
       <div className={'options-container'}>
@@ -180,8 +184,8 @@ class CongratsOptions extends Component<ICongratsOptionsProps, ICongratsOptionsS
           `}
         </style>
       </div>
-    );
+    )
   }
 }
 
-export default CongratsOptions;
+export default CongratsOptions

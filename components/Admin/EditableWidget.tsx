@@ -1,6 +1,6 @@
-import React, { useRef } from 'react';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { library, config, IconProp } from '@fortawesome/fontawesome-svg-core';
+import React, { useRef } from 'react'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { library, config, IconProp } from '@fortawesome/fontawesome-svg-core'
 import {
   faPlay,
   faFont,
@@ -10,16 +10,16 @@ import {
   faCalendar,
   faTimes,
   faCog,
-} from '@fortawesome/free-solid-svg-icons';
+} from '@fortawesome/free-solid-svg-icons'
 
-config.autoAddCss = false; // Prevent Font Awesome from adding its own CSS automatically
-library.add(faList, faPlay, faFont, faMousePointer, faCloudSun, faCalendar, faTimes, faCog);
+config.autoAddCss = false // Prevent Font Awesome from adding its own CSS automatically
+library.add(faList, faPlay, faFont, faMousePointer, faCloudSun, faCalendar, faTimes, faCog)
 
-import Widgets from '../../widgets';
-import { IBaseWidget } from '../../widgets/base_widget';
-import WidgetEditDialog from './WidgetEditDialog'; // Removed IWidgetEditDialog import assuming it's default export or typed internally
-import * as z from 'zod';
-import { WidgetType, WidgetTypeZod } from '../../api/models/Widget'; // Import enum and its Zod schema
+import Widgets from '../../widgets'
+import { IBaseWidget } from '../../widgets/base_widget'
+import WidgetEditDialog from './WidgetEditDialog' // Removed IWidgetEditDialog import assuming it's default export or typed internally
+import * as z from 'zod'
+import { WidgetType, WidgetTypeZod } from '../../api/models/Widget' // Import enum and its Zod schema
 
 // Zod schema for EditableWidget props
 export const EditableWidgetPropsSchema = z.object({
@@ -27,40 +27,42 @@ export const EditableWidgetPropsSchema = z.object({
   type: WidgetTypeZod.default(WidgetType.SLIDESHOW), // Default to slideshow type
   onDelete: z.function(z.tuple([]), z.void()), // Function with no args, returns void
   layout: z.enum(['spaced', 'compact']).default('spaced'), // Default to spaced layout
-  // react-grid-layout props like 'style', 'className', 'data-grid' are omitted
-  // as they are typically handled by RGL and not directly used by this component's logic.
-});
+  /*
+   * react-grid-layout props like 'style', 'className', 'data-grid' are omitted
+   * as they are typically handled by RGL and not directly used by this component's logic.
+   */
+})
 
 // Derive TypeScript type from Zod schema
 export type IEditableWidgetProps = z.infer<typeof EditableWidgetPropsSchema>;
 
 const EditableWidget: React.FC<IEditableWidgetProps> = ({ id, type = WidgetType.SLIDESHOW, onDelete, layout = 'spaced' }) => {
   // Using useRef hook instead of createRef
-  const dialogRef = useRef<WidgetEditDialog>(null);
+  const dialogRef = useRef<WidgetEditDialog>(null)
 
   const openDialog = (e?: React.MouseEvent): void => {
-    if (e) e.stopPropagation();
-    dialogRef.current?.open();
-  };
+    if (e) e.stopPropagation()
+    dialogRef.current?.open()
+  }
 
   const handleDeleteClick = (e?: React.MouseEvent): void => {
-    if (e) e.stopPropagation();
-    onDelete(); // Call the onDelete prop passed from parent
-  };
+    if (e) e.stopPropagation()
+    onDelete() // Call the onDelete prop passed from parent
+  }
 
   // Retrieve widget definition from the global Widgets object
-  const widgetDefinition: IBaseWidget | undefined = Widgets[type];
+  const widgetDefinition: IBaseWidget | undefined = Widgets[type]
 
-  const widgetName = widgetDefinition?.name || 'Broken Widget';
-  const widgetIcon = widgetDefinition?.icon || faTimes; // Default icon if not found
+  const widgetName = widgetDefinition?.name || 'Broken Widget'
+  const widgetIcon = widgetDefinition?.icon || faTimes // Default icon if not found
 
   return (
     <div className={'widget-editable-container'}>
       <div className={'controls'}>
-        <div className={'edit-btn'} onClick={openDialog} role="button" tabIndex={0}>
+        <div className={'edit-btn'} onClick={openDialog} role='button' tabIndex={0}>
           <FontAwesomeIcon icon={faCog} size={'xs'} fixedWidth />
         </div>
-        <div className={'delete-btn'} onClick={handleDeleteClick} role="button" tabIndex={0}>
+        <div className={'delete-btn'} onClick={handleDeleteClick} role='button' tabIndex={0}>
           <FontAwesomeIcon icon={faTimes} size={'xs'} fixedWidth />
         </div>
       </div>
@@ -159,7 +161,7 @@ const EditableWidget: React.FC<IEditableWidgetProps> = ({ id, type = WidgetType.
         `}
       </style>
     </div>
-  );
-};
+  )
+}
 
-export default EditableWidget;
+export default EditableWidget

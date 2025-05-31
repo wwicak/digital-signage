@@ -1,5 +1,5 @@
-import React, { ComponentType, CSSProperties } from 'react';
-import _ from 'lodash';
+import React, { ComponentType, CSSProperties } from 'react'
+import _ from 'lodash'
 
 interface WidgetLayout {
   x: number;
@@ -32,75 +32,79 @@ export default function HeightProvider<P extends object>(
   layoutSetting: 'spaced' | 'compact' | string = 'spaced' // Allow string for flexibility or specific values
 ) {
   return class HeightProviderComponent extends React.Component<P & HeightProviderProps, HeightProviderState> {
-    private mounted: boolean = false;
-    private debouncedResize: _.DebouncedFunc<() => void> | null = null;
-    // Ref for the MeasureComponent if it's rendered by this HOC, or assume MeasureComponent is a direct node/instance
-    // For this conversion, we stick to the original findDOMNode(MeasureComponent) logic.
+    private mounted: boolean = false
+    private debouncedResize: _.DebouncedFunc<() => void> | null = null
+    /*
+     * Ref for the MeasureComponent if it's rendered by this HOC, or assume MeasureComponent is a direct node/instance
+     * For this conversion, we stick to the original findDOMNode(MeasureComponent) logic.
+     */
 
     constructor(props: P & HeightProviderProps) {
-      super(props);
+      super(props)
       this.state = {
         width: 1280,
         height: 720
-      };
+      }
     }
     componentDidMount() {
-      this.mounted = true;
+      this.mounted = true
       // Use debounced resize handler to prevent excessive re-renders
-      this.debouncedResize = _.debounce(this.onWindowResize, 150);
-      window.addEventListener('resize', this.debouncedResize);
-      this.onWindowResize(); // Initial measurement
+      this.debouncedResize = _.debounce(this.onWindowResize, 150)
+      window.addEventListener('resize', this.debouncedResize)
+      this.onWindowResize() // Initial measurement
     }
 
     componentWillUnmount() {
-      this.mounted = false;
+      this.mounted = false
       if (this.debouncedResize) {
-        window.removeEventListener('resize', this.debouncedResize);
-        this.debouncedResize.cancel();
+        window.removeEventListener('resize', this.debouncedResize)
+        this.debouncedResize.cancel()
       }
     }
 
     onWindowResize = () => {
-      if (!this.mounted) return;
+      if (!this.mounted) return
 
-      // The original code uses MeasureComponent directly.
-      // This implies MeasureComponent is an instance or a DOM element passed from outside.
-      // If MeasureComponent were a component type rendered inside this HOC, a ref would be needed.
-      const node = MeasureComponent as HTMLElement;
+      /*
+       * The original code uses MeasureComponent directly.
+       * This implies MeasureComponent is an instance or a DOM element passed from outside.
+       * If MeasureComponent were a component type rendered inside this HOC, a ref would be needed.
+       */
+      const node = MeasureComponent as HTMLElement
 
       if (node instanceof HTMLElement) {
-        const newWidth = Math.round(node.offsetWidth);
-        const newHeight = Math.round(node.offsetHeight);
+        const newWidth = Math.round(node.offsetWidth)
+        const newHeight = Math.round(node.offsetHeight)
         
         // Only update state if dimensions have meaningfully changed
         if (Math.abs(newWidth - this.state.width) > 5 || Math.abs(newHeight - this.state.height) > 5) {
-          this.setState({ width: newWidth, height: newHeight });
+          this.setState({ width: newWidth, height: newHeight })
         }
       }
-    };
+    }
 
     render() {
-      const { measureBeforeMount = false, layout, ...rest } = this.props;
+      const { measureBeforeMount = false, layout, ...rest } = this.props
 
       if (measureBeforeMount && !this.mounted) {
         // className and style are part of this.props
-        return <div className={this.props.className} style={this.props.style} />;
+        return <div className={this.props.className} style={this.props.style} />
       }
 
       // Stabilize calculations to reduce re-renders
       const rowNum = layout.length > 0
         ? Math.max(1, ...layout.map((widget: WidgetLayout) => widget.y + widget.h))
-        : 12; // Default to 12 if layout is empty
+        : 12 // Default to 12 if layout is empty
 
       const colNum = layout.length > 0
         ? Math.max(1, ...layout.map((widget: WidgetLayout) => widget.x + widget.w))
-        : 12; // Default to 12
+        : 12 // Default to 12
 
       // Round values to reduce micro-changes that cause re-renders
-      const stableWidth = Math.round(this.state.width);
-      const baseRowHeight = Math.round(this.state.height / rowNum);
-      const margin = layoutSetting === 'spaced' ? 10 : 0;
-      const stableRowHeight = Math.max(10, baseRowHeight - margin); // Ensure minimum height
+      const stableWidth = Math.round(this.state.width)
+      const baseRowHeight = Math.round(this.state.height / rowNum)
+      const margin = layoutSetting === 'spaced' ? 10 : 0
+      const stableRowHeight = Math.max(10, baseRowHeight - margin) // Ensure minimum height
 
       return (
         <ComposedComponent
@@ -109,7 +113,7 @@ export default function HeightProvider<P extends object>(
           rowHeight={stableRowHeight}
           cols={colNum}
         />
-      );
+      )
     }
-  };
+  }
 }

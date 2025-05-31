@@ -1,10 +1,12 @@
-import React, { SyntheticEvent } from 'react';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { IconProp } from '@fortawesome/fontawesome-svg-core';
-import ReactSwitch, { ReactSwitchProps } from 'react-switch';
+import React, { SyntheticEvent } from 'react'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { IconProp } from '@fortawesome/fontawesome-svg-core'
+import ReactSwitch, { ReactSwitchProps } from 'react-switch'
 
-// Props for the Switch component
-// We can pick necessary props from ReactSwitchProps and add our own.
+/*
+ * Props for the Switch component
+ * We can pick necessary props from ReactSwitchProps and add our own.
+ */
 export interface ISwitchProps {
   name: string; // Name to identify the switch, passed to onValueChange
   checked: boolean; // Current checked state of the switch (controlled)
@@ -30,8 +32,10 @@ export interface ISwitchProps {
   className?: string; // For custom styling of the wrapper
   style?: React.CSSProperties; // For custom styling of the wrapper
 
-  // inline and expand props from original JS seem to affect layout of .inputGroup,
-  // which is this component's root. We'll keep them for styling the wrapper.
+  /*
+   * inline and expand props from original JS seem to affect layout of .inputGroup,
+   * which is this component's root. We'll keep them for styling the wrapper.
+   */
   inline?: boolean; // If true, group lays out more compactly or affects label positioning.
   expand?: boolean; // If true, group might try to expand (e.g. width: 100%)
 }
@@ -64,9 +68,9 @@ const Switch: React.FC<ISwitchProps> = ({
     id: string // id prop from ReactSwitch, usually related to name or generated
   ): void => {
     if (onValueChange) {
-      onValueChange(name, newChecked);
+      onValueChange(name, newChecked)
     }
-  };
+  }
 
   // Prepare props for ReactSwitch
   const reactSwitchProps: ReactSwitchProps = {
@@ -83,14 +87,14 @@ const Switch: React.FC<ISwitchProps> = ({
     ...(height && { height }),
     ...(width && { width }),
     ...(handleDiameter && { handleDiameter }),
-  };
+  }
 
   return (
     <div className={`switch-input-group ${className || ''} ${inline ? 'inline' : 'block-layout'}`} style={style}>
-      {label && <label className="main-label">{label}</label>}
+      {label && <label className='main-label'>{label}</label>}
       <div className='switch-control-area'> {/* Wrapper for labels and switch */}
           {uncheckedLabel && ( /* Display uncheckedLabel first if present (usually on the left) */
-          <label htmlFor={name} className="side-label unchecked-label">
+          <label htmlFor={name} className='side-label unchecked-label'>
               {uncheckedIcon && (
               <span className='icon unchecked-icon'> {/* Changed div to span for inline flow */}
                   <FontAwesomeIcon icon={uncheckedIcon} fixedWidth color='#828282' />
@@ -103,7 +107,7 @@ const Switch: React.FC<ISwitchProps> = ({
               <ReactSwitch {...reactSwitchProps} id={name} />
           </div>
           {checkedLabel && ( /* Display checkedLabel second if present (usually on the right) */
-          <label htmlFor={name} className="side-label checked-label">
+          <label htmlFor={name} className='side-label checked-label'>
               {checkedIcon && (
               <span className='icon checked-icon'> {/* Changed div to span for inline flow */}
                   <FontAwesomeIcon icon={checkedIcon} fixedWidth color='#828282' />
@@ -174,7 +178,7 @@ const Switch: React.FC<ISwitchProps> = ({
         /* Original .input styles are not applicable here as this is not a text input */
       `}</style>
     </div>
-  );
-};
+  )
+}
 
-export default Switch;
+export default Switch

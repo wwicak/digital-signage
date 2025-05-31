@@ -1,6 +1,6 @@
-import mongoose, { Document, Model, Schema } from 'mongoose';
-import * as z from 'zod';
-import { ISlide, SlideSchemaZod as ImportedSlideSchemaZod } from './Slide'; // Import Zod schema for ISlide
+import mongoose, { Document, Model, Schema } from 'mongoose'
+import * as z from 'zod'
+import { ISlide, SlideSchemaZod as ImportedSlideSchemaZod } from './Slide' // Import Zod schema for ISlide
 
 export interface ISlideshow extends Document {
   name: string;
@@ -52,17 +52,17 @@ const SlideshowSchema = new Schema<ISlideshow>(
   {
     timestamps: { createdAt: 'creation_date', updatedAt: 'last_update' }
   }
-);
+)
 
 // Pre-save middleware to update `last_update` field
 SlideshowSchema.pre('save', function(next) {
   if (this.isModified()) {
-    this.last_update = new Date();
+    this.last_update = new Date()
   }
-  next();
-});
+  next()
+})
 
-const SlideshowModel: Model<ISlideshow> = mongoose.model<ISlideshow>('Slideshow', SlideshowSchema);
+const SlideshowModel: Model<ISlideshow> = mongoose.model<ISlideshow>('Slideshow', SlideshowSchema)
 
 // Zod schema for ISlideshow
 export const SlideshowSchemaZod = z.object({
@@ -75,6 +75,6 @@ export const SlideshowSchemaZod = z.object({
   last_update: z.date().optional(),   // Defaulted by Mongoose
   is_enabled: z.boolean().default(true),
   __v: z.number().optional(),
-});
+})
 
-export default SlideshowModel;
+export default SlideshowModel
