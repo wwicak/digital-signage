@@ -52,6 +52,7 @@ type ISlideshowWidgetContentState = z.infer<typeof SlideshowWidgetContentStateSc
 class Slideshow extends Component<ISlideshowWidgetContentProps, ISlideshowWidgetContentState> {
   private slideRefs: Array<ISlideInstance | null> = [];
   private slideAdvanceTimeoutId: NodeJS.Timeout | null = null;
+  private isMounted: boolean = false;
 
   constructor(props: ISlideshowWidgetContentProps) {
     super(props);
@@ -64,8 +65,8 @@ class Slideshow extends Component<ISlideshowWidgetContentProps, ISlideshowWidget
       error: null,
     };
   }
-
   async componentDidMount() {
+    this.isMounted = true;
     this.fetchSlidesAndStart();
   }
 
@@ -77,13 +78,14 @@ class Slideshow extends Component<ISlideshowWidgetContentProps, ISlideshowWidget
       this.fetchSlidesAndStart();
     }
   }
-
-  componentWillUnmount() {
-    this.clearAdvanceTimer();
-    // Optionally call stop() on the current slide if active
-    if (this.state.currentSlideIndex !== null && this.slideRefs[this.state.currentSlideIndex]) {
-        this.slideRefs[this.state.currentSlideIndex]?.stop();
-    }
+componentWillUnmount() {
+  this.isMounted = false;
+  this.clearAdvanceTimer();
+  // Optionally call stop() on the current slide if active
+  if (this.state.currentSlideIndex !== null && this.slideRefs[this.state.currentSlideIndex]) {
+      this.slideRefs[this.state.currentSlideIndex]?.stop();
+  }
+}
   }
   
   clearAdvanceTimer(): void {
