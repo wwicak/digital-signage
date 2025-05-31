@@ -105,10 +105,9 @@ class Slideshow extends Component<ISlideshowWidgetContentProps, ISlideshowWidget
       const slides = await getSlides(slideshowId);
       if (slides && slides.length > 0) {
         this.slideRefs = new Array(slides.length).fill(null);
-        // Assuming slides might have an 'order' or 'position' field for sorting.
-        // ISlideData needs to be updated if 'order' is a standard field.
-        // For now, using 'position' if available, otherwise keep API order.
-        const orderedSlides = _.sortBy(slides, (s: ISlideData) => s.position ?? Infinity);
+        // Keep slides in the order they come from the API
+        // If there's a specific order field, it would need to be added to the ISlideData interface
+        const orderedSlides = slides;
         
         this.setState({ slides: orderedSlides, currentSlideIndex: 0, isLoading: false }, () => {
           this.slideRefs[0]?.play(); // Play the first slide
@@ -171,8 +170,8 @@ class Slideshow extends Component<ISlideshowWidgetContentProps, ISlideshowWidget
     }
   };
 
-  getSlideComponent = (type: string): ComponentType<any> => {
-    // Assuming ISlideData.type is a string that matches these cases
+  getSlideComponent = React.useMemo(() => (type: string): ComponentType<any> => {
+    // Memoize the component selection to avoid repeated switch statements
     switch (type) {
       case 'photo':
         return PhotoSlide;
@@ -184,9 +183,9 @@ class Slideshow extends Component<ISlideshowWidgetContentProps, ISlideshowWidget
       default:
         return GenericSlide; // Fallback for unknown or generic types
     }
-  };
+  }, []);
 
-  renderSlide = (slide: ISlideData, index: number): JSX.Element => {
+  renderSlide = React.useCallback((slide: ISlideData, index: number): JSX.Element => {
     const { currentSlideIndex } = this.state;
     const SlideComponent = this.getSlideComponent(slide.type);
 
@@ -199,7 +198,7 @@ class Slideshow extends Component<ISlideshowWidgetContentProps, ISlideshowWidget
         // Other props like isPreview can be passed here if needed
       />
     );
-  };
+  }, [this.state.currentSlideIndex, this.getSlideComponent]);
 
   render() {
     const { data, defaultDuration = DEFAULT_SLIDE_DURATION_MS } = this.props;

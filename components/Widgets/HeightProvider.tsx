@@ -1,4 +1,5 @@
 import React, { ComponentType, CSSProperties } from 'react';
+import _ from 'lodash';
 
 interface WidgetLayout {
   x: number;
@@ -32,6 +33,7 @@ export default function HeightProvider<P extends object>(
 ) {
   return class HeightProviderComponent extends React.Component<P & HeightProviderProps, HeightProviderState> {
     private mounted: boolean = false;
+    private debouncedResize: _.DebouncedFunc<() => void> | null = null;
     // Ref for the MeasureComponent if it's rendered by this HOC, or assume MeasureComponent is a direct node/instance
     // For this conversion, we stick to the original findDOMNode(MeasureComponent) logic.
 
@@ -42,16 +44,20 @@ export default function HeightProvider<P extends object>(
         height: 720
       };
     }
-
     componentDidMount() {
       this.mounted = true;
-      window.addEventListener('resize', this.onWindowResize);
+      // Use debounced resize handler to prevent excessive re-renders
+      this.debouncedResize = _.debounce(this.onWindowResize, 150);
+      window.addEventListener('resize', this.debouncedResize);
       this.onWindowResize(); // Initial measurement
     }
 
     componentWillUnmount() {
       this.mounted = false;
-      window.removeEventListener('resize', this.onWindowResize);
+      if (this.debouncedResize) {
+        window.removeEventListener('resize', this.debouncedResize);
+        this.debouncedResize.cancel();
+      }
     }
 
     onWindowResize = () => {
@@ -63,7 +69,13 @@ export default function HeightProvider<P extends object>(
       const node = MeasureComponent as HTMLElement;
 
       if (node instanceof HTMLElement) {
-        this.setState({ width: node.offsetWidth, height: node.offsetHeight });
+        const newWidth = Math.round(node.offsetWidth);
+        const newHeight = Math.round(node.offsetHeight);
+        
+        // Only update state if dimensions have meaningfully changed
+        if (Math.abs(newWidth - this.state.width) > 5 || Math.abs(newHeight - this.state.height) > 5) {
+          this.setState({ width: newWidth, height: newHeight });
+        }
       }
     };
 
@@ -75,23 +87,26 @@ export default function HeightProvider<P extends object>(
         return <div className={this.props.className} style={this.props.style} />;
       }
 
-      const rowNum =
-        Math.max(
-          1, // Ensure at least 1 to avoid division by zero or negative numbers
-          ...layout.map(widget => widget.y + widget.h)
-        ) || 12; // Default to 12 if layout is empty or map returns nothing
+      // Stabilize calculations to reduce re-renders
+      const rowNum = layout.length > 0
+        ? Math.max(1, ...layout.map((widget: WidgetLayout) => widget.y + widget.h))
+        : 12; // Default to 12 if layout is empty
 
-      const colNum =
-        Math.max(
-          1, // Ensure at least 1
-          ...layout.map(widget => widget.x + widget.w)
-        ) || 12; // Default to 12
+      const colNum = layout.length > 0
+        ? Math.max(1, ...layout.map((widget: WidgetLayout) => widget.x + widget.w))
+        : 12; // Default to 12
+
+      // Round values to reduce micro-changes that cause re-renders
+      const stableWidth = Math.round(this.state.width);
+      const baseRowHeight = Math.round(this.state.height / rowNum);
+      const margin = layoutSetting === 'spaced' ? 10 : 0;
+      const stableRowHeight = Math.max(10, baseRowHeight - margin); // Ensure minimum height
 
       return (
         <ComposedComponent
           {...(rest as P)} // Spread the rest of the original props
-          width={this.state.width}
-          rowHeight={this.state.height / rowNum - (layoutSetting === 'spaced' ? 10 : 0)}
+          width={stableWidth}
+          rowHeight={stableRowHeight}
           cols={colNum}
         />
       );
