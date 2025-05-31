@@ -4,12 +4,47 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { config as FaConfig, IconProp } from '@fortawesome/fontawesome-svg-core';
 import { faMapMarkerAlt } from '@fortawesome/free-solid-svg-icons'; // Changed from faMapMarker for updated icon sets
 
-import WeatherIcon from './WeatherIcon'; // Assuming WeatherIcon.js or WeatherIcon.tsx
-import { IWeatherDefaultData, TWeatherUnit } from '../index'; // Data structure from widget's index.ts
+import WeatherIcon from './WeatherIcon';
+import { IWeatherDefaultData, TWeatherUnit } from '../index'; // IWeatherDefaultData is interface, TWeatherUnit is type alias
+import * as z from 'zod';
 
 FaConfig.autoAddCss = false;
 
+// Zod schema for TWeatherUnit
+export const TWeatherUnitSchema = z.enum(["metric", "imperial"]);
+
+// Zod schema for IWeatherDefaultData (used in props.data)
+export const WeatherWidgetDataSchema = z.object({
+  zip: z.string(),
+  unit: TWeatherUnitSchema,
+  showForecast: z.boolean().optional(),
+  apiKey: z.string().optional(),
+  locationName: z.string().optional(),
+});
+// We don't infer a type for IWeatherDefaultData from this schema here, as it's imported.
+// This schema is for validating the 'data' prop.
+
+// Zod schema for WeatherContent component props
+export const WeatherContentPropsSchema = z.object({
+  data: WeatherWidgetDataSchema.optional(),
+  isPreview: z.boolean().optional(),
+});
+export type IWeatherContentProps = z.infer<typeof WeatherContentPropsSchema>;
+
+// Zod schema for WeatherContent component state
+export const WeatherContentStateSchema = z.object({
+  locationName: z.string().optional(),
+  iconCode: z.string().optional(),
+  temperature: z.number().optional(),
+  description: z.string().optional(),
+  isLoading: z.boolean(),
+  error: z.string().nullable(),
+});
+type IWeatherContentState = z.infer<typeof WeatherContentStateSchema>;
+
+
 // --- OpenWeatherMap API Response Interfaces ---
+// These can remain as interfaces as they type external API responses
 interface IWeatherCondition {
   id: number; // Weather condition id
   main: string; // Group of weather parameters (Rain, Snow, Extreme etc.)
@@ -66,20 +101,6 @@ interface IOpenWeatherCurrentResponse {
 }
 
 // --- Component Interfaces ---
-export interface IWeatherContentProps {
-  data?: IWeatherDefaultData; // From widget config: zip, unit, apiKey, showForecast
-  isPreview?: boolean;
-}
-
-interface IWeatherContentState {
-  locationName?: string;
-  iconCode?: string; // e.g., "01d"
-  temperature?: number;
-  description?: string;
-  isLoading: boolean;
-  error: string | null;
-}
-
 // --- Constants ---
 const DEFAULT_UNIT: TWeatherUnit = 'imperial';
 const DEFAULT_ZIP = '10001'; // Default to New York

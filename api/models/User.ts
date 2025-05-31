@@ -1,6 +1,7 @@
 import mongoose, { Schema, Model, Document } from 'mongoose';
 import passportLocalMongoose from 'passport-local-mongoose';
 import passport from 'passport'; // Import for passport.Strategy
+import * as z from 'zod';
 
 // Interface for the User document instance
 export interface IUser extends Document {
@@ -36,5 +37,20 @@ UserSchema.plugin(passportLocalMongoose, {
 });
 
 const UserModel = mongoose.model<IUser, IUserModel>('User', UserSchema);
+
+// Zod schema for IUser
+export const UserSchemaZod = z.object({
+  _id: z.instanceof(mongoose.Types.ObjectId).optional(),
+  name: z.string().optional(),
+  email: z.string().email({ message: "Invalid email address" }).optional(), // passport-local-mongoose might enforce presence
+  role: z.string().optional(),
+  username: z.string().optional(), // Only if 'username' is distinct from 'email' and used
+  // Timestamps from Mongoose { timestamps: true }
+  createdAt: z.date().optional(),
+  updatedAt: z.date().optional(),
+  __v: z.number().optional(),
+  // Note: Fields like 'hash' and 'salt' added by passport-local-mongoose are omitted
+  // as they are typically not directly manipulated or validated in application logic.
+});
 
 export default UserModel;

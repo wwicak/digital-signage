@@ -5,27 +5,29 @@ import { fas, faExclamationTriangle } from '@fortawesome/free-solid-svg-icons'; 
 import { fab } from '@fortawesome/free-brands-svg-icons'; // fab is imported but not used in this specific component
 
 import AutoScroll from '../../../components/AutoScroll'; // Assuming .js or .tsx
+import * as z from 'zod';
 
 config.autoAddCss = false;
 library.add(fas); // Add all solid icons (includes faExclamationTriangle if not imported directly)
 library.add(fab);
 
-// Data structure for the announcement widget's content
-// This should align with IAnnouncementDefaultData from announcement/index.ts
-export interface IAnnouncementWidgetData {
-  text?: string;
-  color?: string;
-  textColor?: string;
-  titleTextColor?: string;
-  accentColor?: string;
-  title?: string; // This was in IAnnouncementDefaultData, but not used in original render for title text
-}
+// Zod schema for the announcement widget's content data, matching the component's internal usage
+export const AnnouncementWidgetContentDataSchema = z.object({
+  text: z.string().optional(),
+  color: z.string().optional(), // Background color for the widget content
+  textColor: z.string().optional(), // Text color for the main content
+  titleTextColor: z.string().optional(), // Text color for the "Announcement" title bar
+  accentColor: z.string().optional(), // Color for accents like the border-left of title bar
+  title: z.string().optional(), // Optional title for the announcement content itself (not widget frame)
+});
+export type IAnnouncementWidgetData = z.infer<typeof AnnouncementWidgetContentDataSchema>;
 
-// Props for the AnnouncementContent component
-export interface IAnnouncementContentProps {
-  data?: IAnnouncementWidgetData;
-  isPreview?: boolean; // Example of another prop widgets might receive
-}
+// Zod schema for AnnouncementContent component props
+export const AnnouncementContentPropsSchema = z.object({
+  data: AnnouncementWidgetContentDataSchema.optional(),
+  isPreview: z.boolean().optional(),
+});
+export type IAnnouncementContentProps = z.infer<typeof AnnouncementContentPropsSchema>;
 
 const DEFAULT_COLOR = '#708090'; // Slate gray
 const DEFAULT_TEXT_COLOR = '#ffffff'; // White

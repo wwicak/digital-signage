@@ -1,19 +1,20 @@
 import React, { Component } from 'react';
-import { Form, Input, InlineInputGroup, IInputProps } from '../../../components/Form'; // Assuming Form components are/will be typed
-import { IWidgetOptionsEditorProps } from '../../../components/Admin/WidgetEditDialog'; // Props from WidgetEditDialog
+import { Form, Input, InlineInputGroup, IInputProps } from '../../../components/Form';
+import { IWidgetOptionsEditorProps } from '../../../components/Admin/WidgetEditDialog'; // This is z.infer<typeof WidgetOptionsEditorPropsSchema>
+import * as z from 'zod';
 
-import AnnouncementContent, { IAnnouncementWidgetData } from './AnnouncementContent'; // Data structure from content component
+import AnnouncementContent, { AnnouncementWidgetContentDataSchema, IAnnouncementWidgetData } from './AnnouncementContent'; // IAnnouncementWidgetData is z.infer<typeof AnnouncementWidgetContentDataSchema>
 
-// Props for AnnouncementOptions should conform to IWidgetOptionsEditorProps
-export interface IAnnouncementOptionsProps extends IWidgetOptionsEditorProps<IAnnouncementWidgetData> {
-  // No additional props specific to AnnouncementOptions itself, inherits data and onChange
-}
+// Zod schema for AnnouncementOptions props
+// This needs to align with IWidgetOptionsEditorProps but typed for AnnouncementWidgetContentDataSchema
+export const AnnouncementOptionsPropsSchema = z.object({
+  data: AnnouncementWidgetContentDataSchema.optional(),
+  onChange: z.function().args(AnnouncementWidgetContentDataSchema).returns(z.void()),
+});
+export type IAnnouncementOptionsProps = z.infer<typeof AnnouncementOptionsPropsSchema>;
 
-// State for AnnouncementOptions will hold the fields of IAnnouncementWidgetData
-// IAnnouncementWidgetData already defines all fields as optional, so direct use is fine.
-// If any field was mandatory for state, we'd redefine or pick.
-type IAnnouncementOptionsState = IAnnouncementWidgetData;
-
+// State for AnnouncementOptions will also use IAnnouncementWidgetData (inferred from AnnouncementWidgetContentDataSchema)
+type IAnnouncementOptionsState = IAnnouncementWidgetData; // This is already an inferred type
 
 class AnnouncementOptions extends Component<IAnnouncementOptionsProps, IAnnouncementOptionsState> {
   constructor(props: IAnnouncementOptionsProps) {

@@ -1,44 +1,51 @@
 import axios, { AxiosResponse } from "axios";
-import { SlideType, SlideData } from "../api/models/Slide";
+import * as z from "zod";
+import { SlideTypeZod, SlideDataZod } from "../api/models/Slide"; // Using Zod schemas from the model
 
-// Define interfaces for the data structures
-// This should ideally match the backend API/models or be a subset.
-export interface ISlideData {
-  _id: string;
-  name?: string; // Assuming name is optional or might not always be there
-  type: SlideType;
-  data: SlideData;
-  duration?: number;
-  position?: number;
-  slideshow_ids?: string[]; // Assuming it's an array of slideshow IDs
-  creator_id?: string;
-  creation_date?: string; // Or Date
-  last_update?: string; // Or Date
-}
+// Zod schema for slide data in actions context
+export const SlideActionDataSchema = z.object({
+  _id: z.string(),
+  name: z.string(), // Matches SlideSchemaZod (required)
+  description: z.string().optional(), // Matches SlideSchemaZod
+  type: SlideTypeZod,
+  data: SlideDataZod, // Directly use SlideDataZod from models, assuming API aligns
+  duration: z.number().default(10), // Matches SlideSchemaZod
+  is_enabled: z.boolean().default(true), // Matches SlideSchemaZod
+  creator_id: z.string(), // String version of ObjectId, required
+  creation_date: z.preprocess((arg) => (typeof arg === 'string' || typeof arg === 'number' ? new Date(arg) : arg), z.date()).optional(),
+  last_update: z.preprocess((arg) => (typeof arg === 'string' || typeof arg === 'number' ? new Date(arg) : arg), z.date()).optional(),
+  slideshow_ids: z.array(z.string()).optional(), // Additional field from original ISlideData
+  __v: z.number().optional(), // From Mongoose
+});
 
-// Interface for responses that might just be a success message or some specific data
-interface IApiResponse {
-  message?: string;
-  // other potential fields
-}
+export type ISlideData = z.infer<typeof SlideActionDataSchema>;
 
-// Interface for the standalone_upload response
-interface IStandaloneUploadResponse {
-  url: string; // Assuming the server responds with the URL of the uploaded file
+// Zod Schema for API responses
+export const ApiResponseSchema = z.object({
+  message: z.string().optional(),
+  // other potential fields can be added here
+});
+export type IApiResponse = z.infer<typeof ApiResponseSchema>;
+
+// Zod Schema for the standalone_upload response
+export const StandaloneUploadResponseSchema = z.object({
+  url: z.string().url(),
   // other potential fields like fileId, etc.
-}
+});
+export type IStandaloneUploadResponse = z.infer<typeof StandaloneUploadResponseSchema>;
+
 
 export const getSlides = (
   slideshowId: string,
   host: string = ""
 ): Promise<ISlideData[]> => {
   return axios
-    .get<ISlideData[]>(`${host}/api/v1/slideshow/${slideshowId}/slides`)
-    .then((res: AxiosResponse<ISlideData[]>) => {
+    .get<unknown[]>(`${host}/api/v1/slideshow/${slideshowId}/slides`) // Expect unknown array
+    .then((res: AxiosResponse<unknown[]>) => {
       if (res && res.data) {
-        return res.data;
+        return z.array(SlideActionDataSchema).parse(res.data);
       }
-      return []; // Or throw an error
+      return [];
     });
 };
 
@@ -47,104 +54,147 @@ export const getSlide = (
   host: string = ""
 ): Promise<ISlideData> => {
   return axios
-    .get<ISlideData>(`${host}/api/v1/slide/${slideId}`)
-    .then((res: AxiosResponse<ISlideData>) => {
+    .get<unknown>(`${host}/api/v1/slide/${slideId}`) // Expect unknown
+    .then((res: AxiosResponse<unknown>) => {
       if (res && res.data) {
-        return res.data;
+        return SlideActionDataSchema.parse(res.data);
       }
       throw new Error(`Failed to get slide ${slideId}: no data received`);
     });
 };
 
-// For delete, Axios typically returns AxiosResponse<any> or specific success/error structure.
-// If the backend returns a specific JSON structure like { message: "deleted" }, type it.
 export const deleteSlide = (
   id: string,
   host: string = ""
-): Promise<AxiosResponse<IApiResponse>> => {
-  return axios.delete(`${host}/api/v1/slide/${id}`);
+): Promise<IApiResponse> => { // Return type changed to Promise<IApiResponse>
+  return axios.delete<unknown>(`${host}/api/v1/slide/${id}`)
+    .then((res: AxiosResponse<unknown>) => {
+        if (res && res.data && Object.keys(res.data).length > 0) { // Check if data is not empty
+            return ApiResponseSchema.parse(res.data);
+        }
+        // Handle cases where delete might not return a body but is successful
+        if (res.status >= 200 && res.status < 300) {
+            return { message: "Slide deleted successfully" }; // Provide a default success message
+        }
+        // Fallback for unexpected cases
+        const responseData = res.data as any;
+        throw new Error(responseData?.message || `Failed to delete slide ${id}: no confirmation received`);
+    }).catch(error => {
+        // Attempt to parse error response if available
+        if (error.response && error.response.data) {
+            const parsedError = ApiResponseSchema.safeParse(error.response.data);
+            if (parsedError.success) throw new Error(parsedError.data.message || `Error deleting slide ${id}`);
+        }
+        throw error; // Rethrow original error if parsing fails
+    });
 };
 
-// Type for the 'data' parameter in updateSlide and addSlide, excluding file
-export type SlideUpdateData = Omit<
+// Type for the 'data' parameter (metadata) in updateSlide and addSlide
+export type SlideUpdatePayload = Omit<
   Partial<ISlideData>,
-  "_id" | "creator_id" | "creation_date" | "last_update" | "data"
+  "_id" | "creator_id" | "creation_date" | "last_update" | "data" // 'data' here is the SlideData complex object
 > & {
-  // Add other specific fields that can be sent in the FormData body, if any
-  [key: string]: any; // Allow other string keys for FormData compatibility
+  // This allows other string keys for FormData compatibility but is not strictly type-safe for those extra keys.
+  // It's a common pattern for FormData.
+  [key: string]: any;
 };
 
 export const updateSlide = (
   id: string,
   file: File | null,
-  data: SlideUpdateData,
+  payload: SlideUpdatePayload,
   host: string = ""
-): Promise<AxiosResponse<ISlideData>> => {
+): Promise<ISlideData> => {
   const formData = new FormData();
-  for (const key in data) {
-    if (Object.prototype.hasOwnProperty.call(data, key)) {
-      formData.append(key, data[key]);
+  // Append metadata
+  Object.keys(payload).forEach(key => {
+    const value = (payload as any)[key];
+    if (value !== undefined && typeof value !== 'object' && !Array.isArray(value)) { // FormData typically takes string/blob
+        formData.append(key, String(value));
+    } else if (value !== undefined && (Array.isArray(value) || typeof value === 'object')) {
+        formData.append(key, JSON.stringify(value)); // Or handle objects/arrays appropriately for backend
     }
-  }
+  });
+
   if (file) {
-    formData.append("data", file); // 'data' is often the field name for the file itself
+    formData.append("slideFile", file);
   }
-  return axios.patch<ISlideData>(`${host}/api/v1/slide/${id}`, formData, {
+
+  return axios.patch<unknown>(`${host}/api/v1/slide/${id}`, formData, {
     headers: {
-      "Content-Type": "multipart/form-data",
+      // "Content-Type": "multipart/form-data", // Axios sets this with FormData
     },
+  }).then((res: AxiosResponse<unknown>) => {
+    if (res && res.data) {
+        return SlideActionDataSchema.parse(res.data);
+    }
+    throw new Error(`Failed to update slide ${id}: no data received`);
   });
 };
 
-export type SlideAddData = Omit<
+export type SlideAddPayload = Omit<
   Partial<ISlideData>,
   | "_id"
   | "creator_id"
   | "creation_date"
   | "last_update"
-  | "data"
+  | "data" // SlideData complex object
   | "slideshow_ids"
 > & {
-  // Add other specific fields that can be sent in the FormData body
-  [key: string]: any; // Allow other string keys for FormData compatibility
+  [key: string]: any;
 };
 
 export const addSlide = (
   slideshowId: string,
   file: File | null,
-  data: SlideAddData,
+  payload: SlideAddPayload,
   host: string = ""
-): Promise<AxiosResponse<ISlideData>> => {
+): Promise<ISlideData> => {
   const formData = new FormData();
-  for (const key in data) {
-    if (Object.prototype.hasOwnProperty.call(data, key)) {
-      formData.append(key, data[key]);
+  Object.keys(payload).forEach(key => {
+    const value = (payload as any)[key];
+     if (value !== undefined && typeof value !== 'object' && !Array.isArray(value)) {
+        formData.append(key, String(value));
+    } else if (value !== undefined && (Array.isArray(value) || typeof value === 'object')) {
+        formData.append(key, JSON.stringify(value));
     }
-  }
+  });
+
   if (file) {
-    formData.append("data", file); // Field name for the file
+    formData.append("slideFile", file);
   }
-  formData.append("slideshow", slideshowId); // Assuming 'slideshow' is the field for slideshow ID
-  return axios.post<ISlideData>(`${host}/api/v1/slide`, formData, {
+  formData.append("slideshow_id", slideshowId);
+
+  return axios.post<unknown>(`${host}/api/v1/slide`, formData, {
     headers: {
-      "Content-Type": "multipart/form-data",
+      // "Content-Type": "multipart/form-data", // Axios sets this
     },
+  }).then((res: AxiosResponse<unknown>) => {
+    if (res && res.data) {
+        return SlideActionDataSchema.parse(res.data);
+    }
+    throw new Error(`Failed to add slide: no data received`);
   });
 };
 
 export const standaloneUpload = (
   file: File,
   host: string = ""
-): Promise<AxiosResponse<IStandaloneUploadResponse>> => {
+): Promise<IStandaloneUploadResponse> => {
   const formData = new FormData();
-  formData.append("data", file); // 'data' is the field name for the file
-  return axios.post<IStandaloneUploadResponse>(
+  formData.append("slideFile", file);
+  return axios.post<unknown>(
     `${host}/api/v1/slide/standalone_upload`,
     formData,
     {
       headers: {
-        "Content-Type": "multipart/form-data",
+        // "Content-Type": "multipart/form-data", // Axios sets this
       },
     }
-  );
+  ).then((res: AxiosResponse<unknown>) => {
+    if (res && res.data) {
+        return StandaloneUploadResponseSchema.parse(res.data);
+    }
+    throw new Error(`Failed to upload file: no data received`);
+  });
 };

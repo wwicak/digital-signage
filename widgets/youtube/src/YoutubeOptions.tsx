@@ -1,19 +1,25 @@
 import React, { Component } from 'react';
 import { Form, Input, InlineInputGroup, IInputProps, IChoice } from '../../../components/Form';
 import { IWidgetOptionsEditorProps } from '../../../components/Admin/WidgetEditDialog';
-import getVideoId from 'get-video-id'; // For parsing YouTube URL
+import getVideoId from 'get-video-id';
+import * as z from 'zod';
 
-import { IYoutubeDefaultData } from '../index'; // Data structure from youtube/index.ts
-import YoutubeContent from './YoutubeContent'; // For potential preview
+import { IYoutubeDefaultData } from '../index'; // This is an interface
+import YoutubeContent, { YoutubeWidgetDataSchema } from './YoutubeContent'; // Import Zod schema
 
-// Props for YoutubeOptions should conform to IWidgetOptionsEditorProps
-export interface IYoutubeOptionsProps extends IWidgetOptionsEditorProps<IYoutubeDefaultData> {}
+// Zod schema for YoutubeOptions props
+// IWidgetOptionsEditorProps<T> has data: T | undefined, onChange: (newData: T) => void
+export const YoutubeOptionsPropsSchema = z.object({
+  data: YoutubeWidgetDataSchema.optional(),
+  onChange: z.function().args(YoutubeWidgetDataSchema).returns(z.void()),
+});
+export type IYoutubeOptionsProps = z.infer<typeof YoutubeOptionsPropsSchema>;
 
-// Local state for this options panel might include the full URL input by the user,
-// from which video_id is derived.
-interface IYoutubeOptionsComponentState {
-  inputUrl: string; // To store the full YouTube URL entered by the user
-}
+// Zod schema for the component's local state
+export const YoutubeOptionsComponentStateSchema = z.object({
+  inputUrl: z.string(),
+});
+type IYoutubeOptionsComponentState = z.infer<typeof YoutubeOptionsComponentStateSchema>;
 
 class YoutubeOptions extends Component<IYoutubeOptionsProps, IYoutubeOptionsComponentState> {
   constructor(props: IYoutubeOptionsProps) {

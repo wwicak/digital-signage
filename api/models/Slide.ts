@@ -1,4 +1,5 @@
 import mongoose, { Document, Model, Schema } from "mongoose";
+import * as z from "zod";
 
 // Define an enum for slide types
 export enum SlideType {
@@ -127,5 +128,143 @@ SlideSchema.pre("save", function (next) {
 });
 
 const SlideModel: Model<ISlide> = mongoose.model<ISlide>("Slide", SlideSchema);
+
+// Zod Schemas
+
+// Enum for SlideType
+export const SlideTypeZod = z.nativeEnum(SlideType);
+
+// Schemas for SlideData variants
+export const ImageSlideDataSchema = z.object({
+  url: z.string().url(),
+  alt: z.string().optional(),
+  caption: z.string().optional(),
+});
+
+export const VideoSlideDataSchema = z.object({
+  url: z.string().url(),
+  autoplay: z.boolean().optional(),
+  loop: z.boolean().optional(),
+  muted: z.boolean().optional(),
+});
+
+export const WebSlideDataSchema = z.object({
+  url: z.string().url(),
+  scale: z.number().optional(),
+  allowInteraction: z.boolean().optional(),
+});
+
+export const MarkdownSlideDataSchema = z.object({
+  content: z.string(),
+  theme: z.string().optional(),
+});
+
+export const PhotoSlideDataSchema = z.object({
+  url: z.string().url(),
+  caption: z.string().optional(),
+  effects: z.array(z.string()).optional(),
+});
+
+export const YoutubeSlideDataSchema = z.object({
+  videoId: z.string(),
+  url: z.string().url(),
+  autoplay: z.boolean().optional(),
+  startTime: z.number().optional(),
+  endTime: z.number().optional(),
+});
+
+// Union schema for SlideData
+// This needs to be refined if we want to validate 'data' based on 'type' at this level.
+// For now, it validates that 'data' can be any of the defined slide data structures.
+export const SlideDataZod = z.union([
+  ImageSlideDataSchema,
+  VideoSlideDataSchema,
+  WebSlideDataSchema,
+  MarkdownSlideDataSchema,
+  PhotoSlideDataSchema,
+  YoutubeSlideDataSchema,
+]);
+
+// Zod schema for ISlide
+export const SlideSchemaZod = z.object({
+  _id: z.instanceof(mongoose.Types.ObjectId).optional(),
+  name: z.string(),
+  description: z.string().optional(),
+  type: SlideTypeZod,
+  data: SlideDataZod, // This will be further refined with a .superRefine or .refine
+  creator_id: z.instanceof(mongoose.Types.ObjectId),
+  creation_date: z.date().optional(), // Defaulted by Mongoose
+  last_update: z.date().optional(),   // Defaulted by Mongoose
+  duration: z.number().default(10),
+  is_enabled: z.boolean().default(true),
+  __v: z.number().optional(),
+}).superRefine((val, ctx) => {
+  // Add discriminated union refinement here based on 'type' and 'data'
+  // This ensures that the 'data' object matches the 'type' field.
+  switch (val.type) {
+    case SlideType.IMAGE:
+      if (!ImageSlideDataSchema.safeParse(val.data).success) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ["data"],
+          message: "Data does not match IMAGE type schema",
+        });
+      }
+      break;
+    case SlideType.VIDEO:
+      if (!VideoSlideDataSchema.safeParse(val.data).success) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ["data"],
+          message: "Data does not match VIDEO type schema",
+        });
+      }
+      break;
+    case SlideType.WEB:
+      if (!WebSlideDataSchema.safeParse(val.data).success) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ["data"],
+          message: "Data does not match WEB type schema",
+        });
+      }
+      break;
+    case SlideType.MARKDOWN:
+      if (!MarkdownSlideDataSchema.safeParse(val.data).success) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ["data"],
+          message: "Data does not match MARKDOWN type schema",
+        });
+      }
+      break;
+    case SlideType.PHOTO:
+      if (!PhotoSlideDataSchema.safeParse(val.data).success) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ["data"],
+          message: "Data does not match PHOTO type schema",
+        });
+      }
+      break;
+    case SlideType.YOUTUBE:
+      if (!YoutubeSlideDataSchema.safeParse(val.data).success) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ["data"],
+          message: "Data does not match YOUTUBE type schema",
+        });
+      }
+      break;
+    default:
+      // Should not happen if SlideTypeZod is exhaustive
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["type"],
+        message: "Invalid slide type",
+      });
+  }
+});
+
 
 export default SlideModel;

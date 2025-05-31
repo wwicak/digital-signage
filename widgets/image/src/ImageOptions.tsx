@@ -1,18 +1,32 @@
 import React, { Component } from 'react';
-import { Form, Input, InlineInputGroup, IInputProps, IChoice } from '../../../components/Form'; // Assuming Form components are/will be typed
-import { IWidgetOptionsEditorProps } from '../../../components/Admin/WidgetEditDialog'; // Props from WidgetEditDialog
-import { standaloneUpload } from '../../../actions/slide'; // Action for uploading images
+import { Form, Input, InlineInputGroup, IInputProps, IChoice } from '../../../components/Form';
+import { IWidgetOptionsEditorProps } from '../../../components/Admin/WidgetEditDialog';
+import { standaloneUpload } from '../../../actions/slide';
+import * as z from 'zod';
 
-import { IImageDefaultData, TImageFit } from '../index'; // Data structure and types from image/index.ts
+import { IImageDefaultData, TImageFit } from '../index'; // TImageFit is string union, IImageDefaultData is interface
+import { TImageFitSchema } from './ImageContent'; // Import the Zod schema for TImageFit
 
-// Props for ImageOptions should conform to IWidgetOptionsEditorProps
-export interface IImageOptionsProps extends IWidgetOptionsEditorProps<IImageDefaultData> {
-  // No additional props specific to ImageOptions itself
-}
+// Zod schema for IImageDefaultData (used for props.data and state)
+export const ImageOptionsDataSchema = z.object({
+  title: z.string().nullable().optional(),
+  url: z.string().url().nullable(), // If it's a URL or null. If it can be any string, use z.string().nullable()
+  fit: TImageFitSchema, // Required, as per IImageDefaultData
+  color: z.string(), // Required, as per IImageDefaultData
+  altText: z.string().optional(),
+});
+// type IImageOptionsState = z.infer<typeof ImageOptionsDataSchema>; // This will be the state type
 
-// State for ImageOptions will hold the fields of IImageDefaultData
-// IImageDefaultData defines fields as optional or with defaults, direct use is fine.
-type IImageOptionsState = IImageDefaultData;
+// Zod schema for ImageOptions props
+// IWidgetOptionsEditorProps<T> has data: T | undefined, onChange: (newData: T) => void
+export const ImageOptionsPropsSchema = z.object({
+  data: ImageOptionsDataSchema.optional(), // data is T | undefined
+  onChange: z.function().args(ImageOptionsDataSchema).returns(z.void()), // onChange is (newData: T) => void
+});
+export type IImageOptionsProps = z.infer<typeof ImageOptionsPropsSchema>;
+
+// State for ImageOptions will use the Zod-inferred type
+type IImageOptionsState = z.infer<typeof ImageOptionsDataSchema>;
 
 // Define available 'fit' choices
 const fitChoices: IChoice[] = [

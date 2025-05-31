@@ -7,11 +7,17 @@ import { IconProp } from '@fortawesome/fontawesome-svg-core';
 // Define the structure for status bar items if they become more complex.
 // For now, it's an array of strings like "type_id" or just "type".
 // Example: 'date', 'time_1', 'connection_main'
+import * as z from 'zod';
 
-export interface IDisplayFrameProps {
-  children: ReactNode;
-  statusBar?: string[]; // Array of status bar item identifiers/types
-}
+export const DisplayFramePropsSchema = z.object({
+  children: z.custom<ReactNode>((val) => {
+    // Basic placeholder validation for ReactNode
+    return true;
+  }),
+  statusBar: z.array(z.string()).optional(),
+});
+
+export type IDisplayFrameProps = z.infer<typeof DisplayFramePropsSchema>;
 
 // No local state for this component
 // interface IDisplayFrameState {}

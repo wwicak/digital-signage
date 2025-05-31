@@ -1,33 +1,50 @@
 import React, { Component, ComponentType } from 'react';
-import Dialog, { DialogMethods } from '../Dialog'; // Assuming Dialog.tsx
-import { Form, Button, ButtonGroup } from '../Form'; // Assuming Form components are/will be typed
-import { getWidget, updateWidget, IWidgetData } from '../../actions/widgets'; // Widget actions are typed
+import Dialog, { DialogMethods } from '../Dialog';
+import { Form, Button, ButtonGroup } from '../Form';
+import { getWidget, updateWidget, IWidgetData } from '../../actions/widgets'; // IWidgetData is likely an interface
+import * as z from 'zod';
+import { WidgetDataZod, WidgetTypeZod } from '../../api/models/Widget'; // Import Zod schema for widget's 'data' field and type
 
-// Interface for methods exposed via ref (e.g., to be called by EditableWidget)
+// Interface for methods exposed via ref - Zod not directly applicable
 export interface IWidgetEditDialog {
   open: (e?: React.MouseEvent) => void;
-  close: (e?: React.MouseEvent) => Promise<void>; // Matches original return type
+  close: (e?: React.MouseEvent) => Promise<void>;
 }
 
-// Props for the OptionsComponent that will be passed dynamically
-export interface IWidgetOptionsEditorProps<TData = Record<string, any>> {
-  data: TData | undefined; // The widget-specific data object
-  onChange: (newData: TData) => void; // Callback to update this data object
-}
+// Zod schema for props of the generic OptionsComponent
+// TData is effectively Record<string, any> based on original usage
+export const WidgetOptionsEditorPropsSchema = z.object({
+  data: z.record(z.string(), z.any()).optional(),
+  onChange: z.function().args(z.record(z.string(), z.any())).returns(z.void()),
+});
+export type IWidgetOptionsEditorProps = z.infer<typeof WidgetOptionsEditorPropsSchema>;
 
-export interface IWidgetEditDialogProps {
-  widgetId: string; // ID of the widget to edit
-  widgetType?: string; // Type of the widget, for context or fetching specific options definition
-  OptionsComponent?: ComponentType<IWidgetOptionsEditorProps>; // The dynamic component for widget-specific options
-  // refresh?: () => void; // Optional callback after saving, if needed by parent
-}
+// Zod schema for WidgetEditDialog props
+export const WidgetEditDialogPropsSchema = z.object({
+  widgetId: z.string(),
+  widgetType: WidgetTypeZod.optional(), // Use WidgetTypeZod if type consistency is desired
+  OptionsComponent: z.custom<ComponentType<IWidgetOptionsEditorProps>>().optional(),
+});
+export type IWidgetEditDialogProps = z.infer<typeof WidgetEditDialogPropsSchema>;
 
-interface IWidgetEditDialogState {
-  // This state will hold the 'data' field of the widget (the widget-specific configuration)
-  widgetConfigData: Record<string, any> | undefined;
-  initialWidgetData?: IWidgetData | null; // To store the full widget data if needed for context
-  error?: string | null;
-}
+// Local Zod schema for the expected structure of IWidgetData (full widget)
+const LocalFullWidgetDataSchema = z.object({
+  _id: z.string(), // Assuming IWidgetData has _id
+  name: z.string().optional(), // And other fields if used by the dialog
+  type: WidgetTypeZod.optional(),
+  data: WidgetDataZod.optional(), // This is the specific config object, matching api/models/Widget.WidgetDataZod
+});
+type LocalFullWidgetDataType = z.infer<typeof LocalFullWidgetDataSchema>;
+
+// Zod schema for WidgetEditDialog state
+const WidgetEditDialogStateSchema = z.object({
+  // widgetConfigData should ideally conform to a part of WidgetDataZod based on widgetType
+  // For flexibility with generic OptionsComponent, using record(string, any)
+  widgetConfigData: z.record(z.string(), z.any()).optional(),
+  initialWidgetData: LocalFullWidgetDataSchema.nullable().optional(),
+  error: z.string().nullable().optional(),
+});
+type IWidgetEditDialogState = z.infer<typeof WidgetEditDialogStateSchema>;
 
 class WidgetEditDialog extends Component<IWidgetEditDialogProps, IWidgetEditDialogState> implements IWidgetEditDialog {
   private dialogRef = React.createRef<DialogMethods>(); // Ref to Dialog.tsx component instance
@@ -63,14 +80,24 @@ class WidgetEditDialog extends Component<IWidgetEditDialogProps, IWidgetEditDial
         this.setState({ error: "Widget ID is missing.", widgetConfigData: undefined, initialWidgetData: null });
         return;
     }
-    this.setState({ error: null, widgetConfigData: undefined, initialWidgetData: undefined }); // Reset/loading state
+    this.setState({ error: null, widgetConfigData: undefined, initialWidgetData: undefined });
 
     getWidget(widgetId)
-      .then((widgetFullData: IWidgetData) => {
-        this.setState({
-          widgetConfigData: widgetFullData.data || {}, // Initialize with empty object if no data
-          initialWidgetData: widgetFullData,
-        });
+      .then((widgetFullData: IWidgetData) => { // IWidgetData is from actions, potentially an interface
+        // Attempt to parse with our local Zod schema for safety before setting state
+        const parsedFullData = LocalFullWidgetDataSchema.safeParse(widgetFullData);
+        if (parsedFullData.success) {
+            this.setState({
+                // widgetConfigData should be the 'data' field of the widget.
+                // It could be a specific type from WidgetDataZod union.
+                // For generic OptionsComponent, we pass it as is if it's an object.
+                widgetConfigData: typeof parsedFullData.data.data === 'object' ? parsedFullData.data.data : {},
+                initialWidgetData: parsedFullData.data,
+            });
+        } else {
+            console.error(`Fetched widget data for ${widgetId} does not match schema:`, parsedFullData.error);
+            this.setState({ error: "Fetched widget configuration is invalid.", initialWidgetData: null });
+        }
       })
       .catch(error => {
         console.error(`Failed to fetch widget data for ${widgetId}:`, error);
@@ -80,9 +107,12 @@ class WidgetEditDialog extends Component<IWidgetEditDialogProps, IWidgetEditDial
 
   // This handleChange is for the widget-specific OptionsComponent
   // It expects the OptionsComponent to call it with the complete, new data object
-  handleOptionsChange = (newConfigData: Record<string, any>): void => {
-    this.setState({
-      widgetConfigData: newConfigData,
+  handleOptionsChange = (newConfigData: Record<string, any>): void => { // newConfigData is generic object
+    this.setState(prevState => {
+        // We could try to parse newConfigData against the specific part of WidgetDataZod
+        // if props.widgetType is known, to ensure type safety before setting state.
+        // For now, direct update as OptionsComponent is generic.
+        return { widgetConfigData: newConfigData };
     });
   };
 

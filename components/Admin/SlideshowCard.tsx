@@ -4,16 +4,20 @@ import { IconProp } from '@fortawesome/fontawesome-svg-core';
 import { faClock, faImages } from '@fortawesome/free-regular-svg-icons';
 import { faTrash, faPlay } from '@fortawesome/free-solid-svg-icons';
 import Link from 'next/link';
+import * as z from 'zod';
 
-import { deleteSlideshow, ISlideshowData } from '../../actions/slideshow'; // ISlideshowData is already defined
-import { ISlideData } from '../../actions/slide'; // For typing populated slides
+import { deleteSlideshow, ISlideshowData, SlideshowActionDataSchema } from '../../actions/slideshow';
+import { ISlideData } from '../../actions/slide'; // This is z.infer<typeof SlideActionDataSchema>
 import { useDisplayContext } from '../../contexts/DisplayContext';
 
-// Props for SlideshowCard
-export interface ISlideshowCardProps {
-  value: ISlideshowData; // The slideshow object
-  refresh?: () => void; // Optional refresh callback
-}
+// Zod schema for SlideshowCard props
+export const SlideshowCardPropsSchema = z.object({
+  value: SlideshowActionDataSchema, // Use the Zod schema for slideshow data
+  refresh: z.function(z.tuple([]), z.void()).optional(), // Function with no args, returns void, optional
+});
+
+// Derive TypeScript type from Zod schema
+export type ISlideshowCardProps = z.infer<typeof SlideshowCardPropsSchema>;
 
 const SlideshowCard: React.FC<ISlideshowCardProps> = ({ value, refresh = () => {} }) => {
   const { state: displayState } = useDisplayContext();

@@ -1,25 +1,35 @@
 import React, { Component, CSSProperties } from 'react';
 import { config as FaConfig } from '@fortawesome/fontawesome-svg-core'; // Only config is used
 
-import { IWebDefaultData } from '../index'; // Data structure from widget's index.ts
+import { IWebDefaultData } from '../index'; // This is an interface
+import * as z from 'zod';
 
 FaConfig.autoAddCss = false;
 
-// Data structure for the web widget's content
-// This should align with IWebDefaultData from web/index.ts
-export interface IWebWidgetData extends IWebDefaultData {
-  // All fields are already optional or have defaults in IWebDefaultData
-}
+// Zod schema for IWebDefaultData (used in props.data)
+// This definition should match IWebDefaultData from ../index.ts
+export const WebWidgetDataSchema = z.object({
+  title: z.string().nullable().optional(),
+  url: z.string().url(), // URL is required and should be a valid URL string
+  color: z.string().optional(),
+  refreshInterval: z.number().optional(),
+  scale: z.number().optional(),
+  allowInteraction: z.boolean().optional(),
+});
+export type IWebWidgetData = z.infer<typeof WebWidgetDataSchema>; // For internal consistency if needed
 
-// Props for the WebContent component
-export interface IWebContentProps {
-  data?: IWebWidgetData;
-  isPreview?: boolean;
-}
+// Zod schema for WebContent component props
+export const WebContentPropsSchema = z.object({
+  data: WebWidgetDataSchema.optional(),
+  isPreview: z.boolean().optional(),
+});
+export type IWebContentProps = z.infer<typeof WebContentPropsSchema>;
 
-interface IWebContentState {
-  iframeKey: number; // Used to force iframe re-render on manual refresh or URL change
-}
+// Zod schema for WebContent component state
+export const WebContentStateSchema = z.object({
+  iframeKey: z.number(),
+});
+type IWebContentState = z.infer<typeof WebContentStateSchema>;
 
 const DEFAULT_URL = 'https://compsci.lafayette.edu/';
 const DEFAULT_COLOR = '#FFFFFF'; // Default background for the widget frame itself

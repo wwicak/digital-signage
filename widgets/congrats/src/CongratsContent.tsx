@@ -5,23 +5,25 @@ import { config } from '@fortawesome/fontawesome-svg-core'; // Only config is us
 import AutoScroll from '../../../components/AutoScroll'; // Assuming .js or .tsx
 
 config.autoAddCss = false;
+import * as z from 'zod';
 
-// Data structure for the congrats widget's content
-// This should align with ICongratsDefaultData from congrats/index.ts
-export interface ICongratsWidgetData {
-  text?: string;
-  textColor?: string;
-  animation?: string; // Name of the Lottie animation (e.g., 'confetti')
-  fontSize?: number;
-  color?: string; // Background color
-  recipient?: string; // From ICongratsDefaultData, though not used in original render
-}
+// Zod schema for the congrats widget's content data
+export const CongratsWidgetContentDataSchema = z.object({
+  text: z.string().optional(),
+  textColor: z.string().optional(),
+  animation: z.string().optional(), // Name of the Lottie animation
+  fontSize: z.number().optional(),
+  color: z.string().optional(), // Background color
+  recipient: z.string().optional(),
+});
+export type ICongratsWidgetData = z.infer<typeof CongratsWidgetContentDataSchema>;
 
-// Props for the CongratsContent component
-export interface ICongratsContentProps {
-  data?: ICongratsWidgetData;
-  isPreview?: boolean;
-}
+// Zod schema for CongratsContent component props
+export const CongratsContentPropsSchema = z.object({
+  data: CongratsWidgetContentDataSchema.optional(),
+  isPreview: z.boolean().optional(),
+});
+export type ICongratsContentProps = z.infer<typeof CongratsContentPropsSchema>;
 
 const DEFAULT_COLOR = '#34495e'; // Wet Asphalt
 const DEFAULT_TEXT_COLOR = '#ffffff'; // White

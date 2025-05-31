@@ -1,17 +1,21 @@
 import axios, { AxiosResponse } from "axios";
-import { ISlideData } from "./slide"; // Assuming ISlideData is exported from slide actions
+import * as z from 'zod';
+import { SlideActionDataSchema } from "./slide"; // Import the actual Zod schema
 
-// Define interfaces for the data structures
-export interface ISlideshowData {
-  _id: string;
-  name: string;
-  description?: string;
-  slides: string[] | ISlideData[]; // Array of slide IDs or populated slide objects
-  creator_id?: string;
-  creation_date?: string; // Or Date
-  last_update?: string; // Or Date
-  // Add any other fields that are part of the slideshow object
-}
+// Zod schema for slideshow data in actions context
+export const SlideshowActionDataSchema = z.object({
+  _id: z.string(),
+  name: z.string(),
+  description: z.string().optional(),
+  slides: z.array(z.union([z.string(), SlideActionDataSchema])).default([]), // Use imported SlideActionDataSchema
+  creator_id: z.string().optional(),
+  creation_date: z.preprocess((arg) => (typeof arg === 'string' || typeof arg === 'number' ? new Date(arg) : arg), z.date()).optional(),
+  last_update: z.preprocess((arg) => (typeof arg === 'string' || typeof arg === 'number' ? new Date(arg) : arg), z.date()).optional(),
+  is_enabled: z.boolean().optional().default(true),
+});
+
+// Derive TypeScript type from Zod schema
+export type ISlideshowData = z.infer<typeof SlideshowActionDataSchema>;
 
 // Interface for the response when a slideshow is deleted
 interface IDeleteResponse {
@@ -20,32 +24,34 @@ interface IDeleteResponse {
 }
 
 // Interface for the response of reorderSlides (could be the updated slideshow or just a message)
+// If slideshow is returned, it should conform to ISlideshowData
 interface IReorderResponse {
   message?: string;
-  slideshow?: ISlideshowData; // If the updated slideshow is returned
+  slideshow?: ISlideshowData;
 }
 
 export const getSlideshows = (host: string = ""): Promise<ISlideshowData[]> => {
   return axios
-    .get<ISlideshowData[]>(`${host}/api/v1/slideshow`)
-    .then((res: AxiosResponse<ISlideshowData[]>) => {
+    .get<unknown[]>(`${host}/api/v1/slideshow`) // Expect unknown array
+    .then((res: AxiosResponse<unknown[]>) => {
       if (res && res.data) {
-        return res.data;
+        // Validate and parse the array of slideshows
+        return z.array(SlideshowActionDataSchema).parse(res.data);
       }
-      return []; // Or throw an error
+      return [];
     });
 };
 
 export const addSlideshow = (
-  initialData?: Partial<Omit<ISlideshowData, "_id" | "slides">>,
+  initialData?: Partial<Omit<ISlideshowData, "_id" | "slides" | "creation_date" | "last_update" | "is_enabled">>, // Adjusted Omit for Zod schema
   host: string = ""
 ): Promise<ISlideshowData> => {
-  // Allow passing some initial data for the slideshow, e.g., name, description
   return axios
-    .post<ISlideshowData>(`${host}/api/v1/slideshow`, initialData)
-    .then((res: AxiosResponse<ISlideshowData>) => {
+    .post<unknown>(`${host}/api/v1/slideshow`, initialData) // Expect unknown
+    .then((res: AxiosResponse<unknown>) => {
       if (res && res.data) {
-        return res.data;
+        // Validate and parse the slideshow data
+        return SlideshowActionDataSchema.parse(res.data);
       }
       throw new Error("Failed to create slideshow: no data received");
     });
@@ -56,10 +62,11 @@ export const getSlideshow = (
   host: string = ""
 ): Promise<ISlideshowData> => {
   return axios
-    .get<ISlideshowData>(`${host}/api/v1/slideshow/${id}`)
-    .then((res: AxiosResponse<ISlideshowData>) => {
+    .get<unknown>(`${host}/api/v1/slideshow/${id}`) // Expect unknown
+    .then((res: AxiosResponse<unknown>) => {
       if (res && res.data) {
-        return res.data;
+        // Validate and parse the slideshow data
+        return SlideshowActionDataSchema.parse(res.data);
       }
       throw new Error(`Failed to get slideshow ${id}: no data received`);
     });
@@ -72,6 +79,7 @@ export const deleteSlideshow = (
   return axios
     .delete(`${host}/api/v1/slideshow/${id}`)
     .then((res: AxiosResponse<IDeleteResponse>) => {
+      // Assuming IDeleteResponse is simple and trusted, or create a Zod schema for it too
       if (res && res.data) {
         return res.data;
       }
@@ -83,16 +91,15 @@ export const deleteSlideshow = (
 
 export const updateSlideshow = (
   id: string,
-  data: Partial<Omit<ISlideshowData, "_id" | "slides">>,
+  data: Partial<Omit<ISlideshowData, "_id" | "slides" | "creator_id" | "creation_date" | "last_update">>, // Adjusted Omit
   host: string = ""
 ): Promise<ISlideshowData> => {
-  // Exclude 'slides' from typical update path if slides are managed by different endpoints
-  // or if reordering is handled by a specific function.
   return axios
-    .patch<ISlideshowData>(`${host}/api/v1/slideshow/${id}`, data)
-    .then((res: AxiosResponse<ISlideshowData>) => {
+    .patch<unknown>(`${host}/api/v1/slideshow/${id}`, data) // Expect unknown
+    .then((res: AxiosResponse<unknown>) => {
       if (res && res.data) {
-        return res.data;
+        // Validate and parse the slideshow data
+        return SlideshowActionDataSchema.parse(res.data);
       }
       throw new Error(`Failed to update slideshow ${id}: no data received`);
     });
@@ -105,13 +112,20 @@ export const reorderSlides = (
   host: string = ""
 ): Promise<IReorderResponse> => {
   return axios
-    .patch<IReorderResponse>(`${host}/api/v1/slideshow/${id}/reorder`, {
+    .patch<unknown>(`${host}/api/v1/slideshow/${id}/reorder`, { // Expect unknown
       oldIndex,
       newIndex,
     })
-    .then((res: AxiosResponse<IReorderResponse>) => {
+    .then((res: AxiosResponse<unknown>) => {
       if (res && res.data) {
-        return res.data;
+        // If IReorderResponse needs validation, create its Zod schema
+        // For now, assuming it's simple or trusted.
+        // If it returns the slideshow, it should be validated.
+        const ReorderResponseSchema = z.object({
+            message: z.string().optional(),
+            slideshow: SlideshowActionDataSchema.optional()
+        });
+        return ReorderResponseSchema.parse(res.data);
       }
       throw new Error(
         `Failed to reorder slides for slideshow ${id}: no confirmation received`

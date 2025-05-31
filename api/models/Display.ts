@@ -1,4 +1,5 @@
 import mongoose, { Document, Model, Schema } from 'mongoose';
+import * as z from 'zod';
 import { IWidget } from './Widget'; // Assuming Widget.ts exists or will exist
 
 export interface IDisplay extends Document {
@@ -66,5 +67,27 @@ DisplaySchema.pre('save', function(next) {
 });
 
 const DisplayModel: Model<IDisplay> = mongoose.model<IDisplay>('Display', DisplaySchema);
+
+// Zod schema for StatusBar
+export const StatusBarSchemaZod = z.object({
+  enabled: z.boolean().default(true),
+  color: z.string().optional(),
+  elements: z.array(z.string()).default([]), // Default to empty array
+});
+
+// Zod schema for IDisplay
+export const DisplaySchemaZod = z.object({
+  _id: z.instanceof(mongoose.Types.ObjectId).optional(),
+  name: z.string(),
+  description: z.string().optional(), // Mongoose String type is optional by default unless 'required: true'
+  // For widgets, allowing an array of ObjectIds or populated widget objects (hence z.any() for populated)
+  widgets: z.array(z.union([z.instanceof(mongoose.Types.ObjectId), z.any()])).default([]),
+  creator_id: z.instanceof(mongoose.Types.ObjectId),
+  creation_date: z.date().optional(), // Defaulted by Mongoose timestamps
+  last_update: z.date().optional(),   // Defaulted by Mongoose timestamps
+  layout: z.string().default('spaced'),
+  statusBar: StatusBarSchemaZod.default({ enabled: true, elements: [] }), // Provide default for the object itself
+  __v: z.number().optional(),
+});
 
 export default DisplayModel;

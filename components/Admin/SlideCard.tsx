@@ -2,23 +2,27 @@ import React, { useState, useRef } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { IconProp } from '@fortawesome/fontawesome-svg-core';
 import { faClock } from '@fortawesome/free-regular-svg-icons';
-import { faTrash, faEdit, faPlay, faGlobe, faFileImage, faFileVideo, faFileAlt } from '@fortawesome/free-solid-svg-icons'; // Added more icons for types
+import { faTrash, faEdit, faPlay, faGlobe, faFileImage, faFileVideo, faFileAlt } from '@fortawesome/free-solid-svg-icons';
+import * as z from 'zod';
 
-import SlideEditDialog, { ISlideEditDialogRef } from './SlideEditDialog'; // Assuming SlideEditDialog.tsx and its ref interface
-import { deleteSlide, ISlideData } from '../../actions/slide'; // ISlideData is already defined
+import SlideEditDialog from './SlideEditDialog'; // Removed ISlideEditDialogRef, assuming default export or internal typing
+import { deleteSlide, SlideActionDataSchema, ISlideData } from '../../actions/slide'; // ISlideData is z.infer<typeof SlideActionDataSchema>
 
-// Extend ISlideData if 'order' or 'title' are not standard but used here.
-// For now, assuming 'title' is part of ISlideData (e.g. name field) and 'order' is optional.
-export interface ExtendedSlideData extends ISlideData {
-  order?: number; // If order is a property that might exist
-  title?: string; // If ISlideData uses 'name' but 'title' is used here
-}
+// Zod schema for the 'value' prop, extending SlideActionDataSchema
+const SlideCardValueSchema = SlideActionDataSchema.extend({
+  order: z.number().optional(),
+  title: z.string().optional(), // To cover the ExtendedSlideData interface's title field
+});
 
-export interface ISlideCardProps {
-  value: ExtendedSlideData; // The slide object
-  refresh?: () => void; // Optional refresh callback
-  // Add any other props like draggable props if used in a DND list
-}
+// Zod schema for SlideCard props
+export const SlideCardPropsSchema = z.object({
+  value: SlideCardValueSchema,
+  refresh: z.function(z.tuple([]), z.void()).optional(),
+  // Draggable props would be added here if needed, e.g., using z.any() or more specific schemas
+});
+
+// Derive TypeScript type from Zod schema
+export type ISlideCardProps = z.infer<typeof SlideCardPropsSchema>;
 
 const SlideCard: React.FC<ISlideCardProps> = ({ value, refresh = () => {} }) => {
   const [loading, setLoading] = useState(false);

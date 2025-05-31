@@ -3,25 +3,34 @@ import { config } from '@fortawesome/fontawesome-svg-core'; // Only config is us
 
 import AutoScroll from '../../../components/AutoScroll'; // Assuming .js or .tsx
 import { IListItem } from '../index'; // Import IListItem from widget index
+import * as z from 'zod';
 
 config.autoAddCss = false;
 
-// Data structure for the list widget's content
-// Should align with IListDefaultData from list/index.ts
-export interface IListWidgetData {
-  title?: string | null;
-  color?: string; // Background color for the widget
-  textColor?: string; // Text color for list items
-  list?: IListItem[];
-  ordered?: boolean; // Whether the list is ordered (numbered) or unordered (bulleted)
-  fontSize?: number; // Font size for list items
-}
+// Zod schema for IListItem
+export const ListItemSchema = z.object({
+  text: z.string(),
+  label: z.string().nullable().optional(),
+});
+export type IListItemZod = z.infer<typeof ListItemSchema>; // Exporting inferred type if needed elsewhere
 
-// Props for the ListContent component
-export interface IListContentProps {
-  data?: IListWidgetData;
-  isPreview?: boolean;
-}
+// Zod schema for the list widget's content data
+export const ListWidgetContentDataSchema = z.object({
+  title: z.string().nullable().optional(),
+  color: z.string().optional(), // Background color for the widget
+  textColor: z.string().optional(), // Text color for list items
+  list: z.array(ListItemSchema).optional(),
+  ordered: z.boolean().optional(), // Whether the list is ordered or unordered
+  fontSize: z.number().optional(), // Font size for list items
+});
+export type IListWidgetData = z.infer<typeof ListWidgetContentDataSchema>;
+
+// Zod schema for ListContent component props
+export const ListContentPropsSchema = z.object({
+  data: ListWidgetContentDataSchema.optional(),
+  isPreview: z.boolean().optional(),
+});
+export type IListContentProps = z.infer<typeof ListContentPropsSchema>;
 
 const DEFAULT_COLOR = '#34495e'; // Wet Asphalt from original defaultData
 const DEFAULT_TEXT_COLOR = '#ffffff'; // White from original defaultData

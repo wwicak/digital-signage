@@ -5,13 +5,31 @@ import { faWindowRestore } from '@fortawesome/free-regular-svg-icons';
 import { faChromecast } from '@fortawesome/free-brands-svg-icons';
 import { faTrash, faTv, faEye, faLink } from '@fortawesome/free-solid-svg-icons';
 import Link from 'next/link';
+import * as z from 'zod';
 
-import { deleteDisplay, IDisplayData } from '../../actions/display'; // IDisplayData is already defined
+// Assuming IDisplayData is an interface. We'll define a Zod schema for the 'value' prop
+// that matches the expected structure of IDisplayData used in this component.
+// For a more robust solution, actions/display.ts should export a DisplayActionDataSchema.
+// For now, we define what ScreenCard expects from IDisplayData.
+const ScreenCardValueSchema = z.object({
+  _id: z.string(),
+  name: z.string().optional(), // Based on usage: value.name || 'Untitled Display'
+  widgets: z.array(z.union([z.string(), z.object({})])).optional(), // Based on usage: Array.isArray(value.widgets)
+  // Add other fields from IDisplayData if they were directly used by ScreenCard and need validation.
+  // For this component, only _id, name, and widgets structure seem directly accessed.
+});
 
-export interface IScreenCardProps {
-  value: IDisplayData; // The display object
-  refresh?: () => void; // Optional refresh callback
-}
+// Import the original IDisplayData to ensure compatibility or use if it becomes a Zod type later.
+import { deleteDisplay, IDisplayData } from '../../actions/display';
+
+// Zod schema for ScreenCard props
+export const ScreenCardPropsSchema = z.object({
+  value: ScreenCardValueSchema, // Use the locally defined Zod schema for the 'value' prop
+  refresh: z.function(z.tuple([]), z.void()).optional(),
+});
+
+// Derive TypeScript type from Zod schema
+export type IScreenCardProps = z.infer<typeof ScreenCardPropsSchema>;
 
 const ScreenCard: React.FC<IScreenCardProps> = ({ value, refresh = () => {} }) => {
   const handleDelete = (event: React.MouseEvent): void => {

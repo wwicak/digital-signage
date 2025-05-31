@@ -1,7 +1,8 @@
 import express, { Request, Response, NextFunction, Router } from 'express';
 import mongoose from 'mongoose';
+import * as z from 'zod';
 
-import Slideshow, { ISlideshow } from '../models/Slideshow';
+import Slideshow from '../models/Slideshow';
 // import { ISlide } from '../models/Slide'; // No longer needed if populate doesn't use explicit generic
 import { IUser } from '../models/User';   // For req.user
 
@@ -10,26 +11,31 @@ import { IUser } from '../models/User';   // For req.user
 //   findAllAndSend,  // Custom logic
 // } from '../helpers/common_helper';
 
-import { 
-  validateSlidesExist, 
+import {
+  validateSlidesExist,
   reorderSlidesInSlideshow,
   populateSlideshowSlides
 } from '../helpers/slideshow_helper';
 
 const router: Router = express.Router();
 
-// Define interfaces for request bodies
-interface CreateSlideshowBody {
-  name: string;
-  description?: string;
-  slide_ids?: string[] | mongoose.Types.ObjectId[]; 
-  is_enabled?: boolean;
-}
+// Zod Schemas for request body validation
+export const CreateSlideshowSchema = z.object({
+  name: z.string().min(1, { message: "Slideshow name is required." }),
+  description: z.string().optional(),
+  slide_ids: z.array(z.string().refine((val) => mongoose.Types.ObjectId.isValid(val), {
+    message: "Invalid ObjectId in slide_ids",
+  })).optional(),
+  is_enabled: z.boolean().optional(),
+});
 
-interface UpdateSlideshowBody extends Partial<CreateSlideshowBody> {
-  oldIndex?: number;
-  newIndex?: number;
-}
+const UpdateSlideshowSchema = CreateSlideshowSchema.partial().extend({
+  oldIndex: z.number().optional(),
+  newIndex: z.number().optional(),
+});
+// Export the type as well if needed elsewhere, though for tests, schema is enough
+// export type CreateSlideshowPayload = z.infer<typeof CreateSlideshowSchema>;
+// export type UpdateSlideshowPayload = z.infer<typeof UpdateSlideshowSchema>;
 
 
 // Middleware to ensure user is authenticated
@@ -76,19 +82,20 @@ router.get('/:id', ensureAuthenticated, async (req: Request<{ id: string }>, res
 });
 
 // POST (create) a new slideshow
-router.post('/', ensureAuthenticated, async (req: Request<{}, any, CreateSlideshowBody>, res: Response) => {
+router.post('/', ensureAuthenticated, async (req: Request, res: Response) => {
   const user = req.user as IUser;
   if (!user || !user._id) {
     res.status(400).json({ message: 'User information not found.' });
     return;
   }
 
-  const { name, description, slide_ids, is_enabled } = req.body;
+  const result = CreateSlideshowSchema.safeParse(req.body);
 
-  if (!name) {
-    res.status(400).json({ message: 'Slideshow name is required.' });
-    return;
+  if (!result.success) {
+    return res.status(400).json({ message: 'Validation failed', errors: result.error.formErrors.fieldErrors });
   }
+
+  const { name, description, slide_ids, is_enabled } = result.data;
 
   if (slide_ids && slide_ids.length > 0) {
     const slidesValid = await validateSlidesExist(slide_ids);
@@ -102,13 +109,13 @@ router.post('/', ensureAuthenticated, async (req: Request<{}, any, CreateSlidesh
     name,
     description,
     slides: slide_ids || [],
-    is_enabled, 
+    is_enabled,
     creator_id: user._id,
   });
 
   try {
     const savedSlideshow = await newSlideshowDoc.save();
-    const populatedSlideshow = await populateSlideshowSlides(savedSlideshow); 
+    const populatedSlideshow = await populateSlideshowSlides(savedSlideshow);
     res.status(201).json(populatedSlideshow);
   } catch (error: any) {
     console.error('Error creating slideshow:', error);
@@ -121,7 +128,7 @@ router.post('/', ensureAuthenticated, async (req: Request<{}, any, CreateSlidesh
 });
 
 // PUT (update) a slideshow by ID
-router.put('/:id', ensureAuthenticated, async (req: Request<{ id: string }, any, UpdateSlideshowBody>, res: Response) => {
+router.put('/:id', ensureAuthenticated, async (req: Request<{ id: string }>, res: Response) => {
   const user = req.user as IUser;
   if (!user || !user._id) {
     res.status(400).json({ message: 'User information not found.' });
@@ -129,7 +136,13 @@ router.put('/:id', ensureAuthenticated, async (req: Request<{ id: string }, any,
   }
 
   const slideshowId = req.params.id;
-  const { slide_ids, oldIndex, newIndex, ...slideshowData } = req.body;
+  const result = UpdateSlideshowSchema.safeParse(req.body);
+
+  if (!result.success) {
+    return res.status(400).json({ message: 'Validation failed', errors: result.error.formErrors.fieldErrors });
+  }
+
+  const { slide_ids, oldIndex, newIndex, ...slideshowData } = result.data;
 
   try {
     const slideshowToUpdate = await Slideshow.findOne({ _id: slideshowId, creator_id: user._id });
@@ -144,7 +157,7 @@ router.put('/:id', ensureAuthenticated, async (req: Request<{ id: string }, any,
     }
     
     Object.assign(slideshowToUpdate, slideshowData);
-    if (slide_ids) { 
+    if (slide_ids) {
         if (slide_ids.length > 0) { // Allow empty array to clear slides
             const slidesValid = await validateSlidesExist(slide_ids);
             if (!slidesValid) {
@@ -152,12 +165,12 @@ router.put('/:id', ensureAuthenticated, async (req: Request<{ id: string }, any,
               return;
             }
         }
-        slideshowToUpdate.slides = slide_ids.map(id => new mongoose.Types.ObjectId(id));
+        slideshowToUpdate.slides = slide_ids.map(id => new mongoose.Types.ObjectId(id as string)); // Cast id to string
     }
     // slideshowToUpdate.last_update = new Date(); // Schema timestamps should handle this
 
     const savedSlideshow = await slideshowToUpdate.save();
-    const populatedSlideshow = await populateSlideshowSlides(savedSlideshow); 
+    const populatedSlideshow = await populateSlideshowSlides(savedSlideshow);
     res.json(populatedSlideshow);
 
   } catch (error: any) {
@@ -166,7 +179,7 @@ router.put('/:id', ensureAuthenticated, async (req: Request<{ id: string }, any,
       res.status(400).json({ message: 'Validation Error', errors: error.errors });
       return;
     }
-    if (error.message === 'Invalid slide indices for reordering.') { 
+    if (error.message === 'Invalid slide indices for reordering.') {
         res.status(400).json({ message: error.message });
         return;
     }
