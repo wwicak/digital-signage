@@ -15,11 +15,18 @@ interface IDisplaySummary {
 
 async function getDisplaysData(): Promise<IDisplaySummary[]> {
   try {
-    const host = process.env.NODE_ENV === 'development' 
-      ? 'http://localhost:3000' 
+    const host = process.env.NODE_ENV === 'development'
+      ? 'http://localhost:3000'
       : 'https://your-domain.com'; // Update this with your production domain
     
     const fullDisplayList = await getDisplays(host);
+    
+    // Ensure fullDisplayList is an array before calling map
+    if (!Array.isArray(fullDisplayList)) {
+      console.error("getDisplays() did not return an array:", fullDisplayList);
+      return [];
+    }
+    
     return fullDisplayList.map(display => ({
       _id: display._id,
       name: display.name,
@@ -33,10 +40,11 @@ async function getDisplaysData(): Promise<IDisplaySummary[]> {
 export default async function HomePage() {
   const displays = await getDisplaysData();
 
-  const dropdownChoices = displays.map(display => ({
+  // Ensure displays is an array before calling map
+  const dropdownChoices = Array.isArray(displays) ? displays.map(display => ({
     key: display._id,
     name: display.name,
-  }));
+  })) : [];
 
   const navigateToDisplay = (id: string) => {
     redirect('/display/' + id);

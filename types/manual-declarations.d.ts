@@ -191,3 +191,148 @@ declare module "ts-jest" {
     transformIgnorePatterns?: string[];
   }
 }
+
+// Fix for FontAwesome icon type conflicts
+declare module "@fortawesome/react-fontawesome" {
+  import { IconDefinition } from "@fortawesome/fontawesome-common-types";
+
+  export type IconProp = IconDefinition | string;
+
+  export interface FontAwesomeIconProps {
+    icon: IconProp;
+    size?:
+      | "xs"
+      | "sm"
+      | "lg"
+      | "1x"
+      | "2x"
+      | "3x"
+      | "4x"
+      | "5x"
+      | "6x"
+      | "7x"
+      | "8x"
+      | "9x"
+      | "10x";
+    fixedWidth?: boolean;
+    color?: string;
+    className?: string;
+    style?: React.CSSProperties;
+  }
+
+  export function FontAwesomeIcon(
+    props: FontAwesomeIconProps
+  ): React.ReactElement;
+}
+
+declare module "@fortawesome/fontawesome-svg-core" {
+  import { IconDefinition } from "@fortawesome/fontawesome-common-types";
+
+  export type IconProp = IconDefinition | string;
+  export type IconPrefix = string;
+
+  // Re-export IconDefinition for convenience
+  export { IconDefinition };
+
+  export interface Config {
+    autoAddCss: boolean;
+    autoReplaceSvg: boolean;
+    observeMutations: boolean;
+    keepOriginalSource: boolean;
+    familyPrefix: string;
+    replacementClass: string;
+    autoA11y: boolean;
+    searchPseudoElements: boolean;
+    showMissingIcons: boolean;
+  }
+
+  export interface Library {
+    add(...icons: (IconDefinition | Record<string, IconDefinition>)[]): void;
+  }
+
+  export const library: Library;
+  export const config: Config;
+}
+
+// Make all FontAwesome icons compatible
+// Make all FontAwesome icons compatible
+declare module "@fortawesome/free-solid-svg-icons" {
+  import { IconDefinition } from "@fortawesome/fontawesome-common-types";
+
+  export const faClock: IconDefinition;
+  export const faEdit: IconDefinition;
+  export const faTrash: IconDefinition;
+  export const faTimes: IconDefinition;
+  export const faPencilAlt: IconDefinition;
+  export const faTh: IconDefinition;
+  export const faThLarge: IconDefinition;
+  export const faRss: IconDefinition;
+  export const faGripVertical: IconDefinition;
+  export const faCalendarAlt: IconDefinition;
+  export const faSun: IconDefinition;
+  export const faCloudSun: IconDefinition;
+  export const faCloudMoon: IconDefinition;
+  export const faCloud: IconDefinition;
+  export const faCloudRain: IconDefinition;
+  export const faCloudMoonRain: IconDefinition;
+  export const faBolt: IconDefinition;
+  export const faSnowflake: IconDefinition;
+  export const faSmog: IconDefinition;
+  export const faWifi: IconDefinition;
+  export const faMapMarkerAlt: IconDefinition;
+  export const faExclamationTriangle: IconDefinition;
+  export const faPlay: IconDefinition;
+  export const faGlobe: IconDefinition;
+  export const faFileImage: IconDefinition;
+  export const faFileVideo: IconDefinition;
+  export const faFileAlt: IconDefinition;
+  export const faTv: IconDefinition;
+  export const faCheck: IconDefinition;
+  export const faAngleLeft: IconDefinition;
+  export const faFont: IconDefinition;
+  export const faList: IconDefinition;
+  export const faMousePointer: IconDefinition;
+  export const faCalendar: IconDefinition;
+  export const faCog: IconDefinition;
+  export const faEye: IconDefinition;
+  export const faLink: IconDefinition;
+  export const faKey: IconDefinition;
+  export const faImages: IconDefinition;
+  export const faSignOutAlt: IconDefinition;
+  export const faCaretDown: IconDefinition;
+  export const faGifts: IconDefinition;
+  export const faImage: IconDefinition;
+  export const faListUl: IconDefinition;
+
+  // Re-export IconDefinition for convenience
+  export { IconDefinition };
+
+  // Export icon pack
+  export const fas: Record<string, IconDefinition>;
+
+  // Export all other icons as IconDefinition
+  const icons: Record<string, IconDefinition>;
+  export = icons;
+}
+declare module "@fortawesome/free-brands-svg-icons" {
+  import { IconDefinition } from "@fortawesome/fontawesome-common-types";
+
+  export const faChromecast: IconDefinition;
+  export const faYoutube: IconDefinition;
+
+  export const fab: Record<string, IconDefinition>;
+
+  const icons: Record<string, IconDefinition>;
+  export = icons;
+}
+
+declare module "@fortawesome/free-regular-svg-icons" {
+  import { IconDefinition } from "@fortawesome/fontawesome-common-types";
+
+  export const faClock: IconDefinition;
+  export const faWindowRestore: IconDefinition;
+  export const faImages: IconDefinition;
+
+  const icons: Record<string, IconDefinition>;
+  export = icons;
+}

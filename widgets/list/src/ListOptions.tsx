@@ -137,7 +137,7 @@ class ListOptions extends Component<IListOptionsProps, IListOptionsState> {
       fontSize = 16,
     } = this.state;
 
-    const previewData: IListWidgetData = { title, color, textColor, list, ordered, fontSize };
+    const previewData: import('../index').IListDefaultData = { title, color, textColor, list, ordered, fontSize };
 
     return (
       <div className={'options-container'}>

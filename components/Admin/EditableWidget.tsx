@@ -72,7 +72,7 @@ const EditableWidget: React.FC<IEditableWidgetProps> = ({ id, type = WidgetType.
       </div>
       <WidgetEditDialog
         ref={dialogRef}
-        OptionsComponent={widgetDefinition?.Options}
+        OptionsComponent={widgetDefinition?.Options as any}
         widgetId={id} // Pass widgetId instead of id if that's what WidgetEditDialog expects
         widgetType={type} // Pass widgetType for context in dialog
       />

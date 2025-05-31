@@ -23,7 +23,7 @@ import { WidgetType } from '../../api/models/Widget';
 
 const GridLayoutWithWidth = WidthProvider(GridLayout as any);
 
-export default function LayoutAdminPage() {
+function LayoutAdminContent() {
   const [widgets, setWidgets] = useState<IWidgetData[]>([]);
   const searchParams = useSearchParams();
   const context = useDisplayContext();
@@ -227,7 +227,7 @@ export default function LayoutAdminPage() {
             <div key={widget._id}>
               <EditableWidget
                 id={widget._id}
-                type={widget.type as string}
+                type={widget.type as WidgetType}
                 onDelete={() => handleDeleteWidget(widget._id)}
                 layout={context.state.layout || 'compact'}
               />
@@ -296,5 +296,13 @@ export default function LayoutAdminPage() {
         `}
       </style>
     </Frame>
+  );
+}
+
+export default function LayoutAdminPage() {
+  return (
+    <useCallback fallback={<div>Loading...</div>}>
+      <LayoutAdminContent />
+    </useCallback>
   );
 }

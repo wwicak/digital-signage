@@ -107,6 +107,7 @@ interface DisplayContextType {
   addStatusBarItem: (type: string) => Promise<void>;
   removeStatusBarItem: (index: number) => void;
   reorderStatusBarItems: (startIndex: number, endIndex: number) => void;
+  refreshDisplayData: () => void;
   isLoading: boolean;
   error: any;
 }
@@ -115,14 +116,16 @@ const DisplayContext = createContext<DisplayContextType | undefined>(undefined);
 export const DisplayProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [state, dispatch] = useReducer(displayReducer, initialState);
   const queryClient = useQueryClient();
-  
-  // Use TanStack Query to fetch display data
+  // Use TanStack Query to fetch display data with optimized settings
   const { data: displayData, isLoading, error } = useQuery({
     queryKey: ["display", state.id],
     queryFn: () => getDisplay(state.id!),
     enabled: !!state.id,
-    staleTime: 5 * 60 * 1000, // 5 minutes
+    staleTime: 10 * 60 * 1000, // 10 minutes - longer stale time for better performance
+    gcTime: 15 * 60 * 1000, // 15 minutes cache time (gcTime is the new name for cacheTime)
     retry: 2,
+    refetchOnWindowFocus: false, // Disable refetch on window focus for digital signage
+    refetchOnReconnect: true, // Keep refetch on reconnect for reliability
   });
 
   // Mutation for updating display data
@@ -142,7 +145,7 @@ export const DisplayProvider: React.FC<{ children: React.ReactNode }> = ({ child
     }
   }, [displayData]);
 
-  // Throttled update function
+  // Throttled update function with proper cleanup
   const updateDisplayThrottled = useCallback(
     _.debounce((id: string, data: Partial<IDisplayData>) => {
       updateDisplayMutation.mutate({ id, data });
@@ -150,17 +153,19 @@ export const DisplayProvider: React.FC<{ children: React.ReactNode }> = ({ child
     [updateDisplayMutation]
   );
 
+  // Clean up debounced function when component unmounts or dependencies change
+  React.useEffect(() => {
+    return () => {
+      updateDisplayThrottled.cancel();
+    };
+  }, [updateDisplayThrottled]);
+
   const setId = useCallback(async (id: string): Promise<void> => {
     if (!id) return;
     dispatch({ type: 'SET_ID', payload: id });
     
-    // Fetch display data when ID is set (similar to legacy store behavior)
-    try {
-      const displayInfo: IDisplayData = await getDisplay(id);
-      dispatch({ type: 'SET_DISPLAY_DATA', payload: displayInfo });
-    } catch (error) {
-      console.error('Failed to fetch display data:', error);
-    }
+    // No need to fetch data here - React Query will handle it automatically
+    // when the queryKey changes due to the new ID
   }, []);
 
   const setName = useCallback((name: string) => {
@@ -219,6 +224,13 @@ export const DisplayProvider: React.FC<{ children: React.ReactNode }> = ({ child
     updateDisplayThrottled(state.id, { statusBar: newStatusBar });
   }, [state.id, state.statusBar, updateDisplayThrottled]);
 
+  // Add a method to refresh display data (for SSE usage)
+  const refreshDisplayData = useCallback(() => {
+    if (state.id) {
+      queryClient.invalidateQueries({ queryKey: ["display", state.id] });
+    }
+  }, [state.id, queryClient]);
+
   const value: DisplayContextType = {
     state,
     setId,
@@ -229,6 +241,7 @@ export const DisplayProvider: React.FC<{ children: React.ReactNode }> = ({ child
     addStatusBarItem,
     removeStatusBarItem,
     reorderStatusBarItems,
+    refreshDisplayData,
     isLoading,
     error,
   };

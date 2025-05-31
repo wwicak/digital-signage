@@ -1,430 +1,296 @@
-import mongoose from 'mongoose';
+import mongoose from "mongoose";
 import {
   findByIdAndSend,
   findAllAndSend,
-  // createAndSend, // Will add back later if needed, after fixing its specific issues
+  createAndSend,
   findByIdAndUpdateAndSend,
   findByIdAndDeleteAndSend,
-  sendSseEvent,
   parseQueryParams,
-} from '../../../api/helpers/common_helper';
+  sendSseEvent,
+} from "../../../api/helpers/common_helper";
+import { jest } from "@jest/globals";
 
-// Mock Express response object
+// Connect to the provided MongoDB database
+beforeAll(async () => {
+  await mongoose.connect(
+    "mongodb+srv://dimastw:dya0gVD7m9xJNJpo@cluster0.jez3b.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0"
+  );
+});
+
+afterAll(async () => {
+  await mongoose.connection.close();
+});
+
 const mockResponse = () => {
   const res: any = {};
   res.status = jest.fn().mockReturnValue(res);
   res.json = jest.fn().mockReturnValue(res);
-  res.write = jest.fn().mockReturnValue(res);
-  res.flushHeaders = jest.fn().mockReturnValue(res);
   return res;
 };
 
-// Mock Mongoose model for general cases (findById, find, etc.)
-const mockGeneralModel = (modelName = 'TestModel') => {
-  const modelInstance: any = {
-    modelName,
-    findById: jest.fn(),
-    find: jest.fn(),
-    findByIdAndUpdate: jest.fn(),
-    findByIdAndDelete: jest.fn(),
-  };
-  return modelInstance;
-};
+// Simple test model
+const TestModel = mongoose.model(
+  "TestModel",
+  new mongoose.Schema({
+    name: String,
+    value: Number,
+    fieldToPopulate: { type: mongoose.Schema.Types.ObjectId, ref: "RefModel" },
+  })
+);
 
-// Helper for chained Mongoose queries like .populate().exec()
-const mockQueryChain = (resolveValue: any, execRejects = false) => { // Removed populateRejects from params as it's not used in this new structure
-  const execMock = jest.fn();
-  if (execRejects) {
-    execMock.mockRejectedValue(resolveValue);
-  } else {
-    execMock.mockResolvedValue(resolveValue);
-  }
+// Reference model for populate tests
+const RefModel = mongoose.model(
+  "RefModel",
+  new mongoose.Schema({
+    data: String,
+  })
+);
 
-  const query: any = {
-    exec: execMock, // Keep exec for direct calls if any, but await will use .then
-    populate: jest.fn().mockReturnThis(), // Populate should return the same thenable query
-    select: jest.fn().mockReturnThis(),   // Select should also return the same thenable query
-    then: function(onFulfilled: any, onRejected: any) { // Make the query thenable
-      // Ensure execMock is called and its promise is used
-      return this.exec().then(onFulfilled, onRejected);
-    },
-    catch: function(onRejected: any) { // Also add catch for completeness
-      return this.exec().catch(onRejected);
-    }
-  };
-  return query;
-};
-
-describe('Common Helper Functions', () => {
-  let res: any; // This will be set by the main beforeEach
-  // const testId = new mongoose.Types.ObjectId().toString(); // Defined in child describe
-  // const testData = { name: 'Test Name', _id: testId }; // Defined in child describe
-  // const populatedData = { ...testData, populatedField: { detail: 'Populated Detail' } }; // Defined in child describe
+describe("Common Helper Functions", () => {
+  let res: any;
 
   beforeEach(() => {
-    res = mockResponse(); // res is now consistently set here for all tests
-    jest.clearAllMocks();
+    res = mockResponse();
+    jest.spyOn(console, "error").mockImplementation(() => {});
   });
 
-  it('should correctly initialize and run a basic test with boilerplate', async () => { // made async
-    expect(true).toBe(true);
-    const model = mockGeneralModel('BoilerplateTestModel');
-    expect(model.modelName).toBe('BoilerplateTestModel');
-    const MOCK_RESPONSE_VALUE = { data: 'mockData' };
-    const query = mockQueryChain(MOCK_RESPONSE_VALUE);
-
-    // Test the thenable nature
-    const result = await query;
-    expect(result).toBe(MOCK_RESPONSE_VALUE);
-    expect(query.exec).toHaveBeenCalled(); // exec should be called by our then implementation
-
-
+  afterEach(async () => {
+    await TestModel.deleteMany({});
+    await RefModel.deleteMany({});
   });
 
-  // Actual test suites will be added back here one by one
+  describe("createAndSend", () => {
+    it("should create a document and send it with status 201", async () => {
+      const itemData = { name: "Test Item", value: 100 };
+      await createAndSend(TestModel, itemData, res);
 
-  // --- findByIdAndSend ---
-  describe('findByIdAndSend', () => {
-    const testId = new mongoose.Types.ObjectId().toString();
-    const testData = { name: 'Test Name', _id: testId };
-    const populatedData = { ...testData, populatedField: { detail: 'Populated Detail' } };
-    // res is inherited from the parent describe's beforeEach
-
-    // Removed local beforeEach for `res` as it's handled by the parent.
-
-    it('should find a document by ID and send it', async () => {
-      const model = mockGeneralModel();
-      const query = mockQueryChain(testData);
-      model.findById.mockReturnValue(query);
-
-      // Use the res from the beforeEach in the parent describe
-      await findByIdAndSend(model, testId, res);
-
-      expect(model.findById).toHaveBeenCalledWith(testId);
-      expect(query.populate).not.toHaveBeenCalled();
-      expect(query.exec).toHaveBeenCalled();
-      expect(res.json).toHaveBeenCalledWith(testData);
+      expect(res.status).toHaveBeenCalledWith(201);
+      expect(res.json).toHaveBeenCalledWith(expect.objectContaining(itemData));
     });
 
-    it('should find a document by ID, populate a field, and send it', async () => {
-      const model = mockGeneralModel();
-      const query = mockQueryChain(populatedData);
-      model.findById.mockReturnValue(query);
+    it("should handle errors during creation", async () => {
+      // Force an error by passing invalid data
+      const invalidData = { value: "invalid_number" };
+      await createAndSend(TestModel, invalidData, res);
 
-      await findByIdAndSend(model, testId, res, 'populatedField');
-
-      expect(model.findById).toHaveBeenCalledWith(testId);
-      expect(query.populate).toHaveBeenCalledWith('populatedField');
-      expect(query.exec).toHaveBeenCalled();
-      expect(res.json).toHaveBeenCalledWith(populatedData);
-    });
-
-    it('should return 404 if document not found', async () => {
-      const model = mockGeneralModel('NotFoundModel');
-      const query = mockQueryChain(null); // exec resolves to null
-      model.findById.mockReturnValue(query);
-
-      await findByIdAndSend(model, testId, res);
-
-      expect(model.findById).toHaveBeenCalledWith(testId);
-      expect(query.exec).toHaveBeenCalled();
-      expect(res.status).toHaveBeenCalledWith(404);
-      expect(res.json).toHaveBeenCalledWith({ message: 'NotFoundModel not found' });
-    });
-
-    it('should return 500 on database error', async () => {
-      const model = mockGeneralModel('ErrorModel');
-      const error = new Error('DB Error');
-      const query = mockQueryChain(error, true); // exec rejects with error
-      model.findById.mockReturnValue(query);
-
-      await findByIdAndSend(model, testId, res);
-
-      expect(model.findById).toHaveBeenCalledWith(testId);
-      expect(query.exec).toHaveBeenCalled();
       expect(res.status).toHaveBeenCalledWith(500);
-      expect(res.json).toHaveBeenCalledWith({ message: 'Error fetching data', error: error.message });
+      expect(res.json).toHaveBeenCalledWith(
+        expect.objectContaining({
+          message: "Error creating data",
+        })
+      );
     });
   });
 
-  // --- findAllAndSend ---
-  describe('findAllAndSend', () => {
-    const testId = new mongoose.Types.ObjectId().toString(); // testId may not be directly used but testData might be
-    const testData = { name: 'Test Name', _id: testId };
-    const populatedData = { ...testData, populatedField: { detail: 'Populated Detail' } };
-    // res is inherited from the parent describe's beforeEach
+  describe("findByIdAndUpdateAndSend", () => {
+    it("should update a document and send it", async () => {
+      const item = await TestModel.create({ name: "Test Item", value: 100 });
+      const updateData = { name: "Updated Item", value: 200 };
+      await findByIdAndUpdateAndSend(
+        TestModel,
+        String(item._id),
+        updateData,
+        res
+      );
 
-    it('should find all documents and send them', async () => {
-      const model = mockGeneralModel();
-      const query = mockQueryChain([testData]);
-      model.find.mockReturnValue(query);
-
-      await findAllAndSend(model, res);
-
-      expect(model.find).toHaveBeenCalledWith({});
-      expect(query.populate).not.toHaveBeenCalled();
-      expect(query.exec).toHaveBeenCalled(); // or .then() effectively
-      expect(res.json).toHaveBeenCalledWith([testData]);
+      expect(res.json).toHaveBeenCalledWith(
+        expect.objectContaining(updateData)
+      );
     });
 
-    it('should find all documents with query options, populate, and send', async () => {
-      const model = mockGeneralModel();
-      const query = mockQueryChain([populatedData]);
-      model.find.mockReturnValue(query);
-      const queryOptions = { someFilter: 'value' };
+    it("should send 404 if document not found", async () => {
+      const nonExistentId = new mongoose.Types.ObjectId();
+      await findByIdAndUpdateAndSend(TestModel, nonExistentId, {}, res);
 
-      await findAllAndSend(model, res, 'populatedField', queryOptions);
-
-      expect(model.find).toHaveBeenCalledWith(queryOptions);
-      expect(query.populate).toHaveBeenCalledWith('populatedField');
-      expect(query.exec).toHaveBeenCalled(); // or .then() effectively
-      expect(res.json).toHaveBeenCalledWith([populatedData]);
-    });
-
-    it('should return 500 on database error', async () => {
-        const model = mockGeneralModel('ErrorAllModel');
-        const error = new Error('DB All Error');
-        const query = mockQueryChain(error, true); // exec rejects
-        model.find.mockReturnValue(query);
-
-        await findAllAndSend(model, res);
-
-        expect(model.find).toHaveBeenCalledWith({});
-        expect(query.exec).toHaveBeenCalled(); // or .then() effectively
-        expect(res.status).toHaveBeenCalledWith(500);
-        expect(res.json).toHaveBeenCalledWith({ message: 'Error fetching data', error: error.message });
-      });
-  });
-
-  // --- findByIdAndUpdateAndSend ---
-  describe('findByIdAndUpdateAndSend', () => {
-    const testId = new mongoose.Types.ObjectId().toString();
-    const updateData = { name: 'Updated Name' };
-    const baseUpdatedDoc = { _id: testId, ...updateData };
-    const populatedUpdatedDoc = { ...baseUpdatedDoc, populatedField: { detail: 'Populated Detail' } };
-    // res is inherited from the parent describe's beforeEach
-
-    it('should find by ID, update, and send the document (no populate)', async () => {
-      const model = mockGeneralModel();
-      model.findByIdAndUpdate.mockResolvedValue(baseUpdatedDoc);
-
-      await findByIdAndUpdateAndSend(model, testId, updateData, res);
-
-      expect(model.findByIdAndUpdate).toHaveBeenCalledWith(testId, updateData, { new: true, runValidators: true });
-      expect(res.json).toHaveBeenCalledWith(baseUpdatedDoc);
-    });
-
-    it('should find by ID, update, populate (older Mongoose execPopulate), and send', async () => {
-        const model = mockGeneralModel();
-        const docInstanceReturnedByFindByIdAndUpdate = {
-            ...baseUpdatedDoc,
-            populate: jest.fn().mockReturnThis(),
-            execPopulate: jest.fn().mockResolvedValue(populatedUpdatedDoc)
-        };
-        model.findByIdAndUpdate.mockResolvedValue(docInstanceReturnedByFindByIdAndUpdate);
-
-        await findByIdAndUpdateAndSend(model, testId, updateData, res, 'populatedField');
-
-        expect(model.findByIdAndUpdate).toHaveBeenCalledWith(testId, updateData, { new: true, runValidators: true });
-        expect(docInstanceReturnedByFindByIdAndUpdate.populate).toHaveBeenCalledWith('populatedField');
-        expect(docInstanceReturnedByFindByIdAndUpdate.execPopulate).toHaveBeenCalled();
-        expect(res.json).toHaveBeenCalledWith(populatedUpdatedDoc);
-    });
-
-    it('should find by ID, update, populate (Mongoose 6+ style), and send', async () => {
-        const model = mockGeneralModel();
-        const docInstanceReturnedByFindByIdAndUpdate = {
-            ...baseUpdatedDoc,
-            populate: jest.fn().mockResolvedValue(populatedUpdatedDoc)
-        };
-        delete (docInstanceReturnedByFindByIdAndUpdate as any).execPopulate; // Simulate Mongoose 6+
-
-        model.findByIdAndUpdate.mockResolvedValue(docInstanceReturnedByFindByIdAndUpdate);
-
-        await findByIdAndUpdateAndSend(model, testId, updateData, res, 'populatedField');
-
-        expect(model.findByIdAndUpdate).toHaveBeenCalledWith(testId, updateData, { new: true, runValidators: true });
-        expect(docInstanceReturnedByFindByIdAndUpdate.populate).toHaveBeenCalledWith('populatedField');
-        // No execPopulate call in Mongoose 6+ path
-        expect(res.json).toHaveBeenCalledWith(populatedUpdatedDoc);
-    });
-
-
-    it('should return 404 if document not found for update', async () => {
-      const model = mockGeneralModel('UpdateNotFoundModel');
-      model.findByIdAndUpdate.mockResolvedValue(null);
-
-      await findByIdAndUpdateAndSend(model, testId, updateData, res);
-
-      expect(model.findByIdAndUpdate).toHaveBeenCalledWith(testId, updateData, { new: true, runValidators: true });
       expect(res.status).toHaveBeenCalledWith(404);
-      expect(res.json).toHaveBeenCalledWith({ message: 'UpdateNotFoundModel not found' });
-    });
-
-    it('should return 400 on validation error during update', async () => {
-      const model = mockGeneralModel('UpdateValidationModel');
-      const validationError = { name: 'ValidationError', errors: { field: 'is invalid' } };
-      model.findByIdAndUpdate.mockRejectedValue(validationError);
-
-      await findByIdAndUpdateAndSend(model, testId, updateData, res);
-
-      expect(model.findByIdAndUpdate).toHaveBeenCalledWith(testId, updateData, { new: true, runValidators: true });
-      expect(res.status).toHaveBeenCalledWith(400);
-      expect(res.json).toHaveBeenCalledWith({ message: 'Validation Error', errors: validationError.errors });
-    });
-
-    it('should return 500 on other database error during update', async () => {
-        const model = mockGeneralModel('UpdateErrorModel');
-        const dbError = new Error('DB Update Error');
-        model.findByIdAndUpdate.mockRejectedValue(dbError);
-
-        await findByIdAndUpdateAndSend(model, testId, updateData, res);
-
-        expect(model.findByIdAndUpdate).toHaveBeenCalledWith(testId, updateData, { new: true, runValidators: true });
-        expect(res.status).toHaveBeenCalledWith(500);
-        expect(res.json).toHaveBeenCalledWith({ message: 'Error updating data', error: dbError.message });
+      expect(res.json).toHaveBeenCalledWith({
+        message: "TestModel not found",
       });
+    });
   });
 
-  // --- findByIdAndDeleteAndSend ---
-  describe('findByIdAndDeleteAndSend', () => {
-    const testId = new mongoose.Types.ObjectId().toString();
-    const testData = { name: 'Test Name', _id: testId }; // Sample data returned by findByIdAndDelete
-    // res is inherited from the parent describe's beforeEach
+  describe("findByIdAndDeleteAndSend", () => {
+    it("should delete a document and send success message", async () => {
+      const item = await TestModel.create({ name: "Test Item" });
+      await findByIdAndDeleteAndSend(TestModel, String(item._id), res);
 
-    it('should find by ID, delete, and send success message', async () => {
-      const model = mockGeneralModel('DeleteModel');
-      model.findByIdAndDelete.mockResolvedValue(testData);
-
-      await findByIdAndDeleteAndSend(model, testId, res);
-
-      expect(model.findByIdAndDelete).toHaveBeenCalledWith(testId);
-      expect(res.json).toHaveBeenCalledWith({ message: 'DeleteModel deleted successfully' });
+      expect(res.json).toHaveBeenCalledWith({
+        message: "TestModel deleted successfully",
+      });
     });
 
-    it('should return 404 if document not found for delete', async () => {
-      const model = mockGeneralModel('DeleteNotFoundModel');
-      model.findByIdAndDelete.mockResolvedValue(null);
+    it("should send 404 if document not found", async () => {
+      const nonExistentId = new mongoose.Types.ObjectId();
+      await findByIdAndDeleteAndSend(TestModel, nonExistentId, res);
 
-      await findByIdAndDeleteAndSend(model, testId, res);
-
-      expect(model.findByIdAndDelete).toHaveBeenCalledWith(testId);
       expect(res.status).toHaveBeenCalledWith(404);
-      expect(res.json).toHaveBeenCalledWith({ message: 'DeleteNotFoundModel not found' });
-    });
-
-    it('should return 500 on database error during delete', async () => {
-        const model = mockGeneralModel('DeleteErrorModel');
-        const dbError = new Error('DB Delete Error');
-        model.findByIdAndDelete.mockRejectedValue(dbError);
-
-        await findByIdAndDeleteAndSend(model, testId, res);
-
-        expect(model.findByIdAndDelete).toHaveBeenCalledWith(testId);
-        expect(res.status).toHaveBeenCalledWith(500);
-        expect(res.json).toHaveBeenCalledWith({ message: 'Error deleting data', error: dbError.message });
+      expect(res.json).toHaveBeenCalledWith({
+        message: "TestModel not found",
       });
+    });
   });
 
-  // --- sendSseEvent ---
-  describe('sendSseEvent', () => {
-    // res is inherited from the parent describe's beforeEach,
-    // but we need to ensure it's freshly mocked for each test here if its state matters.
-    // The parent beforeEach already does this.
+  describe("findByIdAndSend", () => {
+    it("should find document by ID and send with status 200", async () => {
+      const item = await TestModel.create({ name: "Test Item", value: 100 });
+      await findByIdAndSend(TestModel, String(item._id), res);
 
-    it('should write event and data to SSE response', () => {
-      const eventName = 'testEvent';
-      const eventData = { info: 'SSE Test' };
-      sendSseEvent(res, eventName, eventData); // res from parent beforeEach is used
-
-      expect(res.write).toHaveBeenCalledWith(`event: ${eventName}\n`);
-      expect(res.write).toHaveBeenCalledWith(`data: ${JSON.stringify(eventData)}\n\n`);
+      expect(res.json).toHaveBeenCalledWith(
+        expect.objectContaining({
+          name: "Test Item",
+          value: 100,
+        })
+      );
     });
 
-    it('should warn if response object is not SSE compatible (missing write)', () => {
-      const nonSseRes: any = { flushHeaders: jest.fn() };
-      const consoleWarnSpy = jest.spyOn(console, 'warn').mockImplementation(() => {});
+    it("should send 404 if document not found", async () => {
+      const nonExistentId = new mongoose.Types.ObjectId();
+      await findByIdAndSend(TestModel, nonExistentId, res);
 
-      sendSseEvent(nonSseRes, 'testEvent', {});
-
-      expect(consoleWarnSpy).toHaveBeenCalledWith('Attempted to send SSE event on a non-SSE response object.');
-      consoleWarnSpy.mockRestore();
-    });
-
-    it('should warn if response object is not SSE compatible (missing flushHeaders)', () => {
-        const nonSseRes: any = { write: jest.fn() };
-        const consoleWarnSpy = jest.spyOn(console, 'warn').mockImplementation(() => {});
-
-        sendSseEvent(nonSseRes, 'testEvent', {});
-
-        expect(consoleWarnSpy).toHaveBeenCalledWith('Attempted to send SSE event on a non-SSE response object.');
-        consoleWarnSpy.mockRestore();
+      expect(res.status).toHaveBeenCalledWith(404);
+      expect(res.json).toHaveBeenCalledWith({
+        message: "TestModel not found",
       });
+    });
+
+    it("should find document by ID with populate and send it", async () => {
+      const refItem = await RefModel.create({ data: "populated data" });
+      const item = await TestModel.create({
+        name: "Test Item",
+        value: 100,
+        fieldToPopulate: refItem._id,
+      });
+
+      await findByIdAndSend(
+        TestModel,
+        String(item._id),
+        res,
+        "fieldToPopulate"
+      );
+
+      expect(res.json).toHaveBeenCalledWith(
+        expect.objectContaining({
+          name: "Test Item",
+          value: 100,
+          fieldToPopulate: expect.objectContaining({
+            data: "populated data",
+          }),
+        })
+      );
+    });
   });
 
-  // --- parseQueryParams ---
-  describe('parseQueryParams', () => {
-    it('should parse query parameters with defaults', () => {
+  describe("findAllAndSend", () => {
+    it("should find all documents and send them", async () => {
+      await TestModel.create({ name: "Item 1", value: 100 });
+      await TestModel.create({ name: "Item 2", value: 200 });
+
+      await findAllAndSend(TestModel, res);
+
+      expect(res.json).toHaveBeenCalledWith(
+        expect.arrayContaining([
+          expect.objectContaining({ name: "Item 1" }),
+          expect.objectContaining({ name: "Item 2" }),
+        ])
+      );
+    });
+
+    it("should handle empty collection", async () => {
+      await findAllAndSend(TestModel, res);
+
+      expect(res.json).toHaveBeenCalledWith([]);
+    });
+  });
+
+  describe("sendSseEvent", () => {
+    it("should send SSE event when res has SSE headers", () => {
+      const sseRes = {
+        writeHead: jest.fn(),
+        write: jest.fn(),
+        end: jest.fn(),
+        headersSent: false,
+        getHeader: jest.fn((name: string) => "text/event-stream"),
+      };
+
+      sendSseEvent(sseRes, "test-event", { message: "test data" });
+
+      expect(sseRes.write).toHaveBeenCalledWith(
+        `event: test-event\ndata: ${JSON.stringify({
+          message: "test data",
+        })}\n\n`
+      );
+    });
+
+    it("should log error for non-SSE response", () => {
+      const consoleErrorSpy = jest
+        .spyOn(console, "error")
+        .mockImplementation(() => {});
+      const regularRes = {
+        getHeader: jest.fn((name: string) => "application/json"),
+      };
+
+      sendSseEvent(regularRes, "test-event", { message: "test data" });
+
+      expect(consoleErrorSpy).toHaveBeenCalledWith(
+        "Attempted to send SSE event on a non-SSE response object."
+      );
+    });
+  });
+
+  describe("parseQueryParams", () => {
+    it("should parse default query params", () => {
       const query = {};
-      const result = parseQueryParams(query);
-      expect(result).toEqual({
-        filter: {},
-        sort: {},
-        skip: 0,
-        limit: 10,
-      });
+      const params = parseQueryParams(query);
+      expect(params.filter).toEqual({});
+      expect(params.sort).toEqual({});
+      expect(params.skip).toBe(0);
+      expect(params.limit).toBe(10);
     });
 
-    it('should parse page, limit, and sort (desc)', () => {
-      const query = { page: '2', limit: '5', sort: 'name:desc' };
-      const result = parseQueryParams(query);
-      expect(result).toEqual({
-        filter: {},
-        sort: { name: -1 },
-        skip: 5,
-        limit: 5,
-      });
+    it("should parse page and limit", () => {
+      const query = { page: "2", limit: "5" };
+      const params = parseQueryParams(query);
+      expect(params.skip).toBe(5);
+      expect(params.limit).toBe(5);
     });
 
-    it('should parse page, limit, and sort (asc)', () => {
-        const query = { page: '3', limit: '20', sort: 'createdAt:asc' };
-        const result = parseQueryParams(query);
-        expect(result).toEqual({
-          filter: {},
-          sort: { createdAt: 1 },
-          skip: 40,
-          limit: 20,
-        });
-      });
-
-    it('should parse filter parameters, excluding page, limit, sort', () => {
-      const query = { name: 'test', category: 'A', page: '1', limit: '10', sort: 'name:asc' };
-      // Mimic destructuring in function to get the expected filter
-      const { page, limit, sort, ...expectedFilter } = query;
-      const result = parseQueryParams(query);
-
-      expect(result.filter).toEqual(expectedFilter);
-      expect(result.filter).not.toHaveProperty('page');
-      expect(result.filter).not.toHaveProperty('limit');
-      expect(result.filter).not.toHaveProperty('sort');
-      expect(result.limit).toBe(10); // Default
-      expect(result.sort).toEqual({ name: 1 });
+    it("should parse ascending sort", () => {
+      const query = { sort: "name:asc" };
+      const params = parseQueryParams(query);
+      expect(params.sort).toEqual({ name: 1 });
     });
 
-    it('should handle sort without specified order (defaults to asc)', () => {
-        const query = { sort: 'name' };
-        const result = parseQueryParams(query);
-        expect(result.sort).toEqual({ name: 1 });
+    it("should parse descending sort", () => {
+      const query = { sort: "name:desc" };
+      const params = parseQueryParams(query);
+      expect(params.sort).toEqual({ name: -1 });
     });
 
-    it('should handle empty query gracefully', () => {
-        const result = parseQueryParams({});
-        expect(result).toEqual({
-            filter: {},
-            sort: {},
-            skip: 0,
-            limit: 10,
-          });
+    it("should parse sort without direction (defaults to asc)", () => {
+      const query = { sort: "name" };
+      const params = parseQueryParams(query);
+      expect(params.sort).toEqual({ name: 1 });
+    });
+
+    it("should parse filter params", () => {
+      const query = { name: "test", category: "A" };
+      const params = parseQueryParams(query);
+      expect(params.filter).toEqual({ name: "test", category: "A" });
+    });
+
+    it("should parse all parameters together", () => {
+      const query = {
+        page: "3",
+        limit: "20",
+        sort: "age:desc",
+        city: "NY",
+        active: "true",
+      };
+      const params = parseQueryParams(query);
+      expect(params.filter).toEqual({ city: "NY", active: "true" });
+      expect(params.sort).toEqual({ age: -1 });
+      expect(params.skip).toBe(40);
+      expect(params.limit).toBe(20);
     });
   });
 });

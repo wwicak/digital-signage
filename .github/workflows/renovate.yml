@@ -1,0 +1,38 @@
+name: Renovate
+
+on:
+  schedule:
+    - cron: "0 0 * * *" # Runs daily at midnight
+  workflow_dispatch: # Allows manual triggering
+
+jobs:
+  renovate:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          # Required for Renovate to be able to push changes back to the repository
+          fetch-depth: 0
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20" # Updated Node.js version
+
+      - name: Install Renovate CLI
+        run: npm install -g renovate
+
+      - name: Configure Git
+        run: |
+          git config user.name "renovate[bot]"
+          git config user.email "renovate[bot]@users.noreply.github.com"
+
+      - name: Run Renovate
+        env:
+          RENOVATE_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          LOG_LEVEL: "debug" # Optional: for more detailed logs
+        run: renovate

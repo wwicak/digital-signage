@@ -2,9 +2,9 @@
  * @fileoverview Slide helper functions for the API
  */
 
-import Slide, { ISlide } from '../models/Slide'; // Assuming Slide.ts exports ISlide
-import Slideshow, { ISlideshow } from '../models/Slideshow'; // Assuming Slideshow.ts exports ISlideshow
-import mongoose from 'mongoose';
+import Slide, { ISlide } from "../models/Slide"; // Assuming Slide.ts exports ISlide
+import Slideshow, { ISlideshow } from "../models/Slideshow"; // Assuming Slideshow.ts exports ISlideshow
+import mongoose from "mongoose";
 
 /**
  * Adds a slide to one or more slideshows.
@@ -15,14 +15,21 @@ import mongoose from 'mongoose';
  */
 export const addSlideToSlideshows = async (
   slide: ISlide,
-  slideshowIds: string | string[] | mongoose.Types.ObjectId | mongoose.Types.ObjectId[]
+  slideshowIds:
+    | string
+    | string[]
+    | mongoose.Types.ObjectId
+    | mongoose.Types.ObjectId[]
 ): Promise<void> => {
   if (!slideshowIds) {
     return;
   }
 
-  const idsToAdd: mongoose.Types.ObjectId[] = (Array.isArray(slideshowIds) ? slideshowIds : [slideshowIds])
-    .map(id => typeof id === 'string' ? new mongoose.Types.ObjectId(id) : id);
+  const idsToAdd: mongoose.Types.ObjectId[] = (
+    Array.isArray(slideshowIds) ? slideshowIds : [slideshowIds]
+  ).map((id) =>
+    typeof id === "string" ? new mongoose.Types.ObjectId(id) : id
+  );
 
   if (idsToAdd.length === 0) {
     return;
@@ -34,8 +41,8 @@ export const addSlideToSlideshows = async (
       { $addToSet: { slides: slide._id } } // Use $addToSet to avoid duplicate slides
     );
   } catch (error: any) {
-    console.error('Error adding slide to slideshows:', error);
-    throw new Error('Failed to add slide to slideshows.');
+    console.error("Error adding slide to slideshows:", error);
+    throw new Error("Failed to add slide to slideshows.");
   }
 };
 
@@ -48,18 +55,26 @@ export const addSlideToSlideshows = async (
  */
 export const removeSlideFromSlideshows = async (
   slideOrSlideId: ISlide | mongoose.Types.ObjectId | string,
-  slideshowIds: string | string[] | mongoose.Types.ObjectId | mongoose.Types.ObjectId[]
+  slideshowIds:
+    | string
+    | string[]
+    | mongoose.Types.ObjectId
+    | mongoose.Types.ObjectId[]
 ): Promise<void> => {
   if (!slideshowIds) {
     return;
   }
-  
-  const slideId = typeof slideOrSlideId === 'string' 
-    ? new mongoose.Types.ObjectId(slideOrSlideId) 
-    : (slideOrSlideId as ISlide)._id || slideOrSlideId; // Handles both ISlide and ObjectId
 
-  const idsToRemoveFrom: mongoose.Types.ObjectId[] = (Array.isArray(slideshowIds) ? slideshowIds : [slideshowIds])
-    .map(id => typeof id === 'string' ? new mongoose.Types.ObjectId(id) : id);
+  const slideId =
+    typeof slideOrSlideId === "string"
+      ? new mongoose.Types.ObjectId(slideOrSlideId)
+      : (slideOrSlideId as ISlide)._id || slideOrSlideId; // Handles both ISlide and ObjectId
+
+  const idsToRemoveFrom: mongoose.Types.ObjectId[] = (
+    Array.isArray(slideshowIds) ? slideshowIds : [slideshowIds]
+  ).map((id) =>
+    typeof id === "string" ? new mongoose.Types.ObjectId(id) : id
+  );
 
   if (idsToRemoveFrom.length === 0) {
     return;
@@ -71,8 +86,8 @@ export const removeSlideFromSlideshows = async (
       { $pull: { slides: slideId } }
     );
   } catch (error: any) {
-    console.error('Error removing slide from slideshows:', error);
-    throw new Error('Failed to remove slide from slideshows.');
+    console.error("Error removing slide from slideshows:", error);
+    throw new Error("Failed to remove slide from slideshows.");
   }
 };
 
@@ -91,19 +106,19 @@ export const handleSlideInSlideshows = async (
   newSlideshowIds: (string | mongoose.Types.ObjectId)[],
   originalSlideshowIds: (string | mongoose.Types.ObjectId)[] = []
 ): Promise<void> => {
-  const newIds = new Set(newSlideshowIds.map(id => id.toString()));
-  const oldIds = new Set(originalSlideshowIds.map(id => id.toString()));
+  const newIds = new Set(newSlideshowIds.map((id) => id.toString()));
+  const oldIds = new Set(originalSlideshowIds.map((id) => id.toString()));
 
   const toAdd: string[] = [];
   const toRemove: string[] = [];
 
-  newIds.forEach(id => {
+  newIds.forEach((id) => {
     if (!oldIds.has(id)) {
       toAdd.push(id);
     }
   });
 
-  oldIds.forEach(id => {
+  oldIds.forEach((id) => {
     if (!newIds.has(id)) {
       toRemove.push(id);
     }
@@ -111,14 +126,20 @@ export const handleSlideInSlideshows = async (
 
   try {
     if (toAdd.length > 0) {
-      await addSlideToSlideshows(slide, toAdd.map(id => new mongoose.Types.ObjectId(id)));
+      await addSlideToSlideshows(
+        slide,
+        toAdd.map((id) => new mongoose.Types.ObjectId(id))
+      );
     }
     if (toRemove.length > 0) {
-      await removeSlideFromSlideshows(slide._id, toRemove.map(id => new mongoose.Types.ObjectId(id)));
+      await removeSlideFromSlideshows(
+        slide._id as mongoose.Types.ObjectId,
+        toRemove.map((id) => new mongoose.Types.ObjectId(id))
+      );
     }
   } catch (error: any) {
-    console.error('Error handling slide in slideshows:', error);
-    throw new Error('Failed to update slide presence in slideshows.');
+    console.error("Error handling slide in slideshows:", error);
+    throw new Error("Failed to update slide presence in slideshows.");
   }
 };
 
@@ -131,7 +152,10 @@ export const handleSlideInSlideshows = async (
 export const deleteSlideAndCleanReferences = async (
   slideId: string | mongoose.Types.ObjectId
 ): Promise<ISlide | null> => {
-  const idToDelete = typeof slideId === 'string' ? new mongoose.Types.ObjectId(slideId) : slideId;
+  const idToDelete =
+    typeof slideId === "string"
+      ? new mongoose.Types.ObjectId(slideId)
+      : slideId;
 
   try {
     // Find the slide to be deleted
@@ -149,10 +173,10 @@ export const deleteSlideAndCleanReferences = async (
 
     // Delete the slide itself
     await Slide.findByIdAndDelete(idToDelete);
-    
+
     return slide; // Return the (now deleted) slide document
   } catch (error: any) {
-    console.error('Error deleting slide and cleaning references:', error);
-    throw new Error('Failed to delete slide and update slideshows.');
+    console.error("Error deleting slide and cleaning references:", error);
+    throw new Error("Failed to delete slide and update slideshows.");
   }
 };

@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useMemo } from 'react';
+import React, { useEffect, useRef, useMemo, useCallback } from 'react';
 import GridLayout, { Layout as RglLayout } from 'react-grid-layout';
 import _ from 'lodash';
 
@@ -22,17 +22,15 @@ export type IDisplayComponentProps = z.infer<typeof DisplayComponentPropsSchema>
 const DEFAULT_STATUS_BAR: string[] = [];
 const DEFAULT_LAYOUT: DisplayLayoutType = 'spaced';
 
-const Display: React.FC<IDisplayComponentProps> = ({ display }) => {
-  const { state, setId } = useDisplayContext();
+const Display: React.FC<IDisplayComponentProps> = React.memo(({ display }) => {
+  const { state, setId, refreshDisplayData } = useDisplayContext();
   const eventSourceRef = useRef<EventSource | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
 
-  // Create a simple refresh function that can be called when SSE events occur
+  // Create a debounced refresh function for SSE events using React Query invalidation
   const refreshDisplay = useMemo(() => _.debounce(() => {
-    if (display) {
-      setId(display);
-    }
-  }, 1500), [display, setId]);
+    refreshDisplayData();
+  }, 500), [refreshDisplayData]); // Reduced debounce time since invalidation is more efficient
 
   const setupSSE = (): void => {
     // Close existing connection if any
@@ -81,19 +79,40 @@ const Display: React.FC<IDisplayComponentProps> = ({ display }) => {
     };
   }, [display, setId, refreshDisplay]);
 
-  // Prepare layout for react-grid-layout
-  const rglWidgetLayout: RglLayout[] = (state.widgets || []).map((widget: any) => ({
-    i: widget._id, // react-grid-layout uses 'i' for id
-    x: widget.x || 0,
-    y: widget.y || 0,
-    w: widget.w || 1,
-    h: widget.h || 1,
-    // Add other RGL properties if needed: minW, maxW, isDraggable, isResizable etc.
-  }));
+  // Memoize layout for react-grid-layout to prevent unnecessary re-renders
+  const rglWidgetLayout: RglLayout[] = useMemo(() =>
+    (state.widgets || []).map((widget: any) => ({
+      i: widget._id, // react-grid-layout uses 'i' for id
+      x: widget.x || 0,
+      y: widget.y || 0,
+      w: widget.w || 1,
+      h: widget.h || 1,
+      // Add other RGL properties if needed: minW, maxW, isDraggable, isResizable etc.
+    }))
+  , [state.widgets]);
 
-  // HeightProvider HOC - cast to any to avoid typing issues with HOC
-  const currentLayout = state.layout || DEFAULT_LAYOUT;
-  const RglComponent = HeightProvider(GridLayout as any, containerRef.current, currentLayout) as any;
+  // Memoize layout setting and grid component
+  const currentLayout = useMemo(() => state.layout || DEFAULT_LAYOUT, [state.layout]);
+  const RglComponent = useMemo(() =>
+    HeightProvider(GridLayout as any, containerRef.current, currentLayout) as any
+  , [currentLayout]);
+
+  // Memoize margin calculation for stable props
+  const gridMargin = useMemo(() =>
+    currentLayout === 'spaced' ? [10, 10] as [number, number] : [0, 0] as [number, number]
+  , [currentLayout]);
+
+  // Memoize widget rendering for performance
+  const renderWidget = useCallback((widget: any) => {
+    const WidgetDefinition: IBaseWidget | undefined = Widgets[widget.type];
+    const WidgetComponent = WidgetDefinition ? WidgetDefinition.Widget : EmptyWidget;
+    
+    return (
+      <div key={widget._id} className={'widget-wrapper'}>
+        <WidgetComponent {...(widget.data ? { data: widget.data } : {})} />
+      </div>
+    );
+  }, []);
 
   return (
     // Frame.tsx statusBar prop expects string[] currently.
@@ -108,26 +127,12 @@ const Display: React.FC<IDisplayComponentProps> = ({ display }) => {
           isDraggable={false} // From original JS
           isResizable={false} // From original JS
           layout={rglWidgetLayout}
-          cols={6}
-          rowHeight={containerRef.current ? containerRef.current.clientHeight / (currentLayout === 'compact' ? 12 : 10) : 50}
-          margin={currentLayout === 'spaced' ? ([10, 10] as [number, number]) : ([0, 0] as [number, number])}
+          cols={6} // Consider making this configurable or dynamic based on layout
+          margin={gridMargin}
+          // rowHeight is now handled by HeightProvider HOC for stability
           // Other RGL props: width, autoSize, compactType, etc.
         >
-          {state.widgets.map((widget: any) => {
-            // Widgets is Record<string, IBaseWidget>
-            // widget.type is string (e.g. "announcement")
-            const WidgetDefinition: IBaseWidget | undefined = Widgets[widget.type];
-            const WidgetComponent = WidgetDefinition ? WidgetDefinition.Widget : EmptyWidget;
-            
-            // Key for RGL items must be string, widget._id is string.
-            return (
-              <div key={widget._id} className={'widget-wrapper'}> {/* Renamed class */}
-                {/* Pass widget-specific data to the WidgetComponent */}
-                {/* Also pass isPreview or other context if needed */}
-                <WidgetComponent {...(widget.data ? { data: widget.data } : {})} />
-              </div>
-            );
-          })}
+          {state.widgets.map(renderWidget)}
         </RglComponent>
         <style jsx>
           {`
@@ -148,6 +153,8 @@ const Display: React.FC<IDisplayComponentProps> = ({ display }) => {
       </div>
     </Frame>
   );
-};
+});
+
+Display.displayName = 'Display';
 
 export default Display;

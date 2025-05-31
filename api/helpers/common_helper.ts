@@ -2,13 +2,15 @@
  * @fileoverview Common helper functions for the API
  */
 
-import mongoose from 'mongoose';
+import mongoose from "mongoose";
 
 // Define a more specific type for Mongoose query results if possible,
 // but 'any' is a fallback if the structure is highly variable or complex.
 type MongooseQueryResult = any;
-type MongooseDocument = mongoose.Document & { _id: mongoose.Types.ObjectId | string, [key: string]: any };
-
+type MongooseDocument = mongoose.Document & {
+  _id: mongoose.Types.ObjectId | string;
+  [key: string]: any;
+};
 
 /**
  * Finds a document by ID and sends it as a JSON response.
@@ -36,7 +38,9 @@ export const findByIdAndSend = async (
     res.json(result);
   } catch (error: any) {
     console.error(`Error finding ${model.modelName} by ID:`, error);
-    res.status(500).json({ message: 'Error fetching data', error: error.message });
+    res
+      .status(500)
+      .json({ message: "Error fetching data", error: error.message });
   }
 };
 
@@ -63,7 +67,9 @@ export const findAllAndSend = async (
     res.json(results);
   } catch (error: any) {
     console.error(`Error finding all ${model.modelName}:`, error);
-    res.status(500).json({ message: 'Error fetching data', error: error.message });
+    res
+      .status(500)
+      .json({ message: "Error fetching data", error: error.message });
   }
 };
 
@@ -85,10 +91,14 @@ export const createAndSend = async (
     res.status(201).json(result);
   } catch (error: any) {
     console.error(`Error creating ${model.modelName}:`, error);
-    if (error.name === 'ValidationError') {
-      return res.status(400).json({ message: 'Validation Error', errors: error.errors });
+    if (error.name === "ValidationError") {
+      return res
+        .status(400)
+        .json({ message: "Validation Error", errors: error.errors });
     }
-    res.status(500).json({ message: 'Error creating data', error: error.message });
+    res
+      .status(500)
+      .json({ message: "Error creating data", error: error.message });
   }
 };
 
@@ -111,37 +121,45 @@ export const findByIdAndUpdateAndSend = async (
   try {
     // Ensure 'last_update' is set if your schema doesn't use Mongoose timestamps for it
     // (data as any).last_update = new Date(); // Or handle this via schema middleware
-    
-    let updatedItem: MongooseDocument | null = await model.findByIdAndUpdate(id, data, { new: true, runValidators: true });
+
+    let updatedItem: MongooseDocument | null = await model.findByIdAndUpdate(
+      id,
+      data,
+      { new: true, runValidators: true }
+    );
 
     if (!updatedItem) {
       return res.status(404).json({ message: `${model.modelName} not found` });
     }
 
     if (populateField && updatedItem.populate) {
-        // Call populate once, as it might return different things based on Mongoose version context
-        const populateCallResult = updatedItem.populate(populateField);
+      // Call populate once, as it might return different things based on Mongoose version context
+      const populateCallResult = updatedItem.populate(populateField);
 
-        // Check if execPopulate exists on the result of the first populate call (for older Mongoose)
-        // or if populateCallResult itself is a promise (Mongoose 6+ on instances)
-        if (typeof populateCallResult.execPopulate === 'function') {
-            updatedItem = await populateCallResult.execPopulate(); // Older Mongoose
-        } else if (typeof populateCallResult.then === 'function') {
-            // Mongoose 6+: populateCallResult is a Promise, await it.
-            updatedItem = await populateCallResult;
-        }
-        // If neither, it might be a case where populate() mutated updatedItem directly (older Mongoose with no promise/execPopulate)
-        // or the populate field was invalid. For this helper, we assume valid fields
-        // and rely on the above two main patterns. If updatedItem wasn't reassigned, it remains as is.
+      // Check if execPopulate exists on the result of the first populate call (for older Mongoose)
+      // or if populateCallResult itself is a promise (Mongoose 6+ on instances)
+      if (typeof (populateCallResult as any).execPopulate === "function") {
+        updatedItem = await (populateCallResult as any).execPopulate(); // Older Mongoose
+      } else if (typeof (populateCallResult as any).then === "function") {
+        // Mongoose 6+: populateCallResult is a Promise, await it.
+        updatedItem = (await populateCallResult) as any;
+      }
+      // If neither, it might be a case where populate() mutated updatedItem directly (older Mongoose with no promise/execPopulate)
+      // or the populate field was invalid. For this helper, we assume valid fields
+      // and rely on the above two main patterns. If updatedItem wasn't reassigned, it remains as is.
     }
-    
+
     res.json(updatedItem);
   } catch (error: any) {
     console.error(`Error updating ${model.modelName}:`, error);
-    if (error.name === 'ValidationError') {
-      return res.status(400).json({ message: 'Validation Error', errors: error.errors });
+    if (error.name === "ValidationError") {
+      return res
+        .status(400)
+        .json({ message: "Validation Error", errors: error.errors });
     }
-    res.status(500).json({ message: 'Error updating data', error: error.message });
+    res
+      .status(500)
+      .json({ message: "Error updating data", error: error.message });
   }
 };
 
@@ -165,7 +183,9 @@ export const findByIdAndDeleteAndSend = async (
     res.json({ message: `${model.modelName} deleted successfully` });
   } catch (error: any) {
     console.error(`Error deleting ${model.modelName}:`, error);
-    res.status(500).json({ message: 'Error deleting data', error: error.message });
+    res
+      .status(500)
+      .json({ message: "Error deleting data", error: error.message });
   }
 };
 
@@ -177,12 +197,12 @@ export const findByIdAndDeleteAndSend = async (
  */
 export const sendSseEvent = (res: any, eventName: string, data: any): void => {
   // Ensure res is an SSE response stream
-  if (res.write && typeof res.flushHeaders === 'function') {
+  if (res.write && typeof res.flushHeaders === "function") {
     res.write(`event: ${eventName}\n`);
     res.write(`data: ${JSON.stringify(data)}\n\n`);
     // res.flushHeaders(); // May or may not be needed depending on server setup
   } else {
-    console.warn('Attempted to send SSE event on a non-SSE response object.');
+    console.warn("Attempted to send SSE event on a non-SSE response object.");
   }
 };
 
@@ -197,12 +217,13 @@ export interface ParsedQueryParams {
 
 export const parseQueryParams = (query: any): ParsedQueryParams => {
   const { page = 1, limit = 10, sort, ...filter } = query;
-  const skip = (parseInt(page as string, 10) - 1) * parseInt(limit as string, 10);
-  
+  const skip =
+    (parseInt(page as string, 10) - 1) * parseInt(limit as string, 10);
+
   let sortOption = {};
   if (sort) {
-    const sortParts = (sort as string).split(':');
-    sortOption = { [sortParts[0]]: sortParts[1] === 'desc' ? -1 : 1 };
+    const sortParts = (sort as string).split(":");
+    sortOption = { [sortParts[0]]: sortParts[1] === "desc" ? -1 : 1 };
   }
 
   return {

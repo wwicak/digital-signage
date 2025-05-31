@@ -52,6 +52,7 @@ type ISlideshowWidgetContentState = z.infer<typeof SlideshowWidgetContentStateSc
 class Slideshow extends Component<ISlideshowWidgetContentProps, ISlideshowWidgetContentState> {
   private slideRefs: Array<ISlideInstance | null> = [];
   private slideAdvanceTimeoutId: NodeJS.Timeout | null = null;
+  private isMounted: boolean = false;
 
   constructor(props: ISlideshowWidgetContentProps) {
     super(props);
@@ -64,8 +65,8 @@ class Slideshow extends Component<ISlideshowWidgetContentProps, ISlideshowWidget
       error: null,
     };
   }
-
   async componentDidMount() {
+    this.isMounted = true;
     this.fetchSlidesAndStart();
   }
 
@@ -77,8 +78,8 @@ class Slideshow extends Component<ISlideshowWidgetContentProps, ISlideshowWidget
       this.fetchSlidesAndStart();
     }
   }
-
   componentWillUnmount() {
+    this.isMounted = false;
     this.clearAdvanceTimer();
     // Optionally call stop() on the current slide if active
     if (this.state.currentSlideIndex !== null && this.slideRefs[this.state.currentSlideIndex]) {
@@ -103,23 +104,32 @@ class Slideshow extends Component<ISlideshowWidgetContentProps, ISlideshowWidget
     this.setState({ isLoading: true, error: null, currentSlideIndex: null, slides: [] });
     try {
       const slides = await getSlides(slideshowId);
+      
+      // Check if component is still mounted after async operation
+      if (!this.isMounted) {
+        return;
+      }
+      
       if (slides && slides.length > 0) {
         this.slideRefs = new Array(slides.length).fill(null);
-        // Assuming slides might have an 'order' or 'position' field for sorting.
-        // ISlideData needs to be updated if 'order' is a standard field.
-        // For now, using 'position' if available, otherwise keep API order.
-        const orderedSlides = _.sortBy(slides, (s: ISlideData) => s.position ?? Infinity);
+        // Keep slides in the order they come from the API
+        // If there's a specific order field, it would need to be added to the ISlideData interface
+        const orderedSlides = slides;
         
         this.setState({ slides: orderedSlides, currentSlideIndex: 0, isLoading: false }, () => {
-          this.slideRefs[0]?.play(); // Play the first slide
-          this.waitForNextSlide();
+          if (this.isMounted) {
+            this.slideRefs[0]?.play(); // Play the first slide
+            this.waitForNextSlide();
+          }
         });
       } else {
         this.setState({ slides: [], currentSlideIndex: null, isLoading: false });
       }
     } catch (error) {
       console.error("Failed to fetch slides:", error);
-      this.setState({ isLoading: false, error: "Failed to load slides." });
+      if (this.isMounted) {
+        this.setState({ isLoading: false, error: "Failed to load slides." });
+      }
     }
   };
 
@@ -154,6 +164,9 @@ class Slideshow extends Component<ISlideshowWidgetContentProps, ISlideshowWidget
     if (slideRef && currentSlideData) {
       slideRef.loadedPromise
         .then(() => {
+          // Check if component is still mounted before setting state or timers
+          if (!this.isMounted) return;
+          
           this.setState({ isCurrentSlideReady: true });
           const duration = (currentSlideData.duration || 0) * 1000; // Convert seconds to ms
           const effectiveDuration = duration > 0 ? duration : (this.props.defaultDuration ?? DEFAULT_SLIDE_DURATION_MS);
@@ -162,17 +175,22 @@ class Slideshow extends Component<ISlideshowWidgetContentProps, ISlideshowWidget
         })
         .catch(error => {
           console.error("Error waiting for slide to load, advancing to next:", error);
+          // Check if component is still mounted before setting timers
+          if (!this.isMounted) return;
+          
           // Advance to next slide even if current one fails to load after a short delay
-          this.slideAdvanceTimeoutId = setTimeout(this.advanceToNextSlide, 2000); 
+          this.slideAdvanceTimeoutId = setTimeout(this.advanceToNextSlide, 2000);
         });
     } else {
         // If no slideRef or currentSlideData, try to advance after a short delay (e.g., if slides are empty)
-        this.slideAdvanceTimeoutId = setTimeout(this.advanceToNextSlide, (this.props.defaultDuration ?? DEFAULT_SLIDE_DURATION_MS));
+        if (this.isMounted) {
+          this.slideAdvanceTimeoutId = setTimeout(this.advanceToNextSlide, (this.props.defaultDuration ?? DEFAULT_SLIDE_DURATION_MS));
+        }
     }
   };
 
-  getSlideComponent = (type: string): ComponentType<any> => {
-    // Assuming ISlideData.type is a string that matches these cases
+  getSlideComponent = React.useMemo(() => (type: string): ComponentType<any> => {
+    // Memoize the component selection to avoid repeated switch statements
     switch (type) {
       case 'photo':
         return PhotoSlide;
@@ -184,9 +202,9 @@ class Slideshow extends Component<ISlideshowWidgetContentProps, ISlideshowWidget
       default:
         return GenericSlide; // Fallback for unknown or generic types
     }
-  };
+  }, []);
 
-  renderSlide = (slide: ISlideData, index: number): JSX.Element => {
+  renderSlide = React.useCallback((slide: ISlideData, index: number): JSX.Element => {
     const { currentSlideIndex } = this.state;
     const SlideComponent = this.getSlideComponent(slide.type);
 
@@ -199,7 +217,7 @@ class Slideshow extends Component<ISlideshowWidgetContentProps, ISlideshowWidget
         // Other props like isPreview can be passed here if needed
       />
     );
-  };
+  }, [this.state.currentSlideIndex, this.getSlideComponent]);
 
   render() {
     const { data, defaultDuration = DEFAULT_SLIDE_DURATION_MS } = this.props;
