@@ -8,6 +8,7 @@ export function addClient(displayId: string, response: Response): void {
     sseClients[displayId] = [];
   }
   sseClients[displayId].push(response);
+  console.log(`Client added for displayId: ${displayId}`);
 }
 
 export function removeClient(displayId: string, response: Response): void {
@@ -17,10 +18,12 @@ export function removeClient(displayId: string, response: Response): void {
       delete sseClients[displayId];
     }
   }
+  console.log(`Client removed for displayId: ${displayId}`);
 }
 
 export function sendEventToDisplay(displayId: string, eventName: string, data: any): void {
   if (sseClients[displayId]) {
+    console.log(`Sending event ${eventName} to ${sseClients[displayId].length} clients for displayId: ${displayId}`);
     sseClients[displayId].forEach(client => {
       sendSseEvent(client, eventName, data);
     });

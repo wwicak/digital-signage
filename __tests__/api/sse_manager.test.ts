@@ -1,202 +1,191 @@
-// @ts-nocheck
-import * as http from "http";
-import { Express } from "express"; // Assuming Express types are installed
-// Using Jest globals: describe, it, expect, beforeEach, jest (for spyOn, resetModules)
+import { Response } from 'express';
+import * as sseManager from '../../api/sse_manager'; // Adjust path relative to __tests__/api
+import { sendSseEvent } from '../../api/helpers/common_helper'; // Adjust path
 
-// Import the functions to be tested
-import * as sseManagerModule from "../../../api/sse_manager"; // Adjusted path
+// Mock the common_helper module
+jest.mock('../../api/helpers/common_helper', () => ({
+  sendSseEvent: jest.fn(),
+}));
 
-// To allow re-importing for fresh state with ES modules, we'll use dynamic import in beforeEach
-const sseManagerPath = "../../../api/sse_manager"; // Adjust path
+// Mock Express Response
+const mockResponse = (id?: string) => { // Optional id for debugging/differentiation
+  const res: Partial<Response & { mockId?: string }> = {};
+  if (id) {
+    res.mockId = id;
+  }
+  return res as Response;
+};
 
-// describe.skip temporarily to focus on user.test.ts
-// interface MockRequest extends http.IncomingMessage {
-interface MockRequest extends http.IncomingMessage {
-  on: jest.Mock;
-}
+describe('sse_manager', () => {
+  let consoleLogSpy: jest.SpyInstance;
 
-interface MockResponse extends http.ServerResponse {
-  setHeader: jest.Mock;
-  flushHeaders: jest.Mock;
-  write: jest.Mock;
-  end: jest.Mock;
-  status?: jest.Mock; // Optional, for Express-like responses
-  json?: jest.Mock; // Optional, for Express-like responses
-}
-
-describe.skip("sse_manager", () => {
-  // Temporarily skipping these tests
-  let mockApp: Partial<Express>; // Use Partial<Express> for mocks
-  let mockReq: MockRequest;
-  let mockRes: MockResponse;
-  let sseManager: typeof sseManagerModule; // To hold the dynamically imported module
-
-  beforeEach(async () => {
-    // Reset modules to clear connectedClients array in sse_manager for each test
-    jest.resetModules(); // Use Jest's built-in module reset
-    // Dynamically import the module to get a fresh instance
-    sseManager = await import(sseManagerPath + ".js"); // Try with .js extension for compiled output
-
-    mockApp = {
-      get: jest.fn(),
-    };
-    mockReq = {
-      on: jest.fn(),
-      // http.IncomingMessage properties (add more as needed for type safety)
-      headers: {},
-      method: "GET",
-      url: "/",
-      socket: {} as any, // Simplified for mock
-    } as MockRequest;
-    mockRes = {
-      setHeader: jest.fn(),
-      flushHeaders: jest.fn(),
-      write: jest.fn(),
-      end: jest.fn(),
-      // http.ServerResponse properties (add more as needed for type safety)
-      statusCode: 200,
-      statusMessage: "OK",
-      writableEnded: false,
-    } as unknown as MockResponse; // Cast to unknown first for complex mock
+  beforeEach(() => {
+    // Reset sseClients before each test
+    sseManager.sseClients = {};
+    // Clear mocks
+    (sendSseEvent as jest.Mock).mockClear();
+    // Spy on console.log and suppress output during tests
+    consoleLogSpy = jest.spyOn(console, 'log').mockImplementation(() => {});
   });
 
-  describe("initializeSSE", () => {
-    it("should set up the /api/v1/events GET route", () => {
-      sseManager.initializeSSE(mockApp as Express);
-      expect(mockApp.get).toHaveBeenCalledWith(
-        "/api/v1/events",
-        expect.any(Function)
-      );
+  afterEach(() => {
+    // Restore console.log
+    consoleLogSpy.mockRestore();
+  });
+
+  describe('addClient', () => {
+    it('should add a client to a new displayId', () => {
+      const res1 = mockResponse();
+      const displayId1 = 'display1';
+      sseManager.addClient(displayId1, res1);
+      expect(sseManager.sseClients[displayId1]).toContain(res1);
+      expect(sseManager.sseClients[displayId1].length).toBe(1);
+      expect(consoleLogSpy).toHaveBeenCalledWith(`Client added for displayId: ${displayId1}`);
     });
 
-    it("should set correct SSE headers and send initial event when a client connects", () => {
-      sseManager.initializeSSE(mockApp as Express);
-      // Simulate a client connection by calling the route handler passed to app.get
-      const routeHandler = (mockApp.get as jest.Mock).mock.calls[0][1];
-      routeHandler(mockReq, mockRes);
-
-      expect(mockRes.setHeader).toHaveBeenCalledWith(
-        "Content-Type",
-        "text/event-stream"
-      );
-      expect(mockRes.setHeader).toHaveBeenCalledWith(
-        "Cache-Control",
-        "no-cache"
-      );
-      expect(mockRes.setHeader).toHaveBeenCalledWith(
-        "Connection",
-        "keep-alive"
-      );
-      expect(mockRes.flushHeaders).toHaveBeenCalled();
-      expect(mockRes.write).toHaveBeenCalledWith(
-        'event: connected\ndata: {"message":"SSE connection established"}\n\n'
-      );
-      // Use the dynamically imported sseManager
-      expect(sseManager.getConnectedClients().length).toBe(1);
+    it('should add multiple clients to the same displayId', () => {
+      const res1 = mockResponse();
+      const res2 = mockResponse();
+      const displayId1 = 'display1';
+      sseManager.addClient(displayId1, res1);
+      sseManager.addClient(displayId1, res2);
+      expect(sseManager.sseClients[displayId1]).toContain(res1);
+      expect(sseManager.sseClients[displayId1]).toContain(res2);
+      expect(sseManager.sseClients[displayId1].length).toBe(2);
+      expect(consoleLogSpy).toHaveBeenCalledWith(`Client added for displayId: ${displayId1}`);
     });
 
-    it("should remove a client when their connection closes", () => {
-      sseManager.initializeSSE(mockApp as Express);
-      const routeHandler = (mockApp.get as jest.Mock).mock.calls[0][1];
-      routeHandler(mockReq, mockRes);
+    it('should store clients for different displayIds separately', () => {
+      const res1 = mockResponse();
+      const displayId1 = 'display1';
+      const res2 = mockResponse();
+      const displayId2 = 'display2';
 
-      expect(sseManager.getConnectedClients().length).toBe(1);
+      sseManager.addClient(displayId1, res1);
+      sseManager.addClient(displayId2, res2);
 
-      expect(mockReq.on).toHaveBeenCalledWith("close", expect.any(Function));
-      const closeCallback = mockReq.on.mock.calls[0][1];
-      closeCallback();
-
-      expect(sseManager.getConnectedClients().length).toBe(0);
-      expect(mockRes.end).toHaveBeenCalled();
+      expect(sseManager.sseClients[displayId1]).toContain(res1);
+      expect(sseManager.sseClients[displayId1].length).toBe(1);
+      expect(sseManager.sseClients[displayId2]).toContain(res2);
+      expect(sseManager.sseClients[displayId2].length).toBe(1);
+      expect(consoleLogSpy).toHaveBeenCalledWith(`Client added for displayId: ${displayId1}`);
+      expect(consoleLogSpy).toHaveBeenCalledWith(`Client added for displayId: ${displayId2}`);
     });
   });
 
-  describe("sendSSEUpdate", () => {
-    it("should not send updates if no clients are connected", () => {
-      sseManager.sendSSEUpdate({ message: "test" }); // sseManager here is from dynamic import
-      expect(mockRes.write).not.toHaveBeenCalled();
+  describe('removeClient', () => {
+    it('should remove a client successfully', () => {
+      const res1 = mockResponse();
+      const res2 = mockResponse();
+      const displayId1 = 'display1';
+      sseManager.addClient(displayId1, res1);
+      sseManager.addClient(displayId1, res2);
+
+      sseManager.removeClient(displayId1, res1);
+      expect(sseManager.sseClients[displayId1]).not.toContain(res1);
+      expect(sseManager.sseClients[displayId1]).toContain(res2);
+      expect(sseManager.sseClients[displayId1].length).toBe(1);
+      expect(consoleLogSpy).toHaveBeenCalledWith(`Client removed for displayId: ${displayId1}`);
     });
 
-    it("should send updates to all connected clients", () => {
-      const mockResClient1 = {
-        write: jest.fn(),
-        setHeader: jest.fn(),
-        flushHeaders: jest.fn(),
-        end: jest.fn(),
-      } as unknown as MockResponse;
-      const mockResClient2 = {
-        write: jest.fn(),
-        setHeader: jest.fn(),
-        flushHeaders: jest.fn(),
-        end: jest.fn(),
-      } as unknown as MockResponse;
+    it('should delete displayId key if it was the last client', () => {
+      const res1 = mockResponse();
+      const displayId1 = 'display1';
+      sseManager.addClient(displayId1, res1);
 
-      sseManager.initializeSSE(mockApp as Express);
-      const routeHandler = (mockApp.get as jest.Mock).mock.calls[0][1];
-
-      // Client 1
-      const mockReq1 = {
-        on: jest.fn(),
-        headers: {},
-        method: "GET",
-        url: "/",
-        socket: {} as any,
-      } as MockRequest;
-      routeHandler(mockReq1, mockResClient1);
-
-      // Client 2
-      const mockReq2 = {
-        on: jest.fn(),
-        headers: {},
-        method: "GET",
-        url: "/",
-        socket: {} as any,
-      } as MockRequest;
-      routeHandler(mockReq2, mockResClient2);
-
-      expect(sseManager.getConnectedClients().length).toBe(2);
-
-      const testData = { message: "live update" };
-      sseManager.sendSSEUpdate(testData);
-
-      const expectedSSEFormattedData = `event: adminUpdate\ndata: ${JSON.stringify(
-        testData
-      )}\n\n`;
-      expect(mockResClient1.write).toHaveBeenCalledWith(
-        expectedSSEFormattedData
-      );
-      expect(mockResClient2.write).toHaveBeenCalledWith(
-        expectedSSEFormattedData
-      );
+      sseManager.removeClient(displayId1, res1);
+      expect(sseManager.sseClients[displayId1]).toBeUndefined();
+      expect(consoleLogSpy).toHaveBeenCalledWith(`Client removed for displayId: ${displayId1}`);
     });
 
-    it("should log an error if writing to a client fails", () => {
-      sseManager.initializeSSE(mockApp as Express);
-      const routeHandler = (mockApp.get as jest.Mock).mock.calls[0][1];
-      const mockBadClientRes = {
-        write: jest.fn().mockImplementation(() => {
-          throw new Error("Client write failed");
-        }),
-        setHeader: jest.fn(), // Add missing properties for MockResponse
-        flushHeaders: jest.fn(),
-        end: jest.fn(),
-      } as unknown as MockResponse;
+    it('should not affect other displayIds or other clients for the same displayId', () => {
+      const res1 = mockResponse();
+      const res2 = mockResponse();
+      const res3 = mockResponse();
+      const displayId1 = 'display1';
+      const displayId2 = 'display2';
 
-      routeHandler(mockReq, mockBadClientRes);
+      sseManager.addClient(displayId1, res1);
+      sseManager.addClient(displayId1, res2);
+      sseManager.addClient(displayId2, res3);
 
-      expect(sseManager.getConnectedClients().length).toBe(1);
-      const consoleErrorSpy = jest
-        .spyOn(console, "error")
-        .mockImplementation(() => {});
+      sseManager.removeClient(displayId1, res1);
 
-      sseManager.sendSSEUpdate({ message: "data for bad client" });
+      expect(sseManager.sseClients[displayId1]).not.toContain(res1);
+      expect(sseManager.sseClients[displayId1]).toContain(res2);
+      expect(sseManager.sseClients[displayId1].length).toBe(1);
+      expect(sseManager.sseClients[displayId2]).toContain(res3);
+      expect(sseManager.sseClients[displayId2].length).toBe(1);
+      expect(consoleLogSpy).toHaveBeenCalledWith(`Client removed for displayId: ${displayId1}`);
+    });
 
-      expect(mockBadClientRes.write).toHaveBeenCalled();
-      expect(consoleErrorSpy).toHaveBeenCalledWith(
-        expect.stringContaining("[SSE] Error sending update to client"),
-        expect.any(Error)
-      );
-      consoleErrorSpy.mockRestore();
+    it('should not throw error if displayId does not exist', () => {
+        const res1 = mockResponse();
+        const displayId1 = 'nonExistentDisplay';
+        expect(() => sseManager.removeClient(displayId1, res1)).not.toThrow();
+        expect(consoleLogSpy).toHaveBeenCalledWith(`Client removed for displayId: ${displayId1}`);
+    });
+
+    it('should not throw error if client does not exist for displayId', () => {
+        const res1 = mockResponse();
+        const res2 = mockResponse();
+        const displayId1 = 'display1';
+        sseManager.addClient(displayId1, res1);
+        expect(() => sseManager.removeClient(displayId1, res2)).not.toThrow();
+        // Check that the original client is still there
+        expect(sseManager.sseClients[displayId1]).toContain(res1);
+        expect(sseManager.sseClients[displayId1].length).toBe(1);
+        expect(consoleLogSpy).toHaveBeenCalledWith(`Client removed for displayId: ${displayId1}`);
+    });
+  });
+
+  describe('sendEventToDisplay', () => {
+    it('should send an event to all clients for a specific displayId', () => {
+      const res1 = mockResponse();
+      const res2 = mockResponse();
+      const displayId1 = 'display1';
+      const eventName = 'testEvent';
+      const data = { message: 'hello' };
+
+      sseManager.addClient(displayId1, res1);
+      sseManager.addClient(displayId1, res2);
+
+      sseManager.sendEventToDisplay(displayId1, eventName, data);
+
+      expect(sendSseEvent).toHaveBeenCalledTimes(2);
+      expect(sendSseEvent).toHaveBeenCalledWith(res1, eventName, data);
+      expect(sendSseEvent).toHaveBeenCalledWith(res2, eventName, data);
+      expect(consoleLogSpy).toHaveBeenCalledWith(`Sending event ${eventName} to 2 clients for displayId: ${displayId1}`);
+    });
+
+    it('should not send events to clients of other displayIds', () => {
+      const res1 = mockResponse('res1');
+      const res2 = mockResponse('res2'); // Client for another display
+      const displayId1 = 'display1';
+      const displayId2 = 'display2';
+      const eventName = 'testEvent';
+      const data = { message: 'hello' };
+
+      sseManager.addClient(displayId1, res1);
+      sseManager.addClient(displayId2, res2);
+
+      sseManager.sendEventToDisplay(displayId1, eventName, data);
+
+      expect(sendSseEvent).toHaveBeenCalledTimes(1);
+      expect(sendSseEvent).toHaveBeenCalledWith(res1, eventName, data);
+      expect(sendSseEvent).not.toHaveBeenCalledWith(res2, eventName, data);
+      expect(consoleLogSpy).toHaveBeenCalledWith(`Sending event ${eventName} to 1 clients for displayId: ${displayId1}`);
+    });
+
+    it('should handle no clients for a displayId without error and not call sendSseEvent', () => {
+      const displayId1 = 'displayWithNoClients';
+      const eventName = 'testEvent';
+      const data = { message: 'hello' };
+
+      sseManager.sendEventToDisplay(displayId1, eventName, data);
+      expect(sendSseEvent).not.toHaveBeenCalled();
+      // console.log for sending event should not be called if no clients
+      expect(consoleLogSpy).not.toHaveBeenCalledWith(expect.stringContaining(`Sending event ${eventName}`));
     });
   });
 });
