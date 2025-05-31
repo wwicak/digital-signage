@@ -1,0 +1,31 @@
+# Use a Node.js image that comes with build tools
+FROM node:20-slim AS base
+
+LABEL maintainer="Jules <devnull@google.com>"
+LABEL description="Development Dockerfile for the Digital Signage application"
+
+# Install Bun
+RUN apt-get update && apt-get install -y curl unzip
+RUN curl -fsSL https://bun.sh/install | bash
+ENV PATH="/root/.bun/bin:$PATH"
+
+# Set up the working directory
+WORKDIR /app
+
+# Copy package.json and bun.lockb first to leverage Docker cache
+COPY package.json bun.lockb ./
+
+# Install all dependencies (including devDependencies)
+# Using --prefer-offline to potentially speed up builds if cache exists
+RUN bun install --prefer-offline
+
+# Copy the rest of the application code
+# This will be overridden by volume mounts in docker-compose for development
+COPY . .
+
+# Expose ports for Next.js dev server (3000) and backend server (3001)
+EXPOSE 3000 3001
+
+# Default command (can be overridden in docker-compose)
+# This will start the Next.js frontend development server
+CMD ["bun", "run", "dev"]

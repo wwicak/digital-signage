@@ -57,10 +57,10 @@ cd CSSeniorDisplayProject
 
 ### Install Dependencies
 
-Install project dependencies using npm:
+Install project dependencies using Bun:
 
 ```bash
-npm install
+bun install
 ```
 
 ### Environment Variables
@@ -88,7 +88,7 @@ Environment variables are crucial for configuring the application.
 The project includes a setup script that helps configure environment variables, primarily the `MONGODB_URI`.
 Run the setup utility using:
 ```bash
-npm run setup
+bun run setup
 ```
 This command utilizes the `makeconf` utility. If a `.env` file does not exist, it will prompt you to enter configuration values (like your MongoDB URI) and create the `.env` file for you. If `.env` already exists, this script might not do anything unless `makeconf` is designed to update existing files.
 
@@ -101,7 +101,7 @@ Once the setup is complete:
 1.  **Start the development server:**
     The primary command for running the application in development mode (which includes the Next.js frontend and the custom Express backend) is:
     ```bash
-    npm run dev:server
+    bun run dev:server
     ```
     This command uses `nodemon` to watch for changes in server-side files and `bun` to execute `server.ts`. The `server.ts` file handles both serving the API and the Next.js application.
 
@@ -111,6 +111,96 @@ Once the setup is complete:
     http://localhost:PORT
     ```
     (Replace `PORT` with the value specified in your `.env` file, e.g., `http://localhost:3001`).
+
+## Running with Docker
+
+This project includes Docker and Docker Compose configurations to simplify setup and deployment for both development and production environments.
+
+### Prerequisites for Docker
+
+*   **Docker Desktop**: Install Docker Desktop (or Docker Engine and Docker Compose CLI for Linux). Refer to the [official Docker documentation](https://docs.docker.com/get-docker/).
+
+### Environment Variables for Docker
+
+Similar to the local setup, Dockerized environments require a `.env` file at the root of the project.
+1.  Create a `.env` file if you haven't already:
+    ```bash
+    cp .env.example .env
+    ```
+2.  Edit the `.env` file and provide necessary values, especially:
+    *   `MONGODB_URI`: **Crucial for both dev and prod.** The Docker containers will need to connect to a MongoDB instance. This can be:
+        *   A MongoDB Atlas SRV string.
+        *   A local MongoDB server running on your host machine. If using Docker Desktop, you might use `mongodb://host.docker.internal:27017/digitaldisplay` to connect from a container to a service on your host. For Linux, this might be `mongodb://172.17.0.1:27017/digitaldisplay` (the default Docker bridge IP).
+        *   Another MongoDB container (you would add this service to `docker-compose.yml`).
+    *   `SESSION_SECRET`: A long, random string.
+    *   `PORT`: Typically `3001` (the backend server port inside the container). This is exposed differently by Docker Compose for host access.
+    *   `ENVIRON`: Set to `DEV` for development-specific settings or `PROD` for production.
+    *   `SERVER_HOST`: e.g., `http://localhost:3001` (for dev, if accessed directly within Docker network or if Next.js needs it for absolute URLs during SSR/API calls from server components). For production, this would be your public domain.
+
+    The `docker-compose.yml` file is configured to pass these variables from the `.env` file into the respective services.
+
+### Development Environment with Docker
+
+The development setup uses `Dockerfile.dev` and provides live reloading for code changes. It runs two services: one for the Next.js frontend and one for the backend API server.
+
+1.  **Build and Start Development Containers:**
+    ```bash
+    docker-compose up app-dev-frontend app-dev-backend
+    ```
+    Or, to run in detached mode:
+    ```bash
+    docker-compose up -d app-dev-frontend app-dev-backend
+    ```
+
+2.  **Accessing the Application (Development):**
+    *   Frontend (Next.js): `http://localhost:3000`
+    *   Backend API: `http://localhost:3001` (or as consumed by the frontend)
+
+3.  **Key Features (Development):**
+    *   **Live Reloading**: Changes to your local source code (frontend and backend) will trigger automatic rebuilds and restarts inside the containers.
+    *   **Separate Services**: Frontend and backend run in separate containers, similar to common development practices (`next dev` and a separate API server).
+    *   **Uses `Dockerfile.dev`**: Optimized for development speed and tooling.
+
+4.  **Stopping Development Containers:**
+    If running attached (no `-d` flag), press `Ctrl+C`. If detached, run:
+    ```bash
+    docker-compose down
+    ```
+
+### Production Environment with Docker
+
+The production setup uses a multi-stage `Dockerfile` to create an optimized, smaller image for deployment.
+
+1.  **Build and Start Production Container:**
+    ```bash
+    docker-compose up -d app-prod
+    ```
+    This command will first build the production image using `Dockerfile` (if not already built) and then start the `app-prod` service in detached mode.
+
+2.  **Accessing the Application (Production):**
+    The `docker-compose.yml` maps port `8080` on the host to port `3001` (the application's backend server port) in the container.
+    *   Access the application at: `http://localhost:8080`
+
+3.  **Key Features (Production):**
+    *   **Optimized Image**: Uses a multi-stage build to minimize image size.
+    *   **Single Service**: The `app-prod` service runs the built Next.js app and the backend server together (as `server.ts` is designed to handle both).
+    *   **Uses `Dockerfile`**: Contains build and runtime optimizations.
+
+4.  **Stopping Production Container:**
+    ```bash
+    docker-compose stop app-prod # To stop the service
+    docker-compose down          # To stop and remove the container
+    ```
+
+### Managing Docker Resources
+
+*   **View running containers:** `docker ps`
+*   **View all containers (including stopped):** `docker ps -a`
+*   **View container logs:** `docker-compose logs <service_name>` (e.g., `docker-compose logs app-dev-frontend`)
+*   **Remove unused images, containers, networks, and volumes:** `docker system prune` (use with caution)
+*   **Rebuild images:** Add the `--build` flag to `docker-compose up` commands (e.g., `docker-compose up --build -d app-prod`).
+
+This Docker setup provides a consistent environment for developing, testing, and running the DigitalSignage application.
 
 ## Development Manual
 
@@ -158,7 +248,7 @@ The project is organized as a monorepo with a Next.js frontend and an Express.js
 *   **Linting**: The project uses ESLint to enforce code style and catch potential errors.
 *   **Run Linter**: To check your code against the linting rules, run:
     ```bash
-    npm run lint
+    bun run lint
     ```
 *   **Code Patterns**: Please try to follow existing code patterns and conventions found in the project. This helps maintain consistency and readability.
 *   **TypeScript**: The project is primarily written in TypeScript. Ensure new code uses TypeScript features appropriately.
@@ -327,7 +417,7 @@ Given the highly modular structure of this program, implementing a new widget is
     export { default as MyWidget } from './MyWidget'; // Export your new widget
     ```
 
-5.  Restart the development server (`npm run dev:server`) to see the new widget appear in the administrator panel.
+5.  Restart the development server (`bun run dev:server`) to see the new widget appear in the administrator panel.
 
 ## Debugging
 
@@ -335,8 +425,8 @@ This section provides tips for debugging different parts of the application.
 
 ### Backend (Node.js/Express)
 
-*   **Console Logging**: For simple debugging, `console.log()` statements in your backend code (API routes, helpers, `server.ts`) can be very effective. Output will appear in the terminal where you ran `npm run dev:server`.
-*   **Nodemon Auto-Restart**: The `npm run dev:server` script uses `nodemon`. This tool automatically monitors changes in server-side files (as configured in `package.json`) and restarts the Node.js server. This means you don't usually need to manually restart after making backend code changes.
+*   **Console Logging**: For simple debugging, `console.log()` statements in your backend code (API routes, helpers, `server.ts`) can be very effective. Output will appear in the terminal where you ran `bun run dev:server`.
+*   **Nodemon Auto-Restart**: The `bun run dev:server` script uses `nodemon`. This tool automatically monitors changes in server-side files (as configured in `package.json`) and restarts the Node.js server. This means you don't usually need to manually restart after making backend code changes.
 *   **Node.js Debugger (e.g., VS Code)**: For more complex debugging scenarios, you can use the Node.js debugger.
     *   **VS Code**: You can create a `launch.json` configuration to attach to the running `nodemon` process or to launch `server.ts` directly with the debugger.
         *   An example `launch.json` configuration for attaching to `nodemon` might involve using the `--inspect` flag with `nodemon` and then attaching VS Code's debugger.
@@ -361,7 +451,7 @@ Ensuring the application is well-tested is crucial for stability and maintainabi
 
 *   **Running Tests**: To run all tests, use the command:
     ```bash
-    npm test
+    bun test
     ```
 *   **Testing Framework**: The project uses [Jest](https://jestjs.io/) as its testing framework.
 *   **Test File Location**: Test files are located in the `__tests__` directory at the root of the project. The structure within `__tests__` generally mirrors the main project structure (e.g., `__tests__/api/routes/user.test.ts` for `api/routes/user.ts`).
@@ -377,7 +467,7 @@ Ensuring the application is well-tested is crucial for stability and maintainabi
     *   **Best Practices**: Review existing tests in `__tests__/` to understand common patterns for mocking Mongoose models, API requests, helper functions, and React components.
 *   **Test Coverage**: To generate a test coverage report, run:
     ```bash
-    npm test -- --coverage
+    bun test --coverage
     ```
     This will output a coverage summary to the console and typically create an HTML report in a `coverage/` directory.
 *   **Importance of Testing**: Writing tests for new features and bug fixes helps prevent regressions, ensures code quality, and makes refactoring safer. Aim for good test coverage across the application.
@@ -387,7 +477,7 @@ Ensuring the application is well-tested is crucial for stability and maintainabi
 Assuming the software was cloned from this GitHub repository, it is possible to use the included script:
 
 ```bash
-npm run update
+bun run update
 ```
 
 This script pulls the latest changes from the repository, installs dependencies, and rebuilds the software.
