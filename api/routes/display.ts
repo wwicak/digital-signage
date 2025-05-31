@@ -44,6 +44,7 @@ interface CreateDisplayBody {
 interface UpdateDisplayBody extends Partial<Omit<IDisplay, '_id' | 'creator_id' | 'creation_date' | 'last_update' | 'widgets'>> {
   // widgets array is handled separately for update
   widgets?: Array<Partial<IWidget> & { _id?: string }>; // For existing widgets, _id is string or ObjectId
+  currentPageData?: Record<string, any>;
 }
 
 
@@ -142,7 +143,7 @@ router.put('/:id', ensureAuthenticated, async (req: Request<{ id: string }, any,
   }
 
   const displayId = req.params.id;
-  const { widgets: newWidgetsData, ...displayData } = req.body;
+  const { widgets: newWidgetsData, currentPageData: newCurrentPageData, ...displayData } = req.body;
 
   try {
     const displayToUpdate = await Display.findOne({ _id: displayId, creator_id: user._id });
@@ -152,7 +153,21 @@ router.put('/:id', ensureAuthenticated, async (req: Request<{ id: string }, any,
       return;
     }
 
+    // Merge other display data
     Object.assign(displayToUpdate, displayData);
+
+    // Handle currentPageData merge
+    if (newCurrentPageData && typeof newCurrentPageData === 'object') {
+      if (displayToUpdate.currentPageData && typeof displayToUpdate.currentPageData === 'object') {
+        displayToUpdate.currentPageData = { ...displayToUpdate.currentPageData, ...newCurrentPageData };
+      } else {
+        displayToUpdate.currentPageData = newCurrentPageData;
+      }
+      // Mark as modified if Mongoose doesn't detect nested object changes
+      displayToUpdate.markModified('currentPageData');
+    }
+
+
     // displayToUpdate.last_update = new Date(); // Schema timestamps should handle this
 
     if (newWidgetsData) { 

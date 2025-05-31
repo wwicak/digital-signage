@@ -28,6 +28,7 @@ interface DisplayState {
   layout: "spaced" | "compact" | null;
   statusBar: IStatusBar;
   widgets: IWidget[];
+  currentPageData?: Record<string, any>; // Added for widget-specific persistent state
 }
 
 type DisplayAction =
@@ -39,7 +40,8 @@ type DisplayAction =
   | { type: 'SET_WIDGETS'; payload: IWidget[] }
   | { type: 'ADD_STATUS_BAR_ITEM'; payload: string }
   | { type: 'REMOVE_STATUS_BAR_ITEM'; payload: number }
-  | { type: 'REORDER_STATUS_BAR_ITEMS'; payload: { startIndex: number; endIndex: number } };
+  | { type: 'REORDER_STATUS_BAR_ITEMS'; payload: { startIndex: number; endIndex: number } }
+  | { type: 'UPDATE_CURRENT_PAGE_WIDGET_DATA'; payload: { widgetId: string; data: any } }; // Added action
 
 const initialState: DisplayState = {
   id: null,
@@ -47,6 +49,7 @@ const initialState: DisplayState = {
   layout: null,
   statusBar: { enabled: false, elements: [] },
   widgets: [],
+  currentPageData: {}, // Initialize currentPageData
 };
 
 function displayReducer(state: DisplayState, action: DisplayAction): DisplayState {
@@ -59,6 +62,7 @@ function displayReducer(state: DisplayState, action: DisplayAction): DisplayStat
         layout: action.payload.layout || null,
         statusBar: action.payload.statusBar || { enabled: false, elements: [] },
         widgets: action.payload.widgets || [],
+        currentPageData: action.payload.currentPageData || {}, // Handle currentPageData
       };
     case 'SET_ID':
       return { ...state, id: action.payload };
@@ -92,6 +96,14 @@ function displayReducer(state: DisplayState, action: DisplayAction): DisplayStat
         ...state,
         statusBar: { ...state.statusBar, elements: reorderElements },
       };
+    case 'UPDATE_CURRENT_PAGE_WIDGET_DATA':
+      return {
+        ...state,
+        currentPageData: {
+          ...(state.currentPageData || {}),
+          [action.payload.widgetId]: action.payload.data,
+        },
+      };
     default:
       return state;
   }
@@ -109,6 +121,8 @@ interface DisplayContextType {
   reorderStatusBarItems: (startIndex: number, endIndex: number) => void;
   isLoading: boolean;
   error: any;
+  currentPageData?: Record<string, any>; // Added currentPageData
+  updateCurrentPageWidgetData: (widgetId: string, data: any) => void; // Added update function
 }
 
 const DisplayContext = createContext<DisplayContextType | undefined>(undefined);
@@ -219,6 +233,24 @@ export const DisplayProvider: React.FC<{ children: React.ReactNode }> = ({ child
     updateDisplayThrottled(state.id, { statusBar: newStatusBar });
   }, [state.id, state.statusBar, updateDisplayThrottled]);
 
+  const updateCurrentPageWidgetData = useCallback((widgetId: string, data: any) => {
+    if (!state.id) return;
+
+    // Dispatch local state update first
+    // The reducer will create currentPageData if it's initially undefined
+    dispatch({ type: 'UPDATE_CURRENT_PAGE_WIDGET_DATA', payload: { widgetId, data } });
+
+    // Construct the new currentPageData by taking the existing state's currentPageData,
+    // or an empty object if it's null/undefined, and then setting the new widget data.
+    // This ensures we're passing the complete, updated object to the backend.
+    const newCurrentPageData = {
+      ...(state.currentPageData || {}),
+      [widgetId]: data,
+    };
+
+    updateDisplayThrottled(state.id, { currentPageData: newCurrentPageData });
+  }, [state.id, state.currentPageData, updateDisplayThrottled]);
+
   const value: DisplayContextType = {
     state,
     setId,
@@ -231,6 +263,8 @@ export const DisplayProvider: React.FC<{ children: React.ReactNode }> = ({ child
     reorderStatusBarItems,
     isLoading,
     error,
+    currentPageData: state.currentPageData, // Expose currentPageData from state
+    updateCurrentPageWidgetData, // Expose the new function
   };
 
   return (

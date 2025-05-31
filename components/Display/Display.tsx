@@ -124,7 +124,10 @@ const Display: React.FC<IDisplayComponentProps> = ({ display }) => {
               <div key={widget._id} className={'widget-wrapper'}> {/* Renamed class */}
                 {/* Pass widget-specific data to the WidgetComponent */}
                 {/* Also pass isPreview or other context if needed */}
-                <WidgetComponent {...(widget.data ? { data: widget.data } : {})} />
+                <WidgetComponent
+                  {...(widget.data ? { data: widget.data } : {})}
+                  widgetId={widget._id} // Pass widgetId
+                />
               </div>
             );
           })}

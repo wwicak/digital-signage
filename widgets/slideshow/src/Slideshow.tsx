@@ -4,6 +4,8 @@ import _ from 'lodash';
 // Assuming these will be migrated or are usable as JS with appropriate typings/shims
 import GenericSlide from './Slide/Generic';
 import PhotoSlide from './Slide/Photo';
+// Import DisplayContext - adjust path as necessary
+import { DisplayContext } from '../../../context/DisplayContext';
 import YoutubeSlide from './Slide/Youtube';
 import WebSlide from './Slide/Web';
 import Progress from './Progress';
@@ -36,6 +38,7 @@ export const SlideshowWidgetContentPropsSchema = z.object({
   data: SlideshowWidgetDefaultDataSchema.optional(),
   defaultDuration: z.number().optional(),
   isPreview: z.boolean().optional(),
+  widgetId: z.string(), // Added widgetId
 });
 export type ISlideshowWidgetContentProps = z.infer<typeof SlideshowWidgetContentPropsSchema>;
 
@@ -50,6 +53,9 @@ export const SlideshowWidgetContentStateSchema = z.object({
 type ISlideshowWidgetContentState = z.infer<typeof SlideshowWidgetContentStateSchema>;
 
 class Slideshow extends Component<ISlideshowWidgetContentProps, ISlideshowWidgetContentState> {
+  static contextType = DisplayContext; // Consume DisplayContext
+  declare context: React.ContextType<typeof DisplayContext>; // Declare context type for TypeScript
+
   private slideRefs: Array<ISlideInstance | null> = [];
   private slideAdvanceTimeoutId: NodeJS.Timeout | null = null;
 
@@ -69,12 +75,23 @@ class Slideshow extends Component<ISlideshowWidgetContentProps, ISlideshowWidget
     this.fetchSlidesAndStart();
   }
 
-  componentDidUpdate(prevProps: ISlideshowWidgetContentProps) {
+  componentDidUpdate(prevProps: ISlideshowWidgetContentProps, prevState: ISlideshowWidgetContentState) {
     // If slideshow_id changes, re-fetch slides
     if (this.props.data?.slideshow_id !== prevProps.data?.slideshow_id) {
       this.clearAdvanceTimer(); // Clear existing timer before fetching new slides
       this.slideRefs = []; // Reset refs
-      this.fetchSlidesAndStart();
+      // Reset isCurrentSlideReady when slideshow_id changes, as new slides will be loaded.
+      this.setState({ isCurrentSlideReady: false }, () => {
+        this.fetchSlidesAndStart();
+      });
+      return; // Return early to avoid processing slide index changes for the old slideshow
+    }
+
+    // Save currentSlideIndex to context when it changes
+    if (this.state.currentSlideIndex !== null && prevState.currentSlideIndex !== this.state.currentSlideIndex) {
+      if (this.context && this.props.widgetId && this.context.updateCurrentPageWidgetData) {
+        this.context.updateCurrentPageWidgetData(this.props.widgetId, this.state.currentSlideIndex);
+      }
     }
   }
 
@@ -110,8 +127,19 @@ class Slideshow extends Component<ISlideshowWidgetContentProps, ISlideshowWidget
         // For now, using 'position' if available, otherwise keep API order.
         const orderedSlides = _.sortBy(slides, (s: ISlideData) => s.position ?? Infinity);
         
-        this.setState({ slides: orderedSlides, currentSlideIndex: 0, isLoading: false }, () => {
-          this.slideRefs[0]?.play(); // Play the first slide
+        let initialSlideIndex = 0;
+        // Restore currentSlideIndex from context
+        if (this.context && this.props.widgetId && this.context.currentPageData) {
+          const persistedIndex = this.context.currentPageData[this.props.widgetId];
+          if (typeof persistedIndex === 'number' && persistedIndex >= 0 && persistedIndex < orderedSlides.length) {
+            initialSlideIndex = persistedIndex;
+          }
+        }
+
+        this.setState({ slides: orderedSlides, currentSlideIndex: initialSlideIndex, isLoading: false }, () => {
+          if (orderedSlides.length > 0 && this.slideRefs[initialSlideIndex]) {
+             this.slideRefs[initialSlideIndex]?.play();
+          }
           this.waitForNextSlide();
         });
       } else {
