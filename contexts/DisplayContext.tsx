@@ -145,13 +145,20 @@ export const DisplayProvider: React.FC<{ children: React.ReactNode }> = ({ child
     }
   }, [displayData]);
 
-  // Throttled update function
+  // Throttled update function with proper cleanup
   const updateDisplayThrottled = useCallback(
     _.debounce((id: string, data: Partial<IDisplayData>) => {
       updateDisplayMutation.mutate({ id, data });
     }, 300),
     [updateDisplayMutation]
   );
+
+  // Clean up debounced function when component unmounts or dependencies change
+  React.useEffect(() => {
+    return () => {
+      updateDisplayThrottled.cancel();
+    };
+  }, [updateDisplayThrottled]);
 
   const setId = useCallback(async (id: string): Promise<void> => {
     if (!id) return;
@@ -234,7 +241,7 @@ export const DisplayProvider: React.FC<{ children: React.ReactNode }> = ({ child
     addStatusBarItem,
     removeStatusBarItem,
     reorderStatusBarItems,
-    refreshDisplayData,
+  h  refreshDisplayData,
     isLoading,
     error,
   };
