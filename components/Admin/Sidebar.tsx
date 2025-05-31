@@ -13,6 +13,7 @@ import {
   IconDefinition,
 } from '@fortawesome/free-solid-svg-icons';
 import DropdownButton, { IDropdownChoice } from '../DropdownButton'; // Already .tsx
+import SidebarDisplayItemPlaceholder from '../Placeholders/SidebarDisplayItemPlaceholder';
 
 import { logout } from '../../helpers/auth'; // Assuming auth.js will be typed or allowJs
 import { useDisplayContext } from '../../contexts/DisplayContext';
@@ -43,10 +44,12 @@ export interface ISidebarProps extends WithRouterProps {
 
 const Sidebar: React.FC<ISidebarProps> = ({ router, loggedIn, displayId }) => {
     const [displays, setDisplays] = useState<ISimpleDisplay[]>([]);
+    const [isLoadingDisplays, setIsLoadingDisplays] = useState<boolean>(true); // New state
     const context = useDisplayContext();
   
     useEffect(() => {
       const fetchDisplays = async () => {
+        setIsLoadingDisplays(true); // Set loading true
         // host determination for client-side only
         const host = typeof window !== 'undefined' ? window.location.origin : '';
         try {
@@ -54,7 +57,9 @@ const Sidebar: React.FC<ISidebarProps> = ({ router, loggedIn, displayId }) => {
           setDisplays(displaysData.map(d => ({ _id: d._id, name: d.name })));
         } catch (error) {
           console.error("Failed to fetch displays for sidebar:", error);
-          setDisplays([]);
+          setDisplays([]); // Clear displays on error
+        } finally {
+          setIsLoadingDisplays(false); // Set loading false
         }
       };
   
@@ -78,6 +83,7 @@ const Sidebar: React.FC<ISidebarProps> = ({ router, loggedIn, displayId }) => {
     };
   
     // Use displayId prop for constructing menu paths if available, otherwise fallback to context or first display
+    // Adjust currentDisplayId to be more robust if displays array is initially empty or context is not ready
     const currentDisplayId = displayId || context.state.id || (displays.length > 0 ? displays[0]._id : '');
 
   const menu: IMenuItem[] = loggedIn
@@ -124,25 +130,41 @@ const Sidebar: React.FC<ISidebarProps> = ({ router, loggedIn, displayId }) => {
   return (
     <div className='sidebar'>
       {loggedIn && (
-        <DropdownButton
-          onSelect={navigateToAdmin}
-          choices={dropdownChoices}
-          style={{ marginTop: 20, marginBottom: 20, width: 'calc(100% - 40px)', marginLeft: 20, marginRight: 20 }} // Adjusted style
-          menuStyle={{ left: 20, top: 'calc(100% + 5px)', width: 'calc(100% - 40px)' }} // Adjusted style
-        >
-          <div className='logo'>
-            <div className='icon'>
-              <FontAwesomeIcon icon={faTv} fixedWidth color='#7bc043' />
+        isLoadingDisplays ? (
+          <>
+            <SidebarDisplayItemPlaceholder />
+            <SidebarDisplayItemPlaceholder />
+            <SidebarDisplayItemPlaceholder />
+          </>
+        ) : displays.length > 0 ? (
+          <DropdownButton
+            onSelect={navigateToAdmin}
+            choices={dropdownChoices}
+            style={{ marginTop: 20, marginBottom: 20, width: 'calc(100% - 40px)', marginLeft: 20, marginRight: 20 }}
+            menuStyle={{ left: 20, top: 'calc(100% + 5px)', width: 'calc(100% - 40px)' }}
+          >
+            <div className='logo'>
+              <div className='icon'>
+                <FontAwesomeIcon icon={faTv} fixedWidth color='#7bc043' />
+              </div>
+              <div className='info'>
+                <span className='name'>
+                  {context.state.name ||
+                   (currentDisplayId && displays.find(d => d._id === currentDisplayId)?.name) ||
+                   'Select Display'}
+                </span>
+                <span className='status online'>online</span> {/* TODO: Hardcoded status */}
+              </div>
+              <div className='caret'>
+                <FontAwesomeIcon icon={faCaretDown} fixedWidth />
+              </div>
             </div>
-            <div className='info'>
-              <span className='name'>{context.state.name || 'Select Display'}</span>
-              <span className='status online'>online</span> {/* TODO: Hardcoded status */}
-            </div>
-            <div className='caret'>
-              <FontAwesomeIcon icon={faCaretDown} fixedWidth />
-            </div>
+          </DropdownButton>
+        ) : (
+          <div style={{ padding: '20px', textAlign: 'center', color: '#888' }}>
+            No displays found.
           </div>
-        </DropdownButton>
+        )
       )}
       <ul className='menu-list'> {/* Renamed class for clarity */}
         {menu.map(item => (

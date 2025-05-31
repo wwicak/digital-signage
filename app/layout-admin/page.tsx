@@ -8,6 +8,7 @@ import { useSearchParams } from 'next/navigation';
 import { DragDropContext, Droppable, DropResult } from '@hello-pangea/dnd';
 
 import Frame from '../../components/Admin/Frame';
+import DisplayPlaceholder from '../../components/Placeholders/DisplayPlaceholder';
 import EditableWidget from '../../components/Admin/EditableWidget';
 import StatusBarElement from '../../components/Admin/StatusBarElement';
 import WidthProvider from '../../components/Widgets/WidthProvider';
@@ -25,25 +26,36 @@ const GridLayoutWithWidth = WidthProvider(GridLayout as any);
 
 function LayoutAdminContent() {
   const [widgets, setWidgets] = useState<IWidgetData[]>([]);
+  const [isRefreshingWidgets, setIsRefreshingWidgets] = useState<boolean>(true); // New state
   const searchParams = useSearchParams();
   const context = useDisplayContext();
 
   useEffect(() => {
-    // Get display ID from URL search params (e.g., ?display=ID)
     const displayIdFromUrl = searchParams?.get('display');
-    const id = displayIdFromUrl || 'default-display-id'; // Fallback to default
-    
-    // Set the display ID in context, which will trigger data fetching
-    context.setId(id);
-    refreshWidgets(id);
-  }, [searchParams, context]);
+    const id = displayIdFromUrl || context.state.id; // Prefer URL, then context
+
+    if (id && id !== 'default-display-id') { // Ensure there's a valid ID
+      if (id !== context.state.id) { // Only set if different
+          context.setId(id);
+      }
+      setIsRefreshingWidgets(true); // Set loading before refresh
+      refreshWidgets(id);
+    } else if (!displayIdFromUrl && !context.state.id) {
+      // Handle case where no ID is available initially
+      setWidgets([]);
+      setIsRefreshingWidgets(false);
+    }
+  }, [searchParams, context.setId, context.state.id]); // Added context.setId
 
   const refreshWidgets = (displayId: string): Promise<void> => {
+    setIsRefreshingWidgets(true); // Set true before fetching
     return getWidgets(displayId).then(widgets => {
       setWidgets(widgets);
     }).catch(error => {
       console.error("Failed to refresh widgets:", error);
       setWidgets([]);
+    }).finally(() => {
+      setIsRefreshingWidgets(false); // Set false after fetching
     });
   };
 
@@ -204,9 +216,14 @@ function LayoutAdminContent() {
         </Form>
       </div>
 
-      <div className='layout' style={{ borderRadius: context.state.layout === 'spaced' ? '8px' : '0px' }}>
-        <GridLayoutWithWidth
-          layout={rglLayout}
+      {context.isLoading || isRefreshingWidgets ? (
+        <div style={{ minHeight: '300px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <DisplayPlaceholder />
+        </div>
+      ) : (
+        <div className='layout' style={{ borderRadius: context.state.layout === 'spaced' ? '8px' : '0px' }}>
+          <GridLayoutWithWidth
+            layout={rglLayout}
           cols={6}
           onLayoutChange={handleLayoutChange}
           draggableCancel={'.ReactModalPortal,.controls'}
@@ -224,8 +241,9 @@ function LayoutAdminContent() {
               />
             </div>
           ))}
-        </GridLayoutWithWidth>
-      </div>
+          </GridLayoutWithWidth>
+        </div>
+      )}
       <style jsx>
         {`
           h1 {

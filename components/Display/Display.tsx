@@ -3,6 +3,7 @@ import GridLayout, { Layout as RglLayout } from 'react-grid-layout';
 import _ from 'lodash';
 
 import Frame from './Frame';
+import DisplayPlaceholder from '../Placeholders/DisplayPlaceholder';
 import HeightProvider from '../Widgets/HeightProvider';
 import Widgets from '../../widgets';
 import EmptyWidget from '../Widgets/EmptyWidget';
@@ -23,7 +24,7 @@ const DEFAULT_STATUS_BAR: string[] = [];
 const DEFAULT_LAYOUT: DisplayLayoutType = 'spaced';
 
 const Display: React.FC<IDisplayComponentProps> = React.memo(({ display }) => {
-  const { state, setId, refreshDisplayData } = useDisplayContext();
+  const { state, setId, refreshDisplayData, isLoading } = useDisplayContext(); // Add isLoading
   const eventSourceRef = useRef<EventSource | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
 
@@ -113,6 +114,14 @@ const Display: React.FC<IDisplayComponentProps> = React.memo(({ display }) => {
       </div>
     );
   }, []);
+
+  // Add this loading check
+  if (isLoading || !state.id || (display && display !== state.id && !state.widgets.length)) {
+    // If display prop is present, state.id matches, but no widgets yet, also show placeholder.
+    // This handles the case where 'display' prop is set, context id is set,
+    // but widget data hasn't populated yet.
+    return <DisplayPlaceholder />;
+  }
 
   return (
     // Frame.tsx statusBar prop expects string[] currently.
