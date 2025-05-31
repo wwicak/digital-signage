@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Suspense } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faThLarge, faTh, faPencilAlt } from '@fortawesome/free-solid-svg-icons';
 import GridLayout, { Layout as RglLayout } from 'react-grid-layout';
@@ -23,7 +23,7 @@ import { WidgetType } from '../../api/models/Widget';
 
 const GridLayoutWithWidth = WidthProvider(GridLayout as any);
 
-export default function LayoutAdminPage() {
+function LayoutAdminContent() {
   const [widgets, setWidgets] = useState<IWidgetData[]>([]);
   const searchParams = useSearchParams();
   const context = useDisplayContext();
@@ -287,5 +287,13 @@ export default function LayoutAdminPage() {
         `}
       </style>
     </Frame>
+  );
+}
+
+export default function LayoutAdminPage() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <LayoutAdminContent />
+    </Suspense>
   );
 }
