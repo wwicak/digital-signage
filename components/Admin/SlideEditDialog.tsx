@@ -4,7 +4,7 @@ import _ from 'lodash';
 import Dialog, { IDialogProps, DialogMethods } from '../Dialog'; // Assuming Dialog.tsx and its props
 import { Form, Input, Button, ButtonGroup, IInputProps, IChoice } from '../Form'; // Assuming Form components are/will be typed
 
-import { getSlide, addSlide, updateSlide, ISlideData, SlideAddData, SlideUpdateData, SlideActionDataSchema } from '../../actions/slide'; // Slide actions are typed
+import { getSlide, addSlide, updateSlide, ISlideData, SlideAddPayload as SlideAddData, SlideUpdatePayload as SlideUpdateData, SlideActionDataSchema } from '../../actions/slide'; // Slide actions are typed
 import { SlideType, SlideData, SlideTypeZod, SlideDataZod } from '../../api/models/Slide';
 import * as z from 'zod';
 

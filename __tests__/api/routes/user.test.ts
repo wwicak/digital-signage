@@ -20,6 +20,7 @@ describe('User API Routes - Registration', () => {
     // User.register is a static method, so we spy on the class itself.
     // Important: passport-local-mongoose adds 'register' to the User model directly.
     mockUserRegister = jest.spyOn(User, 'register' as any); // 'as any' because TS might not know about 'register' on the static side initially
+    mockUserRegister.mockClear(); // Ensure clear before each test
 
     (passport.authenticate as jest.Mock).mockReset();
 

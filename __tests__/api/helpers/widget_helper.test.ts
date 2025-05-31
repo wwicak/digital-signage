@@ -170,30 +170,27 @@ describe("widget_helper", () => {
   describe("deleteWidget", () => {
     it("should delete a widget from a display and resolve successfully", async () => {
       const mockWidgetId = "widget123";
-      const mockWidgetData: MockWidgetData = {
-        _id: { equals: (val) => val === mockWidgetId },
+      // Ensure mockWidgetData._id is a string for the helper's current logic
+      const mockWidgetData = {
+        _id: mockWidgetId, // Use string ID directly
         display: "display123",
       };
-      // Define mockDisplayInstance before it's used in mockResolvedValue
-      let mockDisplayInstance: MockDisplayInstance;
 
+      let mockDisplayInstance: MockDisplayInstance;
       mockDisplayInstance = {
         _id: "display123",
-        widgets: [mockWidgetId, "widget456"],
-        save: jest.fn(), // Initialize save as a Jest mock function
+        widgets: [mockWidgetId, "widget456"], // widgets array contains strings
+        save: jest.fn(),
       };
-      // Now that mockDisplayInstance is defined, set its resolved value
       mockDisplayInstance.save.mockResolvedValue(mockDisplayInstance);
       (Display.findById as jest.Mock).mockResolvedValue(mockDisplayInstance);
-      // (mockDisplayInstance.save as jest.Mock).mockResolvedValue(mockDisplayInstance); // Already done
-      //   mockDisplayInstance // Removed dangling variable
-      // ); // Removed dangling parenthesis
 
       await expect(
         deleteWidget(mockReq as Request, mockRes as Response, mockWidgetData)
       ).resolves.toEqual({ success: true, display: mockDisplayInstance });
 
       expect(Display.findById).toHaveBeenCalledWith("display123");
+      // After successful deletion, the widgetId should be removed from the array
       expect(mockDisplayInstance.widgets.length).toBe(1);
       expect(mockDisplayInstance.widgets[0]).toBe("widget456");
       expect(mockDisplayInstance.save).toHaveBeenCalled();

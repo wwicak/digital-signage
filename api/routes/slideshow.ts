@@ -137,6 +137,8 @@ router.put('/:id', ensureAuthenticated, async (req: Request<{ id: string }>, res
   }
 
   const slideshowId = req.params.id;
+  const userId = user._id; // Get userId for logging
+
   const result = UpdateSlideshowSchema.safeParse(req.body);
 
   if (!result.success) {
@@ -146,7 +148,7 @@ router.put('/:id', ensureAuthenticated, async (req: Request<{ id: string }>, res
   const { slide_ids, oldIndex, newIndex, ...slideshowData } = result.data;
 
   try {
-    const slideshowToUpdate = await Slideshow.findOne({ _id: slideshowId, creator_id: user._id });
+    const slideshowToUpdate = await Slideshow.findOne({ _id: slideshowId, creator_id: userId });
 
     if (!slideshowToUpdate) {
       res.status(404).json({ message: 'Slideshow not found or not authorized' });

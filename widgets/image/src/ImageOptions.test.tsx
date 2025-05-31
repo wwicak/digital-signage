@@ -1,5 +1,5 @@
 import React from 'react';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor, act } from '@testing-library/react'; // Import act
 import '@testing-library/jest-dom';
 
 import ImageOptions, { IImageOptionsProps } from './ImageOptions';
@@ -11,9 +11,10 @@ jest.mock('../../../components/Form', () => ({
   Input: jest.fn((props: any) => {
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
       // Simulate file input providing a File object or a string for URL
-      if (props.type === 'photo' && e.target.files && e.target.files.length > 0) {
+      if (props.type === 'photo' && e.target instanceof HTMLInputElement && e.target.files && e.target.files.length > 0) {
         props.onChange(props.name, e.target.files[0]);
       } else {
+        // For other input types or if no file is selected on a photo/file input, pass the value.
         props.onChange(props.name, e.target.value);
       }
     };
@@ -44,27 +45,23 @@ jest.mock('../../../components/Form', () => ({
     );
   }),
   InlineInputGroup: jest.fn(({ children }) => <div data-testid="mock-inline-input-group">{children}</div>),
-}));
+})); // Correctly close the jest.mock for Form
 
-// Mock standaloneUpload action
-const mockStandaloneUpload = jest.fn();
-
+// Mock the specific action module and the function
 jest.mock('../../../actions/slide', () => {
   const originalModule = jest.requireActual('../../../actions/slide');
   return {
     __esModule: true,
     ...originalModule,
-    standaloneUpload: mockStandaloneUpload,
+    standaloneUpload: jest.fn(), // standaloneUpload will be a jest.fn()
   };
 });
 
-// Ensure other imports come after the mock definition
-import React from 'react';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-import '@testing-library/jest-dom';
-import ImageOptions, { IImageOptionsProps } from './ImageOptions'; // Assuming this is correctly placed after mocks
-import { IImageDefaultData, TImageFit } from '../index';
+// Import after mocks
+import { standaloneUpload } from '../../../actions/slide';
 
+// Cast the imported function to jest.Mock to access mock methods
+const mockStandaloneUpload = standaloneUpload as jest.Mock;
 
 describe('ImageOptions', () => {
   const mockOnChange = jest.fn();
@@ -125,14 +122,27 @@ describe('ImageOptions', () => {
     expect(mockOnChange).toHaveBeenCalledWith({ ...defaultData, altText: newAltText });
   });
 
-  test('calls onChange with new URL if user types/pastes URL into photo input', () => {
+  test('calls onChange with new URL if user types/pastes URL into photo input', async () => {
     renderImageOptions();
     const newUrl = 'http://example.com/pasted.jpg';
-    // The mock Input for 'photo' type calls onChange with name 'upload' and the value.
-    // Temporarily commenting out to focus on standaloneUpload mock
-    // fireEvent.change(screen.getByTestId('mock-input-upload'), { target: { value: newUrl } });
-    // expect(mockOnChange).toHaveBeenCalledWith({ ...defaultData, url: newUrl });
-    expect(true).toBe(true); // Placeholder to make test pass
+
+    const InputMock = jest.requireMock('../../../components/Form').Input as jest.Mock;
+    // Find the props passed to the 'upload' input mock instance
+    const uploadInputCall = InputMock.mock.calls.find(call => call[0].name === 'upload');
+    const uploadInputProps = uploadInputCall?.[0];
+
+    if (uploadInputProps && uploadInputProps.onChange) {
+      await act(async () => { // Wrap state-updating call in act
+        uploadInputProps.onChange('upload', newUrl);
+      });
+    } else {
+      throw new Error("Could not find the mocked 'upload' Input or its onChange prop.");
+    }
+
+    // Wait for the setState callback to trigger mockOnChange
+    await waitFor(() => {
+      expect(mockOnChange).toHaveBeenCalledWith({ ...defaultData, url: newUrl });
+    });
   });
 
   test('handles successful image upload', async () => {

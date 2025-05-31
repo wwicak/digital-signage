@@ -1,4 +1,5 @@
 import { SlideshowSchemaZod } from '../../../api/models/Slideshow';
+import { SlideType } from '../../../api/models/Slide'; // Import SlideType
 import mongoose from 'mongoose';
 import * as z from 'zod';
 
@@ -117,8 +118,20 @@ describe('Slideshow Model Zod Schema (SlideshowSchemaZod)', () => {
    it('should validate slides array with mixed content (ObjectId and any for populated)', () => {
     const data = {
       name: 'Test Mixed Slides',
-      creator_id: validObjectId(),
-      slides: [validObjectId(), { title: 'Populated Slide', type: 'image', data: {url: 'http://example.com/img.png'} }],
+      creator_id: validObjectId(), // Slideshow's creator
+      slides: [
+        validObjectId(),
+        { // This object should conform to ImportedSlideSchemaZod (ISlide)
+          _id: validObjectId(),
+          name: 'Populated Slide Name', // ISlide requires 'name'
+          type: SlideType.IMAGE,       // Use enum from Slide model
+          data: { url: 'http://example.com/img.png' },
+          creator_id: validObjectId(), // ISlide requires 'creator_id'
+          duration: 10,                // Has default, but good to include
+          is_enabled: true,            // Has default
+          // creation_date, last_update are optional (auto-set by Mongoose)
+        }
+      ],
     };
     const result = SlideshowSchemaZod.safeParse(data);
     expect(result.success).toBe(true);

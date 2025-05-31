@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react'; // Import useCallback
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faThLarge, faTh, faPencilAlt } from '@fortawesome/free-solid-svg-icons';
 import GridLayout, { Layout as RglLayout } from 'react-grid-layout';
@@ -28,6 +28,16 @@ export default function LayoutAdminPage() {
   const searchParams = useSearchParams();
   const context = useDisplayContext();
 
+  // Memoize refreshWidgets to stabilize useEffect dependency
+  const refreshWidgets = useCallback((displayId: string): Promise<void> => {
+    return getWidgets(displayId).then(apiWidgets => { // Renamed to avoid confusion with state
+      setWidgets(apiWidgets);
+    }).catch(error => {
+      console.error("Failed to refresh widgets:", error);
+      setWidgets([]); // Ensure widgets is cleared or handled on error
+    });
+  }, []); // Assuming getWidgets and setWidgets are stable or have no dependencies from component scope
+
   useEffect(() => {
     // Get display ID from URL search params (e.g., ?display=ID)
     const displayIdFromUrl = searchParams?.get('display');
@@ -36,33 +46,32 @@ export default function LayoutAdminPage() {
     // Set the display ID in context, which will trigger data fetching
     context.setId(id);
     refreshWidgets(id);
-  }, [searchParams, context]);
-
-  const refreshWidgets = (displayId: string): Promise<void> => {
-    return getWidgets(displayId).then(widgets => {
-      setWidgets(widgets);
-    }).catch(error => {
-      console.error("Failed to refresh widgets:", error);
-      setWidgets([]);
-    });
-  };
+  }, [searchParams, context.setId, refreshWidgets]); // Updated dependencies
 
   const handleAddWidget = (type: string): void => {
+    if (!context.state.id) {
+      console.error("Display ID not set, cannot add widget.");
+      return;
+    }
     const widgetDefinition = Widgets[type];
     const newWidgetData: Partial<INewWidgetData> = {
-        display: context.state.id!,
+        display: context.state.id,
         type: type as WidgetType,
         data: widgetDefinition?.defaultData || {},
     };
 
     addWidget(newWidgetData as INewWidgetData)
-        .then(() => refreshWidgets(context.state.id!))
+        .then(() => refreshWidgets(context.state.id!)) // context.state.id should be stable if refreshWidgets is called
         .catch(error => console.error("Failed to add widget:", error));
   };
 
   const handleDeleteWidget = (id: string): void => {
+    if (!context.state.id) {
+      console.error("Display ID not set, cannot delete widget.");
+      return;
+    }
     deleteWidget(id)
-        .then(() => refreshWidgets(context.state.id!))
+        .then(() => refreshWidgets(context.state.id!)) // context.state.id should be stable
         .catch(error => console.error("Failed to delete widget:", error));
   };
 

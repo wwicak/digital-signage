@@ -80,10 +80,11 @@ describe('Slide Model Zod Schema (SlideSchemaZod)', () => {
       expect(SlideSchemaZod.safeParse(data).success).toBe(true);
     });
     it('should invalidate IMAGE type with incorrect data (missing url)', () => {
-      const data = { ...baseValidSlide, type: SlideType.IMAGE, data: { alt: 'Wrong data' } };
+      const data = { ...baseValidSlide, type: SlideType.IMAGE, data: { alt: 'Wrong data' } }; // url is missing
       const result = SlideSchemaZod.safeParse(data);
       expect(result.success).toBe(false);
       if (!result.success) {
+        // Restore original assertion and remove console.log
         expect(result.error.issues.some(issue => issue.path.includes('data') && issue.message === 'Data does not match IMAGE type schema')).toBe(true);
       }
     });
@@ -155,8 +156,17 @@ describe('Slide Model Zod Schema (SlideSchemaZod)', () => {
 
     // Test for YOUTUBE type
     it('should validate YOUTUBE type with correct data', () => {
-      const data = { ...baseValidSlide, type: SlideType.YOUTUBE, data: { videoId: 'dQw4w9WgXcQ', url: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ' } };
-      expect(SlideSchemaZod.safeParse(data).success).toBe(true);
+      const data = {
+        // ...baseValidSlide, // Using minimal data first
+        name: 'Test Youtube',
+        type: SlideType.YOUTUBE,
+        data: { videoId: 'dQw4w9WgXcQ', url: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ' },
+        creator_id: validObjectId(),
+        // Optional fields with defaults (duration, is_enabled) will be handled by Zod's .default()
+      };
+      const result = SlideSchemaZod.safeParse(data);
+      // Removed console.log
+      expect(result.success).toBe(true);
     });
     it('should invalidate YOUTUBE type with incorrect data (missing videoId)', () => {
       const data = { ...baseValidSlide, type: SlideType.YOUTUBE, data: { url: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ' } };

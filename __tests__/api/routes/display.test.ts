@@ -82,8 +82,8 @@ describe('Display API Routes', () => {
     mockedSendEventToDisplay.mockReset();
 
     // Default spy implementations
-    displayFindSpy.mockImplementation(() => mockQueryChain([]));
-    displayFindOneSpy.mockImplementation(() => mockQueryChain(null));
+    displayFindSpy.mockImplementation(() => mockQueryChain([])); // Keep for findAllAndSend if it relies on chainable find
+    // displayFindOneSpy.mockImplementation(() => mockQueryChain(null)); // Remove, will be mocked per test
     displayProtoSaveSpy.mockResolvedValue({ _id: 'defaultId' } as any); // Default save
   });
 
@@ -128,29 +128,28 @@ describe('Display API Routes', () => {
     const displayId = 'testDisplayId';
     it('should fetch a specific display with populated widgets', async () => {
       const mockDisplay = { _id: displayId, name: 'Test Display', widgets: [], creator_id: mockUser._id };
-      // Ensure the mock for findOne().populate() resolves correctly
-      displayFindOneSpy.mockImplementation(() => mockQueryChain(mockDisplay, 'exec').populate('widgets'));
-
+      const mockPopulate = jest.fn().mockResolvedValueOnce(mockDisplay);
+      displayFindOneSpy.mockReturnValueOnce({ populate: mockPopulate } as any);
 
       const response = await request(app).get(`/api/v1/displays/${displayId}`);
 
       expect(response.status).toBe(200);
       expect(response.body).toEqual(mockDisplay);
       expect(displayFindOneSpy).toHaveBeenCalledWith({ _id: displayId, creator_id: mockUser._id });
-      const findOneMockResult = displayFindOneSpy.mock.results[0].value;
-      expect(findOneMockResult.populate).toHaveBeenCalledWith('widgets');
-      expect(findOneMockResult.exec).toHaveBeenCalled();
+      expect(mockPopulate).toHaveBeenCalledWith('widgets');
     });
 
     it('should return 404 if display not found', async () => {
-      displayFindOneSpy.mockImplementation(() => mockQueryChain(null, 'exec').populate('widgets'));
+      const mockPopulate = jest.fn().mockResolvedValueOnce(null);
+      displayFindOneSpy.mockReturnValueOnce({ populate: mockPopulate } as any);
       const response = await request(app).get(`/api/v1/displays/nonexistent`);
       expect(response.status).toBe(404);
       expect(response.body.message).toBe('Display not found or not authorized.');
     });
 
     it('should return 500 on database error', async () => {
-      displayFindOneSpy.mockImplementation(() => mockQueryChain(null, 'exec').populate('widgets').exec.mockRejectedValue(new Error('DB error')));
+      const mockPopulate = jest.fn().mockRejectedValueOnce(new Error('DB error'));
+      displayFindOneSpy.mockReturnValueOnce({ populate: mockPopulate } as any);
       const response = await request(app).get(`/api/v1/displays/${displayId}`);
       expect(response.status).toBe(500);
       expect(response.body.message).toBe('Error fetching display.');
@@ -203,7 +202,7 @@ describe('Display API Routes', () => {
       // Mock for createWidgetsForDisplay
       // It modifies newDisplayDoc.widgets in place and then newDisplayDoc is saved.
       mockedCreateWidgetsForDisplay.mockImplementation(async (displayDoc, widgetsData, creatorId) => {
-        displayDoc.widgets = widgetsData.map((w, i) => new mongoose.Types.ObjectId()); // Simulate adding widget IDs
+        displayDoc.widgets = widgetsData.map((w: typeof newDisplayData.widgets[0], i: number) => new mongoose.Types.ObjectId()); // Simulate adding widget IDs
       });
       mockedSendEventToDisplay.mockReturnValue(undefined);
 
@@ -215,10 +214,10 @@ describe('Display API Routes', () => {
       expect(response.status).toBe(201);
       expect(response.body).toEqual(populatedDisplayMock);
       expect(displayProtoSaveSpy).toHaveBeenCalledTimes(1);
-      const savedObject = displayProtoSaveSpy.mock.calls[0][0];
-      expect(savedObject.name).toBe(newDisplayData.name);
+      // const savedObject = displayProtoSaveSpy.mock.calls[0][0]; // Instance before save
+      // expect(savedObject.name).toBe(newDisplayData.name); // Checked by response.body
       expect(mockedCreateWidgetsForDisplay).toHaveBeenCalledWith(
-        savedObject, // The newDisplayDoc instance
+        expect.objectContaining({ name: newDisplayData.name }), // Check the instance passed to helper
         newDisplayData.widgets,
         mockUser._id
       );
@@ -328,17 +327,15 @@ describe('Display API Routes', () => {
 
     it('should update display details successfully', async () => {
       const currentDisplayState = getInitialDisplay();
-      // Ensure findOne resolves to an object that can be populated and has save
-      const findOneResultQuery = mockQueryChain(currentDisplayState);
-      findOneResultQuery.populate.mockImplementation(() => findOneResultQuery); // chainable
-      findOneResultQuery.exec.mockResolvedValue(currentDisplayState); // exec gives the object
-      displayFindOneSpy.mockReturnValue(findOneResultQuery);
+      displayFindOneSpy.mockResolvedValueOnce(currentDisplayState); // findOne resolves to the object with a save mock
 
-      currentDisplayState.save.mockResolvedValue({ ...currentDisplayState, ...updatePayload });
-      // Mock populate on the savedDisplay object
-      const finalPopulatedDisplay = { ...currentDisplayState, ...updatePayload, widgets: currentDisplayState.widgets }; // Assuming widgets don't change here
-      (currentDisplayState.save() as any).populate = jest.fn().mockResolvedValue(finalPopulatedDisplay);
+      const savedStateWithUpdates = { ...currentDisplayState, ...updatePayload };
+      const finalPopulatedDisplay = { ...savedStateWithUpdates, widgets: currentDisplayState.widgets }; // Assuming populate adds/keeps widgets
 
+      currentDisplayState.save.mockResolvedValueOnce({
+        ...savedStateWithUpdates,
+        populate: jest.fn().mockResolvedValueOnce(finalPopulatedDisplay)
+      });
 
       const response = await request(app)
         .put(`/api/v1/displays/${displayId}`)
@@ -353,18 +350,26 @@ describe('Display API Routes', () => {
 
     it('should update display widgets successfully', async () => {
       const currentDisplayState = getInitialDisplay();
-      const findOneResultQuery = mockQueryChain(currentDisplayState);
-      displayFindOneSpy.mockReturnValue(findOneResultQuery);
+      displayFindOneSpy.mockResolvedValueOnce(currentDisplayState);
 
       const newWidgetsData = [{ _id: new mongoose.Types.ObjectId().toString(), name: 'Updated Widget', type: WidgetType.WEATHER, x:1,y:1,w:1,h:1, data: {} }];
-      const updatedWidgetIds = [newWidgetsData[0]._id];
-      mockedUpdateWidgetsForDisplay.mockResolvedValue(updatedWidgetIds.map(id => new mongoose.Types.ObjectId(id as string)) as any);
+      const updatedWidgetObjectIds = newWidgetsData.map(w => new mongoose.Types.ObjectId(w._id)); // These are ObjectIds
 
-      const finalSavedDisplay = { ...currentDisplayState, widgets: updatedWidgetIds };
-      currentDisplayState.save.mockResolvedValue(finalSavedDisplay);
-      // Mock populate on the savedDisplay object
-      (finalSavedDisplay as any).populate = jest.fn().mockResolvedValue(finalSavedDisplay);
+      mockedUpdateWidgetsForDisplay.mockResolvedValueOnce(updatedWidgetObjectIds as any); // Helper returns array of ObjectIds
 
+      // This is what displayToUpdate.save() should resolve to, before populate
+      // displayToUpdate.widgets will be set to updatedWidgetObjectIds by the route logic
+      const displayAfterSave = { ...currentDisplayState, widgets: updatedWidgetObjectIds };
+
+      // This is what savedDisplay.populate('widgets') should resolve to.
+      // Populate should turn the ObjectId[] into an IWidget[] (or similar based on schema)
+      // For the test, we'll assume it populates to match newWidgetsData structure.
+      const finalPopulatedDisplay = { ...displayAfterSave, widgets: newWidgetsData };
+
+      currentDisplayState.save.mockResolvedValueOnce({
+        ...displayAfterSave, // The object returned by save()
+        populate: jest.fn().mockResolvedValueOnce(finalPopulatedDisplay) // populate() is called on the result of save()
+      });
 
       const response = await request(app)
         .put(`/api/v1/displays/${displayId}`)
@@ -373,11 +378,11 @@ describe('Display API Routes', () => {
       expect(response.status).toBe(200);
       expect(mockedUpdateWidgetsForDisplay).toHaveBeenCalledWith(currentDisplayState, newWidgetsData, mockUser._id);
       expect(currentDisplayState.save).toHaveBeenCalledTimes(1);
-      expect(response.body.widgets).toEqual(updatedWidgetIds); // Assuming populate returns IDs if not expanding fully
+      expect(response.body.widgets).toEqual(newWidgetsData); // Compare with the expected objects
     });
 
     it('should return 404 if display to update is not found', async () => {
-      displayFindOneSpy.mockImplementation(() => mockQueryChain(null));
+      displayFindOneSpy.mockResolvedValueOnce(null); // findOne returns null
       const response = await request(app)
         .put(`/api/v1/displays/nonExistentId`)
         .send(updatePayload);
@@ -386,10 +391,10 @@ describe('Display API Routes', () => {
 
     it('should return 400 on Mongoose ValidationError during save', async () => {
       const currentDisplayState = getInitialDisplay();
-      displayFindOneSpy.mockImplementation(() => mockQueryChain(currentDisplayState));
+      displayFindOneSpy.mockResolvedValueOnce(currentDisplayState);
       const validationError = new Error('Validation failed') as any;
       validationError.name = 'ValidationError';
-      currentDisplayState.save.mockRejectedValue(validationError);
+      currentDisplayState.save.mockRejectedValueOnce(validationError); // save rejects
 
       const response = await request(app)
         .put(`/api/v1/displays/${displayId}`)
@@ -400,8 +405,8 @@ describe('Display API Routes', () => {
 
     it('should return 500 on other database errors during save', async () => {
       const currentDisplayState = getInitialDisplay();
-      displayFindOneSpy.mockImplementation(() => mockQueryChain(currentDisplayState));
-      currentDisplayState.save.mockRejectedValue(new Error('DB save error'));
+      displayFindOneSpy.mockResolvedValueOnce(currentDisplayState);
+      currentDisplayState.save.mockRejectedValueOnce(new Error('DB save error')); // save rejects
 
       const response = await request(app)
         .put(`/api/v1/displays/${displayId}`)
@@ -435,9 +440,9 @@ describe('Display API Routes', () => {
     };
 
     it('should delete a display successfully', async () => {
-      displayFindOneSpy.mockImplementation(() => mockQueryChain(mockDisplayInstance));
-      mockedDeleteWidgetsForDisplay.mockResolvedValue(undefined); // Assume it completes
-      displayFindByIdAndDeleteSpy.mockResolvedValue(mockDisplayInstance as any); // Returns the deleted document
+      displayFindOneSpy.mockResolvedValueOnce(mockDisplayInstance as any); // Use mockResolvedValueOnce
+      mockedDeleteWidgetsForDisplay.mockResolvedValueOnce(undefined); // Assume it completes
+      displayFindByIdAndDeleteSpy.mockResolvedValueOnce(mockDisplayInstance as any); // Returns the deleted document
       mockedSendEventToDisplay.mockReturnValue(undefined);
 
       const response = await request(app)
@@ -445,14 +450,14 @@ describe('Display API Routes', () => {
 
       expect(response.status).toBe(200);
       expect(response.body.message).toBe('Display and associated widgets deleted successfully');
-      expect(displayFindOneSpy.mock.results[0].value.exec).toHaveBeenCalled();
+      expect(displayFindOneSpy).toHaveBeenCalledWith({ _id: displayId, creator_id: mockUser._id }); // Verify findOne call
       expect(mockedDeleteWidgetsForDisplay).toHaveBeenCalledWith(mockDisplayInstance);
       expect(displayFindByIdAndDeleteSpy).toHaveBeenCalledWith(displayId);
       expect(mockedSendEventToDisplay).toHaveBeenCalledWith(displayId, 'display_updated', { displayId, action: 'delete' });
     });
 
     it('should return 404 if display to delete is not found by findOne', async () => {
-      displayFindOneSpy.mockImplementation(() => mockQueryChain(null));
+      displayFindOneSpy.mockResolvedValueOnce(null); // Use mockResolvedValueOnce
       const response = await request(app)
         .delete(`/api/v1/displays/nonExistentId`);
 

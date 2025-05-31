@@ -1,6 +1,6 @@
 import mongoose, { Document, Model, Schema } from 'mongoose';
 import * as z from 'zod';
-import { ISlide } from './Slide'; // Assuming Slide.ts exists and exports ISlide
+import { ISlide, SlideSchemaZod as ImportedSlideSchemaZod } from './Slide'; // Import Zod schema for ISlide
 
 export interface ISlideshow extends Document {
   name: string;
@@ -69,10 +69,7 @@ export const SlideshowSchemaZod = z.object({
   _id: z.instanceof(mongoose.Types.ObjectId).optional(),
   name: z.string(),
   description: z.string().optional(),
-  // For slides, allowing an array of ObjectIds or populated slide objects (hence z.any() for populated)
-  // A more specific Zod schema for populated slides could be used if ISlide's Zod schema is available
-  // and circular dependencies are handled.
-  slides: z.array(z.union([z.instanceof(mongoose.Types.ObjectId), z.any()])).default([]),
+  slides: z.array(z.union([z.instanceof(mongoose.Types.ObjectId), ImportedSlideSchemaZod])).default([]),
   creator_id: z.instanceof(mongoose.Types.ObjectId),
   creation_date: z.date().optional(), // Defaulted by Mongoose
   last_update: z.date().optional(),   // Defaulted by Mongoose

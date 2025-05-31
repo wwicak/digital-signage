@@ -167,7 +167,7 @@ export const PhotoSlideDataSchema = z.object({
 
 export const YoutubeSlideDataSchema = z.object({
   videoId: z.string(),
-  url: z.string().url(),
+  url: z.string().url(), // Restored .url()
   autoplay: z.boolean().optional(),
   startTime: z.number().optional(),
   endTime: z.number().optional(),
@@ -191,7 +191,7 @@ export const SlideSchemaZod = z.object({
   name: z.string(),
   description: z.string().optional(),
   type: SlideTypeZod,
-  data: SlideDataZod, // This will be further refined with a .superRefine or .refine
+  data: z.any(), // Changed from SlideDataZod to z.any() - superRefine will handle validation
   creator_id: z.instanceof(mongoose.Types.ObjectId),
   creation_date: z.date().optional(), // Defaulted by Mongoose
   last_update: z.date().optional(),   // Defaulted by Mongoose

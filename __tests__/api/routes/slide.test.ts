@@ -295,7 +295,10 @@ describe('Slide API Routes', () => {
 
       slideFindOneSpy.mockResolvedValue(initialSlide as any);
       initialSlide.save.mockResolvedValue({ ...initialSlide, ...updatedDataWithSlideshows });
-      slideshowFindSpy.mockResolvedValue(mockExistingSlideshows as any); // For finding original slideshows
+      // Mock Slideshow.find().select() chain
+      slideshowFindSpy.mockReturnValueOnce({
+        select: jest.fn().mockResolvedValueOnce(mockExistingSlideshows)
+      } as any);
       mockedHandleSlideInSlideshows.mockResolvedValue(undefined);
 
       const response = await request(app)

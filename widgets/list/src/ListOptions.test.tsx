@@ -13,12 +13,8 @@ jest.mock('../../../components/Form', () => ({
     // or with the choice id for select.
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
       if (props.onChange) {
-        // For the 'ordered' select, we pass boolean based on 'ordered'/'unordered' string value
-        if (props.name === 'ordered') {
-            props.onChange(props.name, e.target.value === 'ordered');
-        } else {
-            props.onChange(props.name, e.target.value);
-        }
+        // Pass the raw value from the event; component's onChange will handle conversion
+        props.onChange(props.name, e.target.value);
       }
     };
     if (props.type === 'select') {

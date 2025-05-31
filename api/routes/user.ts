@@ -37,8 +37,8 @@ router.post('/register', async (req: Request<{}, any, RegisterRequestBody>, res:
 
   try {
     // User.register will hash the password and save the user.
-    // The callback receives (err, user)
-    await User.register(userToRegister, password, (err: any, registeredUser?: IUser) => {
+    // The callback receives (err, user). Do not await if providing a callback.
+    User.register(userToRegister, password, (err: any, registeredUser?: IUser) => {
       if (err) {
         console.error('Registration error:', err);
         res.status(500).json({ message: 'Error registering user', error: err.message });

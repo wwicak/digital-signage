@@ -67,9 +67,9 @@ export const deleteSlide = (
   id: string,
   host: string = ""
 ): Promise<IApiResponse> => { // Return type changed to Promise<IApiResponse>
-  return axios.delete<unknown>(`${host}/api/v1/slide/${id}`)
-    .then((res: AxiosResponse<unknown>) => {
-        if (res && res.data && Object.keys(res.data).length > 0) { // Check if data is not empty
+  return axios.delete(`${host}/api/v1/slide/${id}`) // Removed <unknown>
+    .then((res: AxiosResponse<any>) => { // res.data will likely be any if generic is omitted from call
+        if (res && res.data && typeof res.data === 'object' && Object.keys(res.data).length > 0) { // Check if data is not empty and is an object
             return ApiResponseSchema.parse(res.data);
         }
         // Handle cases where delete might not return a body but is successful
