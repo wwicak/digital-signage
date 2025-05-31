@@ -8,6 +8,9 @@ on:
 jobs:
   renovate:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -18,7 +21,7 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: "18" # Specify a Node.js version, adjust if needed
+          node-version: "20" # Updated Node.js version
 
       - name: Install Renovate CLI
         run: npm install -g renovate
