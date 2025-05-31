@@ -82,12 +82,12 @@ class CongratsContent extends Component<ICongratsContentProps> {
     return (
       <div className='congrats-widget-content'> {/* Renamed class */}
         {animationData && (
-          <div className='background-animation'> {/* Renamed class */}
+          <div className='background-animation' data-testid="lottie-animation-container"> {/* Renamed class */}
             <Lottie options={lottieOptions} height={'100%'} width={'100%'} />
           </div>
         )}
         <AutoScroll style={{ display: 'block', flex: 1, overflowY: 'auto', minHeight:0, zIndex: 1 }}> {/* Ensure AutoScroll is on top */}
-          <div className='text-content' style={{ fontSize: `${fontSize}px` }}> {/* Renamed class, applied fontSize */}
+          <div className='text-content' style={{ fontSize: `${fontSize}px` }} data-testid="congrats-text-content"> {/* Renamed class, applied fontSize */}
             {text.split('\n').map((line, index) => (
               <div key={`line-${index}`}>{line || <br />}</div>
             ))}

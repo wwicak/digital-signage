@@ -166,9 +166,22 @@ export const findByIdAndDeleteAndSend = async (
 export const sendSseEvent = (res: any, eventName: string, data: any): void => {
   // Ensure res is an SSE response stream
   if (res.write && typeof res.flushHeaders === 'function') {
-    res.write(`event: ${eventName}\n`);
-    res.write(`data: ${JSON.stringify(data)}\n\n`);
-    // res.flushHeaders(); // May or may not be needed depending on server setup
+    try {
+      const message = `event: ${eventName}\ndata: ${JSON.stringify(data)}\n\n`;
+      res.write(message);
+      // res.flushHeaders(); // May or may not be needed depending on server setup
+    } catch (error) {
+      console.error('Failed to write SSE event:', error);
+      // Optionally, attempt to close the response or mark it as errored
+      // For example, if res.end is available and appropriate:
+      // if (typeof res.end === 'function') {
+      //   res.end();
+      // }
+      // Or emit an error event if 'res' is an EventEmitter-like object
+      // if (typeof res.emit === 'function') {
+      //   res.emit('error', error);
+      // }
+    }
   } else {
     console.warn('Attempted to send SSE event on a non-SSE response object.');
   }

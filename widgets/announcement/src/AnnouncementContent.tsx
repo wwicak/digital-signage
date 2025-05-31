@@ -51,10 +51,10 @@ class AnnouncementContent extends Component<IAnnouncementContentProps> {
           <div className='icon'>
             <FontAwesomeIcon icon={faExclamationTriangle as IconProp} style={{ fontSize: '0.9em' }} color={accentColor} /> {/* Adjusted size */}
           </div>
-          <span>Announcement</span> {/* Hardcoded title text */}
+          <span data-testid="announcement-title-bar-text">Announcement</span> {/* Hardcoded title text with data-testid */}
         </div>
         <AutoScroll style={{ display: 'block', flex: 1, overflowY: 'auto', minHeight: 0 }}> {/* Ensure AutoScroll can shrink */}
-          <div className='text-content'> {/* Renamed class */}
+          <div className='text-content' data-testid="announcement-text-content"> {/* Renamed class and added data-testid */}
             {text.split('\n').map((line, index) => (
               // Ensure unique keys for mapped elements
               <div key={`line-${index}`}>{line || <br />}</div>

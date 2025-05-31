@@ -48,28 +48,28 @@ class ListContent extends Component<IListContentProps> {
     };
 
     return (
-      <div className='list-widget-content' style={{ background: color, color: textColor }}> {/* Renamed class */}
+      <div className='list-widget-content' style={{ background: color, color: textColor }} data-testid="list-widget-container">
         {title && (
-          <div className='title-container'> {/* Renamed class */}
-            <div className='title-text'>{title}</div> {/* Renamed class */}
+          <div className='title-container'>
+            <div className='title-text' data-testid="list-widget-title">{title}</div>
           </div>
         )}
-        <div className='list-items-container'> {/* Renamed class */}
+        <div className='list-items-container'>
           <AutoScroll
             style={{
-              display: 'block', // Changed to block for AutoScroll to manage its own layout
+              display: 'block',
               paddingTop: 12,
               paddingBottom: 12,
-              flex: 1, // Allow AutoScroll to take available space
-              overflowY: 'auto', // Ensure AutoScroll itself can scroll if content exceeds its bounds
-              minHeight: 0, // Important for flex children that need to scroll
+              flex: 1,
+              overflowY: 'auto',
+              minHeight: 0,
             }}
           >
-            <ListTag className={`list-tag ${ordered ? 'ordered' : 'unordered'}`}>
+            <ListTag className={`list-tag ${ordered ? 'ordered' : 'unordered'}`} data-testid="list-widget-list">
               {list.map((item, index) => (
-                <li key={`list-item-${index}-${item.text.slice(0,10)}`} className='list-element' style={itemStyle}> {/* Renamed class */}
-                  <span className='text-content'>{item.text || 'Insert some text ...'}</span> {/* Renamed class */}
-                  {item.label && <div className='label-tag'>{item.label}</div>} {/* Renamed class */}
+                <li key={`list-item-${index}-${item.text.slice(0,10)}`} className='list-element' style={itemStyle} data-testid={`list-item-${index}`}>
+                  <span className='text-content' data-testid="list-item-text">{item.text || 'Insert some text ...'}</span>
+                  {item.label && <div className='label-tag' data-testid="list-item-label">{item.label}</div>}
                 </li>
               ))}
             </ListTag>

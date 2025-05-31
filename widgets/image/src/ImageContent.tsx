@@ -67,19 +67,19 @@ class ImageContent extends Component<IImageContentProps> {
     // An aria-label could be added to the container if appropriate.
 
     return (
-      <div className='image-widget-content' aria-label={altText || title || "Image widget"}> {/* Renamed class */}
+      <div className='image-widget-content' data-testid="image-widget-container" aria-label={altText || title || "Image widget"}>
         {title && (
-          <div className='title-container'> {/* Renamed class */}
-            <div className='title-text'>{title}</div> {/* Renamed class */}
+          <div className='title-container'>
+            <div className='title-text' data-testid="image-widget-title">{title}</div>
           </div>
         )}
         {url ? (
-          <div className='content-area' style={contentStyle}> {/* Renamed class */}
-            <div className='photocover-bg' style={photoCoverStyle} /> {/* Renamed class */}
-            <div className='photo-main' style={photoStyle} /> {/* Renamed class */}
+          <div className='content-area' style={contentStyle}>
+            <div className='photocover-bg' data-testid="image-widget-photocover" style={photoCoverStyle} />
+            <div className='photo-main' data-testid="image-widget-main-image" style={photoStyle} />
           </div>
         ) : (
-          <div className='content-area placeholder-content' style={contentStyle}> {/* Placeholder if no URL */}
+          <div className='content-area placeholder-content' data-testid="image-widget-placeholder" style={contentStyle}>
             <span>No Image URL Provided</span>
           </div>
         )}

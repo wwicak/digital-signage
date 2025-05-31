@@ -239,10 +239,9 @@ export async function deleteWidget(
   }
 
   const displayId = widgetData.display;
-  const widgetId =
-    typeof widgetData._id === "string"
-      ? widgetData._id
-      : (widgetData._id as any).equals(widgetData._id) && widgetData._id;
+  // Ensure widgetId is always a string for comparison.
+  // The _id from widgetData should be the string representation of the ObjectId.
+  const widgetIdString = String(widgetData._id);
 
   try {
     const display = await Display.findById(displayId);
@@ -252,13 +251,9 @@ export async function deleteWidget(
     }
 
     display.widgets = display.widgets.filter((id: any) => {
-      // Handle both string IDs and Mongoose ObjectIds with an .equals method
-      if (typeof id === "string") {
-        return id !== widgetId;
-      } else if (id && typeof id.equals === "function") {
-        return !id.equals(widgetId);
-      }
-      return true;
+      // Convert current widget ID from display.widgets to string for comparison
+      const currentWidgetIdString = String(id);
+      return currentWidgetIdString !== widgetIdString;
     });
 
     const savedDisplay = await display.save();
