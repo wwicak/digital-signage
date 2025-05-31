@@ -7,21 +7,26 @@ import {
   findByIdAndDeleteAndSend,
   sendSseEvent,
   parseQueryParams
-} from '../../../api/helpers/common_helper'; // Adjust path as necessary
-import { jest } from '@jest/globals'; // Explicitly import jest for mocking if not using globals
+} from '../../../api/helpers/common_helper';
+import { jest } from '@jest/globals';
 
-// Helper function to create a mock Mongoose query chain
-const mockQueryChain = (resolveValue: any = null, methodName: string = 'exec') => {
-  const query: any = {
-    populate: jest.fn().mockReturnThis(),
-    select: jest.fn().mockReturnThis(),
-    sort: jest.fn().mockReturnThis(),
-  };
-  query[methodName] = jest.fn().mockResolvedValue(resolveValue);
-  return query;
+// --- Centralized Mock Query Object ---
+// This object will be returned by model static methods like findById, find, etc.
+// Tests will configure the behavior of its methods (exec, populate, etc.).
+const mockQueryObject = {
+  exec: jest.fn(),
+  populate: jest.fn(function(this: any) { return this; }), // mockReturnThis
+  select: jest.fn(function(this: any) { return this; }),
+  sort: jest.fn(function(this: any) { return this; }),
+  lean: jest.fn(function(this: any) { return this; }),
+  limit: jest.fn(function(this: any) { return this; }),
+  skip: jest.fn(function(this: any) { return this; }),
+  // For the specific "granular thenable" test case that is already passing
+  then: jest.fn(function(this: any, onFulfilled: any, onRejected: any) {
+    return this.exec().then(onFulfilled, onRejected);
+  })
 };
 
-// Mock Express response object
 const mockResponse = () => {
   const res: any = {};
   res.status = jest.fn().mockReturnValue(res);
@@ -31,31 +36,29 @@ const mockResponse = () => {
   return res;
 };
 
-// Mock Mongoose Model
 const mockModel = (modelName = 'TestModel') => {
   const modelInstanceSaveResolver = jest.fn();
   const ModelConstructorMock = jest.fn((data) => ({
     ...data,
     _id: new mongoose.Types.ObjectId(),
     save: modelInstanceSaveResolver,
-    populate: jest.fn(function(this: any) { // Ensure 'this' context for chaining
-      // Simulate that populate might return a slightly different object or the same one
-      // For simplicity, returning 'this' which now has its own execPopulate mock
+    populate: jest.fn(function(this: any) {
       this.execPopulate = jest.fn().mockResolvedValue(this);
       return this;
     }),
-    execPopulate: jest.fn(function() { return Promise.resolve(this); }),
+    execPopulate: jest.fn(function(this: any) { return Promise.resolve(this); }),
   }));
 
   Object.assign(ModelConstructorMock, {
     modelName,
-    findById: jest.fn(() => mockQueryChain()),
-    find: jest.fn(() => mockQueryChain([])),
-    findByIdAndUpdate: jest.fn(() => mockQueryChain()),
-    findByIdAndDelete: jest.fn(() => mockQueryChain()),
+    findById: jest.fn().mockReturnValue(mockQueryObject),
+    find: jest.fn().mockReturnValue(mockQueryObject),
+    findByIdAndUpdate: jest.fn().mockReturnValue(mockQueryObject),
+    findByIdAndDelete: jest.fn().mockReturnValue(mockQueryObject),
   });
 
   (ModelConstructorMock as any)._mockSaveResolver = modelInstanceSaveResolver;
+  (ModelConstructorMock as any).modelName = modelName;
 
   return ModelConstructorMock as any;
 };
@@ -66,80 +69,123 @@ describe('Common Helper Functions', () => {
 
   beforeEach(() => {
     res = mockResponse();
-    jest.spyOn(console, 'error').mockImplementation(() => {}); // Suppress console.error
-    jest.spyOn(console, 'warn').mockImplementation(() => {}); // Suppress console.warn
+    jest.spyOn(console, 'error').mockImplementation(() => {});
+    jest.spyOn(console, 'warn').mockImplementation(() => {});
+
+    // Reset all methods of the shared mockQueryObject before each test
+    mockQueryObject.exec.mockReset();
+    mockQueryObject.populate.mockReset().mockImplementation(function(this: any) { return this; });
+    mockQueryObject.select.mockReset().mockImplementation(function(this: any) { return this; });
+    mockQueryObject.sort.mockReset().mockImplementation(function(this: any) { return this; });
+    mockQueryObject.lean.mockReset().mockImplementation(function(this: any) { return this; });
+    mockQueryObject.limit.mockReset().mockImplementation(function(this: any) { return this; });
+    mockQueryObject.skip.mockReset().mockImplementation(function(this: any) { return this; });
+    mockQueryObject.then.mockReset().mockImplementation(function(this: any, onFulfilled: any, onRejected: any) {
+      return this.exec().then(onFulfilled, onRejected);
+    });
   });
 
   afterEach(() => {
-    jest.restoreAllMocks(); // Restore console spies and any other spies
+    jest.restoreAllMocks();
   });
 
   describe('findByIdAndSend', () => {
     let model: any;
     const docId = new mongoose.Types.ObjectId().toString();
-    const mockDoc = { _id: docId, name: 'Test Doc' };
+    const mockDoc = { _id: docId, name: 'Test Doc', fieldToPopulate: null };
+    const populatedDoc = { ...mockDoc, fieldToPopulate: { data: 'populated data' } };
 
     beforeEach(() => {
       model = mockModel('MockedItem');
+      // Ensure model.findById is reset to return the centrally managed mockQueryObject
+      model.findById.mockClear().mockReturnValue(mockQueryObject);
     });
 
-    it('should find a document by ID and send it', async () => {
-      const docId = new mongoose.Types.ObjectId().toString(); // Ensure docId is defined for this test
-      const mockDoc = { _id: docId, name: 'Test Doc' };
-      model = mockModel('MockedItem'); // model is already defined in beforeEach, this re-initializes.
+    // This test is ALREADY PASSING and uses its own specific mock setup for the query chain.
+    // We leave it as is to preserve its working "granular thenable" strategy.
+    it('should find a document by ID, populate, and send it', async () => {
+      const populateField = 'fieldToPopulate';
 
-      // Get the query object that model.findById() will return by default from mockQueryChain
-      // model.findById is already a jest.fn() that returns a mockQueryChain object.
-      // We need to configure the 'exec' and 'populate' on the object *that will be returned*.
+      const mockExecFn_specific = jest.fn().mockResolvedValue(populatedDoc);
+      const queryAfterPopulate_specific = {
+        exec: mockExecFn_specific,
+        then: function(this: any, onFulfilled: any, onRejected: any) {
+          return this.exec().then(onFulfilled, onRejected);
+        }
+      };
+      const queryAfterFindById_specific = {
+        populate: jest.fn().mockReturnValue(queryAfterPopulate_specific)
+      };
+      model.findById.mockReturnValue(queryAfterFindById_specific);
 
-      const mockQueryReturnedByFindById = mockQueryChain(mockDoc); // This creates a fresh query chain object
-      // We need model.findById to return this specific object so we can spy on its methods.
-      model.findById.mockReturnValue(mockQueryReturnedByFindById);
-
-      // Now spy on the methods of the *specific object* that will be returned and used.
-      const populateSpy = jest.spyOn(mockQueryReturnedByFindById, 'populate').mockReturnThis();
-      const execSpy = jest.spyOn(mockQueryReturnedByFindById, 'exec').mockResolvedValue(mockDoc); // exec is already a mock, spyOn wraps it.
-
-      await findByIdAndSend(model, docId, res, 'someField');
+      await findByIdAndSend(model, docId, res, populateField);
 
       expect(model.findById).toHaveBeenCalledWith(docId);
-      expect(populateSpy).toHaveBeenCalledWith('someField');
-      expect(execSpy).toHaveBeenCalled();
-      expect(res.json).toHaveBeenCalledWith(mockDoc);
+      expect(queryAfterFindById_specific.populate).toHaveBeenCalledWith(populateField);
+      expect(mockExecFn_specific).toHaveBeenCalledTimes(1);
+      expect(res.json).toHaveBeenCalledWith(populatedDoc);
       expect(res.status).not.toHaveBeenCalled();
     });
 
     it('should find a document by ID without populate and send it', async () => {
-      const mockQuery = { exec: jest.fn().mockResolvedValue(mockDoc) }; // No populate here
-      model.findById.mockReturnValue(mockQuery);
+      mockQueryObject.exec.mockResolvedValue(mockDoc);
 
-      await findByIdAndSend(model, docId, res); // No populateField
+      await findByIdAndSend(model, docId, res);
 
       expect(model.findById).toHaveBeenCalledWith(docId);
-      expect(mockQuery.exec).toHaveBeenCalled();
+      expect(mockQueryObject.exec).toHaveBeenCalledTimes(1);
+      expect(mockQueryObject.populate).not.toHaveBeenCalled();
       expect(res.json).toHaveBeenCalledWith(mockDoc);
     });
 
-    it('should return 404 if document not found', async () => {
-      const mockQuery = { populate: jest.fn().mockReturnThis(), exec: jest.fn().mockResolvedValue(null) };
-      mockQuery.populate.mockImplementation(() => mockQuery);
-      model.findById.mockReturnValue(mockQuery);
+    it('should return 404 if document not found (with populate)', async () => {
+      const populateField = 'fieldToPopulate';
+      mockQueryObject.exec.mockResolvedValue(null);
 
-      await findByIdAndSend(model, docId, res, 'someField');
+      await findByIdAndSend(model, docId, res, populateField);
 
+      expect(model.findById).toHaveBeenCalledWith(docId);
+      expect(mockQueryObject.populate).toHaveBeenCalledWith(populateField);
+      expect(mockQueryObject.exec).toHaveBeenCalledTimes(1);
       expect(res.status).toHaveBeenCalledWith(404);
       expect(res.json).toHaveBeenCalledWith({ message: 'MockedItem not found' });
     });
 
-    it('should return 500 on database error', async () => {
-      const mockQuery = { populate: jest.fn().mockReturnThis(), exec: jest.fn().mockRejectedValue(new Error('DB Error')) };
-      mockQuery.populate.mockImplementation(() => mockQuery);
-      model.findById.mockReturnValue(mockQuery);
+    it('should return 404 if document not found (no populate)', async () => {
+        mockQueryObject.exec.mockResolvedValue(null);
 
-      await findByIdAndSend(model, docId, res, 'someField');
+        await findByIdAndSend(model, docId, res);
 
+        expect(model.findById).toHaveBeenCalledWith(docId);
+        expect(mockQueryObject.exec).toHaveBeenCalledTimes(1);
+        expect(res.status).toHaveBeenCalledWith(404);
+        expect(res.json).toHaveBeenCalledWith({ message: 'MockedItem not found' });
+    });
+
+    it('should return 500 on database error (with populate)', async () => {
+      const populateField = 'fieldToPopulate';
+      const dbError = new Error('DB Error');
+      mockQueryObject.exec.mockRejectedValue(dbError);
+
+      await findByIdAndSend(model, docId, res, populateField);
+
+      expect(model.findById).toHaveBeenCalledWith(docId);
+      expect(mockQueryObject.populate).toHaveBeenCalledWith(populateField);
+      expect(mockQueryObject.exec).toHaveBeenCalledTimes(1);
       expect(res.status).toHaveBeenCalledWith(500);
       expect(res.json).toHaveBeenCalledWith({ message: 'Error fetching data', error: 'DB Error' });
+    });
+
+    it('should return 500 on database error (no populate)', async () => {
+        const dbError = new Error('DB Error');
+        mockQueryObject.exec.mockRejectedValue(dbError);
+
+        await findByIdAndSend(model, docId, res);
+
+        expect(model.findById).toHaveBeenCalledWith(docId);
+        expect(mockQueryObject.exec).toHaveBeenCalledTimes(1);
+        expect(res.status).toHaveBeenCalledWith(500);
+        expect(res.json).toHaveBeenCalledWith({ message: 'Error fetching data', error: 'DB Error' });
     });
   });
 
@@ -149,51 +195,50 @@ describe('Common Helper Functions', () => {
 
     beforeEach(() => {
       model = mockModel('AllItems');
+      model.find.mockClear().mockReturnValue(mockQueryObject); // Ensure find uses the shared query object
     });
 
     it('should find all documents and send them', async () => {
-      const mockQuery = { populate: jest.fn().mockReturnThis(), exec: jest.fn().mockResolvedValue(mockDocs) };
-      mockQuery.populate.mockImplementation(() => mockQuery);
-      model.find.mockReturnValue(mockQuery);
+      mockQueryObject.exec.mockResolvedValue(mockDocs);
 
       await findAllAndSend(model, res, 'someField', { someFilter: 'value' });
 
       expect(model.find).toHaveBeenCalledWith({ someFilter: 'value' });
-      expect(mockQuery.populate).toHaveBeenCalledWith('someField');
-      expect(mockQuery.exec).toHaveBeenCalled();
+      expect(mockQueryObject.populate).toHaveBeenCalledWith('someField');
+      expect(mockQueryObject.exec).toHaveBeenCalledTimes(1);
       expect(res.json).toHaveBeenCalledWith(mockDocs);
     });
 
     it('should find all documents without populate or queryOptions and send them', async () => {
-      const mockQuery = { exec: jest.fn().mockResolvedValue(mockDocs) };
-      model.find.mockReturnValue(mockQuery);
+      mockQueryObject.exec.mockResolvedValue(mockDocs);
 
       await findAllAndSend(model, res);
 
-      expect(model.find).toHaveBeenCalledWith({}); // Default queryOptions is {}
-      expect(mockQuery.exec).toHaveBeenCalled();
+      expect(model.find).toHaveBeenCalledWith({});
+      expect(mockQueryObject.populate).not.toHaveBeenCalled();
+      expect(mockQueryObject.exec).toHaveBeenCalledTimes(1);
       expect(res.json).toHaveBeenCalledWith(mockDocs);
     });
 
     it('should find all documents with queryOptions but no populate and send them', async () => {
-      const mockQuery = { exec: jest.fn().mockResolvedValue(mockDocs) };
-      model.find.mockReturnValue(mockQuery);
+      mockQueryObject.exec.mockResolvedValue(mockDocs);
       const queryOptions = { name: "SpecificName" };
 
       await findAllAndSend(model, res, undefined, queryOptions);
 
       expect(model.find).toHaveBeenCalledWith(queryOptions);
-      expect(mockQuery.exec).toHaveBeenCalled();
+      expect(mockQueryObject.populate).not.toHaveBeenCalled();
+      expect(mockQueryObject.exec).toHaveBeenCalledTimes(1);
       expect(res.json).toHaveBeenCalledWith(mockDocs);
     });
 
     it('should return 500 on database error', async () => {
-      const mockQuery = { populate: jest.fn().mockReturnThis(), exec: jest.fn().mockRejectedValue(new Error('DB Error')) };
-      mockQuery.populate.mockImplementation(() => mockQuery);
-      model.find.mockReturnValue(mockQuery);
+      const dbError = new Error('DB Error');
+      mockQueryObject.exec.mockRejectedValue(dbError);
 
       await findAllAndSend(model, res, 'someField');
 
+      expect(mockQueryObject.exec).toHaveBeenCalledTimes(1); // Ensure exec was called
       expect(res.status).toHaveBeenCalledWith(500);
       expect(res.json).toHaveBeenCalledWith({ message: 'Error fetching data', error: 'DB Error' });
     });
@@ -209,12 +254,12 @@ describe('Common Helper Functions', () => {
     });
 
     it('should create a document and send it with status 201', async () => {
-      model._mockSaveResolver.mockResolvedValue(savedItem); // Configure the shared save mock
+      model._mockSaveResolver.mockResolvedValue(savedItem);
 
       await createAndSend(model, itemData, res);
 
-      expect(model).toHaveBeenCalledWith(itemData); // Check constructor call
-      expect(model._mockSaveResolver).toHaveBeenCalled(); // Check save call
+      expect(model).toHaveBeenCalledWith(itemData);
+      expect(model._mockSaveResolver).toHaveBeenCalled();
       expect(res.status).toHaveBeenCalledWith(201);
       expect(res.json).toHaveBeenCalledWith(savedItem);
     });
@@ -245,57 +290,53 @@ describe('Common Helper Functions', () => {
     let model: any;
     const docId = new mongoose.Types.ObjectId().toString();
     const updateData = { name: 'Updated Name' };
-    const initialDoc = { _id: docId, name: 'Initial Name', populate: jest.fn().mockReturnThis(), execPopulate: jest.fn() };
-    const updatedDoc = { ...initialDoc, ...updateData };
+    const updatedDocData = { _id: docId, name: 'Updated Name' };
 
     beforeEach(() => {
       model = mockModel('UpdatedItem');
-      // Reset execPopulate on the mock object each time if it's part of the mock structure returned by findByIdAndUpdate
-      initialDoc.execPopulate.mockReset();
+      model.findByIdAndUpdate.mockClear().mockReturnValue(mockQueryObject);
     });
 
     it('should find by ID, update, populate, and send the document', async () => {
-      // Mock findByIdAndUpdate to resolve to an object that has populate/execPopulate
-      model.findByIdAndUpdate.mockImplementation(() => {
-        // Simulate the document returned by findByIdAndUpdate before populate
-        const unpopulatedUpdatedDoc = {
-          ...updatedDoc,
-          populate: jest.fn().mockImplementation(function() { // Use function to bind 'this'
-            // Simulate populate modifying the document or returning a populated one
-            Object.assign(this, { populatedField: 'populatedValue' });
-            return this; // Return 'this' for chaining to execPopulate
-          }),
-          execPopulate: jest.fn().mockResolvedValue({ ...updatedDoc, populatedField: 'populatedValue' })
-        };
-        return mockQueryChain(unpopulatedUpdatedDoc); // findByIdAndUpdate returns a Query
-      });
+      const populatedFieldValue = { data: 'populatedValue' };
+      const docAfterUpdateWithPopulateMethod = {
+        ...updatedDocData,
+        fieldToPopulate: 'someId', // Unpopulated value
+        populate: jest.fn(function(this: any) { // Mock instance populate
+          this.fieldToPopulate = populatedFieldValue; // Simulate population
+          this.execPopulate = jest.fn().mockResolvedValue(this); // execPopulate after populate
+          return this;
+        }),
+        execPopulate: jest.fn() // Placeholder, will be defined by populate mock
+      };
+      mockQueryObject.exec.mockResolvedValue(docAfterUpdateWithPopulateMethod);
 
-      await findByIdAndUpdateAndSend(model, docId, updateData, res, 'someField');
+      await findByIdAndUpdateAndSend(model, docId, updateData, res, 'fieldToPopulate');
 
       expect(model.findByIdAndUpdate).toHaveBeenCalledWith(docId, updateData, { new: true, runValidators: true });
-      // The following depends on how you assert chained calls on the resolved object.
-      // This part is tricky because the populate is called on the *result* of findByIdAndUpdate.
-      // We need to inspect the object that `findByIdAndUpdate`'s query resolves to.
-      // The `unpopulatedUpdatedDoc.populate` and `unpopulatedUpdatedDoc.execPopulate` would be called.
-      // A direct assertion on these specific mocks is needed if they are unique per call.
-
-      // For simplicity, we'll check the final res.json if populate worked.
-      expect(res.json).toHaveBeenCalledWith(expect.objectContaining({ name: 'Updated Name', populatedField: 'populatedValue' }));
+      expect(mockQueryObject.exec).toHaveBeenCalledTimes(1);
+      expect(docAfterUpdateWithPopulateMethod.populate).toHaveBeenCalledWith('fieldToPopulate');
+      expect(docAfterUpdateWithPopulateMethod.execPopulate).toHaveBeenCalledTimes(1);
+      expect(res.json).toHaveBeenCalledWith(expect.objectContaining({ name: 'Updated Name', fieldToPopulate: populatedFieldValue }));
       expect(res.status).not.toHaveBeenCalled();
     });
 
     it('should find by ID, update, and send (no populate)', async () => {
-      model.findByIdAndUpdate.mockReturnValue(mockQueryChain(updatedDoc));
+      mockQueryObject.exec.mockResolvedValue(updatedDocData);
 
       await findByIdAndUpdateAndSend(model, docId, updateData, res);
 
       expect(model.findByIdAndUpdate).toHaveBeenCalledWith(docId, updateData, { new: true, runValidators: true });
-      expect(res.json).toHaveBeenCalledWith(updatedDoc);
+      expect(mockQueryObject.exec).toHaveBeenCalledTimes(1);
+      expect(res.json).toHaveBeenCalledWith(updatedDocData);
     });
 
     it('should return 404 if document not found for update', async () => {
-      model.findByIdAndUpdate.mockReturnValue(mockQueryChain(null));
+      mockQueryObject.exec.mockResolvedValue(null);
+
       await findByIdAndUpdateAndSend(model, docId, updateData, res);
+
+      expect(mockQueryObject.exec).toHaveBeenCalledTimes(1);
       expect(res.status).toHaveBeenCalledWith(404);
       expect(res.json).toHaveBeenCalledWith({ message: 'UpdatedItem not found' });
     });
@@ -303,17 +344,23 @@ describe('Common Helper Functions', () => {
     it('should return 400 on validation error during update', async () => {
       const validationError = new Error('Validation failed') as any;
       validationError.name = 'ValidationError';
-      model.findByIdAndUpdate.mockReturnValue(mockQueryChain(null).exec.mockRejectedValue(validationError).getMockImplementation()()); // Make exec reject
+      validationError.errors = { name: { message: 'Name is required' } };
+      mockQueryObject.exec.mockRejectedValue(validationError);
 
       await findByIdAndUpdateAndSend(model, docId, updateData, res);
 
+      expect(mockQueryObject.exec).toHaveBeenCalledTimes(1);
       expect(res.status).toHaveBeenCalledWith(400);
       expect(res.json).toHaveBeenCalledWith({ message: 'Validation Error', errors: validationError.errors });
     });
 
     it('should return 500 on other database errors during update', async () => {
-      model.findByIdAndUpdate.mockReturnValue(mockQueryChain(null).exec.mockRejectedValue(new Error('DB Update Error')).getMockImplementation()());
+      const dbError = new Error('DB Update Error');
+      mockQueryObject.exec.mockRejectedValue(dbError);
+
       await findByIdAndUpdateAndSend(model, docId, updateData, res);
+
+      expect(mockQueryObject.exec).toHaveBeenCalledTimes(1);
       expect(res.status).toHaveBeenCalledWith(500);
       expect(res.json).toHaveBeenCalledWith({ message: 'Error updating data', error: 'DB Update Error' });
     });
@@ -326,28 +373,37 @@ describe('Common Helper Functions', () => {
 
     beforeEach(() => {
       model = mockModel('DeletedItem');
+      model.findByIdAndDelete.mockClear().mockReturnValue(mockQueryObject);
     });
 
     it('should find by ID, delete, and send success message', async () => {
-      model.findByIdAndDelete.mockReturnValue(mockQueryChain(mockDeletedDoc));
+      mockQueryObject.exec.mockResolvedValue(mockDeletedDoc);
 
       await findByIdAndDeleteAndSend(model, docId, res);
 
       expect(model.findByIdAndDelete).toHaveBeenCalledWith(docId);
+      expect(mockQueryObject.exec).toHaveBeenCalledTimes(1);
       expect(res.json).toHaveBeenCalledWith({ message: 'DeletedItem deleted successfully' });
       expect(res.status).not.toHaveBeenCalled();
     });
 
     it('should return 404 if document not found for delete', async () => {
-      model.findByIdAndDelete.mockReturnValue(mockQueryChain(null));
+      mockQueryObject.exec.mockResolvedValue(null);
+
       await findByIdAndDeleteAndSend(model, docId, res);
+
+      expect(mockQueryObject.exec).toHaveBeenCalledTimes(1);
       expect(res.status).toHaveBeenCalledWith(404);
       expect(res.json).toHaveBeenCalledWith({ message: 'DeletedItem not found' });
     });
 
     it('should return 500 on database error during delete', async () => {
-      model.findByIdAndDelete.mockReturnValue(mockQueryChain(null).exec.mockRejectedValue(new Error('DB Delete Error')).getMockImplementation()());
+      const dbError = new Error('DB Delete Error');
+      mockQueryObject.exec.mockRejectedValue(dbError);
+
       await findByIdAndDeleteAndSend(model, docId, res);
+
+      expect(mockQueryObject.exec).toHaveBeenCalledTimes(1);
       expect(res.status).toHaveBeenCalledWith(500);
       expect(res.json).toHaveBeenCalledWith({ message: 'Error deleting data', error: 'DB Delete Error' });
     });
@@ -362,17 +418,16 @@ describe('Common Helper Functions', () => {
 
       expect(res.write).toHaveBeenCalledWith(`event: ${eventName}\n`);
       expect(res.write).toHaveBeenCalledWith(`data: ${JSON.stringify(eventData)}\n\n`);
-      // expect(res.flushHeaders).toHaveBeenCalled(); // Depending on whether you want to enforce this
     });
 
     it('should warn if res is not a valid SSE stream (missing write)', () => {
-      const invalidRes: any = { flushHeaders: jest.fn() }; // Missing write
+      const invalidRes: any = { flushHeaders: jest.fn() };
       sendSseEvent(invalidRes, 'testEvent', {});
       expect(console.warn).toHaveBeenCalledWith('Attempted to send SSE event on a non-SSE response object.');
     });
 
     it('should warn if res is not a valid SSE stream (missing flushHeaders)', () => {
-      const invalidRes: any = { write: jest.fn() }; // Missing flushHeaders
+      const invalidRes: any = { write: jest.fn() };
       sendSseEvent(invalidRes, 'testEvent', {});
       expect(console.warn).toHaveBeenCalledWith('Attempted to send SSE event on a non-SSE response object.');
     });
@@ -391,7 +446,7 @@ describe('Common Helper Functions', () => {
     it('should parse page and limit', () => {
       const query = { page: '2', limit: '5' };
       const params = parseQueryParams(query);
-      expect(params.skip).toBe(5); // (2-1)*5
+      expect(params.skip).toBe(5);
       expect(params.limit).toBe(5);
     });
 
@@ -424,7 +479,7 @@ describe('Common Helper Functions', () => {
       const params = parseQueryParams(query);
       expect(params.filter).toEqual({ city: 'NY', active: 'true' });
       expect(params.sort).toEqual({ age: -1 });
-      expect(params.skip).toBe(40); // (3-1)*20
+      expect(params.skip).toBe(40);
       expect(params.limit).toBe(20);
     });
   });
