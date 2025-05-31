@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, memo } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPencilAlt, IconDefinition } from '@fortawesome/free-solid-svg-icons';
 import _ from 'lodash';
@@ -31,7 +31,7 @@ const updateSlideshowThrottled = _.debounce((id: string, data: Partial<Slideshow
   return updateSlideshow(id, data);
 }, 300);
 
-const SlideshowPage = ({ slideshow: initialSlideshow, loggedIn, displayId, host }: SlideshowProps) => {
+const SlideshowPageComponent = memo(function SlideshowPageComponent({ slideshow: initialSlideshow, loggedIn, displayId, host }: SlideshowProps) {
   const [slideshow, setSlideshow] = useState<SlideshowData | undefined>(initialSlideshow);
   const slideListRef = useRef<SlideListComponent>(null);
   const dialogRef = useRef<SlideEditDialogComponent>(null);
@@ -152,7 +152,10 @@ const SlideshowPage = ({ slideshow: initialSlideshow, loggedIn, displayId, host 
       </style>
     </Frame>
   );
-};
+});
+
+// Create a wrapper component for getInitialProps
+const SlideshowPage = (props: SlideshowProps) => <SlideshowPageComponent {...props} />;
 
 SlideshowPage.getInitialProps = async (ctx: any): Promise<Partial<SlideshowProps>> => {
   const id = ctx.query.id as string | undefined;

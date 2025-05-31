@@ -112,7 +112,7 @@ describe("Slideshow API Routes", () => {
         },
       ];
       slideshowFindSpy.mockReturnValueOnce({
-        populate: jest.fn().mockResolvedValueOnce(mockSlideshows)
+        populate: jest.fn().mockResolvedValueOnce(mockSlideshows),
       } as any);
 
       const response = await request(app).get("/api/v1/slideshows");
@@ -457,7 +457,10 @@ describe("Slideshow API Routes", () => {
       expect(response.status).toBe(200);
       // const findOneMockResult = slideshowFindOneSpy.mock.results[0].value; // No longer an object with .exec
       // expect(findOneMockResult.exec).toHaveBeenCalled(); // Removed as findOneMockResult is now currentSlideshowState
-      expect(slideshowFindOneSpy).toHaveBeenCalledWith({ _id: slideshowId, creator_id: mockUser._id }); // Verify findOne was called
+      expect(slideshowFindOneSpy).toHaveBeenCalledWith({
+        _id: slideshowId,
+        creator_id: mockUser._id,
+      }); // Verify findOne was called
       expect(currentSlideshowState.save).toHaveBeenCalledTimes(1);
       expect(response.body.name).toBe(updatePayload.name);
       expect(response.body.description).toBe(updatePayload.description);
@@ -507,9 +510,9 @@ describe("Slideshow API Routes", () => {
         mockQueryChain(mockOriginalSlideshowsContainingSlide)
       );
 
-    //   const response = await request(app)
-    //     .put(`/api/v1/slideshows/${slideshowId}`)
-    //     .send(slideIdUpdatePayload);
+      const response = await request(app)
+        .put(`/api/v1/slideshows/${slideshowId}`)
+        .send(slideIdUpdatePayload);
 
       expect(response.status).toBe(200);
       expect(mockedValidateSlidesExist).toHaveBeenCalledWith(
@@ -606,114 +609,115 @@ describe("Slideshow API Routes", () => {
         mockQueryChain(mockOriginalSlideshowsContainingSlide)
       );
 
-    //   const response = await request(app)
-    //     .put(`/api/v1/slideshows/${slideshowId}`)
-    //     .send(slideIdUpdatePayload);
-
-    //   expect(response.status).toBe(200);
-    //   expect(mockedValidateSlidesExist).toHaveBeenCalledWith([]);
-    //   expect(currentSlideshowState.save).toHaveBeenCalledTimes(1);
-    //   expect(response.body.slides).toEqual([]);
-    // });
-
-    it("should return 400 if user information is not found for PUT /:id", async () => {
-      const tempApp = express();
-      tempApp.use(express.json());
-      tempApp.use((req: any, res, next) => {
-        req.user = undefined;
-        req.isAuthenticated = () => true;
-        next();
-      });
-      tempApp.use("/api/v1/slideshows", SlideshowRouter);
-
-      const response = await request(tempApp)
+      const response = await request(app)
         .put(`/api/v1/slideshows/${slideshowId}`)
-        .send(updatePayload);
-      expect(response.status).toBe(400);
-      expect(response.body.message).toBe("User information not found.");
-    });
-  });
+        .send(slideIdUpdatePayload);
 
-  describe("DELETE /:id", () => {
-    const slideshowId = "showToDelete";
-    const mockSlideshow = {
-      _id: slideshowId,
-      name: "To Delete",
-      creator_id: mockUser._id,
-    };
+      //   expect(response.status).toBe(200);
+      //   expect(mockedValidateSlidesExist).toHaveBeenCalledWith([]);
+      //   expect(currentSlideshowState.save).toHaveBeenCalledTimes(1);
+      //   expect(response.body.slides).toEqual([]);
+      // });
 
-    it("should delete a slideshow successfully", async () => {
-      slideshowFindOneSpy.mockImplementation(() =>
-        mockQueryChain(mockSlideshow)
-      );
-      slideshowFindByIdAndDeleteSpy.mockResolvedValue(mockSlideshow as any);
+      it("should return 400 if user information is not found for PUT /:id", async () => {
+        const tempApp = express();
+        tempApp.use(express.json());
+        tempApp.use((req: any, res, next) => {
+          req.user = undefined;
+          req.isAuthenticated = () => true;
+          next();
+        });
+        tempApp.use("/api/v1/slideshows", SlideshowRouter);
 
-      const response = await request(app).delete(
-        `/api/v1/slideshows/${slideshowId}`
-      );
-
-      expect(response.status).toBe(200);
-      expect(response.body.message).toBe("Slideshow deleted successfully");
-      const findOneMockResult = slideshowFindOneSpy.mock.results[0].value;
-      expect(findOneMockResult.exec).toHaveBeenCalled();
-      expect(slideshowFindByIdAndDeleteSpy).toHaveBeenCalledWith(slideshowId);
-    });
-
-    it("should return 404 if slideshow to delete is not found by findOne", async () => {
-      slideshowFindOneSpy.mockImplementation(() => mockQueryChain(null));
-      const response = await request(app).delete(
-        `/api/v1/slideshows/nonExistentId`
-      );
-
-      expect(response.status).toBe(404);
-      expect(response.body.message).toBe(
-        "Slideshow not found or not authorized"
-      );
-      expect(slideshowFindByIdAndDeleteSpy).not.toHaveBeenCalled();
-    });
-
-    it("should return 500 if findOne throws an error", async () => {
-      slideshowFindOneSpy.mockImplementation(() =>
-        mockQueryChain(null)
-          .exec.mockRejectedValue(new Error("DB find error"))
-          .getMockImplementation()()
-      );
-      const response = await request(app).delete(
-        `/api/v1/slideshows/${slideshowId}`
-      );
-      expect(response.status).toBe(500);
-      expect(response.body.message).toBe("Error deleting slideshow");
-    });
-
-    it("should return 500 if findByIdAndDelete throws an error", async () => {
-      slideshowFindOneSpy.mockImplementation(() =>
-        mockQueryChain(mockSlideshow)
-      );
-      slideshowFindByIdAndDeleteSpy.mockRejectedValue(
-        new Error("DB delete error")
-      );
-      const response = await request(app).delete(
-        `/api/v1/slideshows/${slideshowId}`
-      );
-      expect(response.status).toBe(500);
-      expect(response.body.message).toBe("Error deleting slideshow");
-    });
-
-    it("should return 400 if user information is not found for DELETE /:id", async () => {
-      const tempApp = express();
-      tempApp.use(express.json());
-      tempApp.use((req: any, res, next) => {
-        req.user = undefined;
-        req.isAuthenticated = () => true;
-        next();
+        const response = await request(tempApp)
+          .put(`/api/v1/slideshows/${slideshowId}`)
+          .send(updatePayload);
+        expect(response.status).toBe(400);
+        expect(response.body.message).toBe("User information not found.");
       });
-      tempApp.use("/api/v1/slideshows", SlideshowRouter);
+    });
 
-      const response = await request(tempApp).delete(
-        `/api/v1/slideshows/${slideshowId}`
-      );
-      expect(response.status).toBe(400);
-      expect(response.body.message).toBe("User information not found.");
+    describe("DELETE /:id", () => {
+      const slideshowId = "showToDelete";
+      const mockSlideshow = {
+        _id: slideshowId,
+        name: "To Delete",
+        creator_id: mockUser._id,
+      };
+
+      it("should delete a slideshow successfully", async () => {
+        slideshowFindOneSpy.mockImplementation(() =>
+          mockQueryChain(mockSlideshow)
+        );
+        slideshowFindByIdAndDeleteSpy.mockResolvedValue(mockSlideshow as any);
+
+        const response = await request(app).delete(
+          `/api/v1/slideshows/${slideshowId}`
+        );
+
+        expect(response.status).toBe(200);
+        expect(response.body.message).toBe("Slideshow deleted successfully");
+        const findOneMockResult = slideshowFindOneSpy.mock.results[0].value;
+        expect(findOneMockResult.exec).toHaveBeenCalled();
+        expect(slideshowFindByIdAndDeleteSpy).toHaveBeenCalledWith(slideshowId);
+      });
+
+      it("should return 404 if slideshow to delete is not found by findOne", async () => {
+        slideshowFindOneSpy.mockImplementation(() => mockQueryChain(null));
+        const response = await request(app).delete(
+          `/api/v1/slideshows/nonExistentId`
+        );
+
+        expect(response.status).toBe(404);
+        expect(response.body.message).toBe(
+          "Slideshow not found or not authorized"
+        );
+        expect(slideshowFindByIdAndDeleteSpy).not.toHaveBeenCalled();
+      });
+
+      it("should return 500 if findOne throws an error", async () => {
+        slideshowFindOneSpy.mockImplementation(() =>
+          mockQueryChain(null)
+            .exec.mockRejectedValue(new Error("DB find error"))
+            .getMockImplementation()()
+        );
+        const response = await request(app).delete(
+          `/api/v1/slideshows/${slideshowId}`
+        );
+        expect(response.status).toBe(500);
+        expect(response.body.message).toBe("Error deleting slideshow");
+      });
+
+      it("should return 500 if findByIdAndDelete throws an error", async () => {
+        slideshowFindOneSpy.mockImplementation(() =>
+          mockQueryChain(mockSlideshow)
+        );
+        slideshowFindByIdAndDeleteSpy.mockRejectedValue(
+          new Error("DB delete error")
+        );
+        const response = await request(app).delete(
+          `/api/v1/slideshows/${slideshowId}`
+        );
+        expect(response.status).toBe(500);
+        expect(response.body.message).toBe("Error deleting slideshow");
+      });
+
+      it("should return 400 if user information is not found for DELETE /:id", async () => {
+        const tempApp = express();
+        tempApp.use(express.json());
+        tempApp.use((req: any, res, next) => {
+          req.user = undefined;
+          req.isAuthenticated = () => true;
+          next();
+        });
+        tempApp.use("/api/v1/slideshows", SlideshowRouter);
+
+        const response = await request(tempApp).delete(
+          `/api/v1/slideshows/${slideshowId}`
+        );
+        expect(response.status).toBe(400);
+        expect(response.body.message).toBe("User information not found.");
+      });
     });
   });
 });

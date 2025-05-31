@@ -2,7 +2,7 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import '@testing-library/jest-dom';
 
-import ImageContent, { IImageContentProps, DEFAULT_COLOR, DEFAULT_FIT, DEFAULT_ALT_TEXT } from './ImageContent';
+import ImageContent, { IImageContentProps, DEFAULT_COLOR, DEFAULT_FIT, DEFAULT_ALT_TEXT } from '../../../widgets/image/src/ImageContent';
 
 // No complex child components to mock for ImageContent itself.
 

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, Suspense } from 'react';
+import { useState, Suspense, memo } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -9,7 +9,7 @@ import { faTv, faCheck, faTimes, faAngleLeft } from '@fortawesome/free-solid-svg
 import Frame from '../../components/Admin/Frame';
 import { login } from '../../helpers/auth';
 
-function LoginContent() {
+const LoginContent = memo(function LoginContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const displayId = searchParams?.get('display');
@@ -213,7 +213,7 @@ function LoginContent() {
       </style>
     </Frame>
   );
-}
+});
 
 export default function LoginPage() {
   return (

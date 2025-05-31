@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, memo } from 'react';
 
 import Frame from '../components/Admin/Frame.tsx'; // Assuming .tsx
 import ScreenListComponent from '../components/Admin/ScreenList.tsx'; // Renamed, Assuming .tsx
@@ -20,7 +20,7 @@ interface ScreensProps extends ProtectProps {
   displayId?: string; // displayId might be optional or from router query
 }
 
-const Screens = ({ loggedIn, displayId }: ScreensProps) => {
+const ScreensComponent = memo(function ScreensComponent({ loggedIn, displayId }: ScreensProps) {
   const screenListRef = useRef<ScreenListInstance>(null);
   const displayContext = useDisplayContext();
 
@@ -71,9 +71,12 @@ const Screens = ({ loggedIn, displayId }: ScreensProps) => {
       </style>
     </Frame>
   );
-};
+});
 
-// Add getInitialProps to the component
+// Create a wrapper component for getInitialProps
+const Screens = (props: ScreensProps) => <ScreensComponent {...props} />;
+
+// Add getInitialProps to the wrapper component
 Screens.getInitialProps = async (ctx: any): Promise<{ displayId?: string }> => {
   const displayId = ctx.query.id as string | undefined;
   return { displayId };

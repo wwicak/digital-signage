@@ -2,8 +2,8 @@ import React from 'react';
 import { render, screen, fireEvent, waitFor, act } from '@testing-library/react'; // Import act
 import '@testing-library/jest-dom';
 
-import ImageOptions, { IImageOptionsProps } from './ImageOptions';
-import { IImageDefaultData, TImageFit } from '../index';
+import ImageOptions, { IImageOptionsProps } from '../../../widgets/image/src/ImageOptions';
+import { IImageDefaultData, TImageFit } from '../../../widgets/image/index';
 
 // Mock Form components
 jest.mock('../../../components/Form', () => ({

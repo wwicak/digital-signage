@@ -2,8 +2,8 @@ import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom';
 
-import ListOptions, { IListOptionsProps } from './ListOptions';
-import { IListDefaultData, IListItem } from '../index';
+import ListOptions, { IListOptionsProps } from '../../../widgets/list/src/ListOptions';
+import { IListDefaultData, IListItem } from '../../../widgets/list/index';
 
 // Mock Form components
 jest.mock('../../../components/Form', () => ({

@@ -1,8 +1,8 @@
 import React from 'react';
 import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
 import '@testing-library/jest-dom';
-import ScreenCard, { IScreenCardProps } from './ScreenCard';
-import { IDisplayData } from '../../actions/display';
+import ScreenCard, { IScreenCardProps } from '../../../components/Admin/ScreenCard';
+import { IDisplayData } from '../../../actions/display';
 
 // --- Mocks ---
 const mockRouterPush = jest.fn();

@@ -2,7 +2,7 @@ import React from 'react';
 import { render, screen, waitFor, act } from '@testing-library/react';
 import '@testing-library/jest-dom';
 
-import Slideshow, { ISlideshowWidgetContentProps, ISlideInstance } from './Slideshow';
+import Slideshow, { ISlideshowWidgetContentProps, ISlideInstance } from '../../../widgets/slideshow/src/Slideshow';
 import { ISlideData, SlideActionDataSchema } from '../../../actions/slide'; // Assuming SlideActionDataSchema is the Zod schema for ISlideData
 
 // --- Mock child components and actions ---

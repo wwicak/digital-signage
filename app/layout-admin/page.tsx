@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useCallback } from 'react'; // Import useCallback
+import React, { useState, useEffect, useCallback, Suspense, memo } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faThLarge, faTh, faPencilAlt } from '@fortawesome/free-solid-svg-icons';
 import GridLayout, { Layout as RglLayout } from 'react-grid-layout';
@@ -23,7 +23,7 @@ import { WidgetType } from '../../api/models/Widget';
 
 const GridLayoutWithWidth = WidthProvider(GridLayout as any);
 
-function LayoutAdminContent() {
+const LayoutAdminContent = memo(function LayoutAdminContent() {
   const [widgets, setWidgets] = useState<IWidgetData[]>([]);
   const searchParams = useSearchParams();
   const context = useDisplayContext();
@@ -297,12 +297,12 @@ function LayoutAdminContent() {
       </style>
     </Frame>
   );
-}
+});
 
 export default function LayoutAdminPage() {
   return (
-    <useCallback fallback={<div>Loading...</div>}>
+    <Suspense fallback={<div>Loading...</div>}>
       <LayoutAdminContent />
-    </useCallback>
+    </Suspense>
   );
 }

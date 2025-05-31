@@ -2,8 +2,8 @@ import React from 'react';
 import { render, screen, fireEvent, waitFor, act, within } from '@testing-library/react'; // Import within
 import '@testing-library/jest-dom';
 import { NextRouter } from 'next/router';
-import SidebarComponentWithRouter, { ISidebarProps } from './Sidebar';
-import { IDisplayData } from '../../actions/display';
+import SidebarComponentWithRouter, { ISidebarProps } from '../../../components/Admin/Sidebar';
+import { IDisplayData } from '../../../actions/display';
 
 // --- Mocks ---
 

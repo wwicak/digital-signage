@@ -1,4 +1,4 @@
-import React, { ReactNode, forwardRef, useImperativeHandle, useState } from 'react';
+import React, { ReactNode, forwardRef, useImperativeHandle, useState, memo } from 'react';
 import DialogLegacy, { DialogRef } from './ui/dialog-legacy';
 
 export interface IDialogProps {
@@ -13,7 +13,7 @@ export interface DialogMethods {
   close: (e?: React.MouseEvent | React.KeyboardEvent) => void;
 }
 
-const Dialog = forwardRef<DialogMethods, IDialogProps>((props, ref) => {
+const Dialog = memo(forwardRef<DialogMethods, IDialogProps>((props, ref) => {
   const dialogRef = React.useRef<DialogRef>(null);
 
   useImperativeHandle(ref, () => ({
@@ -28,7 +28,7 @@ const Dialog = forwardRef<DialogMethods, IDialogProps>((props, ref) => {
   }));
 
   return <DialogLegacy ref={dialogRef} {...props} />;
-});
+}));
 
 Dialog.displayName = 'Dialog';
 

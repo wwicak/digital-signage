@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React, { Component, memo } from 'react';
 import ContentLoader from 'react-content-loader';
 import {
   DndContext,
@@ -31,7 +31,7 @@ interface SortableItemProps {
   refresh: () => void;
 }
 
-function SortableItem({ id, value, refresh }: SortableItemProps) {
+const SortableItem = memo(function SortableItem({ id, value, refresh }: SortableItemProps) {
   const {
     attributes,
     listeners,
@@ -52,7 +52,7 @@ function SortableItem({ id, value, refresh }: SortableItemProps) {
       <SlideCard value={value} refresh={refresh} />
     </div>
   );
-}
+});
 
 // Sortable List Component using @dnd-kit
 interface SortableListProps {
@@ -61,7 +61,7 @@ interface SortableListProps {
   onDragEnd: (event: DragEndEvent) => void;
 }
 
-function SortableList({ items, refresh, onDragEnd }: SortableListProps) {
+const SortableList = memo(function SortableList({ items, refresh, onDragEnd }: SortableListProps) {
   const sensors = useSensors(
     useSensor(PointerSensor, {
       activationConstraint: {
@@ -112,7 +112,7 @@ function SortableList({ items, refresh, onDragEnd }: SortableListProps) {
       </div>
     </DndContext>
   );
-}
+});
 
 export interface ISlideListProps {
   slideshowId: string;

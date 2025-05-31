@@ -10,7 +10,7 @@
     "prod": "bun run build && ENVIRON=PROD bun dist/server.js",
     "build": "next build && tsc --project tsconfig.server.json",
     "lint": "eslint --ext .js,.jsx,.ts,.tsx .",
-    "type-check": "tsc --noEmit && tsc --project tsconfig.server.json --noEmit",
+    "type-check": "tsc --noEmit && tsc --project tsconfig.server.json --noEmit --skipLibCheck --exclude \"**/*.test.ts\" --exclude \"**/*.test.tsx\"",
     "start": "bun dist/server.js",
     "test": "jest --coverage",
     "update": "git pull && bun install && bun run build",

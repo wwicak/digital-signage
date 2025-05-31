@@ -2,8 +2,8 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import '@testing-library/jest-dom';
 
-import ListContent, { IListContentProps } from './ListContent';
-import { IListItem } from '../index';
+import ListContent, { IListContentProps } from '../../../widgets/list/src/ListContent';
+import { IListItem } from '../../../widgets/list/index';
 
 // Mock AutoScroll
 jest.mock('../../../components/AutoScroll', () => {

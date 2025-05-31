@@ -2,8 +2,8 @@ import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom';
 
-import SlideshowOptions, { ISlideshowWidgetOptionsProps } from './SlideshowOptions';
-import { ISlideshowWidgetDefaultData } from '../index';
+import SlideshowOptions, { ISlideshowWidgetOptionsProps } from '../../../widgets/slideshow/src/SlideshowOptions';
+import { ISlideshowWidgetDefaultData } from '../../../widgets/slideshow/index';
 import { ISlideshowData } from '../../../actions/slideshow';
 
 // Mock Form components
