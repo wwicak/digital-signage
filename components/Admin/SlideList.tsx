@@ -20,8 +20,8 @@ import {
 } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
 
-import SlideCard, { ISlideCardProps, ExtendedSlideData } from './SlideCard'
-import { getSlides, ISlideData } from '../../actions/slide'
+import SlideCard, { ExtendedSlideData } from './SlideCard'
+import { getSlides } from '../../actions/slide'
 import { reorderSlides } from '../../actions/slideshow'
 
 // Sortable Item Component using @dnd-kit

@@ -3,7 +3,7 @@
  * along with its title and description.
  */
 
-import GenericSlide, { GenericSlideProps, GenericSlideState } from './Generic'
+import GenericSlide, { GenericSlideProps } from './Generic'
 import React from 'react'
 import Image from 'next/image'
 

@@ -24,7 +24,6 @@ const ScreenCardValueSchema = z.object({
 })
 
 // Import the original IDisplayData to ensure compatibility or use if it becomes a Zod type later.
-import { IDisplayData } from '../../actions/display'
 import { useDisplayMutations } from '../../hooks/useDisplayMutations'
 
 // Zod schema for ScreenCard props

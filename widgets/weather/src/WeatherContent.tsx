@@ -5,7 +5,7 @@ import { config as FaConfig, IconProp } from '@fortawesome/fontawesome-svg-core'
 import { faMapMarkerAlt } from '@fortawesome/free-solid-svg-icons'
 
 import WeatherIcon from './WeatherIcon'
-import { IWeatherDefaultData, TWeatherUnit } from '../index'
+import { TWeatherUnit } from '../index'
 import * as z from 'zod'
 
 FaConfig.autoAddCss = false

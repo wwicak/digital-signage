@@ -4,7 +4,7 @@ import ContentLoader from 'react-content-loader'
 import { FileRejection, DropzoneProps, DropEvent } from 'react-dropzone' // Import types
 
 // Assuming SlideEditDialog.tsx exports ISlideEditDialogRef for its ref methods
-import SlideEditDialog, { ISlideEditDialogRef } from './Admin/SlideEditDialog'
+import SlideEditDialog from './Admin/SlideEditDialog'
 
 /*
  * Dynamically import react-dropzone for client-side only

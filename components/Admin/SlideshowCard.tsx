@@ -6,7 +6,7 @@ import { faTrash, faPlay } from '@fortawesome/free-solid-svg-icons'
 import Link from 'next/link'
 import * as z from 'zod'
 
-import { deleteSlideshow, ISlideshowData, SlideshowActionDataSchema } from '../../actions/slideshow'
+import { deleteSlideshow, SlideshowActionDataSchema } from '../../actions/slideshow'
 import { ISlideData } from '../../actions/slide' // This is z.infer<typeof SlideActionDataSchema>
 import { useDisplayContext } from '../../contexts/DisplayContext'
 

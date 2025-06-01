@@ -1,9 +1,9 @@
 import React, { Component } from 'react'
 import { config as FaConfig } from '@fortawesome/fontawesome-svg-core' // Only config is used
-import getVideoId from 'get-video-id' // Assuming @types/get-video-id or it returns any
+// Assuming @types/get-video-id or it returns any
 import YouTube, { YouTubeProps, YouTubePlayer } from 'react-youtube' // Import YouTube component and its types
 
-import { IYoutubeDefaultData } from '../index' // This is an interface
+// This is an interface
 import * as z from 'zod'
 
 FaConfig.autoAddCss = false

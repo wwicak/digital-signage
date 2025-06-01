@@ -1,16 +1,8 @@
 import {
   SlideSchemaZod,
-  SlideType,
-  SlideTypeZod,
-  ImageSlideDataSchema,
-  VideoSlideDataSchema,
-  WebSlideDataSchema,
-  MarkdownSlideDataSchema,
-  PhotoSlideDataSchema,
-  YoutubeSlideDataSchema
+  SlideType
 } from '../../../api/models/Slide'
 import mongoose from 'mongoose'
-import * as z from 'zod'
 
 describe('Slide Model Zod Schema (SlideSchemaZod)', () => {
   const validObjectId = () => new mongoose.Types.ObjectId()

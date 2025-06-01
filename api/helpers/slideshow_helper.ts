@@ -3,7 +3,7 @@
  */
 
 import Slideshow, { ISlideshow } from '../models/Slideshow' // Assuming Slideshow.ts exports ISlideshow
-import Slide, { ISlide } from '../models/Slide' // Assuming Slide.ts exports ISlide
+import Slide from '../models/Slide' // Assuming Slide.ts exports ISlide
 import mongoose from 'mongoose'
 
 /**

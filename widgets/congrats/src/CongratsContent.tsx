@@ -1,9 +1,9 @@
 import React, { Component } from 'react'
-import Lottie, { LottieProps, Options as LottieOptions } from 'react-lottie'
+import Lottie, { Options as LottieOptions } from 'react-lottie'
 import { config } from '@fortawesome/fontawesome-svg-core'
 import AutoScroll from '../../../components/AutoScroll'
 import * as z from 'zod'
-import { CongratsWidgetContentDataSchema, ICongratsWidgetData } from './types'
+import { CongratsWidgetContentDataSchema } from './types'
 import { animationUtils } from './animationUtils' // Import the utility
 
 config.autoAddCss = false

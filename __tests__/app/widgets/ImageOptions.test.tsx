@@ -2,7 +2,7 @@ import React from 'react'
 import { render, screen, fireEvent, waitFor, act } from '@testing-library/react' // Import act
 import '@testing-library/jest-dom'
 
-import ImageOptions, { IImageOptionsProps } from '../../../widgets/image/src/ImageOptions'
+import ImageOptions from '../../../widgets/image/src/ImageOptions'
 import { IImageDefaultData, TImageFit } from '../../../widgets/image/index'
 
 // Mock Form components

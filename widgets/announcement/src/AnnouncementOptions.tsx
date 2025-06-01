@@ -1,6 +1,6 @@
 import React, { Component } from 'react'
-import { Form, Input, InlineInputGroup, IInputProps } from '../../../components/Form'
-import { IWidgetOptionsEditorProps } from '../../../components/Admin/WidgetEditDialog' // This is z.infer<typeof WidgetOptionsEditorPropsSchema>
+import { Form, Input, InlineInputGroup } from '../../../components/Form'
+// This is z.infer<typeof WidgetOptionsEditorPropsSchema>
 import * as z from 'zod'
 
 import AnnouncementContent, { AnnouncementWidgetContentDataSchema, IAnnouncementWidgetData } from './AnnouncementContent' // IAnnouncementWidgetData is z.infer<typeof AnnouncementWidgetContentDataSchema>

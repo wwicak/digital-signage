@@ -1,7 +1,7 @@
 import React from 'react'
-import { library, config, IconProp } from '@fortawesome/fontawesome-svg-core'
+import { config, IconProp } from '@fortawesome/fontawesome-svg-core'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { fas, faExclamationTriangle } from '@fortawesome/free-solid-svg-icons'
+import { faExclamationTriangle } from '@fortawesome/free-solid-svg-icons'
 
 import AutoScroll from '../../../components/AutoScroll'
 import * as z from 'zod'

@@ -1,4 +1,4 @@
-import React, { Component, ReactNode, JSX } from 'react'
+import React, { ReactNode, JSX } from 'react'
 import Clock from 'react-live-clock' // react-live-clock might need @types/react-live-clock if not inherently typed
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faWifi } from '@fortawesome/free-solid-svg-icons'

@@ -6,7 +6,7 @@ import { faTrash, faEdit, faPlay, faGlobe, faFileImage, faFileVideo, faFileAlt }
 import * as z from 'zod'
 
 import SlideEditDialog from './SlideEditDialog' // Removed ISlideEditDialogRef, assuming default export or internal typing
-import { deleteSlide, SlideActionDataSchema, ISlideData } from '../../actions/slide' // ISlideData is z.infer<typeof SlideActionDataSchema>
+import { deleteSlide, SlideActionDataSchema } from '../../actions/slide' // ISlideData is z.infer<typeof SlideActionDataSchema>
 
 // Zod schema for the 'value' prop, extending SlideActionDataSchema
 const SlideCardValueSchema = SlideActionDataSchema.extend({

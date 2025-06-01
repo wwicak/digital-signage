@@ -1,7 +1,7 @@
 import express, { Request, Response, NextFunction, Router } from 'express'
 import mongoose from 'mongoose'
 
-import Slide, { ISlide } from '../models/Slide'
+import Slide from '../models/Slide'
 import { IUser } from '../models/User' // Assuming IUser is the correct interface for req.user
 import Slideshow from '../models/Slideshow' // Required for querying slideshows
 

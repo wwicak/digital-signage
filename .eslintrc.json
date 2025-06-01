@@ -1,7 +1,7 @@
 {
   "extends": ["next/core-web-vitals", "plugin:@typescript-eslint/recommended"],
   "parser": "@typescript-eslint/parser",
-  "plugins": ["@typescript-eslint", "react"],
+  "plugins": ["@typescript-eslint", "react", "unused-imports"],
   "parserOptions": {
     "ecmaVersion": "latest",
     "sourceType": "module",
@@ -18,13 +18,23 @@
   },
   "rules": {
     // Preserve your existing code style preferences
-    "camelcase": ["error", { "properties": "always" }],
+    "camelcase": "off",
     "no-undef": "warn",
     "no-extra-semi": "warn",
     "no-underscore-dangle": "off",
     "no-console": ["warn", { "allow": ["warn", "error"] }],
     "no-unused-vars": "off",
-    "@typescript-eslint/no-unused-vars": "warn",
+    "@typescript-eslint/no-unused-vars": "off",
+    "unused-imports/no-unused-imports": "error",
+    "unused-imports/no-unused-vars": [
+      "warn",
+      {
+        "vars": "all",
+        "varsIgnorePattern": "^_",
+        "args": "after-used",
+        "argsIgnorePattern": "^_"
+      }
+    ],
     "no-trailing-spaces": ["warn", { "skipBlankLines": true }],
     "no-unreachable": "warn",
     "no-alert": "off",

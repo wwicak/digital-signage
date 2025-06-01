@@ -1,6 +1,5 @@
 import { useEffect, useState, useRef } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
-import { IDisplayData } from '../actions/display'
 
 /**
  * Hook for handling Server-Sent Events (SSE) real-time updates for specific displays.

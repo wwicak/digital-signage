@@ -1,10 +1,10 @@
 import request from 'supertest'
-import express, { Express, Request, Response, NextFunction } from 'express'
+import express, { Express, Response, NextFunction } from 'express'
 import session from 'express-session'
-import passport from 'passport' // For req.user, req.isAuthenticated type usage
+// For req.user, req.isAuthenticated type usage
 import WidgetsRouter from '../../../api/routes/widgets'
-import Widget, { IWidget, WidgetType } from '../../../api/models/Widget' // Actual Widget model
-import User, { IUser } from '../../../api/models/User' // For req.user type
+import Widget, { WidgetType } from '../../../api/models/Widget' // Actual Widget model
+import { IUser } from '../../../api/models/User' // For req.user type
 import * as widgetHelper from '../../../api/helpers/widget_helper'
 
 // Mock dependencies

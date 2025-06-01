@@ -1,8 +1,8 @@
-import React, { Component, ChangeEvent, KeyboardEvent, ReactNode, CSSProperties } from 'react'
+import React, { Component, ChangeEvent, KeyboardEvent, CSSProperties } from 'react'
 import dynamic from 'next/dynamic'
 import ContentLoader from 'react-content-loader'
 
-import ColorPicker, { IColorPickerProps } from './ColorPicker' // Assuming ColorPicker.tsx
+import ColorPicker from './ColorPicker' // Assuming ColorPicker.tsx
 
 // --- Types and Interfaces ---
 export interface IChoice {

@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback, CSSProperties } from 'react'
 import { config as FaConfig } from '@fortawesome/fontawesome-svg-core'
 
-import { IWebDefaultData } from '../index'
 import * as z from 'zod'
 
 FaConfig.autoAddCss = false

@@ -1,10 +1,9 @@
 import React, { Component } from 'react'
-import { Form, Input, InlineInputGroup, IInputProps, IChoice } from '../../../components/Form'
-import { IWidgetOptionsEditorProps } from '../../../components/Admin/WidgetEditDialog'
+import { Form, Input, InlineInputGroup, IChoice } from '../../../components/Form'
 import { standaloneUpload } from '../../../actions/slide'
 import * as z from 'zod'
 
-import { IImageDefaultData, TImageFit } from '../index' // TImageFit is string union, IImageDefaultData is interface
+// TImageFit is string union, IImageDefaultData is interface
 import { TImageFitSchema } from './ImageContent' // Import the Zod schema for TImageFit
 
 // Zod schema for IImageDefaultData (used for props.data and state)

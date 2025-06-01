@@ -1,7 +1,7 @@
 import express, { Request, Response, NextFunction, Router } from 'express'
 import mongoose from 'mongoose'
 
-import Widget, { IWidget, WidgetType } from '../models/Widget'
+import Widget, { WidgetType } from '../models/Widget'
 import { IUser } from '../models/User'
 
 /*

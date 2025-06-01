@@ -3,7 +3,7 @@
  */
 
 import Widget, { IWidget, WidgetType } from '../models/Widget' // Assuming Widget.ts exports IWidget and WidgetType enum
-import Display, { IDisplay } from '../models/Display' // Assuming Display.ts exports IDisplay
+import Display from '../models/Display' // Assuming Display.ts exports IDisplay
 import Slideshow from '../models/Slideshow' // For validating slideshow_id in widget data
 import mongoose from 'mongoose'
 import { Request, Response } from 'express' // For typing req/res

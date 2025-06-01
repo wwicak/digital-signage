@@ -1,5 +1,5 @@
 import React from 'react'
-import { render, screen, fireEvent, waitFor, act, within } from '@testing-library/react' // Import within
+import { render, screen, fireEvent, waitFor, within } from '@testing-library/react' // Import within
 import '@testing-library/jest-dom'
 import { NextRouter } from 'next/router'
 import SidebarComponentWithRouter, { ISidebarProps } from '../../../components/Admin/Sidebar'

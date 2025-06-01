@@ -2,7 +2,7 @@ import React, { Component, CSSProperties } from 'react'
 import { config } from '@fortawesome/fontawesome-svg-core' // Only config is used
 
 import AutoScroll from '../../../components/AutoScroll' // Assuming .js or .tsx
-import { IListItem } from '../index' // Import IListItem from widget index
+// Import IListItem from widget index
 import * as z from 'zod'
 
 config.autoAddCss = false

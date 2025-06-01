@@ -3,7 +3,7 @@
  */
 
 import Slide, { ISlide } from '../models/Slide' // Assuming Slide.ts exports ISlide
-import Slideshow, { ISlideshow } from '../models/Slideshow' // Assuming Slideshow.ts exports ISlideshow
+import Slideshow from '../models/Slideshow' // Assuming Slideshow.ts exports ISlideshow
 import mongoose from 'mongoose'
 import { getDisplayIdsForSlideshow } from '../helpers/slideshow_helper'
 import { sendEventToDisplay } from '../sse_manager' // Added import

@@ -1,11 +1,11 @@
 import request from 'supertest'
-import express, { Express, Request, Response, NextFunction } from 'express'
+import express, { Express, Response, NextFunction } from 'express'
 import session from 'express-session'
-import passport from 'passport' // Needed for req.user, req.isAuthenticated
+// Needed for req.user, req.isAuthenticated
 import SlideRouter from '../../../api/routes/slide'
-import Slide, { ISlide, SlideType } from '../../../api/models/Slide' // Actual Slide model
+import Slide, { SlideType } from '../../../api/models/Slide' // Actual Slide model
 import Slideshow from '../../../api/models/Slideshow' // Actual Slideshow model
-import User, { IUser } from '../../../api/models/User' // For req.user type
+import { IUser } from '../../../api/models/User' // For req.user type
 import * as commonHelpers from '../../../api/helpers/common_helper' // To mock findByIdAndSend etc.
 import * as slideHelpers from '../../../api/helpers/slide_helper' // To mock validateSlideData etc.
 

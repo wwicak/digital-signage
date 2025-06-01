@@ -1,10 +1,9 @@
 import React from 'react'
-import { render, screen, fireEvent, waitFor, act } from '@testing-library/react'
+import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import '@testing-library/jest-dom'
-import * as z from 'zod'
 
 // Import the schema from the new types.ts file for use in this test file
-import { CongratsWidgetContentDataSchema, ICongratsWidgetData } from '../../../widgets/congrats/src/types'
+import { ICongratsWidgetData } from '../../../widgets/congrats/src/types'
 
 // Import the component to be tested
 import CongratsOptions, { ICongratsOptionsProps } from '../../../widgets/congrats/src/CongratsOptions'

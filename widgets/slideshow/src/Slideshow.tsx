@@ -1,5 +1,4 @@
 import React, { Component, ComponentType, JSX } from 'react'
-import _ from 'lodash'
 
 // Assuming these will be migrated or are usable as JS with appropriate typings/shims
 import GenericSlide from './Slide/Generic'
@@ -10,7 +9,7 @@ import Progress from './Progress'
 import * as z from 'zod'
 
 import { getSlides, ISlideData, SlideActionDataSchema } from '../../../actions/slide' // ISlideData is z.infer<SlideActionDataSchema>
-import { ISlideshowWidgetDefaultData } from '../index' // This is an interface
+// This is an interface
 
 const DEFAULT_SLIDE_DURATION_MS = 5000
 

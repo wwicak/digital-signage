@@ -1,4 +1,4 @@
-import React, { ReactNode, HTMLAttributes, Children, isValidElement, cloneElement } from 'react'
+import React, { ReactNode, HTMLAttributes, Children } from 'react'
 
 // Props for the InlineInputGroup component
 export interface IInlineInputGroupProps extends HTMLAttributes<HTMLDivElement> {

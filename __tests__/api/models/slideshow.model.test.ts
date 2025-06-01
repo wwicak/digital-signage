@@ -1,7 +1,6 @@
 import { SlideshowSchemaZod } from '../../../api/models/Slideshow'
 import { SlideType } from '../../../api/models/Slide' // Import SlideType
 import mongoose from 'mongoose'
-import * as z from 'zod'
 
 describe('Slideshow Model Zod Schema (SlideshowSchemaZod)', () => {
   const validObjectId = () => new mongoose.Types.ObjectId()

@@ -1,7 +1,7 @@
 import React from 'react'
 import { render, screen, fireEvent, waitFor, act } from '@testing-library/react'
 import '@testing-library/jest-dom'
-import Button, { IButtonProps } from '../../../components/Form/Button'
+import Button from '../../../components/Form/Button'
 
 /*
  * Mock the ButtonWithLoading component

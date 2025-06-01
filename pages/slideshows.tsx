@@ -1,5 +1,4 @@
 import React, { useRef, useEffect } from 'react'
-import { NextPageContext } from 'next'
 
 import Frame from '../components/Admin/Frame.tsx'
 import SlideshowListComponent from '../components/Admin/SlideshowList.tsx' // Renamed

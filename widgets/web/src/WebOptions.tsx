@@ -1,6 +1,5 @@
 import React, { Component } from 'react'
-import { Form, Input, InlineInputGroup, IInputProps } from '../../../components/Form' // Assuming Form components are/will be typed
-import { IWidgetOptionsEditorProps } from '../../../components/Admin/WidgetEditDialog'
+import { Form, Input, InlineInputGroup } from '../../../components/Form' // Assuming Form components are/will be typed
 import * as z from 'zod'
 
 import { IWebDefaultData } from '../index' // This is an interface

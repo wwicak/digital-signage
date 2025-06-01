@@ -1,6 +1,5 @@
 import React, { Component } from 'react'
-import { Form, Input, IChoice, InlineInputGroup } from '../../../components/Form'
-import { IWidgetOptionsEditorProps } from '../../../components/Admin/WidgetEditDialog'
+import { Form, Input, InlineInputGroup } from '../../../components/Form'
 import { getSlideshows, ISlideshowData } from '../../../actions/slideshow' // ISlideshowData is z.infer<SlideshowActionDataSchema>
 import * as z from 'zod'
 

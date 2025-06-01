@@ -1,7 +1,7 @@
 import React, { Component } from 'react'
 import ContentLoader from 'react-content-loader'
 
-import SlideshowCard, { ISlideshowCardProps } from './SlideshowCard' // SlideshowCard.tsx and its props
+import SlideshowCard from './SlideshowCard' // SlideshowCard.tsx and its props
 import { getSlideshows, ISlideshowData } from '../../actions/slideshow' // ISlideshowData is already defined
 
 // This component doesn't seem to receive any specific props from its parent.

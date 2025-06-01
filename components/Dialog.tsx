@@ -1,4 +1,4 @@
-import React, { ReactNode, forwardRef, useImperativeHandle, useState, memo } from 'react'
+import React, { ReactNode, forwardRef, useImperativeHandle, memo } from 'react'
 import DialogLegacy, { DialogRef } from './ui/dialog-legacy'
 
 export interface IDialogProps {

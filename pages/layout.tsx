@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faThLarge, faTh, faPencilAlt } from '@fortawesome/free-solid-svg-icons'
 import { IconProp, IconDefinition } from '@fortawesome/fontawesome-svg-core'
-import GridLayout, { Layout as RglLayout, Layouts as RglLayouts } from 'react-grid-layout'
+import GridLayout, { Layout as RglLayout } from 'react-grid-layout'
 import { DragDropContext, Droppable, DropResult, DroppableProvided } from '@hello-pangea/dnd'
 
 import Frame from '../components/Admin/Frame' // Assuming .js or .tsx

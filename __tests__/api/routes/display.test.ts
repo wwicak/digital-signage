@@ -1,13 +1,13 @@
 // @ts-nocheck
 import request from 'supertest'
-import express, { Express, Request, Response, NextFunction } from 'express'
+import express, { Express, Response, NextFunction } from 'express'
 import session from 'express-session'
-import passport from 'passport' // For req.user, req.isAuthenticated type usage
+// For req.user, req.isAuthenticated type usage
 import mongoose from 'mongoose'
 import DisplayRouter from '../../../api/routes/display'
-import Display, { IDisplay } from '../../../api/models/Display'
-import Widget, { IWidget, WidgetType } from '../../../api/models/Widget'
-import User, { IUser } from '../../../api/models/User'
+import Display from '../../../api/models/Display'
+import { WidgetType } from '../../../api/models/Widget'
+import { IUser } from '../../../api/models/User'
 import * as commonHelper from '../../../api/helpers/common_helper'
 import * as displayHelper from '../../../api/helpers/display_helper'
 import * as sseManager from '../../../api/sse_manager'

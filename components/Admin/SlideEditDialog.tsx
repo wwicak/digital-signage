@@ -1,10 +1,10 @@
 import React, { Component } from 'react'
 import _ from 'lodash'
 
-import Dialog, { IDialogProps, DialogMethods } from '../Dialog' // Assuming Dialog.tsx and its props
-import { Form, Input, Button, ButtonGroup, IInputProps, IChoice } from '../Form' // Assuming Form components are/will be typed
+import Dialog, { DialogMethods } from '../Dialog' // Assuming Dialog.tsx and its props
+import { Form, Input, Button, ButtonGroup, IChoice } from '../Form' // Assuming Form components are/will be typed
 
-import { getSlide, addSlide, updateSlide, ISlideData, SlideAddPayload as SlideAddData, SlideUpdatePayload as SlideUpdateData, SlideActionDataSchema } from '../../actions/slide' // Corrected import aliases
+import { getSlide, addSlide, updateSlide, ISlideData, SlideAddPayload as SlideAddData, SlideUpdatePayload as SlideUpdateData } from '../../actions/slide' // Corrected import aliases
 import {
   SlideType, SlideData, SlideTypeZod, SlideDataZod,
   ImageSlideData, VideoSlideData, WebSlideData, MarkdownSlideData, PhotoSlideData, YoutubeSlideData // Import specific types

@@ -1,6 +1,5 @@
 import React, { Component } from 'react'
-import { Form, Input, InlineInputGroup, IInputProps, IChoice } from '../../../components/Form'
-import { IWidgetOptionsEditorProps } from '../../../components/Admin/WidgetEditDialog'
+import { Form, Input, InlineInputGroup, IChoice } from '../../../components/Form'
 // Import the schema from the new types.ts file
 import * as z from 'zod' // z is still needed for CongratsOptionsPropsSchema
 import { CongratsWidgetContentDataSchema, ICongratsWidgetData } from './types'

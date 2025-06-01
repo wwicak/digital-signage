@@ -1,13 +1,12 @@
 import React, { Component } from 'react'
-import { Form, Input, InlineInputGroup, Button, IInputProps, IChoice } from '../../../components/Form'
-import { IWidgetOptionsEditorProps } from '../../../components/Admin/WidgetEditDialog'
+import { Form, Input, InlineInputGroup, Button } from '../../../components/Form'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faTrash } from '@fortawesome/free-solid-svg-icons'
 import { IconProp } from '@fortawesome/fontawesome-svg-core'
 import * as z from 'zod'
 
 import ListContent from './ListContent' // IListWidgetData (now inferred) is not directly used here.
-import { IListDefaultData, IListItem } from '../index' // IListItem is interface, IListDefaultData is interface
+import { IListItem } from '../index' // IListItem is interface, IListDefaultData is interface
 import { ListItemSchema } from './ListContent' // Import Zod schema for IListItem
 
 // Zod schema for IListDefaultData (used for props.data and state)

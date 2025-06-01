@@ -1,9 +1,8 @@
 import React, { Component } from 'react'
 import { Form, Input, IChoice, InlineInputGroup } from '../../../components/Form' // Assuming Form components are/will be typed
-import { IWidgetOptionsEditorProps } from '../../../components/Admin/WidgetEditDialog'
 import * as z from 'zod'
 
-import { IWeatherDefaultData, TWeatherUnit } from '../index' // IWeatherDefaultData is interface
+// IWeatherDefaultData is interface
 import { WeatherWidgetDataSchema } from './WeatherContent' // Import Zod schema for IWeatherDefaultData
 
 /*

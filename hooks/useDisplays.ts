@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query'
-import { getDisplays, IDisplayData } from '../actions/display'
+import { getDisplays } from '../actions/display'
 
 /**
  * Global hook for fetching and caching the list of all displays.

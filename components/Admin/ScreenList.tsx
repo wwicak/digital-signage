@@ -1,9 +1,8 @@
 import React, { forwardRef, useImperativeHandle } from 'react'
 import ContentLoader from 'react-content-loader'
 
-import ScreenCard, { IScreenCardProps } from './ScreenCard' // Assuming ScreenCard.tsx and its props
+import ScreenCard from './ScreenCard' // Assuming ScreenCard.tsx and its props
 import { useDisplays } from '../../hooks/useDisplays'
-import { IDisplayData } from '../../actions/display'
 
 // This component doesn't seem to receive any specific props from its parent in the current usage.
 export interface IScreenListProps {

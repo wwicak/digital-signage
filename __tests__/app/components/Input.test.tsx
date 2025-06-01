@@ -1,7 +1,7 @@
 import React from 'react'
-import { render, screen, fireEvent, waitFor, act } from '@testing-library/react'
+import { render, screen, fireEvent, act } from '@testing-library/react'
 import '@testing-library/jest-dom'
-import Input, { IInputProps, IChoice } from '../../../components/Form/Input'
+import Input, { IChoice } from '../../../components/Form/Input'
 
 // Mock ColorPicker
 jest.mock('../../../components/Form/ColorPicker', () => {

@@ -1,5 +1,4 @@
 import React, { memo } from 'react'
-import { NextPage, GetServerSidePropsContext } from 'next'
 
 import DisplayComponent from '../components/Display/Display' // Renamed to DisplayComponent to avoid conflict
 
