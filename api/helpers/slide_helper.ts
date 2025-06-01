@@ -173,7 +173,9 @@ export async function getDisplayIdsForSlide(
 
     // b. For each slideshowId found, call getDisplayIdsForSlideshow.
     for (const slideshow of slideshows) {
-      const displayIds = await getDisplayIdsForSlideshow(slideshow._id);
+      const displayIds = await getDisplayIdsForSlideshow(
+        slideshow._id as mongoose.Types.ObjectId
+      );
       displayIds.forEach((id) => allDisplayIds.add(id));
     }
 

@@ -15,10 +15,11 @@ jest.mock("passport");
 // Mock helper functions from slideshow_helper
 jest.mock("../../../api/helpers/slideshow_helper");
 // Mock SSE manager
-const mockSendEventToDisplay = jest.fn();
-jest.mock("../../../api/sse_manager", () => ({
-  sendEventToDisplay: mockSendEventToDisplay,
-}));
+jest.mock("../../../api/sse_manager");
+import { sendEventToDisplay } from "../../../api/sse_manager";
+const mockSendEventToDisplay = sendEventToDisplay as jest.MockedFunction<
+  typeof sendEventToDisplay
+>;
 
 const mockUser = {
   _id: "testUserId",
