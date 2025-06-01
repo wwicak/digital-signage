@@ -34,7 +34,7 @@ jest.mock('next/router', () => ({
   __esModule: true,
   useRouter: () => mockRouter,
   default: {
-    push: mockRouterPush,
+    push: jest.fn(),
   },
   withRouter: (Component: any) => {
     return (props: any) => React.createElement(Component, { ...props, router: mockRouter })

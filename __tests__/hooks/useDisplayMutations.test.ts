@@ -71,7 +71,13 @@ describe("useDisplayMutations", () => {
 
   describe("createDisplay", () => {
     it("should create a display successfully", async () => {
-      mockedAddDisplay.mockResolvedValueOnce(mockDisplayData);
+      // Create a promise that resolves after a delay to capture loading state
+      let resolvePromise: (value: any) => void;
+      const delayedPromise = new Promise((resolve) => {
+        resolvePromise = resolve;
+      });
+
+      mockedAddDisplay.mockReturnValueOnce(delayedPromise);
 
       const { result } = renderHook(() => useDisplayMutations(), {
         wrapper: createWrapper(),
@@ -83,7 +89,15 @@ describe("useDisplayMutations", () => {
         result.current.createDisplay.mutate("localhost");
       });
 
-      expect(result.current.isCreating).toBe(true);
+      // Should be loading now
+      await waitFor(() => {
+        expect(result.current.isCreating).toBe(true);
+      });
+
+      // Resolve the promise
+      act(() => {
+        resolvePromise!(mockDisplay);
+      });
 
       await waitFor(() => {
         expect(result.current.isCreating).toBe(false);

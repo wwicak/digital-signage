@@ -179,8 +179,8 @@ describe("useDisplaySSE", () => {
 
     consoleLogSpy.mockClear();
 
-    // Change wrapper (and thus queryClient)
-    rerender();
+    // Change wrapper (and thus queryClient) - this should trigger cleanup and re-initialization
+    rerender(() => useDisplaySSE(true), { wrapper: wrapper2 });
 
     // Should re-initialize due to queryClient dependency
     expect(consoleLogSpy).toHaveBeenCalledWith(

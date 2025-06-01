@@ -61,11 +61,11 @@ const ScreenCard: React.FC<IScreenCardProps> = ({ value, refresh = () => {} }) =
   }
 
   // Fallback for widgets if undefined (though IDisplayData defines it as optional IWidget[] or string[])
-  const widgetCount = Array.isArray(value.widgets) ? value.widgets.length : 0
+  const widgetCount = value && Array.isArray(value.widgets) ? value.widgets.length : 0
 
   return (
     // The outer Link wraps the entire card. Clicks on action icons inside need stopPropagation.
-    <Link href={`/layout?display=${value._id}`}>
+    <Link href={`/layout?display=${value?._id || ''}`}>
       <a className='card-anchor-wrapper'> {/* Use an anchor tag for proper semantics with Next.js Link */}
         <div className='card'>
           <div className='left'>
@@ -74,7 +74,7 @@ const ScreenCard: React.FC<IScreenCardProps> = ({ value, refresh = () => {} }) =
             </div>
           </div>
           <div className='middle'>
-            <div className='title'>{value.name || 'Untitled Display'}</div>
+            <div className='title'>{value?.name || 'Untitled Display'}</div>
             <div className='info'>
               <div className='widgetnum'>
                 <div className='icon'>
@@ -97,13 +97,13 @@ const ScreenCard: React.FC<IScreenCardProps> = ({ value, refresh = () => {} }) =
           </div>
           <div className='right'>
             {/* Edit Layout Link */}
-            <Link href={`/layout?display=${value._id}`}>
+            <Link href={`/layout?display=${value?._id || ''}`}>
               <a className='actionIcon' onClick={(e) => e.stopPropagation()} aria-label='Edit Layout'>
                 <FontAwesomeIcon icon={faEye as IconProp} fixedWidth color='#828282' />
               </a>
             </Link>
             {/* View Display Link */}
-            <Link href={`/display/${value._id}`}>
+            <Link href={`/display/${value?._id || ''}`}>
               <a className='actionIcon' onClick={(e) => e.stopPropagation()} aria-label='View Display'>
                 <FontAwesomeIcon icon={faLink as IconProp} fixedWidth color='#828282' />
               </a>

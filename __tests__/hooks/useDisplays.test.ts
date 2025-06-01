@@ -98,13 +98,16 @@ describe("useDisplays", () => {
     expect(result.current.isLoading).toBe(true);
 
     // Wait for the query to fail
-    await waitFor(() => {
-      expect(result.current.isLoading).toBe(false);
-    });
+    await waitFor(
+      () => {
+        expect(result.current.isError).toBe(true);
+      },
+      { timeout: 3000 }
+    );
 
+    expect(result.current.isLoading).toBe(false);
     expect(result.current.data).toBeUndefined();
     expect(result.current.error).toBeTruthy();
-    expect(result.current.isError).toBe(true);
     expect(mockedGetDisplays).toHaveBeenCalledTimes(3); // Due to retry: 2 in useDisplays
   });
 
@@ -183,9 +186,12 @@ describe("useDisplays", () => {
       wrapper: createWrapper(),
     });
 
-    await waitFor(() => {
-      expect(result.current.isError).toBe(true);
-    });
+    await waitFor(
+      () => {
+        expect(result.current.isError).toBe(true);
+      },
+      { timeout: 3000 }
+    );
 
     expect(result.current.error).toBeTruthy();
     expect(result.current.data).toBeUndefined();
@@ -193,9 +199,24 @@ describe("useDisplays", () => {
   });
 
   it("should cache results according to query configuration", async () => {
-    mockedGetDisplays.mockResolvedValueOnce(mockDisplaysData);
+    mockedGetDisplays.mockResolvedValue(mockDisplaysData);
 
-    const wrapper = createWrapper();
+    // Create a shared QueryClient for this test to test caching
+    const queryClient = new QueryClient({
+      defaultOptions: {
+        queries: {
+          retry: false,
+          staleTime: 10000, // 10 seconds
+        },
+      },
+    });
+
+    const wrapper = ({ children }: { children: React.ReactNode }) =>
+      React.createElement(
+        QueryClientProvider,
+        { client: queryClient },
+        children
+      );
 
     // First render
     const { result: result1 } = renderHook(() => useDisplays(), { wrapper });
@@ -204,6 +225,9 @@ describe("useDisplays", () => {
       expect(result1.current.isSuccess).toBe(true);
     });
 
+    // Reset the mock count after first successful call
+    mockedGetDisplays.mockClear();
+
     // Second render should use cache (no additional API call within staleTime)
     const { result: result2 } = renderHook(() => useDisplays(), { wrapper });
 
@@ -211,7 +235,7 @@ describe("useDisplays", () => {
       expect(result2.current.isSuccess).toBe(true);
     });
 
-    // Should have only called the API once due to caching
-    expect(mockedGetDisplays).toHaveBeenCalledTimes(1);
+    // Should not have called the API again due to caching
+    expect(mockedGetDisplays).toHaveBeenCalledTimes(0);
   });
 });
