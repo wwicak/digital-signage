@@ -17,8 +17,9 @@ const mockedUseDisplays = useDisplays as jest.MockedFunction<typeof useDisplays>
 const mockedUseDisplayContext = useDisplayContext as jest.MockedFunction<typeof useDisplayContext>
 const mockedLogout = logout as jest.MockedFunction<typeof logout>
 
-// Mock Next.js router
+// Mock Next.js router - create mock function separately to avoid hoisting issues
 const mockRouterPush = jest.fn()
+const mockDefaultRouterPush = jest.fn()
 const mockRouter = {
   push: mockRouterPush,
   pathname: '/screens',
@@ -34,7 +35,7 @@ jest.mock('next/router', () => ({
   __esModule: true,
   useRouter: () => mockRouter,
   default: {
-    push: jest.fn(),
+    push: jest.fn(), // Use anonymous function to avoid hoisting issues
   },
   withRouter: (Component: any) => {
     return (props: any) => React.createElement(Component, { ...props, router: mockRouter })
@@ -203,12 +204,16 @@ describe('Sidebar (Refactored with global hooks)', () => {
     })
 
     it('should navigate to admin page when display is selected from dropdown', () => {
+      // Access the mocked Router.push function
+      const Router = require('next/router').default
+      const mockRouterDefaultPush = Router.push
+      
       renderSidebar({ loggedIn: true })
       
       const displayChoice = screen.getByTestId('choice-display2')
       fireEvent.click(displayChoice)
       
-      expect(mockRouterPush).toHaveBeenCalledWith('/layout?display=display2')
+      expect(mockRouterDefaultPush).toHaveBeenCalledWith('/layout?display=display2')
       expect(mockDisplayContext.setId).toHaveBeenCalledWith('display2')
     })
 
@@ -243,12 +248,14 @@ describe('Sidebar (Refactored with global hooks)', () => {
       const logoutElement = screen.getByText('Logout').closest('[role="button"]')
       expect(logoutElement).toHaveAttribute('tabIndex', '0')
       
-      fireEvent.keyPress(logoutElement!, { key: 'Enter', code: 'Enter' })
+      // Test Enter key
+      fireEvent.keyPress(logoutElement!, { key: 'Enter', code: 'Enter', charCode: 13 })
       expect(mockedLogout).toHaveBeenCalledTimes(1)
       
       mockedLogout.mockClear()
       
-      fireEvent.keyPress(logoutElement!, { key: ' ', code: 'Space' })
+      // Test space key
+      fireEvent.keyPress(logoutElement!, { key: ' ', code: 'Space', charCode: 32 })
       expect(mockedLogout).toHaveBeenCalledTimes(1)
     })
   })

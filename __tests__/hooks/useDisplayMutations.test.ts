@@ -13,6 +13,7 @@ import {
   deleteDisplay,
   getDisplay,
   IDisplayData,
+  IDeleteResponse,
 } from "../../actions/display";
 
 // Mock the actions/display module
@@ -72,8 +73,8 @@ describe("useDisplayMutations", () => {
   describe("createDisplay", () => {
     it("should create a display successfully", async () => {
       // Create a promise that resolves after a delay to capture loading state
-      let resolvePromise: (value: any) => void;
-      const delayedPromise = new Promise((resolve) => {
+      let resolvePromise: (value: IDisplayData) => void;
+      const delayedPromise = new Promise<IDisplayData>((resolve) => {
         resolvePromise = resolve;
       });
 
@@ -166,8 +167,8 @@ describe("useDisplayMutations", () => {
   describe("updateDisplay", () => {
     it("should update a display successfully", async () => {
       // Create a promise that resolves after a delay to capture loading state
-      let resolvePromise: (value: any) => void;
-      const delayedPromise = new Promise((resolve) => {
+      let resolvePromise: (value: IDisplayData) => void;
+      const delayedPromise = new Promise<IDisplayData>((resolve) => {
         resolvePromise = resolve;
       });
 
@@ -288,8 +289,8 @@ describe("useDisplayMutations", () => {
   describe("deleteDisplay", () => {
     it("should delete a display successfully", async () => {
       // Create a promise that resolves after a delay to capture loading state
-      let resolvePromise: (value: any) => void;
-      const delayedPromise = new Promise((resolve) => {
+      let resolvePromise: (value: IDeleteResponse) => void;
+      const delayedPromise = new Promise<IDeleteResponse>((resolve) => {
         resolvePromise = resolve;
       });
 
