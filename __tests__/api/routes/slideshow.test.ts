@@ -14,6 +14,12 @@ jest.mock('passport')
 
 // Mock helper functions from slideshow_helper
 jest.mock('../../../api/helpers/slideshow_helper')
+// Mock SSE manager
+const mockSendEventToDisplay = jest.fn();
+jest.mock('../../../sse_manager', () => ({
+  sendEventToDisplay: mockSendEventToDisplay,
+}));
+
 
 const mockUser = {
   _id: 'testUserId',
@@ -51,6 +57,9 @@ describe('Slideshow API Routes', () => {
     slideshowHelper.reorderSlidesInSlideshow as jest.Mock
   const mockedPopulateSlideshowSlides =
     slideshowHelper.populateSlideshowSlides as jest.Mock
+  // Mock for the new helper function
+  let mockedGetDisplayIdsForSlideshow: jest.Mock;
+
 
   beforeEach(() => {
     app = express()
@@ -81,6 +90,11 @@ describe('Slideshow API Routes', () => {
     mockedValidateSlidesExist.mockReset()
     mockedReorderSlidesInSlideshow.mockReset()
     mockedPopulateSlideshowSlides.mockReset()
+    // Initialize and reset the new mock
+    mockedGetDisplayIdsForSlideshow = slideshowHelper.getDisplayIdsForSlideshow as jest.Mock;
+    mockedGetDisplayIdsForSlideshow.mockReset();
+    mockSendEventToDisplay.mockClear();
+
 
     /*
      * Default mock implementations removed to force explicit mocking in each test
@@ -728,4 +742,139 @@ describe('Slideshow API Routes', () => {
       })
     })
   })
+
+  // New Test Suite for SSE Notifications
+  describe('Slideshow API - SSE Notifications', () => {
+    const slideshowId = 'sseShowId';
+    const mockDisplayIds = ['display1', 'display2'];
+
+    const getMockSlideshow = (id: string) => ({
+      _id: id,
+      name: 'SSE Test Slideshow',
+      creator_id: mockUser._id,
+      slides: [],
+      save: jest.fn(),
+      // Add any other fields accessed by the route handler
+    });
+
+    describe('PUT /:id - Update Slideshow Notifications', () => {
+      it('should send display_updated event to relevant displays on successful update', async () => {
+        const mockSlideshowInstance = getMockSlideshow(slideshowId);
+        mockSlideshowInstance.save.mockResolvedValue(mockSlideshowInstance); // Mock save to resolve
+
+        slideshowFindOneSpy.mockImplementation(() => mockQueryChain(mockSlideshowInstance));
+        mockedGetDisplayIdsForSlideshow.mockResolvedValue(mockDisplayIds);
+        mockedPopulateSlideshowSlides.mockImplementation(async (ss) => ss); // Ensure populate works
+
+        const updatePayload = { name: 'Updated for SSE' };
+        const response = await request(app)
+          .put(`/api/v1/slideshows/${slideshowId}`)
+          .send(updatePayload);
+
+        expect(response.status).toBe(200); // Or whatever success status is
+        expect(mockedGetDisplayIdsForSlideshow).toHaveBeenCalledWith(mockSlideshowInstance._id);
+        expect(mockSendEventToDisplay).toHaveBeenCalledTimes(mockDisplayIds.length);
+        for (const displayId of mockDisplayIds) {
+          expect(mockSendEventToDisplay).toHaveBeenCalledWith(
+            displayId,
+            'display_updated',
+            expect.objectContaining({
+              displayId: displayId,
+              action: 'update',
+              reason: 'slideshow_change',
+              slideshowId: mockSlideshowInstance._id.toString(),
+            })
+          );
+        }
+      });
+
+      it('should not send events if getDisplayIdsForSlideshow returns empty array', async () => {
+        const mockSlideshowInstance = getMockSlideshow(slideshowId);
+        mockSlideshowInstance.save.mockResolvedValue(mockSlideshowInstance);
+
+        slideshowFindOneSpy.mockImplementation(() => mockQueryChain(mockSlideshowInstance));
+        mockedGetDisplayIdsForSlideshow.mockResolvedValue([]);
+        mockedPopulateSlideshowSlides.mockImplementation(async (ss) => ss);
+
+        const updatePayload = { name: 'Updated No SSE' };
+        await request(app)
+          .put(`/api/v1/slideshows/${slideshowId}`)
+          .send(updatePayload);
+
+        expect(mockedGetDisplayIdsForSlideshow).toHaveBeenCalledWith(mockSlideshowInstance._id);
+        expect(mockSendEventToDisplay).not.toHaveBeenCalled();
+      });
+
+      it('should not send events if getDisplayIdsForSlideshow throws an error', async () => {
+        const mockSlideshowInstance = getMockSlideshow(slideshowId);
+        mockSlideshowInstance.save.mockResolvedValue(mockSlideshowInstance);
+
+        slideshowFindOneSpy.mockImplementation(() => mockQueryChain(mockSlideshowInstance));
+        mockedGetDisplayIdsForSlideshow.mockRejectedValue(new Error("DB error fetching display IDs"));
+        mockedPopulateSlideshowSlides.mockImplementation(async (ss) => ss);
+
+        const updatePayload = { name: 'Updated Error SSE' };
+        const response = await request(app)
+          .put(`/api/v1/slideshows/${slideshowId}`)
+          .send(updatePayload);
+
+        expect(response.status).toBe(200); // Main operation succeeds
+        expect(mockSendEventToDisplay).not.toHaveBeenCalled();
+      });
+    });
+
+    describe('DELETE /:id - Delete Slideshow Notifications', () => {
+      it('should send display_updated event with slideshow_deleted reason on successful delete', async () => {
+        const mockSlideshowInstance = getMockSlideshow(slideshowId);
+        slideshowFindOneSpy.mockImplementation(() => mockQueryChain(mockSlideshowInstance));
+        slideshowFindByIdAndDeleteSpy.mockResolvedValue(mockSlideshowInstance); // Mock delete to resolve
+        mockedGetDisplayIdsForSlideshow.mockResolvedValue(mockDisplayIds);
+
+        const response = await request(app)
+          .delete(`/api/v1/slideshows/${slideshowId}`);
+
+        expect(response.status).toBe(200);
+        expect(mockedGetDisplayIdsForSlideshow).toHaveBeenCalledWith(slideshowId);
+        expect(mockSendEventToDisplay).toHaveBeenCalledTimes(mockDisplayIds.length);
+        for (const displayId of mockDisplayIds) {
+          expect(mockSendEventToDisplay).toHaveBeenCalledWith(
+            displayId,
+            'display_updated',
+            expect.objectContaining({
+              displayId: displayId,
+              action: 'update',
+              reason: 'slideshow_deleted',
+              slideshowId: slideshowId.toString(),
+            })
+          );
+        }
+      });
+
+      it('should not send events if getDisplayIdsForSlideshow returns empty for delete', async () => {
+        const mockSlideshowInstance = getMockSlideshow(slideshowId);
+        slideshowFindOneSpy.mockImplementation(() => mockQueryChain(mockSlideshowInstance));
+        slideshowFindByIdAndDeleteSpy.mockResolvedValue(mockSlideshowInstance);
+        mockedGetDisplayIdsForSlideshow.mockResolvedValue([]);
+
+        await request(app)
+          .delete(`/api/v1/slideshows/${slideshowId}`);
+
+        expect(mockedGetDisplayIdsForSlideshow).toHaveBeenCalledWith(slideshowId);
+        expect(mockSendEventToDisplay).not.toHaveBeenCalled();
+      });
+
+      it('should still delete slideshow but not send events if getDisplayIdsForSlideshow throws (delete)', async () => {
+        const mockSlideshowInstance = getMockSlideshow(slideshowId);
+        slideshowFindOneSpy.mockImplementation(() => mockQueryChain(mockSlideshowInstance));
+        slideshowFindByIdAndDeleteSpy.mockResolvedValue(mockSlideshowInstance);
+        mockedGetDisplayIdsForSlideshow.mockRejectedValue(new Error("DB error fetching display IDs"));
+
+        const response = await request(app)
+          .delete(`/api/v1/slideshows/${slideshowId}`);
+
+        expect(response.status).toBe(200); // Main delete operation succeeds
+        expect(mockSendEventToDisplay).not.toHaveBeenCalled();
+      });
+    });
+  });
 })
