@@ -33,10 +33,7 @@ jest.mock("../../../api/models/Widget");
 jest.mock("../../../api/sse_manager");
 
 // Spy on getDisplayIdsForWidget within the same module for deleteWidgetAndCleanReferences tests
-const mockGetDisplayIdsForWidget = jest.spyOn(
-  widgetHelper,
-  "getDisplayIdsForWidget"
-);
+let mockGetDisplayIdsForWidget: jest.SpyInstance;
 const mockSendEventToDisplay = sendEventToDisplay as jest.Mock;
 
 describe("widget_helper", () => {
@@ -67,7 +64,16 @@ describe("widget_helper", () => {
     }
     // A new mock for each test for prototype methods like save
     (Display.prototype.save as jest.Mock) = jest.fn();
-    mockGetDisplayIdsForWidget.mockClear();
+
+    // Initialize spy for each test
+    if (mockGetDisplayIdsForWidget) {
+      mockGetDisplayIdsForWidget.mockRestore();
+    }
+    mockGetDisplayIdsForWidget = jest.spyOn(
+      widgetHelper,
+      "getDisplayIdsForWidget"
+    );
+
     mockSendEventToDisplay.mockClear();
   });
 

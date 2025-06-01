@@ -14,11 +14,15 @@ jest.mock("passport");
 // Mock helper functions from widget_helper
 jest.mock("../../../api/helpers/widget_helper");
 
-// Mock SSE manager
-const mockSendEventToDisplay = jest.fn();
+// Mock SSE manager - declare mock function first and use a factory function
 jest.mock("../../../api/sse_manager", () => ({
-  sendEventToDisplay: mockSendEventToDisplay,
+  sendEventToDisplay: jest.fn(),
 }));
+
+// Import the mocked function after mocking
+const {
+  sendEventToDisplay: mockSendEventToDisplay,
+} = require("../../../api/sse_manager");
 
 const mockUser = {
   _id: "testUserId",

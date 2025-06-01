@@ -15,15 +15,15 @@ const mockSlideRef: ISlideInstance = {
   loadedPromise: Promise.resolve(),
 }
 
-jest.mock('./Slide/Generic', () => React.forwardRef((props: any, ref: any) => {
+jest.mock('../../../widgets/slideshow/src/Slide/Generic', () => React.forwardRef((props: any, ref: any) => {
   React.useImperativeHandle(ref, () => mockSlideRef)
   return <div data-testid='mock-generic-slide' data-slideid={props.slide._id} data-active={props.show}>Generic: {props.slide.data.title}</div>
 }))
-jest.mock('./Slide/Photo', () => React.forwardRef((props: any, ref: any) => {
+jest.mock('../../../widgets/slideshow/src/Slide/Photo', () => React.forwardRef((props: any, ref: any) => {
   React.useImperativeHandle(ref, () => mockSlideRef)
   return <div data-testid='mock-photo-slide' data-slideid={props.slide._id} data-active={props.show}>Photo: {props.slide.data.title}</div>
 }))
-jest.mock('./Slide/Youtube', () => React.forwardRef((props: any, ref: any) => {
+jest.mock('../../../widgets/slideshow/src/Slide/Youtube', () => React.forwardRef((props: any, ref: any) => {
   React.useImperativeHandle(ref, () => mockSlideRef)
   return <div data-testid='mock-youtube-slide' data-slideid={props.slide._id} data-active={props.show}>Youtube: {props.slide.data.title}</div>
 }))

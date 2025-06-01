@@ -30,7 +30,7 @@ jest.mock('next/link', () => {
     }
 })
 
-jest.mock('../../actions/display', () => ({
+jest.mock('../../../actions/display', () => ({
   deleteDisplay: jest.fn(),
 }))
 

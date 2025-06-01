@@ -76,10 +76,10 @@ describe("Slide Helper Functions", () => {
       const updatedSlideshow1 = await Slideshow.findById(slideshow1._id);
       const updatedSlideshow2 = await Slideshow.findById(slideshow2._id);
 
-      expect(updatedSlideshow1?.slides).toContain(
+      expect(updatedSlideshow1?.slides).toContainEqual(
         slide._id as mongoose.Types.ObjectId
       );
-      expect(updatedSlideshow2?.slides).toContain(
+      expect(updatedSlideshow2?.slides).toContainEqual(
         slide._id as mongoose.Types.ObjectId
       );
     });
@@ -118,7 +118,7 @@ describe("Slide Helper Functions", () => {
 
       // Verify slide was added
       const updatedSlideshow = await Slideshow.findById(slideshow._id);
-      expect(updatedSlideshow?.slides).toContain(
+      expect(updatedSlideshow?.slides).toContainEqual(
         slide._id as mongoose.Types.ObjectId
       );
     });
@@ -311,10 +311,10 @@ describe("Slide Helper Functions", () => {
       expect(updatedSlideshow1?.slides).not.toContain(
         slide._id as mongoose.Types.ObjectId
       );
-      expect(updatedSlideshow2?.slides).toContain(
+      expect(updatedSlideshow2?.slides).toContainEqual(
         slide._id as mongoose.Types.ObjectId
       );
-      expect(updatedSlideshow3?.slides).toContain(
+      expect(updatedSlideshow3?.slides).toContainEqual(
         slide._id as mongoose.Types.ObjectId
       );
     });
@@ -352,7 +352,7 @@ describe("Slide Helper Functions", () => {
 
       // Verify slide was added
       const updatedSlideshow = await Slideshow.findById(slideshow._id);
-      expect(updatedSlideshow?.slides).toContain(
+      expect(updatedSlideshow?.slides).toContainEqual(
         slide._id as mongoose.Types.ObjectId
       );
     });
@@ -470,7 +470,7 @@ import { getDisplayIdsForSlideshow as mockGetDisplayIdsForSlideshowHelper } from
 
 // Setup spies and mocks for SSE unit tests
 // spiedGetDisplayIdsForSlide will be initialized before the describe block for unit tests
-let spiedGetDisplayIdsForSlide: jest.SpyInstance;
+let spiedGetDisplayIdsForSlide: jest.MockedFunction<any>;
 const mockSendEventToDisplay = sendEventToDisplay as jest.Mock;
 const mockedGetDisplayIdsForSlideshow =
   mockGetDisplayIdsForSlideshowHelper as jest.Mock;
@@ -480,33 +480,66 @@ describe("Slide Helper - deleteSlideAndCleanReferences - SSE Unit Tests", () => 
   const mockDisplayIds = ["displaySseSlideHelper1", "displaySseSlideHelper2"];
 
   beforeEach(() => {
+    // Reset mocks for each unit test with safety checks
+    if (
+      SlideMongooseModel.findById &&
+      typeof (SlideMongooseModel.findById as any).mockReset === "function"
+    ) {
+      (SlideMongooseModel.findById as jest.MockedFunction<any>).mockReset();
+    }
+    if (
+      SlideMongooseModel.findByIdAndDelete &&
+      typeof (SlideMongooseModel.findByIdAndDelete as any).mockReset ===
+        "function"
+    ) {
+      (
+        SlideMongooseModel.findByIdAndDelete as jest.MockedFunction<any>
+      ).mockReset();
+    }
+    if (
+      SlideshowMongooseModel.updateMany &&
+      typeof (SlideshowMongooseModel.updateMany as any).mockReset === "function"
+    ) {
+      (
+        SlideshowMongooseModel.updateMany as jest.MockedFunction<any>
+      ).mockReset();
+    }
+    mockSendEventToDisplay.mockReset();
+    if (
+      mockedGetDisplayIdsForSlideshow &&
+      typeof mockedGetDisplayIdsForSlideshow.mockReset === "function"
+    ) {
+      mockedGetDisplayIdsForSlideshow.mockReset();
+    }
+
     // Initialize spy here where slideHelperModule is in scope
+    if (spiedGetDisplayIdsForSlide) {
+      spiedGetDisplayIdsForSlide.mockRestore();
+    }
     spiedGetDisplayIdsForSlide = jest.spyOn(
       slideHelperModule,
       "getDisplayIdsForSlide"
     );
-
-    // Reset mocks for each unit test
-    (SlideMongooseModel.findById as jest.Mock).mockReset();
-    (SlideMongooseModel.findByIdAndDelete as jest.Mock).mockReset();
-    (SlideshowMongooseModel.updateMany as jest.Mock).mockReset();
-    spiedGetDisplayIdsForSlide.mockReset();
-    mockSendEventToDisplay.mockClear();
-    mockedGetDisplayIdsForSlideshow.mockReset();
   });
 
   afterEach(() => {
     // Restore the spy after each test to avoid conflicts
-    spiedGetDisplayIdsForSlide.mockRestore();
+    if (spiedGetDisplayIdsForSlide) {
+      spiedGetDisplayIdsForSlide.mockRestore();
+    }
   });
 
   it("should send display_updated event with slide_deleted reason for each display ID on successful delete", async () => {
     const mockSlide = { _id: slideId, name: "Test Slide for SSE delete" };
-    (SlideMongooseModel.findById as jest.Mock).mockResolvedValue(mockSlide);
-    (SlideMongooseModel.findByIdAndDelete as jest.Mock).mockResolvedValue(
+    (SlideMongooseModel.findById as jest.MockedFunction<any>).mockResolvedValue(
       mockSlide
     );
-    (SlideshowMongooseModel.updateMany as jest.Mock).mockResolvedValue({
+    (
+      SlideMongooseModel.findByIdAndDelete as jest.MockedFunction<any>
+    ).mockResolvedValue(mockSlide);
+    (
+      SlideshowMongooseModel.updateMany as jest.MockedFunction<any>
+    ).mockResolvedValue({
       acknowledged: true,
       modifiedCount: 1,
     });
@@ -538,11 +571,15 @@ describe("Slide Helper - deleteSlideAndCleanReferences - SSE Unit Tests", () => 
 
   it("should not send events if getDisplayIdsForSlide (spied) returns an empty array", async () => {
     const mockSlide = { _id: slideId, name: "Test Slide No SSE" };
-    (SlideMongooseModel.findById as jest.Mock).mockResolvedValue(mockSlide);
-    (SlideMongooseModel.findByIdAndDelete as jest.Mock).mockResolvedValue(
+    (SlideMongooseModel.findById as jest.MockedFunction<any>).mockResolvedValue(
       mockSlide
     );
-    (SlideshowMongooseModel.updateMany as jest.Mock).mockResolvedValue({
+    (
+      SlideMongooseModel.findByIdAndDelete as jest.MockedFunction<any>
+    ).mockResolvedValue(mockSlide);
+    (
+      SlideshowMongooseModel.updateMany as jest.MockedFunction<any>
+    ).mockResolvedValue({
       acknowledged: true,
       modifiedCount: 1,
     });
@@ -558,11 +595,15 @@ describe("Slide Helper - deleteSlideAndCleanReferences - SSE Unit Tests", () => 
 
   it("should still delete slide but not send events if getDisplayIdsForSlide (spied) throws an error", async () => {
     const mockSlide = { _id: slideId, name: "Test Slide Error SSE" };
-    (SlideMongooseModel.findById as jest.Mock).mockResolvedValue(mockSlide);
-    (SlideMongooseModel.findByIdAndDelete as jest.Mock).mockResolvedValue(
+    (SlideMongooseModel.findById as jest.MockedFunction<any>).mockResolvedValue(
       mockSlide
     );
-    (SlideshowMongooseModel.updateMany as jest.Mock).mockResolvedValue({
+    (
+      SlideMongooseModel.findByIdAndDelete as jest.MockedFunction<any>
+    ).mockResolvedValue(mockSlide);
+    (
+      SlideshowMongooseModel.updateMany as jest.MockedFunction<any>
+    ).mockResolvedValue({
       acknowledged: true,
       modifiedCount: 1,
     });
@@ -579,7 +620,9 @@ describe("Slide Helper - deleteSlideAndCleanReferences - SSE Unit Tests", () => 
   });
 
   it("should return null and not send events if slide to delete is not found (findById returns null)", async () => {
-    (SlideMongooseModel.findById as jest.Mock).mockResolvedValue(null);
+    (SlideMongooseModel.findById as jest.MockedFunction<any>).mockResolvedValue(
+      null
+    );
     spiedGetDisplayIdsForSlide.mockResolvedValue(mockDisplayIds); // Mock this so it doesn't throw before findById check
 
     const result = await slideHelperModule.deleteSlideAndCleanReferences(
@@ -604,19 +647,26 @@ describe("Slide Helper - getDisplayIdsForSlide - Unit Tests", () => {
   ];
 
   beforeEach(() => {
-    (SlideshowMongooseModel.find as jest.Mock).mockReset();
+    if (
+      SlideshowMongooseModel.find &&
+      typeof (SlideshowMongooseModel.find as any).mockReset === "function"
+    ) {
+      (SlideshowMongooseModel.find as jest.MockedFunction<any>).mockReset();
+    }
     mockedGetDisplayIdsForSlideshow.mockReset();
   });
 
   it("should call getDisplayIdsForSlideshow for each slideshow and aggregate unique display IDs", async () => {
-    (SlideshowMongooseModel.find as jest.Mock).mockReturnValue({
+    (SlideshowMongooseModel.find as jest.MockedFunction<any>).mockReturnValue({
       select: jest.fn().mockReturnThis(),
-      lean: jest.fn().mockResolvedValue(mockSlideshowsContainingSlide),
+      lean: (jest.fn() as jest.MockedFunction<any>).mockResolvedValue(
+        mockSlideshowsContainingSlide
+      ),
     } as any);
 
-    mockedGetDisplayIdsForSlideshow
-      .mockResolvedValueOnce(["display1", "display2"])
-      .mockResolvedValueOnce(["display2", "display3"]);
+    (mockedGetDisplayIdsForSlideshow as jest.MockedFunction<any>)
+      .mockResolvedValueOnce(["display1", "display2"] as any)
+      .mockResolvedValueOnce(["display2", "display3"] as any);
 
     const result = await slideHelperModule.getDisplayIdsForSlide(testSlideId);
 
@@ -639,9 +689,9 @@ describe("Slide Helper - getDisplayIdsForSlide - Unit Tests", () => {
   });
 
   it("should return empty array if no slideshows contain the slide", async () => {
-    (SlideshowMongooseModel.find as jest.Mock).mockReturnValue({
+    (SlideshowMongooseModel.find as jest.MockedFunction<any>).mockReturnValue({
       select: jest.fn().mockReturnThis(),
-      lean: jest.fn().mockResolvedValue([]),
+      lean: (jest.fn() as jest.MockedFunction<any>).mockResolvedValue([]),
     } as any);
 
     const result = await slideHelperModule.getDisplayIdsForSlide(testSlideId);
@@ -650,11 +700,15 @@ describe("Slide Helper - getDisplayIdsForSlide - Unit Tests", () => {
   });
 
   it("should return empty array if getDisplayIdsForSlideshow returns empty for all slideshows", async () => {
-    (SlideshowMongooseModel.find as jest.Mock).mockReturnValue({
+    (SlideshowMongooseModel.find as jest.MockedFunction<any>).mockReturnValue({
       select: jest.fn().mockReturnThis(),
-      lean: jest.fn().mockResolvedValue(mockSlideshowsContainingSlide),
+      lean: (jest.fn() as jest.MockedFunction<any>).mockResolvedValue(
+        mockSlideshowsContainingSlide
+      ),
     } as any);
-    mockedGetDisplayIdsForSlideshow.mockResolvedValue([]);
+    (
+      mockedGetDisplayIdsForSlideshow as jest.MockedFunction<any>
+    ).mockResolvedValue([] as any);
 
     const result = await slideHelperModule.getDisplayIdsForSlide(testSlideId);
     expect(result).toEqual([]);

@@ -73,7 +73,7 @@ jest.mock('next/link', () => {
   return MockLink
 })
 
-jest.mock('../../helpers/auth', () => ({
+jest.mock('../../../helpers/auth', () => ({
   logout: jest.fn(() => Promise.resolve()),
 }))
 

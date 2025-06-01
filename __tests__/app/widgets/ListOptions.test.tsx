@@ -57,7 +57,7 @@ jest.mock('@fortawesome/react-fontawesome', () => ({
 }))
 
 // Mock ListContent for preview
-jest.mock('./ListContent', () => {
+jest.mock('../../../widgets/list/src/ListContent', () => {
   return jest.fn((props: any) => (
     <div data-testid='mock-list-content-preview'>
       Preview: {props.data?.title}

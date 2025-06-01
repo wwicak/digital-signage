@@ -31,7 +31,7 @@ jest.mock('../../../components/Form', () => ({
   InlineInputGroup: jest.fn(({ children }) => <div data-testid='mock-inline-input-group'>{children}</div>),
 }))
 
-jest.mock('./AnnouncementContent', () => {
+jest.mock('../../../widgets/announcement/src/AnnouncementContent', () => {
   const MockAnnouncementContent = ({ data }: { data: IAnnouncementWidgetData }) => (
     <div data-testid='mock-announcement-content-preview'>
       <p data-testid='preview-text'>{data.text}</p>

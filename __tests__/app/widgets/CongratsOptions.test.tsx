@@ -51,7 +51,7 @@ jest.mock('../../../components/Form', () => ({
 }))
 
 const mockCongratsContentDataForPreview: Partial<ICongratsWidgetData> = {}
-jest.mock('./CongratsContent', () => {
+jest.mock('../../../widgets/congrats/src/CongratsContent', () => {
     // This is the mock for the CongratsContent component used in the PREVIEW section of CongratsOptions
     const MockCongratsContentPreview = ({ data }: { data: ICongratsWidgetData }) => {
         Object.assign(mockCongratsContentDataForPreview, data)
