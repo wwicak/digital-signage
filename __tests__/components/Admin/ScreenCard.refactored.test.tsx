@@ -34,7 +34,7 @@ jest.mock('next/link', () => {
 
 // Mock FontAwesome icons
 jest.mock('@fortawesome/react-fontawesome', () => ({
-  FontAwesomeIcon: jest.fn((props) => React.createElement('i', { 
+  FontAwesomeIcon: jest.fn((props) => React.createElement('i', {
     'data-testid': `mock-fa-icon-${props.icon.iconName}`,
     'data-color': props.color
   })),
@@ -115,32 +115,32 @@ describe('ScreenCard (Refactored with hooks)', () => {
     })
 
     it('should render "Untitled Display" when name is not provided', () => {
-      renderScreenCard({ 
-        value: { ...mockDisplayValue, name: undefined as any } 
+      renderScreenCard({
+        value: { ...mockDisplayValue, name: undefined as any }
       })
       
       expect(screen.getByText('Untitled Display')).toBeInTheDocument()
     })
 
     it('should render "Untitled Display" when name is empty', () => {
-      renderScreenCard({ 
-        value: { ...mockDisplayValue, name: '' } 
+      renderScreenCard({
+        value: { ...mockDisplayValue, name: '' }
       })
       
       expect(screen.getByText('Untitled Display')).toBeInTheDocument()
     })
 
     it('should handle widgets count correctly', () => {
-      renderScreenCard({ 
-        value: { ...mockDisplayValue, widgets: [] } 
+      renderScreenCard({
+        value: { ...mockDisplayValue, widgets: [] }
       })
       
       expect(screen.getByText('0 widgets')).toBeInTheDocument()
     })
 
     it('should handle undefined widgets array', () => {
-      renderScreenCard({ 
-        value: { ...mockDisplayValue, widgets: undefined as any } 
+      renderScreenCard({
+        value: { ...mockDisplayValue, widgets: undefined as any }
       })
       
       expect(screen.getByText('0 widgets')).toBeInTheDocument()
@@ -279,8 +279,8 @@ describe('ScreenCard (Refactored with hooks)', () => {
     })
 
     it('should not delete when _id is missing', () => {
-      renderScreenCard({ 
-        value: { ...mockDisplayValue, _id: undefined as any } 
+      renderScreenCard({
+        value: { ...mockDisplayValue, _id: undefined as any }
       })
       
       const deleteButton = screen.getByLabelText('Delete Display')
@@ -338,7 +338,7 @@ describe('ScreenCard (Refactored with hooks)', () => {
       
       // The component should reflect the loading state
       // This would typically be shown through disabled states or loading indicators
-      // Since the current component doesn't have visible loading states, 
+      // Since the current component doesn't have visible loading states,
       // we just verify the hook is called correctly
       expect(mockedUseDisplayMutations).toHaveBeenCalled()
     })

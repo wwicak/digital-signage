@@ -27,7 +27,7 @@ jest.mock('../../../components/Admin/ScreenCard', () => {
 // Mock ContentLoader
 jest.mock('react-content-loader', () => {
   return function MockContentLoader({ ...props }: any) {
-    return <div data-testid="content-loader" {...props} />
+    return <div data-testid='content-loader' {...props} />
   }
 })
 

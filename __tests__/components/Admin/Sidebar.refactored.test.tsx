@@ -46,7 +46,7 @@ jest.mock('next/router', () => ({
 jest.mock('next/link', () => {
   return ({ children, href, ...rest }: { children: React.ReactNode, href: string, [key: string]: any }) => {
     if (React.isValidElement(children) && children.type === 'li') {
-      return React.cloneElement(children as React.ReactElement<any>, { 
+      return React.cloneElement(children as React.ReactElement<any>, {
         'data-href': href,
         ...rest,
         ...(children.props || {})
@@ -58,7 +58,7 @@ jest.mock('next/link', () => {
 
 // Mock FontAwesome
 jest.mock('@fortawesome/react-fontawesome', () => ({
-  FontAwesomeIcon: jest.fn((props) => React.createElement('i', { 
+  FontAwesomeIcon: jest.fn((props) => React.createElement('i', {
     'data-testid': `icon-${props.icon.iconName}`,
     'data-color': props.color
   })),
@@ -68,9 +68,9 @@ jest.mock('@fortawesome/react-fontawesome', () => ({
 jest.mock('../../../components/DropdownButton', () => {
   return function MockDropdownButton({ children, onSelect, choices }: any) {
     return (
-      <div data-testid="dropdown-button">
+      <div data-testid='dropdown-button'>
         {children}
-        <div data-testid="dropdown-choices">
+        <div data-testid='dropdown-choices'>
           {choices && choices.map((choice: any) => (
             <button
               key={choice.key}

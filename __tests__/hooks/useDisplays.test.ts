@@ -1,36 +1,36 @@
-import { renderHook, waitFor } from "@testing-library/react";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import React from "react";
-import { useDisplays } from "../../hooks/useDisplays";
-import { getDisplays, IDisplayData } from "../../actions/display";
+import { renderHook, waitFor } from '@testing-library/react'
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import React from 'react'
+import { useDisplays } from '../../hooks/useDisplays'
+import { getDisplays, IDisplayData } from '../../actions/display'
 
 // Mock the actions/display module
-jest.mock("../../actions/display", () => ({
+jest.mock('../../actions/display', () => ({
   getDisplays: jest.fn(),
-}));
+}))
 
 const mockedGetDisplays = getDisplays as jest.MockedFunction<
   typeof getDisplays
->;
+>
 
 // Test data
 const mockDisplaysData: IDisplayData[] = [
   {
-    _id: "display1",
-    name: "Display 1",
-    layout: "spaced",
+    _id: 'display1',
+    name: 'Display 1',
+    layout: 'spaced',
     widgets: [],
-    creator_id: "user1",
+    creator_id: 'user1',
   },
   {
-    _id: "display2",
-    name: "Display 2",
-    layout: "compact",
+    _id: 'display2',
+    name: 'Display 2',
+    layout: 'compact',
     widgets: [
       {
-        _id: "widget1",
-        name: "Widget 1",
-        type: "announcement",
+        _id: 'widget1',
+        name: 'Widget 1',
+        type: 'announcement',
         x: 0,
         y: 0,
         w: 1,
@@ -38,9 +38,9 @@ const mockDisplaysData: IDisplayData[] = [
         data: {},
       },
     ],
-    creator_id: "user2",
+    creator_id: 'user2',
   },
-];
+]
 
 // Helper function to create a wrapper with QueryClient
 const createWrapper = () => {
@@ -51,155 +51,155 @@ const createWrapper = () => {
         gcTime: 0, // Disable cache for tests
       },
     },
-  });
+  })
 
   return ({ children }: { children: React.ReactNode }) =>
-    React.createElement(QueryClientProvider, { client: queryClient }, children);
-};
+    React.createElement(QueryClientProvider, { client: queryClient }, children)
+}
 
-describe("useDisplays", () => {
+describe('useDisplays', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
-  });
+    jest.clearAllMocks()
+  })
 
-  it("should return displays data when query is successful", async () => {
-    mockedGetDisplays.mockResolvedValueOnce(mockDisplaysData);
+  it('should return displays data when query is successful', async () => {
+    mockedGetDisplays.mockResolvedValueOnce(mockDisplaysData)
 
     const { result } = renderHook(() => useDisplays(), {
       wrapper: createWrapper(),
-    });
+    })
 
     // Initially loading
-    expect(result.current.isLoading).toBe(true);
-    expect(result.current.data).toBeUndefined();
-    expect(result.current.error).toBe(null);
+    expect(result.current.isLoading).toBe(true)
+    expect(result.current.data).toBeUndefined()
+    expect(result.current.error).toBe(null)
 
     // Wait for the query to resolve
     await waitFor(() => {
-      expect(result.current.isLoading).toBe(false);
-    });
+      expect(result.current.isLoading).toBe(false)
+    })
 
-    expect(result.current.data).toEqual(mockDisplaysData);
-    expect(result.current.error).toBe(null);
-    expect(result.current.isSuccess).toBe(true);
-    expect(mockedGetDisplays).toHaveBeenCalledTimes(1);
-    expect(mockedGetDisplays).toHaveBeenCalledWith();
-  });
+    expect(result.current.data).toEqual(mockDisplaysData)
+    expect(result.current.error).toBe(null)
+    expect(result.current.isSuccess).toBe(true)
+    expect(mockedGetDisplays).toHaveBeenCalledTimes(1)
+    expect(mockedGetDisplays).toHaveBeenCalledWith()
+  })
 
-  it("should handle error states properly", async () => {
-    const mockError = new Error("Failed to fetch displays");
-    mockedGetDisplays.mockRejectedValueOnce(mockError);
+  it('should handle error states properly', async () => {
+    const mockError = new Error('Failed to fetch displays')
+    mockedGetDisplays.mockRejectedValueOnce(mockError)
 
     const { result } = renderHook(() => useDisplays(), {
       wrapper: createWrapper(),
-    });
+    })
 
     // Initially loading
-    expect(result.current.isLoading).toBe(true);
+    expect(result.current.isLoading).toBe(true)
 
     // Wait for the query to fail
     await waitFor(
       () => {
-        expect(result.current.isError).toBe(true);
+        expect(result.current.isError).toBe(true)
       },
       { timeout: 3000 }
-    );
+    )
 
-    expect(result.current.isLoading).toBe(false);
-    expect(result.current.data).toBeUndefined();
-    expect(result.current.error).toBeTruthy();
-    expect(mockedGetDisplays).toHaveBeenCalledTimes(2); // Due to retry: 1 in test config
-  });
+    expect(result.current.isLoading).toBe(false)
+    expect(result.current.data).toBeUndefined()
+    expect(result.current.error).toBeTruthy()
+    expect(mockedGetDisplays).toHaveBeenCalledTimes(2) // Due to retry: 1 in test config
+  })
 
-  it("should return empty array when API returns empty data", async () => {
-    mockedGetDisplays.mockResolvedValueOnce([]);
-
-    const { result } = renderHook(() => useDisplays(), {
-      wrapper: createWrapper(),
-    });
-
-    await waitFor(() => {
-      expect(result.current.isLoading).toBe(false);
-    });
-
-    expect(result.current.data).toEqual([]);
-    expect(result.current.error).toBe(null);
-    expect(result.current.isSuccess).toBe(true);
-  });
-
-  it("should use correct query configuration", async () => {
-    mockedGetDisplays.mockResolvedValueOnce(mockDisplaysData);
+  it('should return empty array when API returns empty data', async () => {
+    mockedGetDisplays.mockResolvedValueOnce([])
 
     const { result } = renderHook(() => useDisplays(), {
       wrapper: createWrapper(),
-    });
+    })
 
     await waitFor(() => {
-      expect(result.current.isSuccess).toBe(true);
-    });
+      expect(result.current.isLoading).toBe(false)
+    })
+
+    expect(result.current.data).toEqual([])
+    expect(result.current.error).toBe(null)
+    expect(result.current.isSuccess).toBe(true)
+  })
+
+  it('should use correct query configuration', async () => {
+    mockedGetDisplays.mockResolvedValueOnce(mockDisplaysData)
+
+    const { result } = renderHook(() => useDisplays(), {
+      wrapper: createWrapper(),
+    })
+
+    await waitFor(() => {
+      expect(result.current.isSuccess).toBe(true)
+    })
 
     // Test that the hook exposes the expected TanStack Query properties
-    expect(result.current).toHaveProperty("data");
-    expect(result.current).toHaveProperty("isLoading");
-    expect(result.current).toHaveProperty("error");
-    expect(result.current).toHaveProperty("isError");
-    expect(result.current).toHaveProperty("isSuccess");
-    expect(result.current).toHaveProperty("refetch");
-  });
+    expect(result.current).toHaveProperty('data')
+    expect(result.current).toHaveProperty('isLoading')
+    expect(result.current).toHaveProperty('error')
+    expect(result.current).toHaveProperty('isError')
+    expect(result.current).toHaveProperty('isSuccess')
+    expect(result.current).toHaveProperty('refetch')
+  })
 
-  it("should allow manual refetch", async () => {
-    mockedGetDisplays.mockResolvedValueOnce(mockDisplaysData);
+  it('should allow manual refetch', async () => {
+    mockedGetDisplays.mockResolvedValueOnce(mockDisplaysData)
 
     const { result } = renderHook(() => useDisplays(), {
       wrapper: createWrapper(),
-    });
+    })
 
     await waitFor(() => {
-      expect(result.current.isSuccess).toBe(true);
-    });
+      expect(result.current.isSuccess).toBe(true)
+    })
 
     // Clear the mock to test refetch
-    mockedGetDisplays.mockClear();
+    mockedGetDisplays.mockClear()
     mockedGetDisplays.mockResolvedValueOnce([
       ...mockDisplaysData,
       {
-        _id: "display3",
-        name: "Display 3",
-        layout: "spaced",
+        _id: 'display3',
+        name: 'Display 3',
+        layout: 'spaced',
         widgets: [],
-        creator_id: "user3",
+        creator_id: 'user3',
       },
-    ]);
+    ])
 
     // Trigger refetch
-    await result.current.refetch();
+    await result.current.refetch()
 
-    expect(mockedGetDisplays).toHaveBeenCalledTimes(1);
-  });
+    expect(mockedGetDisplays).toHaveBeenCalledTimes(1)
+  })
 
-  it("should handle network errors gracefully", async () => {
-    const networkError = new Error("Network Error");
-    networkError.name = "NetworkError";
-    mockedGetDisplays.mockRejectedValueOnce(networkError);
+  it('should handle network errors gracefully', async () => {
+    const networkError = new Error('Network Error')
+    networkError.name = 'NetworkError'
+    mockedGetDisplays.mockRejectedValueOnce(networkError)
 
     const { result } = renderHook(() => useDisplays(), {
       wrapper: createWrapper(),
-    });
+    })
 
     await waitFor(
       () => {
-        expect(result.current.isError).toBe(true);
+        expect(result.current.isError).toBe(true)
       },
       { timeout: 3000 }
-    );
+    )
 
-    expect(result.current.error).toBeTruthy();
-    expect(result.current.data).toBeUndefined();
-    expect(result.current.isLoading).toBe(false);
-  });
+    expect(result.current.error).toBeTruthy()
+    expect(result.current.data).toBeUndefined()
+    expect(result.current.isLoading).toBe(false)
+  })
 
-  it("should cache results according to query configuration", async () => {
-    mockedGetDisplays.mockResolvedValue(mockDisplaysData);
+  it('should cache results according to query configuration', async () => {
+    mockedGetDisplays.mockResolvedValue(mockDisplaysData)
 
     // Create a shared QueryClient for this test to test caching
     const queryClient = new QueryClient({
@@ -209,34 +209,34 @@ describe("useDisplays", () => {
           staleTime: 10000, // 10 seconds
         },
       },
-    });
+    })
 
     const wrapper = ({ children }: { children: React.ReactNode }) =>
       React.createElement(
         QueryClientProvider,
         { client: queryClient },
         children
-      );
+      )
 
     // First render
-    const { result: result1 } = renderHook(() => useDisplays(), { wrapper });
+    const { result: result1 } = renderHook(() => useDisplays(), { wrapper })
 
     await waitFor(() => {
-      expect(result1.current.isSuccess).toBe(true);
-    });
+      expect(result1.current.isSuccess).toBe(true)
+    })
 
     // Check that the second hook instance immediately has cached data
-    expect(result1.current.data).toEqual(mockDisplaysData);
+    expect(result1.current.data).toEqual(mockDisplaysData)
 
     // Second render should use cache (no additional API call within staleTime)
-    const { result: result2 } = renderHook(() => useDisplays(), { wrapper });
+    const { result: result2 } = renderHook(() => useDisplays(), { wrapper })
 
     // Should immediately have cached data without loading
-    expect(result2.current.isLoading).toBe(false);
-    expect(result2.current.isSuccess).toBe(true);
-    expect(result2.current.data).toEqual(mockDisplaysData);
+    expect(result2.current.isLoading).toBe(false)
+    expect(result2.current.isSuccess).toBe(true)
+    expect(result2.current.data).toEqual(mockDisplaysData)
 
     // Total API calls should be at most 2 (one for each hook instance)
-    expect(mockedGetDisplays).toHaveBeenCalledTimes(2);
-  });
-});
+    expect(mockedGetDisplays).toHaveBeenCalledTimes(2)
+  })
+})

@@ -52,36 +52,36 @@ const TestComponent = () => {
   const context = useDisplayContext()
   return (
     <div>
-      <div data-testid="display-id">{context.state.id || 'no-id'}</div>
-      <div data-testid="display-name">{context.state.name || 'no-name'}</div>
-      <div data-testid="display-layout">{context.state.layout || 'no-layout'}</div>
-      <div data-testid="widgets-count">{context.state.widgets.length}</div>
-      <div data-testid="status-bar-enabled">{context.state.statusBar.enabled ? 'true' : 'false'}</div>
-      <div data-testid="status-elements-count">{context.state.statusBar.elements?.length || 0}</div>
-      <div data-testid="is-loading">{context.isLoading ? 'true' : 'false'}</div>
-      <div data-testid="has-error">{context.error ? 'true' : 'false'}</div>
-      <button data-testid="set-id" onClick={() => context.setId('display1')}>
+      <div data-testid='display-id'>{context.state.id || 'no-id'}</div>
+      <div data-testid='display-name'>{context.state.name || 'no-name'}</div>
+      <div data-testid='display-layout'>{context.state.layout || 'no-layout'}</div>
+      <div data-testid='widgets-count'>{context.state.widgets.length}</div>
+      <div data-testid='status-bar-enabled'>{context.state.statusBar.enabled ? 'true' : 'false'}</div>
+      <div data-testid='status-elements-count'>{context.state.statusBar.elements?.length || 0}</div>
+      <div data-testid='is-loading'>{context.isLoading ? 'true' : 'false'}</div>
+      <div data-testid='has-error'>{context.error ? 'true' : 'false'}</div>
+      <button data-testid='set-id' onClick={() => context.setId('display1')}>
         Set ID
       </button>
-      <button data-testid="set-name" onClick={() => context.setName('New Name')}>
+      <button data-testid='set-name' onClick={() => context.setName('New Name')}>
         Set Name
       </button>
-      <button data-testid="update-name" onClick={() => context.updateName('Updated Name')}>
+      <button data-testid='update-name' onClick={() => context.updateName('Updated Name')}>
         Update Name
       </button>
-      <button data-testid="update-layout" onClick={() => context.updateLayout('compact')}>
+      <button data-testid='update-layout' onClick={() => context.updateLayout('compact')}>
         Update Layout
       </button>
-      <button data-testid="add-status-item" onClick={() => context.addStatusBarItem('date')}>
+      <button data-testid='add-status-item' onClick={() => context.addStatusBarItem('date')}>
         Add Status Item
       </button>
-      <button data-testid="remove-status-item" onClick={() => context.removeStatusBarItem(0)}>
+      <button data-testid='remove-status-item' onClick={() => context.removeStatusBarItem(0)}>
         Remove Status Item
       </button>
-      <button data-testid="reorder-status-items" onClick={() => context.reorderStatusBarItems(0, 1)}>
+      <button data-testid='reorder-status-items' onClick={() => context.reorderStatusBarItems(0, 1)}>
         Reorder Status Items
       </button>
-      <button data-testid="refresh" onClick={() => context.refreshDisplayData()}>
+      <button data-testid='refresh' onClick={() => context.refreshDisplayData()}>
         Refresh
       </button>
     </div>
@@ -341,7 +341,7 @@ describe('DisplayContext', () => {
       const context = useDisplayContext()
       return (
         <button
-          data-testid="update-widgets"
+          data-testid='update-widgets'
           onClick={() => context.updateWidgets([])}
         >
           Update Widgets
@@ -445,7 +445,7 @@ describe('DisplayContext', () => {
       const context = useDisplayContext()
       return (
         <button
-          data-testid="invalid-layout"
+          data-testid='invalid-layout'
           onClick={() => context.updateLayout('invalid' as any)}
         >
           Invalid Layout

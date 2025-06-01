@@ -1,10 +1,10 @@
-import { addWidget, deleteWidget } from "../../../api/helpers/widget_helper"; // Adjusted path assuming widget_helper.ts is in root of helpers
-import Display from "../../../api/models/Display"; // Adjusted path
-import { Request, Response } from "express"; // For typing req/res
+import { addWidget, deleteWidget } from '../../../api/helpers/widget_helper' // Adjusted path assuming widget_helper.ts is in root of helpers
+import Display from '../../../api/models/Display' // Adjusted path
+import { Request, Response } from 'express' // For typing req/res
 // Using Jest globals: describe, beforeEach, it, expect, jest
 
 // Mock the Display model
-jest.mock("../../../api/models/Display");
+jest.mock('../../../api/models/Display')
 
 // Define interfaces for cleaner typing
 interface MockWidgetData {
@@ -21,79 +21,79 @@ interface MockDisplayInstance {
 }
 
 // Import specific functions to test and mock
-import * as widgetHelper from "../../../api/helpers/widget_helper";
-import Widget from "../../../api/models/Widget"; // For model operations
+import * as widgetHelper from '../../../api/helpers/widget_helper'
+import Widget from '../../../api/models/Widget' // For model operations
 // Display is already imported
-import { sendEventToDisplay } from "../../../api/sse_manager";
-import mongoose from "mongoose";
+import { sendEventToDisplay } from '../../../api/sse_manager'
+import mongoose from 'mongoose'
 
 // Mock models and other dependencies
-jest.mock("../../../api/models/Widget");
+jest.mock('../../../api/models/Widget')
 // Display is already mocked at the top
-jest.mock("../../../api/sse_manager");
+jest.mock('../../../api/sse_manager')
 
 // Spy on getDisplayIdsForWidget within the same module for deleteWidgetAndCleanReferences tests
-let mockGetDisplayIdsForWidget: jest.SpyInstance;
-const mockSendEventToDisplay = sendEventToDisplay as jest.Mock;
+let mockGetDisplayIdsForWidget: jest.SpyInstance
+const mockSendEventToDisplay = sendEventToDisplay as jest.Mock
 
-describe("widget_helper", () => {
-  let mockReq: Partial<Request>; // Use Partial for mocks, can be more specific if needed
-  let mockRes: Partial<Response>; // Use Partial for mocks
+describe('widget_helper', () => {
+  let mockReq: Partial<Request> // Use Partial for mocks, can be more specific if needed
+  let mockRes: Partial<Response> // Use Partial for mocks
 
   beforeEach(() => {
-    mockReq = {}; // Minimal mock
+    mockReq = {} // Minimal mock
     mockRes = {
       status: jest.fn().mockReturnThis(),
       json: jest.fn().mockReturnThis(),
-    };
+    }
 
     // Clear all mocks before each test
-    if (typeof (Display.findById as jest.Mock)?.mockClear === "function") {
-      (Display.findById as jest.Mock).mockClear();
+    if (typeof (Display.findById as jest.Mock)?.mockClear === 'function') {
+      (Display.findById as jest.Mock).mockClear()
     }
-    if (typeof (Display.updateMany as jest.Mock)?.mockClear === "function") {
-      (Display.updateMany as jest.Mock).mockClear();
+    if (typeof (Display.updateMany as jest.Mock)?.mockClear === 'function') {
+      (Display.updateMany as jest.Mock).mockClear()
     }
-    if (typeof (Widget.findById as jest.Mock)?.mockClear === "function") {
-      (Widget.findById as jest.Mock).mockClear();
+    if (typeof (Widget.findById as jest.Mock)?.mockClear === 'function') {
+      (Widget.findById as jest.Mock).mockClear()
     }
     if (
-      typeof (Widget.findByIdAndDelete as jest.Mock)?.mockClear === "function"
+      typeof (Widget.findByIdAndDelete as jest.Mock)?.mockClear === 'function'
     ) {
-      (Widget.findByIdAndDelete as jest.Mock).mockClear();
+      (Widget.findByIdAndDelete as jest.Mock).mockClear()
     }
     // A new mock for each test for prototype methods like save
-    (Display.prototype.save as jest.Mock) = jest.fn();
+    (Display.prototype.save as jest.Mock) = jest.fn()
 
     // Initialize spy for each test
     if (mockGetDisplayIdsForWidget) {
-      mockGetDisplayIdsForWidget.mockRestore();
+      mockGetDisplayIdsForWidget.mockRestore()
     }
     mockGetDisplayIdsForWidget = jest.spyOn(
       widgetHelper,
-      "getDisplayIdsForWidget"
-    );
+      'getDisplayIdsForWidget'
+    )
 
-    mockSendEventToDisplay.mockClear();
-  });
+    mockSendEventToDisplay.mockClear()
+  })
 
-  describe("addWidget", () => {
-    it("should add a widget to a display and resolve successfully", async () => {
+  describe('addWidget', () => {
+    it('should add a widget to a display and resolve successfully', async () => {
       const mockWidgetData: MockWidgetData = {
-        _id: "widget123",
-        display: "display123",
-      };
+        _id: 'widget123',
+        display: 'display123',
+      }
       // Define mockDisplayInstance before it's used in save: jest.fn().mockResolvedValue(mockDisplayInstance),
-      let mockDisplayInstance: MockDisplayInstance;
+      let mockDisplayInstance: MockDisplayInstance
 
       mockDisplayInstance = {
-        _id: "display123",
+        _id: 'display123',
         widgets: [],
         save: jest.fn(), // Initialize save as a Jest mock function
-      };
+      }
       // Now that mockDisplayInstance is defined, set its resolved value
       mockDisplayInstance.save.mockResolvedValue(mockDisplayInstance);
-      (Display.findById as jest.Mock).mockResolvedValue(mockDisplayInstance);
+      (Display.findById as jest.Mock).mockResolvedValue(mockDisplayInstance)
       /*
        * Ensure the save mock on the instance is the one being called and checked
        * (mockDisplayInstance.save as jest.Mock).mockResolvedValue(mockDisplayInstance); // Already done by line above
@@ -105,235 +105,235 @@ describe("widget_helper", () => {
 
       await expect(
         addWidget(mockReq as Request, mockRes as Response, mockWidgetData)
-      ).resolves.toEqual({ success: true, display: mockDisplayInstance });
+      ).resolves.toEqual({ success: true, display: mockDisplayInstance })
 
-      expect(Display.findById).toHaveBeenCalledWith("display123");
-      expect(mockDisplayInstance.widgets).toContain("widget123");
-      expect(mockDisplayInstance.save).toHaveBeenCalled();
-      expect(mockRes.json).not.toHaveBeenCalled();
-    });
+      expect(Display.findById).toHaveBeenCalledWith('display123')
+      expect(mockDisplayInstance.widgets).toContain('widget123')
+      expect(mockDisplayInstance.save).toHaveBeenCalled()
+      expect(mockRes.json).not.toHaveBeenCalled()
+    })
 
-    it("should return 404 via res if display not found", async () => {
+    it('should return 404 via res if display not found', async () => {
       const mockWidgetData: MockWidgetData = {
-        _id: "widget123",
-        display: "display_not_found",
+        _id: 'widget123',
+        display: 'display_not_found',
       };
-      (Display.findById as jest.Mock).mockResolvedValue(null);
+      (Display.findById as jest.Mock).mockResolvedValue(null)
 
-      await addWidget(mockReq as Request, mockRes as Response, mockWidgetData);
+      await addWidget(mockReq as Request, mockRes as Response, mockWidgetData)
 
-      expect(Display.findById).toHaveBeenCalledWith("display_not_found");
-      expect(mockRes.status).toHaveBeenCalledWith(404);
-      expect(mockRes.json).toHaveBeenCalledWith({ error: "Display not found" });
-    });
+      expect(Display.findById).toHaveBeenCalledWith('display_not_found')
+      expect(mockRes.status).toHaveBeenCalledWith(404)
+      expect(mockRes.json).toHaveBeenCalledWith({ error: 'Display not found' })
+    })
 
-    it("should return 500 via res if display save fails (returns null/false)", async () => {
+    it('should return 500 via res if display save fails (returns null/false)', async () => {
       const mockWidgetData: MockWidgetData = {
-        _id: "widget123",
-        display: "display123",
-      };
+        _id: 'widget123',
+        display: 'display123',
+      }
       const mockDisplayInstance: MockDisplayInstance = {
-        _id: "display123",
+        _id: 'display123',
         widgets: [],
         save: jest.fn().mockResolvedValue(null), // Simulate failed save with a Jest mock
       };
-      (Display.findById as jest.Mock).mockResolvedValue(mockDisplayInstance);
+      (Display.findById as jest.Mock).mockResolvedValue(mockDisplayInstance)
 
-      await addWidget(mockReq as Request, mockRes as Response, mockWidgetData);
+      await addWidget(mockReq as Request, mockRes as Response, mockWidgetData)
 
-      expect(mockDisplayInstance.save).toHaveBeenCalled();
-      expect(mockRes.status).toHaveBeenCalledWith(500);
-      expect(mockRes.json).toHaveBeenCalledWith({ error: "Display not saved" });
-    });
+      expect(mockDisplayInstance.save).toHaveBeenCalled()
+      expect(mockRes.status).toHaveBeenCalledWith(500)
+      expect(mockRes.json).toHaveBeenCalledWith({ error: 'Display not saved' })
+    })
 
-    it("should reject or allow error to propagate for DB findById errors", async () => {
+    it('should reject or allow error to propagate for DB findById errors', async () => {
       const mockWidgetData: MockWidgetData = {
-        _id: "widget123",
-        display: "display123",
-      };
-      const error = new Error("DB findById error");
-      (Display.findById as jest.Mock).mockRejectedValue(error);
+        _id: 'widget123',
+        display: 'display123',
+      }
+      const error = new Error('DB findById error');
+      (Display.findById as jest.Mock).mockRejectedValue(error)
 
       await expect(
         addWidget(mockReq as Request, mockRes as Response, mockWidgetData)
-      ).rejects.toThrow("DB findById error");
-      expect(mockRes.status).not.toHaveBeenCalled();
-      expect(mockRes.json).not.toHaveBeenCalled();
-    });
+      ).rejects.toThrow('DB findById error')
+      expect(mockRes.status).not.toHaveBeenCalled()
+      expect(mockRes.json).not.toHaveBeenCalled()
+    })
 
-    it("should reject or allow error to propagate for DB save errors", async () => {
+    it('should reject or allow error to propagate for DB save errors', async () => {
       const mockWidgetData: MockWidgetData = {
-        _id: "widget123",
-        display: "display123",
-      };
+        _id: 'widget123',
+        display: 'display123',
+      }
       const mockDisplayInstance: MockDisplayInstance = {
-        _id: "display123",
+        _id: 'display123',
         widgets: [],
-        save: jest.fn().mockRejectedValue(new Error("DB save error")), // Jest mock
+        save: jest.fn().mockRejectedValue(new Error('DB save error')), // Jest mock
       };
-      (Display.findById as jest.Mock).mockResolvedValue(mockDisplayInstance);
+      (Display.findById as jest.Mock).mockResolvedValue(mockDisplayInstance)
 
       await expect(
         addWidget(mockReq as Request, mockRes as Response, mockWidgetData)
-      ).rejects.toThrow("DB save error");
-      expect(mockRes.status).not.toHaveBeenCalled();
-      expect(mockRes.json).not.toHaveBeenCalled();
-    });
+      ).rejects.toThrow('DB save error')
+      expect(mockRes.status).not.toHaveBeenCalled()
+      expect(mockRes.json).not.toHaveBeenCalled()
+    })
 
-    it("should call res.status(400) if widgetData is invalid (missing display)", async () => {
-      const invalidWidgetData: any = { _id: "widget123" }; // Missing display
+    it('should call res.status(400) if widgetData is invalid (missing display)', async () => {
+      const invalidWidgetData: any = { _id: 'widget123' } // Missing display
       await addWidget(
         mockReq as Request,
         mockRes as Response,
         invalidWidgetData
-      );
-      expect(mockRes.status).toHaveBeenCalledWith(400);
+      )
+      expect(mockRes.status).toHaveBeenCalledWith(400)
       expect(mockRes.json).toHaveBeenCalledWith({
-        error: "Invalid widget data provided to addWidget helper.",
-      });
-    });
+        error: 'Invalid widget data provided to addWidget helper.',
+      })
+    })
 
-    it("should call res.status(400) if widgetData is invalid (missing _id)", async () => {
-      const invalidWidgetData: any = { display: "display123" }; // Missing _id
+    it('should call res.status(400) if widgetData is invalid (missing _id)', async () => {
+      const invalidWidgetData: any = { display: 'display123' } // Missing _id
       await addWidget(
         mockReq as Request,
         mockRes as Response,
         invalidWidgetData
-      );
-      expect(mockRes.status).toHaveBeenCalledWith(400);
+      )
+      expect(mockRes.status).toHaveBeenCalledWith(400)
       expect(mockRes.json).toHaveBeenCalledWith({
-        error: "Invalid widget data provided to addWidget helper.",
-      });
-    });
-  });
+        error: 'Invalid widget data provided to addWidget helper.',
+      })
+    })
+  })
 
-  describe("deleteWidget", () => {
-    it("should delete a widget from a display and resolve successfully", async () => {
-      const mockWidgetId = "widget123";
+  describe('deleteWidget', () => {
+    it('should delete a widget from a display and resolve successfully', async () => {
+      const mockWidgetId = 'widget123'
       // Ensure mockWidgetData._id is a string for the helper's current logic
       const mockWidgetData = {
         _id: mockWidgetId, // Use string ID directly
-        display: "display123",
-      };
+        display: 'display123',
+      }
 
-      let mockDisplayInstance: MockDisplayInstance;
+      let mockDisplayInstance: MockDisplayInstance
       mockDisplayInstance = {
-        _id: "display123",
-        widgets: [mockWidgetId, "widget456"], // widgets array contains strings
+        _id: 'display123',
+        widgets: [mockWidgetId, 'widget456'], // widgets array contains strings
         save: jest.fn(),
-      };
+      }
       mockDisplayInstance.save.mockResolvedValue(mockDisplayInstance);
-      (Display.findById as jest.Mock).mockResolvedValue(mockDisplayInstance);
+      (Display.findById as jest.Mock).mockResolvedValue(mockDisplayInstance)
 
       await expect(
         deleteWidget(mockReq as Request, mockRes as Response, mockWidgetData)
-      ).resolves.toEqual({ success: true, display: mockDisplayInstance });
+      ).resolves.toEqual({ success: true, display: mockDisplayInstance })
 
-      expect(Display.findById).toHaveBeenCalledWith("display123");
+      expect(Display.findById).toHaveBeenCalledWith('display123')
       // After successful deletion, the widgetId should be removed from the array
-      expect(mockDisplayInstance.widgets.length).toBe(1);
-      expect(mockDisplayInstance.widgets[0]).toBe("widget456");
-      expect(mockDisplayInstance.save).toHaveBeenCalled();
-      expect(mockRes.json).not.toHaveBeenCalled();
-    });
+      expect(mockDisplayInstance.widgets.length).toBe(1)
+      expect(mockDisplayInstance.widgets[0]).toBe('widget456')
+      expect(mockDisplayInstance.save).toHaveBeenCalled()
+      expect(mockRes.json).not.toHaveBeenCalled()
+    })
 
-    it("should return 404 via res if display not found for delete", async () => {
+    it('should return 404 via res if display not found for delete', async () => {
       const mockWidgetData: MockWidgetData = {
-        _id: "widget123",
-        display: "display_not_found",
+        _id: 'widget123',
+        display: 'display_not_found',
       };
-      (Display.findById as jest.Mock).mockResolvedValue(null);
+      (Display.findById as jest.Mock).mockResolvedValue(null)
 
       await deleteWidget(
         mockReq as Request,
         mockRes as Response,
         mockWidgetData
-      );
+      )
 
-      expect(Display.findById).toHaveBeenCalledWith("display_not_found");
-      expect(mockRes.status).toHaveBeenCalledWith(404);
-      expect(mockRes.json).toHaveBeenCalledWith({ error: "Display not found" });
-    });
+      expect(Display.findById).toHaveBeenCalledWith('display_not_found')
+      expect(mockRes.status).toHaveBeenCalledWith(404)
+      expect(mockRes.json).toHaveBeenCalledWith({ error: 'Display not found' })
+    })
 
-    it("should reject or allow error to propagate for DB findById errors during delete", async () => {
+    it('should reject or allow error to propagate for DB findById errors during delete', async () => {
       const mockWidgetData: MockWidgetData = {
-        _id: "widget123",
-        display: "display123",
-      };
-      const error = new Error("DB findById error for delete");
-      (Display.findById as jest.Mock).mockRejectedValue(error);
+        _id: 'widget123',
+        display: 'display123',
+      }
+      const error = new Error('DB findById error for delete');
+      (Display.findById as jest.Mock).mockRejectedValue(error)
 
       await expect(
         deleteWidget(mockReq as Request, mockRes as Response, mockWidgetData)
-      ).rejects.toThrow("DB findById error for delete");
-      expect(mockRes.status).not.toHaveBeenCalled();
-      expect(mockRes.json).not.toHaveBeenCalled();
-    });
+      ).rejects.toThrow('DB findById error for delete')
+      expect(mockRes.status).not.toHaveBeenCalled()
+      expect(mockRes.json).not.toHaveBeenCalled()
+    })
 
-    it("should reject or allow error to propagate for DB save errors during delete", async () => {
+    it('should reject or allow error to propagate for DB save errors during delete', async () => {
       const mockWidgetData: MockWidgetData = {
-        _id: { equals: (val) => val === "widget123" },
-        display: "display123",
-      };
+        _id: { equals: (val) => val === 'widget123' },
+        display: 'display123',
+      }
       const mockDisplayInstance: MockDisplayInstance = {
-        _id: "display123",
-        widgets: ["widget123"],
+        _id: 'display123',
+        widgets: ['widget123'],
         save: jest
           .fn() // Jest mock
-          .mockRejectedValue(new Error("DB save error for delete")),
+          .mockRejectedValue(new Error('DB save error for delete')),
       };
-      (Display.findById as jest.Mock).mockResolvedValue(mockDisplayInstance);
+      (Display.findById as jest.Mock).mockResolvedValue(mockDisplayInstance)
 
       await expect(
         deleteWidget(mockReq as Request, mockRes as Response, mockWidgetData)
-      ).rejects.toThrow("DB save error for delete");
-      expect(mockRes.status).not.toHaveBeenCalled();
-      expect(mockRes.json).not.toHaveBeenCalled();
-    });
+      ).rejects.toThrow('DB save error for delete')
+      expect(mockRes.status).not.toHaveBeenCalled()
+      expect(mockRes.json).not.toHaveBeenCalled()
+    })
 
-    it("should call res.status(400) if widgetData is invalid for delete (missing display)", async () => {
-      const invalidWidgetData: any = { _id: "widget123" }; // Missing display
+    it('should call res.status(400) if widgetData is invalid for delete (missing display)', async () => {
+      const invalidWidgetData: any = { _id: 'widget123' } // Missing display
       await deleteWidget(
         mockReq as Request,
         mockRes as Response,
         invalidWidgetData
-      );
-      expect(mockRes.status).toHaveBeenCalledWith(400);
+      )
+      expect(mockRes.status).toHaveBeenCalledWith(400)
       expect(mockRes.json).toHaveBeenCalledWith({
-        error: "Invalid widget data provided to deleteWidget helper.",
-      });
-    });
+        error: 'Invalid widget data provided to deleteWidget helper.',
+      })
+    })
 
-    it("should call res.status(400) if widgetData is invalid for delete (missing _id)", async () => {
-      const invalidWidgetData: any = { display: "display123" }; // Missing _id
+    it('should call res.status(400) if widgetData is invalid for delete (missing _id)', async () => {
+      const invalidWidgetData: any = { display: 'display123' } // Missing _id
       await deleteWidget(
         mockReq as Request,
         mockRes as Response,
         invalidWidgetData
-      );
-      expect(mockRes.status).toHaveBeenCalledWith(400);
+      )
+      expect(mockRes.status).toHaveBeenCalledWith(400)
       expect(mockRes.json).toHaveBeenCalledWith({
-        error: "Invalid widget data provided to deleteWidget helper.",
-      });
-    });
-  });
-});
+        error: 'Invalid widget data provided to deleteWidget helper.',
+      })
+    })
+  })
+})
 
-describe("Widget Helper - deleteWidgetAndCleanReferences - SSE", () => {
-  const widgetId = new mongoose.Types.ObjectId().toString();
-  const mockDisplayIds = ["displayNotify1", "displayNotify2"];
+describe('Widget Helper - deleteWidgetAndCleanReferences - SSE', () => {
+  const widgetId = new mongoose.Types.ObjectId().toString()
+  const mockDisplayIds = ['displayNotify1', 'displayNotify2']
 
   beforeEach(() => {
     // Reset mocks for each test in this suite
     (Widget.findById as jest.Mock).mockReset();
     (Widget.findByIdAndDelete as jest.Mock).mockReset();
-    (Display.updateMany as jest.Mock).mockReset();
-    mockGetDisplayIdsForWidget.mockReset();
-    mockSendEventToDisplay.mockClear();
-  });
+    (Display.updateMany as jest.Mock).mockReset()
+    mockGetDisplayIdsForWidget.mockReset()
+    mockSendEventToDisplay.mockClear()
+  })
 
-  it("should send display_updated event with widget_deleted reason for each display ID on successful delete", async () => {
-    const mockWidget = { _id: widgetId, name: "Test Widget" };
+  it('should send display_updated event with widget_deleted reason for each display ID on successful delete', async () => {
+    const mockWidget = { _id: widgetId, name: 'Test Widget' };
     (Widget.findById as jest.Mock).mockResolvedValue(mockWidget);
     (Widget.findByIdAndDelete as jest.Mock).mockResolvedValue(mockWidget);
     (Display.updateMany as jest.Mock).mockResolvedValue({
@@ -342,34 +342,34 @@ describe("Widget Helper - deleteWidgetAndCleanReferences - SSE", () => {
       upsertedId: null,
       upsertedCount: 0,
       matchedCount: 1,
-    }); // Mock successful update
-    mockGetDisplayIdsForWidget.mockResolvedValue(mockDisplayIds);
+    }) // Mock successful update
+    mockGetDisplayIdsForWidget.mockResolvedValue(mockDisplayIds)
 
-    await widgetHelper.deleteWidgetAndCleanReferences(widgetId);
+    await widgetHelper.deleteWidgetAndCleanReferences(widgetId)
 
     expect(mockGetDisplayIdsForWidget).toHaveBeenCalledWith(
       new mongoose.Types.ObjectId(widgetId)
-    );
+    )
     expect(Widget.findByIdAndDelete).toHaveBeenCalledWith(
       new mongoose.Types.ObjectId(widgetId)
-    );
-    expect(mockSendEventToDisplay).toHaveBeenCalledTimes(mockDisplayIds.length);
+    )
+    expect(mockSendEventToDisplay).toHaveBeenCalledTimes(mockDisplayIds.length)
     for (const displayId of mockDisplayIds) {
       expect(mockSendEventToDisplay).toHaveBeenCalledWith(
         displayId,
-        "display_updated",
+        'display_updated',
         expect.objectContaining({
           displayId: displayId,
-          action: "update",
-          reason: "widget_deleted",
+          action: 'update',
+          reason: 'widget_deleted',
           widgetId: widgetId.toString(),
         })
-      );
+      )
     }
-  });
+  })
 
-  it("should not send events if getDisplayIdsForWidget returns an empty array", async () => {
-    const mockWidget = { _id: widgetId, name: "Test Widget" };
+  it('should not send events if getDisplayIdsForWidget returns an empty array', async () => {
+    const mockWidget = { _id: widgetId, name: 'Test Widget' };
     (Widget.findById as jest.Mock).mockResolvedValue(mockWidget);
     (Widget.findByIdAndDelete as jest.Mock).mockResolvedValue(mockWidget);
     (Display.updateMany as jest.Mock).mockResolvedValue({
@@ -378,19 +378,19 @@ describe("Widget Helper - deleteWidgetAndCleanReferences - SSE", () => {
       upsertedId: null,
       upsertedCount: 0,
       matchedCount: 1,
-    });
-    mockGetDisplayIdsForWidget.mockResolvedValue([]);
+    })
+    mockGetDisplayIdsForWidget.mockResolvedValue([])
 
-    await widgetHelper.deleteWidgetAndCleanReferences(widgetId);
+    await widgetHelper.deleteWidgetAndCleanReferences(widgetId)
 
     expect(mockGetDisplayIdsForWidget).toHaveBeenCalledWith(
       new mongoose.Types.ObjectId(widgetId)
-    );
-    expect(mockSendEventToDisplay).not.toHaveBeenCalled();
-  });
+    )
+    expect(mockSendEventToDisplay).not.toHaveBeenCalled()
+  })
 
-  it("should still delete widget but not send events if getDisplayIdsForWidget throws an error", async () => {
-    const mockWidget = { _id: widgetId, name: "Test Widget" };
+  it('should still delete widget but not send events if getDisplayIdsForWidget throws an error', async () => {
+    const mockWidget = { _id: widgetId, name: 'Test Widget' };
     (Widget.findById as jest.Mock).mockResolvedValue(mockWidget);
     (Widget.findByIdAndDelete as jest.Mock).mockResolvedValue(mockWidget);
     (Display.updateMany as jest.Mock).mockResolvedValue({
@@ -399,31 +399,31 @@ describe("Widget Helper - deleteWidgetAndCleanReferences - SSE", () => {
       upsertedId: null,
       upsertedCount: 0,
       matchedCount: 1,
-    });
+    })
     mockGetDisplayIdsForWidget.mockRejectedValue(
-      new Error("Error fetching display IDs")
-    );
+      new Error('Error fetching display IDs')
+    )
 
-    await widgetHelper.deleteWidgetAndCleanReferences(widgetId);
+    await widgetHelper.deleteWidgetAndCleanReferences(widgetId)
 
     // We expect deletion to proceed
     expect(Widget.findByIdAndDelete).toHaveBeenCalledWith(
       new mongoose.Types.ObjectId(widgetId)
-    );
-    expect(mockSendEventToDisplay).not.toHaveBeenCalled(); // But no notifications sent
-  });
+    )
+    expect(mockSendEventToDisplay).not.toHaveBeenCalled() // But no notifications sent
+  })
 
-  it("should return null and not send events if widget to delete is not found", async () => {
-    (Widget.findById as jest.Mock).mockResolvedValue(null);
+  it('should return null and not send events if widget to delete is not found', async () => {
+    (Widget.findById as jest.Mock).mockResolvedValue(null)
 
-    const result = await widgetHelper.deleteWidgetAndCleanReferences(widgetId);
+    const result = await widgetHelper.deleteWidgetAndCleanReferences(widgetId)
 
-    expect(result).toBeNull();
+    expect(result).toBeNull()
     expect(mockGetDisplayIdsForWidget).toHaveBeenCalledWith(
       new mongoose.Types.ObjectId(widgetId)
-    ); // It's called before findById
-    expect(Widget.findByIdAndDelete).not.toHaveBeenCalled();
-    expect(Display.updateMany).not.toHaveBeenCalled();
-    expect(mockSendEventToDisplay).not.toHaveBeenCalled();
-  });
-});
+    ) // It's called before findById
+    expect(Widget.findByIdAndDelete).not.toHaveBeenCalled()
+    expect(Display.updateMany).not.toHaveBeenCalled()
+    expect(mockSendEventToDisplay).not.toHaveBeenCalled()
+  })
+})

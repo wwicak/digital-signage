@@ -56,3 +56,5 @@ dist
 *.tsbuildinfo
 type-check-errors.log
 bun.lockb
+.eslintcache
+.eslintrc.old

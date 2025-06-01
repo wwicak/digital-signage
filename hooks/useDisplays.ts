@@ -1,5 +1,5 @@
-import { useQuery } from "@tanstack/react-query";
-import { getDisplays, IDisplayData } from "../actions/display";
+import { useQuery } from '@tanstack/react-query'
+import { getDisplays, IDisplayData } from '../actions/display'
 
 /**
  * Global hook for fetching and caching the list of all displays.
@@ -15,7 +15,7 @@ import { getDisplays, IDisplayData } from "../actions/display";
  */
 export const useDisplays = () => {
   return useQuery({
-    queryKey: ["displays"],
+    queryKey: ['displays'],
     queryFn: () => getDisplays(),
     staleTime: 5 * 60 * 1000, // 5 minutes - data considered fresh for 5 minutes
     gcTime: 10 * 60 * 1000, // 10 minutes - cache garbage collection time
@@ -24,6 +24,6 @@ export const useDisplays = () => {
     retry: 2, // Retry failed requests twice
     refetchInterval: false, // Disable polling - we'll use SSE for real-time updates
     // Enable background refetching when the query becomes stale
-    refetchOnMount: "always", // Always refetch when component mounts
-  });
-};
+    refetchOnMount: 'always', // Always refetch when component mounts
+  })
+}

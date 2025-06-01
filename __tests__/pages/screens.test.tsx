@@ -20,7 +20,7 @@ const mockedProtect = protect as jest.MockedFunction<typeof protect>
 jest.mock('../../components/Admin/Frame.tsx', () => {
   return function MockFrame({ children, loggedIn }: { children: React.ReactNode; loggedIn: boolean }) {
     return (
-      <div data-testid="frame" data-logged-in={loggedIn}>
+      <div data-testid='frame' data-logged-in={loggedIn}>
         {children}
       </div>
     )
@@ -33,14 +33,14 @@ jest.mock('../../components/Admin/ScreenList.tsx', () => {
     React.useImperativeHandle(ref, () => ({
       refresh: jest.fn(),
     }))
-    return <div data-testid="screen-list">Screen List</div>
+    return <div data-testid='screen-list'>Screen List</div>
   })
 })
 
 // Mock Dialog component
 jest.mock('../../components/Dialog.tsx', () => {
   return function MockDialog({ children }: { children: React.ReactNode }) {
-    return <div data-testid="dialog">{children}</div>
+    return <div data-testid='dialog'>{children}</div>
   }
 })
 
@@ -48,7 +48,7 @@ jest.mock('../../components/Dialog.tsx', () => {
 jest.mock('../../components/Form', () => ({
   Button: function MockButton({ text, onClick, ...props }: any) {
     return (
-      <button data-testid="add-screen-button" onClick={onClick} {...props}>
+      <button data-testid='add-screen-button' onClick={onClick} {...props}>
         {text}
       </button>
     )
@@ -143,9 +143,9 @@ describe('Screens Page', () => {
   })
 
   it('should set display ID when displayId prop is provided', () => {
-    render(React.createElement(ScreensComponent, { 
-      loggedIn: true, 
-      displayId: 'test-display-id' 
+    render(React.createElement(ScreensComponent, {
+      loggedIn: true,
+      displayId: 'test-display-id'
     }), { wrapper: createWrapper() })
     
     expect(mockDisplayContext.setId).toHaveBeenCalledWith('test-display-id')
@@ -179,7 +179,7 @@ describe('Screens Page', () => {
         React.useImperativeHandle(ref, () => ({
           refresh: mockRefresh,
         }))
-        return <div data-testid="screen-list">Screen List</div>
+        return <div data-testid='screen-list'>Screen List</div>
       })
     })
     
@@ -340,9 +340,9 @@ describe('Screens Page', () => {
     })
 
     it('should update display context when displayId changes', () => {
-      const { rerender } = render(React.createElement(ScreensComponent, { 
-        loggedIn: true, 
-        displayId: 'initial-id' 
+      const { rerender } = render(React.createElement(ScreensComponent, {
+        loggedIn: true,
+        displayId: 'initial-id'
       }), { wrapper: createWrapper() })
       
       expect(mockDisplayContext.setId).toHaveBeenCalledWith('initial-id')
@@ -351,9 +351,9 @@ describe('Screens Page', () => {
       mockDisplayContext.setId.mockClear()
       
       // Rerender with different displayId
-      rerender(React.createElement(ScreensComponent, { 
-        loggedIn: true, 
-        displayId: 'new-id' 
+      rerender(React.createElement(ScreensComponent, {
+        loggedIn: true,
+        displayId: 'new-id'
       }))
       
       expect(mockDisplayContext.setId).toHaveBeenCalledWith('new-id')
