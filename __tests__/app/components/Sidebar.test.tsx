@@ -78,14 +78,14 @@ jest.mock('../../../helpers/auth', () => ({
 }))
 
 const mockSetIdGlobal = jest.fn()
-jest.mock('../../contexts/DisplayContext', () => ({
+jest.mock('../../../contexts/DisplayContext', () => ({
   useDisplayContext: jest.fn(() => ({
     state: { id: 'defaultDisplayId', name: 'Default Display Name' },
     setId: mockSetIdGlobal,
   })),
 }))
 
-jest.mock('../../actions/display', () => ({
+jest.mock('../../../actions/display', () => ({
   getDisplays: jest.fn(),
 }))
 

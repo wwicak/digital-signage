@@ -43,7 +43,7 @@ jest.mock('../../../widgets/announcement/src/AnnouncementContent', () => {
     __esModule: true,
     default: MockAnnouncementContent,
     // Exporting schema if it's used by options (it is for types)
-    AnnouncementWidgetContentDataSchema: jest.requireActual('./AnnouncementContent').AnnouncementWidgetContentDataSchema
+    AnnouncementWidgetContentDataSchema: jest.requireActual('../../../widgets/announcement/src/AnnouncementContent').AnnouncementWidgetContentDataSchema
   }
 })
 

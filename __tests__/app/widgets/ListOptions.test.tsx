@@ -89,7 +89,7 @@ describe('ListOptions', () => {
     mockOnChange.mockClear();
     (jest.requireMock('../../../components/Form').Input as jest.Mock).mockClear();
     (jest.requireMock('../../../components/Form').Button as jest.Mock).mockClear();
-    (jest.requireMock('./ListContent') as jest.Mock).mockClear()
+    (jest.requireMock('../../../widgets/list/src/ListContent') as jest.Mock).mockClear()
   })
 
   test('renders initial fields correctly', () => {
@@ -164,7 +164,7 @@ describe('ListOptions', () => {
 
   test('updates preview when data changes', () => {
     const { rerender } = renderListOptions()
-    const ListContentMock = jest.requireMock('./ListContent')
+    const ListContentMock = jest.requireMock('../../../widgets/list/src/ListContent')
     expect(ListContentMock).toHaveBeenLastCalledWith(expect.objectContaining({data: defaultListData}), {})
 
     const newData: IListDefaultData = {

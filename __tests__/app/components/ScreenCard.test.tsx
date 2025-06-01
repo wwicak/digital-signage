@@ -65,7 +65,7 @@ describe('ScreenCard Component', () => {
 
   beforeEach(() => {
     jest.clearAllMocks()
-    deleteDisplayMock = require('../../actions/display').deleteDisplay
+    deleteDisplayMock = require('../../../actions/display').deleteDisplay
   })
 
   test('renders basic screen information', () => {
