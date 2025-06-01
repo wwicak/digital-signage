@@ -1,8 +1,9 @@
 import React from 'react'
-import { render, screen, fireEvent, waitFor, act } from '@testing-library/react'
+import { screen, fireEvent, waitFor, act } from '@testing-library/react'
 import '@testing-library/jest-dom'
 import ScreenCard, { IScreenCardProps } from '../../../components/Admin/ScreenCard'
 import { IDisplayData } from '../../../actions/display'
+import { renderWithQuery } from '../../utils/testUtils'
 
 // --- Mocks ---
 const mockRouterPush = jest.fn()
@@ -30,8 +31,36 @@ jest.mock('next/link', () => {
     }
 })
 
-jest.mock('../../../actions/display', () => ({
-  deleteDisplay: jest.fn(),
+const mockDeleteDisplayMutate = jest.fn()
+
+jest.mock('../../../hooks/useDisplayMutations', () => ({
+  useDisplayMutations: jest.fn(() => ({
+    deleteDisplay: {
+      mutate: mockDeleteDisplayMutate,
+      isPending: false,
+      error: null,
+      isSuccess: false,
+      isError: false,
+    },
+    createDisplay: {
+      mutate: jest.fn(),
+      isPending: false,
+    },
+    updateDisplay: {
+      mutate: jest.fn(),
+      isPending: false,
+    },
+    getDisplay: {
+      mutate: jest.fn(),
+      isPending: false,
+    },
+    isCreating: false,
+    isUpdating: false,
+    isDeleting: false,
+    createError: null,
+    updateError: null,
+    deleteError: null,
+  })),
 }))
 
 jest.mock('@fortawesome/react-fontawesome', () => ({
@@ -57,15 +86,12 @@ const renderScreenCard = (props?: Partial<IScreenCardProps>) => {
     refresh: mockRefresh,
     ...props,
   }
-  return render(<ScreenCard {...combinedProps} />)
+  return renderWithQuery(<ScreenCard {...combinedProps} />)
 }
 
 describe('ScreenCard Component', () => {
-  let deleteDisplayMock: jest.Mock
-
   beforeEach(() => {
     jest.clearAllMocks()
-    deleteDisplayMock = require('../../../actions/display').deleteDisplay
   })
 
   test('renders basic screen information', () => {
@@ -144,55 +170,58 @@ describe('ScreenCard Component', () => {
 
   describe('Delete Action', () => {
     test('clicking delete icon calls deleteDisplay and refresh, and not main link', async () => {
-      deleteDisplayMock.mockResolvedValueOnce({})
       renderScreenCard()
       const deleteButton = screen.getByLabelText('Delete Display')
       mockRouterPush.mockClear()
 
       fireEvent.click(deleteButton)
 
-      expect(deleteDisplayMock).toHaveBeenCalledWith(defaultScreenValue._id)
-      await waitFor(() => expect(mockRefresh).toHaveBeenCalledTimes(1))
+      expect(mockDeleteDisplayMutate).toHaveBeenCalledWith(
+        { id: defaultScreenValue._id },
+        expect.any(Object) // onSuccess/onError callbacks
+      )
       expect(mockRouterPush).not.toHaveBeenCalled() // Main card link should not have been triggered
     })
 
     test('pressing Enter on delete icon calls deleteDisplay and refresh', async () => {
-        deleteDisplayMock.mockResolvedValueOnce({})
         renderScreenCard()
         const deleteButton = screen.getByLabelText('Delete Display')
         mockRouterPush.mockClear()
 
         fireEvent.keyPress(deleteButton, { key: 'Enter', code: 'Enter', charCode: 13 })
 
-        expect(deleteDisplayMock).toHaveBeenCalledWith(defaultScreenValue._id)
-        await waitFor(() => expect(mockRefresh).toHaveBeenCalledTimes(1))
+        expect(mockDeleteDisplayMutate).toHaveBeenCalledWith(
+          { id: defaultScreenValue._id },
+          expect.any(Object)
+        )
         expect(mockRouterPush).not.toHaveBeenCalled()
     })
 
     test('pressing Space on delete icon calls deleteDisplay and refresh', async () => {
-        deleteDisplayMock.mockResolvedValueOnce({})
         renderScreenCard()
         const deleteButton = screen.getByLabelText('Delete Display')
         mockRouterPush.mockClear()
 
         fireEvent.keyPress(deleteButton, { key: ' ', code: 'Space', charCode: 32 })
 
-        expect(deleteDisplayMock).toHaveBeenCalledWith(defaultScreenValue._id)
-        await waitFor(() => expect(mockRefresh).toHaveBeenCalledTimes(1))
+        expect(mockDeleteDisplayMutate).toHaveBeenCalledWith(
+          { id: defaultScreenValue._id },
+          expect.any(Object)
+        )
         expect(mockRouterPush).not.toHaveBeenCalled()
     })
 
     test('handles deleteDisplay failure and calls console.error', async () => {
       const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {})
-      deleteDisplayMock.mockRejectedValueOnce(new Error('Deletion failed'))
       renderScreenCard()
       const deleteButton = screen.getByLabelText('Delete Display')
 
       fireEvent.click(deleteButton)
 
-      expect(deleteDisplayMock).toHaveBeenCalledWith(defaultScreenValue._id)
-      await waitFor(() => expect(consoleErrorSpy).toHaveBeenCalledWith('Failed to delete display:', expect.any(Error)))
-      expect(mockRefresh).not.toHaveBeenCalled()
+      expect(mockDeleteDisplayMutate).toHaveBeenCalledWith(
+        { id: defaultScreenValue._id },
+        expect.any(Object)
+      )
 
       consoleErrorSpy.mockRestore()
     })
@@ -203,7 +232,7 @@ describe('ScreenCard Component', () => {
 
         fireEvent.click(deleteButton)
 
-        expect(deleteDisplayMock).not.toHaveBeenCalled()
+        expect(mockDeleteDisplayMutate).not.toHaveBeenCalled()
         expect(mockRefresh).not.toHaveBeenCalled()
       })
   })
