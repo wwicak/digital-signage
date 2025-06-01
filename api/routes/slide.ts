@@ -18,7 +18,9 @@ import {
 import {
   handleSlideInSlideshows,
   deleteSlideAndCleanReferences,
+  getDisplayIdsForSlide, // Added import
 } from '../helpers/slide_helper'
+import { sendEventToDisplay } from '../../sse_manager' // Added import
 
 const router: Router = express.Router()
 
@@ -193,6 +195,22 @@ router.put(
           slideshow_ids,
           originalSlideshowIds
         )
+      }
+
+      // Notify relevant displays
+      try {
+        const displayIds = await getDisplayIdsForSlide(savedSlide._id);
+        for (const displayId of displayIds) {
+          sendEventToDisplay(displayId, 'display_updated', {
+            displayId: displayId,
+            action: 'update',
+            reason: 'slide_change',
+            slideId: savedSlide._id.toString()
+          });
+        }
+      } catch (notifyError) {
+        console.error(`Error notifying displays after slide update ${slideId}:`, notifyError);
+        // Log error but don't let it fail the main operation
       }
 
       res.json(savedSlide)

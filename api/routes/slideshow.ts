@@ -17,7 +17,9 @@ import {
   validateSlidesExist,
   reorderSlidesInSlideshow,
   populateSlideshowSlides,
+  getDisplayIdsForSlideshow, // Added import
 } from '../helpers/slideshow_helper'
+import { sendEventToDisplay } from '../../sse_manager' // Added import
 
 const router: Router = express.Router()
 
@@ -230,6 +232,24 @@ router.put(
 
       const savedSlideshow = await slideshowToUpdate.save()
       const populatedSlideshow = await populateSlideshowSlides(savedSlideshow)
+
+      // Notify relevant displays
+      try {
+        const displayIds = await getDisplayIdsForSlideshow(savedSlideshow._id);
+        for (const displayId of displayIds) {
+          sendEventToDisplay(displayId, 'display_updated', {
+            displayId: displayId,
+            action: 'update',
+            reason: 'slideshow_change',
+            slideshowId: savedSlideshow._id.toString()
+          });
+        }
+      } catch (notifyError) {
+        console.error(`Error notifying displays after slideshow update ${slideshowId}:`, notifyError);
+        // Decide if this error should affect the response to the client
+        // For now, we'll just log it and not send a different response
+      }
+
       res.json(populatedSlideshow)
     } catch (error: any) {
       console.error(`Error updating slideshow ${slideshowId}:`, error)
@@ -261,6 +281,7 @@ router.delete(
       return
     }
     const slideshowId = req.params.id
+    let displayIdsToDeleteNotifications: string[] = [];
 
     try {
       const slideshow = await Slideshow.findOne({
@@ -274,7 +295,26 @@ router.delete(
         return
       }
 
+      // Get display IDs before deleting the slideshow
+      try {
+        displayIdsToDeleteNotifications = await getDisplayIdsForSlideshow(slideshowId);
+      } catch (notifyError) {
+        console.error(`Error fetching display IDs before slideshow delete ${slideshowId}:`, notifyError);
+        // Log the error, but proceed with deletion
+      }
+
       await Slideshow.findByIdAndDelete(slideshowId)
+
+      // Notify relevant displays after successful deletion
+      for (const displayId of displayIdsToDeleteNotifications) {
+        sendEventToDisplay(displayId, 'display_updated', {
+          displayId: displayId,
+          action: 'update',
+          reason: 'slideshow_deleted',
+          slideshowId: slideshowId.toString() // slideshowId is already a string here
+        });
+      }
+
       res.json({ message: 'Slideshow deleted successfully' })
     } catch (error: any) {
       console.error(`Error deleting slideshow ${slideshowId}:`, error)

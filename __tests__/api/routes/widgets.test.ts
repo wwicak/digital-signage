@@ -14,6 +14,12 @@ jest.mock('passport')
 // Mock helper functions from widget_helper
 jest.mock('../../../api/helpers/widget_helper')
 
+// Mock SSE manager
+const mockSendEventToDisplay = jest.fn();
+jest.mock('../../../sse_manager', () => ({
+  sendEventToDisplay: mockSendEventToDisplay,
+}));
+
 const mockUser = { _id: 'testUserId', name: 'Test User', email: 'test@example.com', role: 'user' } as IUser
 
 // Helper function to create a mock Mongoose query chain
@@ -40,6 +46,7 @@ describe('Widget API Routes', () => {
   // Mocks for helper functions
   const mockedValidateWidgetData = widgetHelper.validateWidgetData as jest.Mock
   const mockedDeleteWidgetAndCleanReferences = widgetHelper.deleteWidgetAndCleanReferences as jest.Mock
+  let mockedGetDisplayIdsForWidget: jest.Mock; // Added
 
   beforeEach(() => {
     app = express()
@@ -65,6 +72,9 @@ describe('Widget API Routes', () => {
     // Reset helper mocks
     mockedValidateWidgetData.mockReset()
     mockedDeleteWidgetAndCleanReferences.mockReset()
+    mockedGetDisplayIdsForWidget = widgetHelper.getDisplayIdsForWidget as jest.Mock; // Initialize
+    mockedGetDisplayIdsForWidget.mockReset(); // Reset
+    mockSendEventToDisplay.mockClear(); // Clear SSE mock
 
     // Default implementations removed, tests will provide their own mocks.
   })
@@ -492,4 +502,87 @@ describe('Widget API Routes', () => {
       expect(response.body.message).toBe('User information not found.')
     })
   })
+
+  // New Test Suite for SSE Notifications
+  describe('Widgets API - SSE Notifications', () => {
+    const widgetId = 'sseWidgetId';
+    const mockDisplayIds = ['displaySse1', 'displaySse2'];
+
+    const getMockWidget = (id: string) => ({
+      _id: id,
+      name: 'SSE Test Widget',
+      type: WidgetType.ANNOUNCEMENT,
+      data: { message: 'Test' },
+      creator_id: mockUser._id,
+      save: jest.fn(),
+    });
+
+    describe('PUT /:id - Update Widget Notifications', () => {
+      it('should send display_updated event to relevant displays on successful widget update', async () => {
+        const mockWidgetInstance = getMockWidget(widgetId);
+        mockWidgetInstance.save.mockResolvedValue(mockWidgetInstance);
+
+        widgetFindOneSpy.mockResolvedValueOnce(mockWidgetInstance);
+        mockedValidateWidgetData.mockResolvedValue(undefined); // Assume validation passes
+        mockedGetDisplayIdsForWidget.mockResolvedValue(mockDisplayIds);
+
+        const updatePayload = { name: 'Updated Widget for SSE' };
+        const response = await request(app)
+          .put(`/api/v1/widgets/${widgetId}`)
+          .send(updatePayload);
+
+        expect(response.status).toBe(200);
+        expect(mockedGetDisplayIdsForWidget).toHaveBeenCalledWith(mockWidgetInstance._id);
+        expect(mockSendEventToDisplay).toHaveBeenCalledTimes(mockDisplayIds.length);
+        for (const displayId of mockDisplayIds) {
+          expect(mockSendEventToDisplay).toHaveBeenCalledWith(
+            displayId,
+            'display_updated',
+            expect.objectContaining({
+              displayId: displayId,
+              action: 'update',
+              reason: 'widget_change',
+              widgetId: mockWidgetInstance._id.toString(),
+            })
+          );
+        }
+      });
+
+      it('should not send events if getDisplayIdsForWidget returns an empty array', async () => {
+        const mockWidgetInstance = getMockWidget(widgetId);
+        mockWidgetInstance.save.mockResolvedValue(mockWidgetInstance);
+
+        widgetFindOneSpy.mockResolvedValueOnce(mockWidgetInstance);
+        mockedValidateWidgetData.mockResolvedValue(undefined);
+        mockedGetDisplayIdsForWidget.mockResolvedValue([]);
+
+        const updatePayload = { name: 'Updated Widget No SSE' };
+        await request(app)
+          .put(`/api/v1/widgets/${widgetId}`)
+          .send(updatePayload);
+
+        expect(mockedGetDisplayIdsForWidget).toHaveBeenCalledWith(mockWidgetInstance._id);
+        expect(mockSendEventToDisplay).not.toHaveBeenCalled();
+      });
+
+      it('should still update widget but not send events if getDisplayIdsForWidget throws', async () => {
+        const mockWidgetInstance = getMockWidget(widgetId);
+        mockWidgetInstance.save.mockResolvedValue(mockWidgetInstance);
+
+        widgetFindOneSpy.mockResolvedValueOnce(mockWidgetInstance);
+        mockedValidateWidgetData.mockResolvedValue(undefined);
+        mockedGetDisplayIdsForWidget.mockRejectedValue(new Error("DB error getting display IDs"));
+
+        const updatePayload = { name: 'Updated Widget Error SSE' };
+        const response = await request(app)
+          .put(`/api/v1/widgets/${widgetId}`)
+          .send(updatePayload);
+
+        expect(response.status).toBe(200); // Main operation should succeed
+        expect(mockSendEventToDisplay).not.toHaveBeenCalled();
+      });
+    });
+
+    // DELETE notifications are tested in the helper's test file as per plan
+  });
 })

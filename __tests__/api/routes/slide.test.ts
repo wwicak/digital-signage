@@ -17,6 +17,12 @@ jest.mock('passport') // For req.isAuthenticated and req.login/logout if used by
 jest.mock('../../../api/helpers/common_helper')
 jest.mock('../../../api/helpers/slide_helper')
 
+// Mock SSE manager
+const mockSendEventToDisplay = jest.fn();
+jest.mock('../../../sse_manager', () => ({
+  sendEventToDisplay: mockSendEventToDisplay,
+}));
+
 const mockUser = { _id: 'testUserId', name: 'Test User', email: 'test@example.com', role: 'user' } as IUser
 
 // Middleware to simulate authentication
@@ -59,6 +65,7 @@ describe('Slide API Routes', () => {
   // Mocks for helper functions
   const mockedHandleSlideInSlideshows = slideHelpers.handleSlideInSlideshows as jest.Mock
   const mockedDeleteSlideAndCleanReferences = slideHelpers.deleteSlideAndCleanReferences as jest.Mock
+  let mockedGetDisplayIdsForSlide: jest.Mock; // Added for SSE tests
   /*
    * Common helpers are not directly used by name in the routes, but by the route handlers that might be tested directly.
    * For now, we are testing the routes via HTTP requests.
@@ -93,6 +100,9 @@ describe('Slide API Routes', () => {
     // Reset helper mocks
     mockedHandleSlideInSlideshows.mockReset()
     mockedDeleteSlideAndCleanReferences.mockReset()
+    mockedGetDisplayIdsForSlide = slideHelpers.getDisplayIdsForSlide as jest.Mock; // Initialize
+    mockedGetDisplayIdsForSlide.mockReset(); // Reset
+    mockSendEventToDisplay.mockClear(); // Clear SSE mock
     /*
      * commonHelpers are not directly called by name in these routes, so no direct reset needed here.
      * If they were, e.g. commonHelpers.createAndSend, we would mock and reset them.
@@ -432,4 +442,85 @@ describe('Slide API Routes', () => {
       expect(response.body.message).toBe('Error deleting slide')
     })
   })
+
+  // New Test Suite for SSE Notifications
+  describe('Slide API - SSE Notifications', () => {
+    const slideIdSse = 'sseSlideId';
+    const mockDisplayIdsSse = ['displaySseSlide1', 'displaySseSlide2'];
+
+    const getMockSlideSse = (id: string) => ({
+      _id: id,
+      name: 'SSE Test Slide',
+      type: SlideType.IMAGE,
+      data: { url: 'http://example.com/sse.jpg' },
+      creator_id: mockUser._id,
+      save: jest.fn(),
+    });
+
+    describe('PUT /:id - Update Slide Notifications', () => {
+      it('should send display_updated event with slide_change reason on successful slide update', async () => {
+        const mockSlideInstance = getMockSlideSse(slideIdSse);
+        mockSlideInstance.save.mockResolvedValue(mockSlideInstance);
+
+        slideFindOneSpy.mockResolvedValue(mockSlideInstance as any);
+        mockedGetDisplayIdsForSlide.mockResolvedValue(mockDisplayIdsSse);
+        // Assuming slideshow_ids are not part of this specific SSE test payload for simplicity
+        // If they were, slideshowFindSpy and mockedHandleSlideInSlideshows would need to be mocked too.
+
+        const updatePayload = { name: 'Updated Slide for SSE' };
+        const response = await request(app)
+          .put(`/api/v1/slides/${slideIdSse}`)
+          .send(updatePayload);
+
+        expect(response.status).toBe(200);
+        expect(mockedGetDisplayIdsForSlide).toHaveBeenCalledWith(mockSlideInstance._id);
+        expect(mockSendEventToDisplay).toHaveBeenCalledTimes(mockDisplayIdsSse.length);
+        for (const displayId of mockDisplayIdsSse) {
+          expect(mockSendEventToDisplay).toHaveBeenCalledWith(
+            displayId,
+            'display_updated',
+            expect.objectContaining({
+              displayId: displayId,
+              action: 'update',
+              reason: 'slide_change',
+              slideId: mockSlideInstance._id.toString(),
+            })
+          );
+        }
+      });
+
+      it('should not send events if getDisplayIdsForSlide returns an empty array', async () => {
+        const mockSlideInstance = getMockSlideSse(slideIdSse);
+        mockSlideInstance.save.mockResolvedValue(mockSlideInstance);
+
+        slideFindOneSpy.mockResolvedValue(mockSlideInstance as any);
+        mockedGetDisplayIdsForSlide.mockResolvedValue([]);
+
+        const updatePayload = { name: 'Updated Slide No SSE' };
+        await request(app)
+          .put(`/api/v1/slides/${slideIdSse}`)
+          .send(updatePayload);
+
+        expect(mockedGetDisplayIdsForSlide).toHaveBeenCalledWith(mockSlideInstance._id);
+        expect(mockSendEventToDisplay).not.toHaveBeenCalled();
+      });
+
+      it('should still update slide but not send events if getDisplayIdsForSlide throws an error', async () => {
+        const mockSlideInstance = getMockSlideSse(slideIdSse);
+        mockSlideInstance.save.mockResolvedValue(mockSlideInstance);
+
+        slideFindOneSpy.mockResolvedValue(mockSlideInstance as any);
+        mockedGetDisplayIdsForSlide.mockRejectedValue(new Error("DB error getting display IDs for slide"));
+
+        const updatePayload = { name: 'Updated Slide Error SSE' };
+        const response = await request(app)
+          .put(`/api/v1/slides/${slideIdSse}`)
+          .send(updatePayload);
+
+        expect(response.status).toBe(200); // Main operation should succeed
+        expect(mockSendEventToDisplay).not.toHaveBeenCalled();
+      });
+    });
+    // DELETE notifications for slides will be tested in the slide_helper.test.ts file as per plan
+  });
 })

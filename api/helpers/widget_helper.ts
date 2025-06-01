@@ -7,6 +7,35 @@ import Display, { IDisplay } from '../models/Display' // Assuming Display.ts exp
 import Slideshow from '../models/Slideshow' // For validating slideshow_id in widget data
 import mongoose from 'mongoose'
 import { Request, Response } from 'express' // For typing req/res
+import { sendEventToDisplay } from '../../sse_manager'; // Added import
+
+/**
+ * Finds all Display IDs that are currently using a given widget.
+ * @param {string | mongoose.Types.ObjectId} widgetId - The ID of the widget.
+ * @returns {Promise<string[]>} A promise that resolves to an array of unique display IDs (as strings).
+ * @throws {Error} If there's an issue with database queries.
+ */
+export async function getDisplayIdsForWidget(widgetId: string | mongoose.Types.ObjectId): Promise<string[]> {
+    try {
+        const wId = typeof widgetId === 'string' ? new mongoose.Types.ObjectId(widgetId) : widgetId;
+
+        const displays = await Display.find({
+            widgets: wId, // Check if widgetId is in the 'widgets' array
+        }).select('_id').lean();
+
+        if (!displays || displays.length === 0) {
+            return [];
+        }
+
+        // Using Set to ensure uniqueness and converting ObjectId to string
+        const displayIds = [...new Set(displays.map(display => display._id.toString()))];
+
+        return displayIds;
+    } catch (error) {
+        console.error('Error fetching display IDs for widget:', error);
+        throw error; // Rethrow to be handled by the caller
+    }
+}
 
 // Define interface for cleaner typing, adjust as needed based on actual widget data structure
 interface MockWidgetData {
@@ -176,23 +205,44 @@ export const deleteWidgetAndCleanReferences = async (
   const idToDelete =
     typeof widgetId === 'string'
       ? new mongoose.Types.ObjectId(widgetId)
-      : widgetId
+      : widgetId;
+
+  let affectedDisplayIds: string[] = [];
 
   try {
-    const widget = await Widget.findById(idToDelete)
+    // First, get the display IDs that are using this widget
+    try {
+      affectedDisplayIds = await getDisplayIdsForWidget(idToDelete);
+    } catch (e) {
+      console.error(`Error fetching display IDs for widget ${idToDelete} before deletion:`, e);
+      // Continue with deletion even if fetching display IDs fails, but log the error.
+    }
+
+    const widget = await Widget.findById(idToDelete);
     if (!widget) {
-      return null // Or throw: throw new Error(`Widget with ID ${idToDelete} not found.`);
+      // If widget not found, no need to proceed further with notifications for it.
+      return null; // Or throw: throw new Error(`Widget with ID ${idToDelete} not found.`);
     }
 
     // Remove widget reference from all displays
-    await removeWidgetFromAllDisplays(idToDelete)
+    await removeWidgetFromAllDisplays(idToDelete);
 
     // Delete the widget itself
-    await Widget.findByIdAndDelete(idToDelete)
+    await Widget.findByIdAndDelete(idToDelete);
 
-    return widget // Return the (now deleted) widget document
+    // Notify affected displays after successful deletion
+    for (const displayId of affectedDisplayIds) {
+      sendEventToDisplay(displayId, 'display_updated', {
+        displayId: displayId,
+        action: 'update',
+        reason: 'widget_deleted',
+        widgetId: idToDelete.toString(),
+      });
+    }
+
+    return widget; // Return the (now deleted) widget document
   } catch (error: any) {
-    console.error('Error deleting widget and cleaning references:', error)
+    console.error('Error deleting widget and cleaning references:', error);
     // Consider if specific error types should be thrown or if a generic error is okay
     throw new Error(
       `Failed to delete widget ${idToDelete} and clean references.`

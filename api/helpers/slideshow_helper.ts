@@ -107,3 +107,48 @@ export const getAllSlideshowsWithPopulatedSlides = async (): Promise<ISlideshow[
     return []
   }
 }
+
+import Widget from '../models/widget'; // Assuming path to Widget model
+import Display from '../models/display'; // Assuming path to Display model
+import { WidgetType } from '../models/widget'; // Assuming WidgetType is in Widget model file
+
+/**
+ * Finds all Display IDs that are currently showing a given slideshow.
+ * @param {string | mongoose.Types.ObjectId} slideshowId - The ID of the slideshow.
+ * @returns {Promise<string[]>} A promise that resolves to an array of unique display IDs (as strings).
+ * @throws {Error} If there's an issue with database queries.
+ */
+export async function getDisplayIdsForSlideshow(slideshowId: string | mongoose.Types.ObjectId): Promise<string[]> {
+    try {
+        // Ensure slideshowId is an ObjectId if it's a string
+        const sId = typeof slideshowId === 'string' ? new mongoose.Types.ObjectId(slideshowId) : slideshowId;
+
+        const widgets = await Widget.find({
+            type: WidgetType.SLIDESHOW,
+            'data.slideshow_id': sId,
+        }).select('_id').lean();
+
+        if (!widgets || widgets.length === 0) {
+            return [];
+        }
+
+        const widgetIds = widgets.map(widget => widget._id);
+
+        const displays = await Display.find({
+            widgets: { $in: widgetIds },
+        }).select('_id').lean();
+
+        if (!displays || displays.length === 0) {
+            return [];
+        }
+
+        // Using Set to ensure uniqueness and converting ObjectId to string
+        const displayIds = [...new Set(displays.map(display => display._id.toString()))];
+
+        return displayIds;
+    } catch (error) {
+        console.error('Error fetching display IDs for slideshow:', error);
+        // Rethrow the error to be handled by the caller
+        throw error;
+    }
+}

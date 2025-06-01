@@ -13,8 +13,10 @@ import { IUser } from '../models/User'
 
 import {
   validateWidgetData,
-  deleteWidgetAndCleanReferences
+  deleteWidgetAndCleanReferences,
+  getDisplayIdsForWidget, // Added import
 } from '../helpers/widget_helper'
+import { sendEventToDisplay } from '../../sse_manager' // Added import
 
 const router: Router = express.Router()
 
@@ -150,6 +152,23 @@ router.put('/:id', ensureAuthenticated, async (req: Request<{ id: string }, any,
     // widgetToUpdate.last_update = new Date(); // Schema timestamps should handle this
 
     const savedWidget = await widgetToUpdate.save()
+
+    // Notify relevant displays
+    try {
+      const displayIds = await getDisplayIdsForWidget(savedWidget._id);
+      for (const displayId of displayIds) {
+        sendEventToDisplay(displayId, 'display_updated', {
+          displayId: displayId,
+          action: 'update',
+          reason: 'widget_change',
+          widgetId: savedWidget._id.toString()
+        });
+      }
+    } catch (notifyError) {
+      console.error(`Error notifying displays after widget update ${widgetId}:`, notifyError);
+      // Log error but don't let it fail the main operation
+    }
+
     res.json(savedWidget)
 
   } catch (error: any) {
