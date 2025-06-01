@@ -278,3 +278,44 @@ describe('ScreenList', () => {
       isSuccess: false,
     } as any)
 
+    render(React.createElement(ScreenList, {}), { wrapper: createWrapper() })
+
+    // Should show error message, not loaders
+    expect(screen.getByText('Failed to load screens. Please try again later.')).toBeInTheDocument()
+    expect(screen.queryByTestId('content-loader')).not.toBeInTheDocument()
+  })
+
+  it('should handle transition from loading to data', async () => {
+    const { rerender } = render(React.createElement(ScreenList, {}), { wrapper: createWrapper() })
+
+    // Initial loading state
+    mockedUseDisplays.mockReturnValue({
+      data: undefined,
+      isLoading: true,
+      error: null,
+      refetch: mockRefetch,
+      isError: false,
+      isSuccess: false,
+    } as any)
+
+    rerender(React.createElement(ScreenList, {}))
+    expect(screen.getAllByTestId('content-loader')).toHaveLength(4)
+
+    // Transition to data loaded
+    mockedUseDisplays.mockReturnValue({
+      data: mockDisplaysData,
+      isLoading: false,
+      error: null,
+      refetch: mockRefetch,
+      isError: false,
+      isSuccess: true,
+    } as any)
+
+    rerender(React.createElement(ScreenList, {}))
+    
+    await waitFor(() => {
+      expect(screen.queryByTestId('content-loader')).not.toBeInTheDocument()
+      expect(screen.getByTestId('screen-card-display1')).toBeInTheDocument()
+    })
+  })
+})
