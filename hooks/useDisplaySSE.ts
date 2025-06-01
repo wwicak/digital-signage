@@ -1,99 +1,158 @@
-import { useEffect } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { IDisplayData } from "../actions/display";
 
 /**
- * Hook for handling Server-Sent Events (SSE) real-time updates for displays.
- * This is a placeholder implementation that sets up the structure for SSE integration.
+ * Hook for handling Server-Sent Events (SSE) real-time updates for specific displays.
+ * Only subscribes to events for the specified displayId, implementing the feature
+ * "Only broadcast changes to the edited display".
  *
- * Features (to be implemented):
- * - Real-time display updates via SSE
+ * Features:
+ * - Real-time display updates via SSE for specific displayId
  * - Automatic cache invalidation on server events
  * - Graceful fallback when SSE is unavailable
  * - Connection management and error handling
+ * - Display-specific subscriptions to prevent unnecessary updates
  *
+ * @param displayId - The specific display ID to subscribe to (required for targeted updates)
  * @param enabled - Whether to enable SSE listening (default: true)
  */
-export const useDisplaySSE = (enabled: boolean = true) => {
+export const useDisplaySSE = (displayId?: string, enabled: boolean = true) => {
   const queryClient = useQueryClient();
+  const [isConnected, setIsConnected] = useState(false);
+  const eventSourceRef = useRef<EventSource | null>(null);
+  const reconnectTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const reconnectAttemptsRef = useRef(0);
+  const maxReconnectAttempts = 5;
+  const reconnectDelay = 1000; // Start with 1 second
+
+  const connect = () => {
+    if (!displayId || !enabled) return;
+
+    try {
+      // Close existing connection if any
+      if (eventSourceRef.current) {
+        eventSourceRef.current.close();
+      }
+
+      // Create new EventSource connection for specific display
+      const eventSource = new EventSource(
+        `/api/v1/displays/${displayId}/events`
+      );
+      eventSourceRef.current = eventSource;
+
+      eventSource.addEventListener("connected", () => {
+        setIsConnected(true);
+        reconnectAttemptsRef.current = 0;
+        console.log(`SSE connected to display ${displayId}`);
+      });
+
+      eventSource.addEventListener("display_updated", (event) => {
+        const eventData = JSON.parse(event.data);
+        const { displayId: eventDisplayId, action } = eventData;
+
+        // Important: Only process events for the displayId we're subscribed to
+        // This is the core of the "Only broadcast changes to the edited display" feature
+        if (eventDisplayId !== displayId) {
+          console.warn(
+            `Received event for wrong display: expected ${displayId}, got ${eventDisplayId}`
+          );
+          return;
+        }
+
+        switch (action) {
+          case "create":
+            // For create events, invalidate displays list to fetch fresh data
+            queryClient.invalidateQueries({ queryKey: ["displays"] });
+            // Also invalidate the specific display cache
+            queryClient.invalidateQueries({ queryKey: ["display", displayId] });
+            break;
+
+          case "update":
+            // For update events, invalidate both individual display and displays list
+            queryClient.invalidateQueries({ queryKey: ["display", displayId] });
+            queryClient.invalidateQueries({ queryKey: ["displays"] });
+            break;
+
+          case "delete":
+            // For delete events, remove from cache and invalidate displays list
+            queryClient.removeQueries({ queryKey: ["display", displayId] });
+            queryClient.invalidateQueries({ queryKey: ["displays"] });
+            break;
+
+          default:
+            console.warn(`Unknown display action: ${action}`);
+        }
+      });
+
+      eventSource.addEventListener("error", (event) => {
+        console.error(`SSE connection error for display ${displayId}:`, event);
+        setIsConnected(false);
+
+        // Implement exponential backoff reconnection
+        if (reconnectAttemptsRef.current < maxReconnectAttempts) {
+          const delay =
+            reconnectDelay * Math.pow(2, reconnectAttemptsRef.current);
+          reconnectAttemptsRef.current++;
+
+          reconnectTimeoutRef.current = setTimeout(() => {
+            console.log(
+              `Attempting to reconnect SSE for display ${displayId} (attempt ${reconnectAttemptsRef.current})`
+            );
+            connect();
+          }, delay);
+        } else {
+          console.error(
+            `Max reconnection attempts reached for display ${displayId}`
+          );
+        }
+      });
+    } catch (error) {
+      console.error(
+        `Failed to establish SSE connection for display ${displayId}:`,
+        error
+      );
+      setIsConnected(false);
+    }
+  };
+
+  const disconnect = () => {
+    if (eventSourceRef.current) {
+      eventSourceRef.current.close();
+      eventSourceRef.current = null;
+    }
+    if (reconnectTimeoutRef.current) {
+      clearTimeout(reconnectTimeoutRef.current);
+      reconnectTimeoutRef.current = null;
+    }
+    setIsConnected(false);
+    reconnectAttemptsRef.current = 0;
+  };
+
+  const reconnect = () => {
+    disconnect();
+    connect();
+  };
 
   useEffect(() => {
-    if (!enabled) return;
+    if (!enabled || !displayId) {
+      disconnect();
+      return;
+    }
 
-    // TODO: Implement actual SSE connection when backend SSE endpoint is ready
-    // This is a placeholder structure for future implementation
+    connect();
 
-    /*
-    const eventSource = new EventSource("/api/v1/display/events");
-
-    eventSource.addEventListener("display_updated", (event) => {
-      const { displayId, action, displayData } = JSON.parse(event.data);
-
-      switch (action) {
-        case "create":
-          // Optimistically add new display to list
-          queryClient.setQueryData(['displays'], (old: IDisplayData[] | undefined) => {
-            if (!old) return [displayData]
-            return [...old, displayData]
-          })
-          // Invalidate to ensure consistency
-          queryClient.invalidateQueries({ queryKey: ["displays"] });
-          break;
-          
-        case "update":
-          // Update individual display cache
-          queryClient.setQueryData(["display", displayId], displayData);
-          
-          // Update displays list cache
-          queryClient.setQueryData(['displays'], (old: IDisplayData[] | undefined) => {
-            if (!old) return [displayData]
-            return old.map((display) =>
-              display._id === displayId ? displayData : display
-            )
-          })
-          break;
-          
-        case "delete":
-          // Remove from displays list
-          queryClient.setQueryData(['displays'], (old: IDisplayData[] | undefined) => {
-            if (!old) return []
-            return old.filter((display) => display._id !== displayId)
-          })
-          // Remove individual display cache
-          queryClient.removeQueries({ queryKey: ["display", displayId] });
-          break;
-      }
-    });
-
-    eventSource.addEventListener("error", (event) => {
-      console.error("SSE connection error:", event);
-      // Implement reconnection logic here
-    });
-
+    // Cleanup function
     return () => {
-      eventSource.close();
+      disconnect();
     };
-    */
-
-    console.log(
-      "SSE hook initialized (placeholder - actual implementation pending)"
-    );
-
-    // Cleanup function for when effect is removed
-    return () => {
-      console.log("SSE hook cleanup (placeholder)");
-    };
-  }, [enabled, queryClient]);
+  }, [enabled, displayId, queryClient]);
 
   // Return SSE connection status and control functions
   return {
-    isConnected: false, // Placeholder - will be true when SSE is actually connected
-    reconnect: () => {
-      console.log("SSE reconnect requested (placeholder)");
-    },
-    disconnect: () => {
-      console.log("SSE disconnect requested (placeholder)");
-    },
+    isConnected,
+    reconnect,
+    disconnect,
   };
 };
 
