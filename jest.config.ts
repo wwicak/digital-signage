@@ -18,6 +18,8 @@ const config: Config = {
     "<rootDir>/node_modules/",
     "<rootDir>/__tests__/utils/",
   ],
+  // Transform ES modules in node_modules
+  transformIgnorePatterns: ["node_modules/(?!(nanoid|shortid)/)"],
   moduleNameMapper: {
     /*
      * Handle CSS imports (with CSS modules)
@@ -37,6 +39,10 @@ const config: Config = {
 
     // Handle module aliases
     "^@/(.*)$": "<rootDir>/$1",
+
+    // Mock problematic ES modules
+    "^nanoid$": "<rootDir>/__mocks__/nanoid.js",
+    "^shortid$": "<rootDir>/__mocks__/shortid.js",
   },
   // Add Babel preset for Next.js
   transform: {

@@ -96,7 +96,7 @@ describe("useDisplayMutations", () => {
 
       // Resolve the promise
       act(() => {
-        resolvePromise!(mockDisplay);
+        resolvePromise!(mockDisplayData);
       });
 
       await waitFor(() => {
@@ -165,7 +165,13 @@ describe("useDisplayMutations", () => {
 
   describe("updateDisplay", () => {
     it("should update a display successfully", async () => {
-      mockedUpdateDisplay.mockResolvedValueOnce(updatedDisplayData);
+      // Create a promise that resolves after a delay to capture loading state
+      let resolvePromise: (value: any) => void;
+      const delayedPromise = new Promise((resolve) => {
+        resolvePromise = resolve;
+      });
+
+      mockedUpdateDisplay.mockReturnValueOnce(delayedPromise);
 
       const { result } = renderHook(() => useDisplayMutations(), {
         wrapper: createWrapper(),
@@ -181,7 +187,15 @@ describe("useDisplayMutations", () => {
         });
       });
 
-      expect(result.current.isUpdating).toBe(true);
+      // Should be loading now
+      await waitFor(() => {
+        expect(result.current.isUpdating).toBe(true);
+      });
+
+      // Resolve the promise
+      act(() => {
+        resolvePromise!(updatedDisplayData);
+      });
 
       await waitFor(() => {
         expect(result.current.isUpdating).toBe(false);
@@ -273,7 +287,13 @@ describe("useDisplayMutations", () => {
 
   describe("deleteDisplay", () => {
     it("should delete a display successfully", async () => {
-      mockedDeleteDisplay.mockResolvedValueOnce({ message: "Display deleted" });
+      // Create a promise that resolves after a delay to capture loading state
+      let resolvePromise: (value: any) => void;
+      const delayedPromise = new Promise((resolve) => {
+        resolvePromise = resolve;
+      });
+
+      mockedDeleteDisplay.mockReturnValueOnce(delayedPromise);
 
       const { result } = renderHook(() => useDisplayMutations(), {
         wrapper: createWrapper(),
@@ -286,7 +306,15 @@ describe("useDisplayMutations", () => {
         });
       });
 
-      expect(result.current.isDeleting).toBe(true);
+      // Should be loading now
+      await waitFor(() => {
+        expect(result.current.isDeleting).toBe(true);
+      });
+
+      // Resolve the promise
+      act(() => {
+        resolvePromise!({ message: "Display deleted" });
+      });
 
       await waitFor(() => {
         expect(result.current.isDeleting).toBe(false);

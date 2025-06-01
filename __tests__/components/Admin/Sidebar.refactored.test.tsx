@@ -70,11 +70,11 @@ jest.mock('../../../components/DropdownButton', () => {
       <div data-testid="dropdown-button">
         {children}
         <div data-testid="dropdown-choices">
-          {choices.map((choice: any) => (
+          {choices && choices.map((choice: any) => (
             <button
               key={choice.key}
               data-testid={`choice-${choice.key}`}
-              onClick={() => onSelect(choice.key)}
+              onClick={() => onSelect && onSelect(choice.key)}
             >
               {choice.name}
             </button>
@@ -164,7 +164,9 @@ describe('Sidebar (Refactored with global hooks)', () => {
       renderSidebar({ loggedIn: true })
       
       expect(screen.getByTestId('dropdown-button')).toBeInTheDocument()
-      expect(screen.getByText('Display 1')).toBeInTheDocument() // Current display name
+      // Check current display name in the dropdown header
+      const dropdown = screen.getByTestId('dropdown-button')
+      expect(dropdown).toHaveTextContent('Display 1')
       expect(screen.getByText('online')).toBeInTheDocument() // Status
     })
 
@@ -195,7 +197,9 @@ describe('Sidebar (Refactored with global hooks)', () => {
       renderSidebar({ loggedIn: true })
       
       expect(mockedUseDisplayContext).toHaveBeenCalledTimes(1)
-      expect(screen.getByText('Display 1')).toBeInTheDocument()
+      // Check current display name in the dropdown header
+      const dropdown = screen.getByTestId('dropdown-button')
+      expect(dropdown).toHaveTextContent('Display 1')
     })
 
     it('should navigate to admin page when display is selected from dropdown', () => {
@@ -389,8 +393,9 @@ describe('Sidebar (Refactored with global hooks)', () => {
     it('should render all expected icons', () => {
       renderSidebar({ loggedIn: true })
       
-      expect(screen.getByTestId('icon-tv')).toBeInTheDocument() // Main display icon
-      expect(screen.getByTestId('icon-tv')).toBeInTheDocument() // Screens menu icon
+      // Use getAllByTestId for icons that appear multiple times
+      const tvIcons = screen.getAllByTestId('icon-tv')
+      expect(tvIcons).toHaveLength(2) // Main display icon and Screens menu icon
       expect(screen.getByTestId('icon-th-large')).toBeInTheDocument() // Layout icon
       expect(screen.getByTestId('icon-eye')).toBeInTheDocument() // Preview icon
       expect(screen.getByTestId('icon-images')).toBeInTheDocument() // Slideshows icon
@@ -426,8 +431,12 @@ describe('Sidebar (Refactored with global hooks)', () => {
       // Should have both displays in dropdown choices
       expect(screen.getByTestId('choice-display1')).toBeInTheDocument()
       expect(screen.getByTestId('choice-display2')).toBeInTheDocument()
-      expect(screen.getByText('Display 1')).toBeInTheDocument()
-      expect(screen.getByText('Display 2')).toBeInTheDocument()
+      
+      // Check dropdown choice buttons contain the expected text
+      const choice1 = screen.getByTestId('choice-display1')
+      const choice2 = screen.getByTestId('choice-display2')
+      expect(choice1).toHaveTextContent('Display 1')
+      expect(choice2).toHaveTextContent('Display 2')
     })
   })
 })
