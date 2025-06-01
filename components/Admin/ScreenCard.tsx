@@ -24,7 +24,8 @@ const ScreenCardValueSchema = z.object({
 })
 
 // Import the original IDisplayData to ensure compatibility or use if it becomes a Zod type later.
-import { deleteDisplay, IDisplayData } from '../../actions/display'
+import { IDisplayData } from '../../actions/display'
+import { useDisplayMutations } from '../../hooks/useDisplayMutations'
 
 // Zod schema for ScreenCard props
 export const ScreenCardPropsSchema = z.object({
@@ -34,21 +35,28 @@ export const ScreenCardPropsSchema = z.object({
 
 // Derive TypeScript type from Zod schema
 export type IScreenCardProps = z.infer<typeof ScreenCardPropsSchema>;
-
 const ScreenCard: React.FC<IScreenCardProps> = ({ value, refresh = () => {} }) => {
+  const { deleteDisplay } = useDisplayMutations()
+
   const handleDelete = (event: React.MouseEvent): void => {
     event.preventDefault() // Prevent Link navigation when clicking delete icon
     event.stopPropagation() // Stop event from bubbling further
 
     if (value && value._id) {
-      deleteDisplay(value._id)
-        .then(() => {
-          refresh()
-        })
-        .catch(error => {
-          console.error('Failed to delete display:', error)
-          // Optionally, provide user feedback here
-        })
+      deleteDisplay.mutate(
+        { id: value._id },
+        {
+          onSuccess: () => {
+            // The mutation automatically updates the global cache,
+            // but we still call refresh in case the parent needs to do something
+            refresh()
+          },
+          onError: (error: any) => {
+            console.error('Failed to delete display:', error)
+            // Optionally, provide user feedback here
+          }
+        }
+      )
     }
   }
 

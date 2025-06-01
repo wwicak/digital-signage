@@ -127,13 +127,26 @@ export const DisplayProvider: React.FC<{ children: React.ReactNode }> = ({ child
     refetchOnWindowFocus: false, // Disable refetch on window focus for digital signage
     refetchOnReconnect: true, // Keep refetch on reconnect for reliability
   })
-
-  // Mutation for updating display data
+  // Enhanced mutation for updating display data with global list updates
   const updateDisplayMutation = useMutation({
     mutationFn: ({ id, data }: { id: string; data: Partial<IDisplayData> }) =>
       updateDisplay(id, data),
-    onSuccess: (data, variables) => {
-      // Update the specific display cache
+    onSuccess: (updatedDisplay, variables) => {
+      // Update individual display cache
+      queryClient.setQueryData(['display', variables.id], updatedDisplay)
+
+      // Update displays list cache to ensure global state consistency
+      queryClient.setQueryData(
+        ['displays'],
+        (old: IDisplayData[] | undefined) => {
+          if (!old) return [updatedDisplay]
+          return old.map((display) =>
+            display._id === variables.id ? updatedDisplay : display
+          )
+        }
+      )
+
+      // Invalidate to ensure fresh data from server
       queryClient.invalidateQueries({ queryKey: ['display', variables.id] })
     },
   })

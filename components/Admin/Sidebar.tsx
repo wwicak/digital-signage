@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import React, { useState, useEffect } from 'react'
+import React from 'react'
 import Router, { NextRouter, withRouter } from 'next/router'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import {
@@ -16,7 +16,7 @@ import DropdownButton, { IDropdownChoice } from '../DropdownButton' // Already .
 
 import { logout } from '../../helpers/auth' // Assuming auth.js will be typed or allowJs
 import { useDisplayContext } from '../../contexts/DisplayContext'
-import { getDisplays, IDisplayData } from '../../actions/display' // Already .tsx
+import { useDisplays } from '../../hooks/useDisplays'
 
 // Simplified display data for local state
 interface ISimpleDisplay {
@@ -42,24 +42,11 @@ export interface ISidebarProps extends WithRouterProps {
 }
 
 const Sidebar: React.FC<ISidebarProps> = ({ router, loggedIn, displayId }) => {
-    const [displays, setDisplays] = useState<ISimpleDisplay[]>([])
+    const { data: displaysData = [] } = useDisplays()
     const context = useDisplayContext()
-  
-    useEffect(() => {
-      const fetchDisplays = async () => {
-        // host determination for client-side only
-        const host = typeof window !== 'undefined' ? window.location.origin : ''
-        try {
-          const displaysData: IDisplayData[] = await getDisplays(host)
-          setDisplays(displaysData.map(d => ({ _id: d._id, name: d.name })))
-        } catch (error) {
-          console.error('Failed to fetch displays for sidebar:', error)
-          setDisplays([])
-        }
-      }
-  
-      fetchDisplays()
-    }, [])
+    
+    // Transform displays data to simple format for dropdown
+    const displays: ISimpleDisplay[] = displaysData.map(d => ({ _id: d._id, name: d.name }))
   
     const navigateToAdmin = (id: string): void => {
       // This method is called by DropdownButton with the key of the selected choice (which is display._id)

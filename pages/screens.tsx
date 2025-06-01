@@ -1,30 +1,22 @@
 import React, { useEffect, useRef, memo } from 'react'
 
 import Frame from '../components/Admin/Frame.tsx' // Assuming .tsx
-import ScreenListComponent from '../components/Admin/ScreenList.tsx' // Renamed, Assuming .tsx
+import ScreenListComponent, { IScreenListRef } from '../components/Admin/ScreenList.tsx' // Renamed, Assuming .tsx
 import Dialog from '../components/Dialog.tsx' // Assuming .tsx
 import { Button } from '../components/Form' // Assuming Form components are in .tsx or have .d.ts
 
-import { addDisplay } from '../actions/display' // Assuming .ts and typed
+import { useDisplayMutations } from '../hooks/useDisplayMutations'
 import { protect, ProtectProps } from '../helpers/auth' // Now .tsx
 import { useDisplayContext } from '../contexts/DisplayContext'
-
-/*
- * Placeholder for ScreenList component instance type
- * In a real scenario, ScreenList component would export its instance type or props type
- */
-interface ScreenListInstance {
-  refresh: () => void;
-  // Add other methods/properties if accessed via ref
-}
 
 interface ScreensProps extends ProtectProps {
   displayId?: string; // displayId might be optional or from router query
 }
 
 const ScreensComponent = memo(function ScreensComponent({ loggedIn, displayId }: ScreensProps) {
-  const screenListRef = useRef<ScreenListInstance>(null)
+  const screenListRef = useRef<IScreenListRef>(null)
   const displayContext = useDisplayContext()
+  const { createDisplay } = useDisplayMutations()
 
   useEffect(() => {
     if (displayId) {
@@ -38,11 +30,20 @@ const ScreensComponent = memo(function ScreensComponent({ loggedIn, displayId }:
   }, [displayId, displayContext])
 
   const add = (): Promise<void> => {
-    return addDisplay().then(() => {
-      // Type guard for ref
-      if (screenListRef && screenListRef.current) {
-        screenListRef.current.refresh()
-      }
+    return new Promise((resolve, reject) => {
+      createDisplay.mutate(undefined, {
+        onSuccess: () => {
+          // Type guard for ref
+          if (screenListRef && screenListRef.current) {
+            screenListRef.current.refresh()
+          }
+          resolve()
+        },
+        onError: (error) => {
+          console.error('Failed to create display:', error)
+          reject(error)
+        }
+      })
     })
   }
 
