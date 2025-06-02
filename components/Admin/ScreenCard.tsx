@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { IconProp } from '@fortawesome/fontawesome-svg-core'
 import { faWindowRestore } from '@fortawesome/free-regular-svg-icons'
@@ -6,6 +6,7 @@ import { faChromecast } from '@fortawesome/free-brands-svg-icons'
 import { faTrash, faTv, faEye, faLink } from '@fortawesome/free-solid-svg-icons'
 import Link from 'next/link'
 import * as z from 'zod'
+import OrientationPreview from './OrientationPreview'
 
 /*
  * Assuming IDisplayData is an interface. We'll define a Zod schema for the 'value' prop
@@ -16,6 +17,7 @@ import * as z from 'zod'
 const ScreenCardValueSchema = z.object({
   _id: z.string(),
   name: z.string().optional(), // Based on usage: value.name || 'Untitled Display'
+  orientation: z.enum(['landscape', 'portrait']).optional(), // Display orientation
   widgets: z.array(z.union([z.string(), z.object({})])).optional(), // Based on usage: Array.isArray(value.widgets)
   /*
    * Add other fields from IDisplayData if they were directly used by ScreenCard and need validation.
@@ -35,7 +37,34 @@ export const ScreenCardPropsSchema = z.object({
 // Derive TypeScript type from Zod schema
 export type IScreenCardProps = z.infer<typeof ScreenCardPropsSchema>;
 const ScreenCard: React.FC<IScreenCardProps> = ({ value, refresh = () => {} }) => {
-  const { deleteDisplay } = useDisplayMutations()
+  const { deleteDisplay, updateDisplay } = useDisplayMutations()
+  const [isUpdatingOrientation, setIsUpdatingOrientation] = useState(false)
+
+  const handleOrientationChange = (event: React.ChangeEvent<HTMLSelectElement>): void => {
+    event.preventDefault()
+    event.stopPropagation()
+    
+    const newOrientation = event.target.value as 'landscape' | 'portrait'
+    if (value && value._id && newOrientation !== value.orientation) {
+      setIsUpdatingOrientation(true)
+      updateDisplay.mutate(
+        {
+          id: value._id,
+          data: { orientation: newOrientation }
+        },
+        {
+          onSuccess: () => {
+            setIsUpdatingOrientation(false)
+            refresh()
+          },
+          onError: (error: any) => {
+            console.error('Failed to update orientation:', error)
+            setIsUpdatingOrientation(false)
+          }
+        }
+      )
+    }
+  }
 
   const handleDelete = (event: React.MouseEvent): void => {
     event.preventDefault() // Prevent Link navigation when clicking delete icon
@@ -87,6 +116,19 @@ const ScreenCard: React.FC<IScreenCardProps> = ({ value, refresh = () => {} }) =
                 </div>
                 {/* TODO: Client count is hardcoded, should come from data if available */}
                 <span className='text'>1 client paired</span>
+              </div>
+              <div className='orientation-control'>
+                <OrientationPreview orientation={value?.orientation || null} />
+                <select
+                  value={value?.orientation || 'landscape'}
+                  onChange={handleOrientationChange}
+                  disabled={isUpdatingOrientation}
+                  onClick={(e) => e.stopPropagation()}
+                  className='orientation-select'
+                >
+                  <option value='landscape'>Landscape</option>
+                  <option value='portrait'>Portrait</option>
+                </select>
               </div>
               <div className='online'>
                 {/* TODO: Online status is hardcoded, should come from data if available */}
@@ -176,13 +218,41 @@ const ScreenCard: React.FC<IScreenCardProps> = ({ value, refresh = () => {} }) =
 
               .widgetnum,
               .online,
-              .clientnum {
+              .clientnum,
+              .orientation-control {
                 font-family: 'Open Sans', sans-serif;
                 font-size: 14px;
                 color: #878787;
                 margin-right: 12px; /* Increased margin */
                 display: flex; /* For icon and text alignment */
                 align-items: center;
+              }
+
+              .orientation-control {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 4px;
+              }
+
+              .orientation-select {
+                font-family: 'Open Sans', sans-serif;
+                font-size: 12px;
+                padding: 2px 4px;
+                border: 1px solid #ddd;
+                border-radius: 3px;
+                background: white;
+                color: #666;
+                cursor: pointer;
+                min-width: 80px;
+              }
+
+              .orientation-select:hover {
+                border-color: #7bc043;
+              }
+
+              .orientation-select:disabled {
+                opacity: 0.6;
+                cursor: not-allowed;
               }
 
               .widgetnum .icon,

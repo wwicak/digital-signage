@@ -29,6 +29,8 @@ const DisplayPageComponent = memo(function DisplayPageComponent({ host, displayI
             display: flex;
             width: 100vw;
             height: 100vh;
+            overflow: hidden;
+            position: relative;
           }
         `}
       </style>
@@ -42,6 +44,15 @@ const DisplayPageComponent = memo(function DisplayPageComponent({ host, displayI
           }
           *::-webkit-scrollbar {
             display: none; /* Safari and Chrome */
+          }
+          
+          /* Global orientation styles for the display */
+          .portrait-display {
+            /* Portrait mode transformations will be handled at the component level */
+          }
+          
+          .landscape-display {
+            /* Landscape mode is the default */
           }
         `}
       </style>

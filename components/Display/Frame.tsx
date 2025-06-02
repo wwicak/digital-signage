@@ -17,6 +17,7 @@ export const DisplayFramePropsSchema = z.object({
     return true
   }),
   statusBar: z.array(z.string()).optional(),
+  orientation: z.enum(['landscape', 'portrait']).nullable().optional(),
 })
 
 export type IDisplayFrameProps = z.infer<typeof DisplayFramePropsSchema>;
@@ -26,7 +27,7 @@ export type IDisplayFrameProps = z.infer<typeof DisplayFramePropsSchema>;
  * interface IDisplayFrameState {}
  */
 
-const Frame: React.FC<IDisplayFrameProps> = React.memo(({ children, statusBar = [] }) => {
+const Frame: React.FC<IDisplayFrameProps> = React.memo(({ children, statusBar = [], orientation = null }) => {
   const renderStatusBarItem = React.useCallback((itemKey: string, index: number): JSX.Element | null => {
     // Assuming itemKey could be "type_uniqueId" or just "type"
     const type = itemKey.includes('_') ? itemKey.split('_')[0] : itemKey
@@ -48,8 +49,11 @@ const Frame: React.FC<IDisplayFrameProps> = React.memo(({ children, statusBar = 
     }
   }, [])
 
+  const isPortrait = orientation === 'portrait'
+  const orientationClass = isPortrait ? 'portrait-frame' : 'landscape-frame'
+
   return (
-    <div className='display-frame'>
+    <div className={`display-frame ${orientationClass}`}>
       {statusBar && statusBar.length > 0 && (
         <div className={'status-bar-container'}>
           {statusBar.map((item, index) => (
@@ -73,35 +77,54 @@ const Frame: React.FC<IDisplayFrameProps> = React.memo(({ children, statusBar = 
             background: black;
             font-family: 'Open Sans', sans-serif;
             color: white;
+            transition: all 0.3s ease-in-out;
           }
+          
+          /* Portrait orientation specific styles */
+          .display-frame.portrait-frame {
+            /* Apply any frame-level portrait adjustments here */
+          }
+          
+          /* Landscape orientation specific styles (default) */
+          .display-frame.landscape-frame {
+            /* Apply any frame-level landscape adjustments here */
+          }
+          
           .display-content {
             flex: 1;
             display: flex;
             flex-direction: column;
             overflow: hidden;
+            transition: all 0.3s ease-in-out;
           }
+          
           .status-bar-container {
-            padding: 15px 30px;
+            padding: ${isPortrait ? '10px 20px' : '15px 30px'};
             display: flex;
             flex-direction: row;
             justify-content: flex-start;
             align-items: center;
             background-color: rgba(0,0,0,0.2);
-            min-height: 50px;
+            min-height: ${isPortrait ? '40px' : '50px'};
+            transition: all 0.3s ease-in-out;
           }
+          
           .status-bar-item {
             display: flex;
             align-items: center;
           }
+          
           .status-bar-item:not(:first-child) {
-            margin-left: 16px;
+            margin-left: ${isPortrait ? '12px' : '16px'};
           }
+          
           .status-bar-item.item-connection .wifi-icon {
             color: #baff23;
           }
+          
           .status-bar-item.item-date,
           .status-bar-item.item-time {
-            font-size: 1em;
+            font-size: ${isPortrait ? '0.9em' : '1em'};
           }
         `}
       </style>

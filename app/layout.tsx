@@ -1,5 +1,6 @@
 import React from 'react'
 import StyledComponentsRegistry from './lib/registry'
+import { Providers } from './providers'
 
 // Import global styles
 import '../styles/globals.css'
@@ -32,9 +33,11 @@ export default function RootLayout({
         <style>{'body { margin: 0 } /* custom! */'}</style>
       </head>
       <body>
-        <StyledComponentsRegistry>
-          {children}
-        </StyledComponentsRegistry>
+        <Providers>
+          <StyledComponentsRegistry>
+            {children}
+          </StyledComponentsRegistry>
+        </Providers>
       </body>
     </html>
   )

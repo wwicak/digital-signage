@@ -1,3 +1,5 @@
+'use client'
+
 import React, { createContext, useContext, useReducer, useCallback } from 'react'
 import _ from 'lodash'
 import shortid from 'shortid'
@@ -26,6 +28,7 @@ interface DisplayState {
   id: string | null;
   name: string | null;
   layout: 'spaced' | 'compact' | null;
+  orientation: 'landscape' | 'portrait' | null;
   statusBar: IStatusBar;
   widgets: IWidget[];
 }
@@ -35,16 +38,17 @@ type DisplayAction =
   | { type: 'SET_ID'; payload: string | null }
   | { type: 'SET_NAME'; payload: string }
   | { type: 'SET_LAYOUT'; payload: 'spaced' | 'compact' }
+  | { type: 'SET_ORIENTATION'; payload: 'landscape' | 'portrait' }
   | { type: 'SET_STATUS_BAR'; payload: IStatusBar }
   | { type: 'SET_WIDGETS'; payload: IWidget[] }
   | { type: 'ADD_STATUS_BAR_ITEM'; payload: string }
   | { type: 'REMOVE_STATUS_BAR_ITEM'; payload: number }
   | { type: 'REORDER_STATUS_BAR_ITEMS'; payload: { startIndex: number; endIndex: number } };
-
 const initialState: DisplayState = {
   id: null,
   name: null,
   layout: null,
+  orientation: null,
   statusBar: { enabled: false, elements: [] },
   widgets: [],
 }
@@ -57,6 +61,7 @@ function displayReducer(state: DisplayState, action: DisplayAction): DisplayStat
         id: action.payload._id || state.id,
         name: action.payload.name || null,
         layout: action.payload.layout || null,
+        orientation: action.payload.orientation || null,
         statusBar: action.payload.statusBar || { enabled: false, elements: [] },
         widgets: action.payload.widgets || [],
       }
@@ -66,6 +71,8 @@ function displayReducer(state: DisplayState, action: DisplayAction): DisplayStat
       return { ...state, name: action.payload }
     case 'SET_LAYOUT':
       return { ...state, layout: action.payload }
+    case 'SET_ORIENTATION':
+      return { ...state, orientation: action.payload }
     case 'SET_STATUS_BAR':
       return { ...state, statusBar: action.payload }
     case 'SET_WIDGETS':
@@ -103,6 +110,7 @@ interface DisplayContextType {
   setName: (name: string) => void;
   updateName: (name: string) => void;
   updateLayout: (layout: 'spaced' | 'compact') => void;
+  updateOrientation: (orientation: 'landscape' | 'portrait') => void;
   updateWidgets: (widgets: IWidget[]) => void;
   addStatusBarItem: (type: string) => Promise<void>;
   removeStatusBarItem: (index: number) => void;
@@ -200,6 +208,12 @@ export const DisplayProvider: React.FC<{ children: React.ReactNode }> = ({ child
     updateDisplayThrottled(state.id, { layout })
   }, [state.id, updateDisplayThrottled])
 
+  const updateOrientation = useCallback((orientation: 'landscape' | 'portrait') => {
+    if (!orientation || !['landscape', 'portrait'].includes(orientation) || !state.id) return
+    dispatch({ type: 'SET_ORIENTATION', payload: orientation })
+    updateDisplayThrottled(state.id, { orientation })
+  }, [state.id, updateDisplayThrottled])
+
   const updateWidgets = useCallback((widgets: IWidget[]) => {
     if (!state.id) return
     dispatch({ type: 'SET_WIDGETS', payload: widgets })
@@ -252,6 +266,7 @@ export const DisplayProvider: React.FC<{ children: React.ReactNode }> = ({ child
     setName,
     updateName,
     updateLayout,
+    updateOrientation,
     updateWidgets,
     addStatusBarItem,
     removeStatusBarItem,

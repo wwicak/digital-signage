@@ -114,6 +114,13 @@ const Display: React.FC<IDisplayComponentProps> = React.memo(({ display }) => {
     )
   }, [])
 
+  // Determine orientation-specific styling and grid configuration
+  const isPortrait = state.orientation === 'portrait'
+  const orientationClass = isPortrait ? 'portrait-display' : 'landscape-display'
+  
+  // Adjust grid columns based on orientation for better layout
+  const gridCols = isPortrait ? 4 : 6 // Fewer columns in portrait for better widget sizing
+
   return (
     /*
      * Frame.tsx statusBar prop expects string[] currently.
@@ -122,14 +129,14 @@ const Display: React.FC<IDisplayComponentProps> = React.memo(({ display }) => {
      * Current Frame.tsx expects string[] (item identifiers).
      * Assuming this.state.statusBar (from displayData.statusBar.elements) is string[]
      */
-    <Frame statusBar={state.statusBar?.elements || DEFAULT_STATUS_BAR}>
-      <div className={'gridContainer'} ref={containerRef}>
+    <Frame statusBar={state.statusBar?.elements || DEFAULT_STATUS_BAR} orientation={state.orientation}>
+      <div className={`gridContainer ${orientationClass}`} ref={containerRef}>
         <RglComponent
           className='layout' // Default class, react-grid-layout uses this
           isDraggable={false} // From original JS
           isResizable={false} // From original JS
           layout={rglWidgetLayout}
-          cols={6} // Consider making this configurable or dynamic based on layout
+          cols={gridCols} // Dynamic columns based on orientation
           margin={gridMargin}
           /*
            * rowHeight is now handled by HeightProvider HOC for stability
@@ -144,13 +151,35 @@ const Display: React.FC<IDisplayComponentProps> = React.memo(({ display }) => {
               flex: 1;
               overflow: hidden; /* Important for RGL and scrolling */
               margin-bottom: ${currentLayout === 'spaced' ? '10px' : '0px'};
+              transition: all 0.3s ease-in-out;
               /* background: #eee; */ /* Optional: for visualizing grid container */
             }
+            
+            /* Portrait orientation styles */
+            .gridContainer.portrait-display {
+              /* Container adjustments for portrait mode */
+              width: 100%;
+              height: 100%;
+            }
+            
+            /* Landscape orientation styles (default) */
+            .gridContainer.landscape-display {
+              /* Container adjustments for landscape mode */
+              width: 100%;
+              height: 100%;
+            }
+            
             .widget-wrapper { /* Renamed from .widget */
               border-radius: ${currentLayout === 'spaced' ? '6px' : '0px'};
               overflow: hidden; /* Clip widget content */
               background-color: rgba(200,200,200,0.1); /* Example placeholder background */
-              /* Add transition for smooth resize/move if RGL animations are on */
+              transition: all 0.3s ease-in-out; /* Smooth transitions for orientation changes */
+            }
+            
+            /* Portrait-specific widget adjustments */
+            .portrait-display .widget-wrapper {
+              /* Adjust widget styling for portrait orientation */
+              min-height: ${isPortrait ? '120px' : 'auto'}; /* Ensure minimum height in portrait */
             }
           `}
         </style>

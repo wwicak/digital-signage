@@ -58,3 +58,68 @@
     --chart-5: 340 75% 55%;
   }
 }
+
+/* Display Orientation Styles */
+.portrait-display {
+  /* Portrait orientation adjustments */
+}
+
+.landscape-display {
+  /* Landscape orientation (default) */
+}
+
+/* Widget responsiveness for portrait orientation */
+.portrait-display .widget-wrapper {
+  /* Ensure widgets adapt to portrait layout */
+}
+
+.portrait-display .announce-widget-content {
+  /* Announcement widget adjustments for portrait */
+}
+
+.portrait-display .announce-widget-content .title-bar {
+  font-size: 14px;
+  padding: 3px 6px;
+  margin-bottom: 6px;
+}
+
+.portrait-display .announce-widget-content .text-content {
+  font-size: 14px;
+}
+
+.portrait-display .congrats-widget-content {
+  /* Congrats widget adjustments for portrait */
+}
+
+.portrait-display .congrats-widget-content .text-content {
+  font-size: 14px;
+  padding: 12px;
+}
+
+/* Status bar adjustments for portrait */
+.portrait-frame .status-bar-container {
+  padding: 8px 16px;
+  min-height: 35px;
+}
+
+.portrait-frame .status-bar-item.item-date,
+.portrait-frame .status-bar-item.item-time {
+  font-size: 0.85em;
+}
+
+/* Grid layout adjustments for portrait */
+.portrait-display .react-grid-layout {
+  /* Ensure grid layout works well in portrait */
+}
+
+.portrait-display .react-grid-item {
+  /* Individual grid item adjustments for portrait */
+}
+
+/* Responsive text scaling for portrait orientation */
+@media (max-aspect-ratio: 1/1) {
+  /* Additional responsive adjustments when in portrait aspect ratio */
+  .portrait-display {
+    /* Fine-tune portrait display */
+  }
+}
