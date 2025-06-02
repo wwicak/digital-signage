@@ -37,8 +37,8 @@ export interface ISidebarProps {
 }
 
 const Sidebar: React.FC<ISidebarProps> = ({ loggedIn, displayId }) => {
-    const router = useRouter();
-    const pathname = usePathname();
+    const router = useRouter()
+    const pathname = usePathname()
     const { data: displaysData = [] } = useDisplays()
     const context = useDisplayContext()
     
