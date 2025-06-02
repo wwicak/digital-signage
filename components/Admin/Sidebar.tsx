@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import React from 'react'
-import Router, { NextRouter, withRouter } from 'next/router'
+import { useRouter, usePathname } from 'next/navigation'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import {
   faKey,
@@ -31,17 +31,14 @@ interface IMenuItem {
   icon: IconDefinition;
 }
 
-// Props injected by withRouter HOC
-export interface WithRouterProps {
-  router: NextRouter;
-}
-
-export interface ISidebarProps extends WithRouterProps {
+export interface ISidebarProps {
   loggedIn?: boolean;
   displayId?: string | null; // This prop was passed from Frame.tsx
 }
 
-const Sidebar: React.FC<ISidebarProps> = ({ router, loggedIn, displayId }) => {
+const Sidebar: React.FC<ISidebarProps> = ({ loggedIn, displayId }) => {
+    const router = useRouter();
+    const pathname = usePathname();
     const { data: displaysData = [] } = useDisplays()
     const context = useDisplayContext()
     
@@ -50,7 +47,7 @@ const Sidebar: React.FC<ISidebarProps> = ({ router, loggedIn, displayId }) => {
   
     const navigateToAdmin = (id: string): void => {
       // This method is called by DropdownButton with the key of the selected choice (which is display._id)
-      Router.push(`/layout?display=${id}`)
+      router.push(`/layout?display=${id}`)
       context.setId(id) // Update the context
     }
   
@@ -134,7 +131,7 @@ const Sidebar: React.FC<ISidebarProps> = ({ router, loggedIn, displayId }) => {
       <ul className='menu-list'> {/* Renamed class for clarity */}
         {menu.map(item => (
           <Link href={item.path} key={item.id} legacyBehavior>
-            <li className={item.path === router.pathname ? 'active' : ''}>
+            <li className={item.path === pathname ? 'active' : ''}>
               <a> {/* Anchor tag is child of li for Link with legacyBehavior */}
                 <FontAwesomeIcon icon={item.icon} fixedWidth />
                 <span className={'text'}>
@@ -296,4 +293,4 @@ const Sidebar: React.FC<ISidebarProps> = ({ router, loggedIn, displayId }) => {
   )
 }
 
-export default withRouter(Sidebar)
+export default Sidebar

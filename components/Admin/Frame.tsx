@@ -28,8 +28,8 @@ const Frame: React.FC<IFrameProps> = (props) => {
   
   return (
     <div className='admin-frame-container'>
-      {/* The displayId for the Sidebar is taken from the context */}
-      <Sidebar loggedIn={props.loggedIn} displayId={state.id} />
+      {/* Only render Sidebar when user is logged in */}
+      {props.loggedIn && <Sidebar loggedIn={props.loggedIn} displayId={state.id} />}
       <div className='admin-frame-content'>{props.children}</div>
       <style jsx>
         {`

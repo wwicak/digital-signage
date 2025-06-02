@@ -1,4 +1,3 @@
-import Router from 'next/router'
 import axios, { AxiosResponse } from 'axios'
 import React, { ComponentType } from 'react'
 import { parseCookies, setCookie, destroyCookie } from 'nookies'
@@ -216,7 +215,7 @@ export const protect = <P extends object>(
           res.writeHead(302, { Location: '/login' })
           res.end()
         } else { // Client-side redirect
-          Router.push('/login')
+          window.location.href = '/login'
         }
         return {} // Return empty object for props
       }
