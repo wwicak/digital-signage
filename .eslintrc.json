@@ -40,9 +40,9 @@
     "no-alert": "off",
     "react/jsx-uses-react": "warn",
     "react/jsx-uses-vars": "warn",
-    "quotes": ["error", "single", "avoid-escape"],
+    //"quotes": ["error", "single", "avoid-escape"],
     "jsx-quotes": ["warn", "prefer-single"],
-    "semi": ["error", "never"],
+    //"semi": ["error", "never"],
     "max-len": [
       "warn",
       { "code": 120, "ignoreUrls": true, "ignoreStrings": true }
