@@ -7,9 +7,12 @@
  * Used for __tests__/testing-library.js
  * Learn more: https://github.com/testing-library/jest-dom
  */
-import '@testing-library/jest-dom'
+require("@testing-library/jest-dom");
 
 // Polyfill for TextEncoder and TextDecoder
-import { TextEncoder, TextDecoder } from 'util'
-global.TextEncoder = TextEncoder
-global.TextDecoder = TextDecoder
+const { TextEncoder, TextDecoder } = require("util");
+global.TextEncoder = TextEncoder;
+global.TextDecoder = TextDecoder;
+
+// Suppress Mongoose Jest warnings
+process.env.SUPPRESS_JEST_WARNINGS = "true";

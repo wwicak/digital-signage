@@ -2,7 +2,7 @@
  * @fileoverview Common helper functions for the API
  */
 
-import mongoose from 'mongoose'
+import mongoose from "mongoose";
 
 /*
  * Define a more specific type for Mongoose query results if possible,
@@ -29,22 +29,22 @@ export const findByIdAndSend = async (
   populateField?: string
 ): Promise<void> => {
   try {
-    let query = model.findById(id)
+    let query = model.findById(id);
     if (populateField) {
-      query = query.populate(populateField)
+      query = query.populate(populateField);
     }
-    const result: MongooseQueryResult = await query
+    const result: MongooseQueryResult = await query;
     if (!result) {
-      return res.status(404).json({ message: `${model.modelName} not found` })
+      return res.status(404).json({ message: `${model.modelName} not found` });
     }
-    res.json(result)
+    res.json(result);
   } catch (error: any) {
-    console.error(`Error finding ${model.modelName} by ID:`, error)
+    console.error(`Error finding ${model.modelName} by ID:`, error);
     res
       .status(500)
-      .json({ message: 'Error fetching data', error: error.message })
+      .json({ message: "Error fetching data", error: error.message });
   }
-}
+};
 
 /**
  * Finds all documents in a model and sends them as a JSON response.
@@ -61,19 +61,19 @@ export const findAllAndSend = async (
   queryOptions: object = {}
 ): Promise<void> => {
   try {
-    let query = model.find(queryOptions)
+    let query = model.find(queryOptions);
     if (populateField) {
-      query = query.populate(populateField)
+      query = query.populate(populateField);
     }
-    const results: MongooseQueryResult[] = await query
-    res.json(results)
+    const results: MongooseQueryResult[] = await query;
+    res.json(results);
   } catch (error: any) {
-    console.error(`Error finding all ${model.modelName}:`, error)
+    console.error(`Error finding all ${model.modelName}:`, error);
     res
       .status(500)
-      .json({ message: 'Error fetching data', error: error.message })
+      .json({ message: "Error fetching data", error: error.message });
   }
-}
+};
 
 /**
  * Creates a new document and sends it as a JSON response.
@@ -88,21 +88,21 @@ export const createAndSend = async (
   res: any // Should be Express.Response
 ): Promise<void> => {
   try {
-    const newItem = new model(data)
-    const result: MongooseQueryResult = await newItem.save()
-    res.status(201).json(result)
+    const newItem = new model(data);
+    const result: MongooseQueryResult = await newItem.save();
+    res.status(201).json(result);
   } catch (error: any) {
-    console.error(`Error creating ${model.modelName}:`, error)
-    if (error.name === 'ValidationError') {
+    console.error(`Error creating ${model.modelName}:`, error);
+    if (error.name === "ValidationError") {
       return res
         .status(400)
-        .json({ message: 'Validation Error', errors: error.errors })
+        .json({ message: "Validation Error", errors: error.errors });
     }
     res
       .status(500)
-      .json({ message: 'Error creating data', error: error.message })
+      .json({ message: "Error creating data", error: error.message });
   }
-}
+};
 
 /**
  * Updates a document by ID and sends the updated document as a JSON response.
@@ -130,25 +130,25 @@ export const findByIdAndUpdateAndSend = async (
       id,
       data,
       { new: true, runValidators: true }
-    )
+    );
 
     if (!updatedItem) {
-      return res.status(404).json({ message: `${model.modelName} not found` })
+      return res.status(404).json({ message: `${model.modelName} not found` });
     }
 
     if (populateField && updatedItem.populate) {
       // Call populate once, as it might return different things based on Mongoose version context
-      const populateCallResult = updatedItem.populate(populateField)
+      const populateCallResult = updatedItem.populate(populateField);
 
       /*
        * Check if execPopulate exists on the result of the first populate call (for older Mongoose)
        * or if populateCallResult itself is a promise (Mongoose 6+ on instances)
        */
-      if (typeof (populateCallResult as any).execPopulate === 'function') {
-        updatedItem = await (populateCallResult as any).execPopulate() // Older Mongoose
-      } else if (typeof (populateCallResult as any).then === 'function') {
+      if (typeof (populateCallResult as any).execPopulate === "function") {
+        updatedItem = await (populateCallResult as any).execPopulate(); // Older Mongoose
+      } else if (typeof (populateCallResult as any).then === "function") {
         // Mongoose 6+: populateCallResult is a Promise, await it.
-        updatedItem = (await populateCallResult) as any
+        updatedItem = (await populateCallResult) as any;
       }
       /*
        * If neither, it might be a case where populate() mutated updatedItem directly (older Mongoose with no promise/execPopulate)
@@ -157,19 +157,19 @@ export const findByIdAndUpdateAndSend = async (
        */
     }
 
-    res.json(updatedItem)
+    res.json(updatedItem);
   } catch (error: any) {
-    console.error(`Error updating ${model.modelName}:`, error)
-    if (error.name === 'ValidationError') {
+    console.error(`Error updating ${model.modelName}:`, error);
+    if (error.name === "ValidationError") {
       return res
         .status(400)
-        .json({ message: 'Validation Error', errors: error.errors })
+        .json({ message: "Validation Error", errors: error.errors });
     }
     res
       .status(500)
-      .json({ message: 'Error updating data', error: error.message })
+      .json({ message: "Error updating data", error: error.message });
   }
-}
+};
 
 /**
  * Deletes a document by ID and sends a success message as a JSON response.
@@ -184,18 +184,18 @@ export const findByIdAndDeleteAndSend = async (
   res: any // Should be Express.Response
 ): Promise<void> => {
   try {
-    const result: MongooseQueryResult = await model.findByIdAndDelete(id)
+    const result: MongooseQueryResult = await model.findByIdAndDelete(id);
     if (!result) {
-      return res.status(404).json({ message: `${model.modelName} not found` })
+      return res.status(404).json({ message: `${model.modelName} not found` });
     }
-    res.json({ message: `${model.modelName} deleted successfully` })
+    res.json({ message: `${model.modelName} deleted successfully` });
   } catch (error: any) {
-    console.error(`Error deleting ${model.modelName}:`, error)
+    console.error(`Error deleting ${model.modelName}:`, error);
     res
       .status(500)
-      .json({ message: 'Error deleting data', error: error.message })
+      .json({ message: "Error deleting data", error: error.message });
   }
-}
+};
 
 /**
  * Helper to handle SSE updates. (This is a placeholder, actual implementation might vary)
@@ -204,15 +204,15 @@ export const findByIdAndDeleteAndSend = async (
  * @param {any} data - The data to send with the event.
  */
 export const sendSseEvent = (res: any, eventName: string, data: any): void => {
-  // Ensure res is an SSE response stream
-  if (res.write && typeof res.flushHeaders === 'function') {
-    res.write(`event: ${eventName}\n`)
-    res.write(`data: ${JSON.stringify(data)}\n\n`)
-    // res.flushHeaders(); // May or may not be needed depending on server setup
+  // Check if this is an SSE response by looking for text/event-stream content type
+  if (res.getHeader && res.getHeader("Content-Type") === "text/event-stream") {
+    if (res.write) {
+      res.write(`event: ${eventName}\ndata: ${JSON.stringify(data)}\n\n`);
+    }
   } else {
-    console.warn('Attempted to send SSE event on a non-SSE response object.')
+    console.error("Attempted to send SSE event on a non-SSE response object.");
   }
-}
+};
 
 /*
  * You can add more common helper functions here as needed.
@@ -226,14 +226,14 @@ export interface ParsedQueryParams {
 }
 
 export const parseQueryParams = (query: any): ParsedQueryParams => {
-  const { page = 1, limit = 10, sort, ...filter } = query
+  const { page = 1, limit = 10, sort, ...filter } = query;
   const skip =
-    (parseInt(page as string, 10) - 1) * parseInt(limit as string, 10)
+    (parseInt(page as string, 10) - 1) * parseInt(limit as string, 10);
 
-  let sortOption = {}
+  let sortOption = {};
   if (sort) {
-    const sortParts = (sort as string).split(':')
-    sortOption = { [sortParts[0]]: sortParts[1] === 'desc' ? -1 : 1 }
+    const sortParts = (sort as string).split(":");
+    sortOption = { [sortParts[0]]: sortParts[1] === "desc" ? -1 : 1 };
   }
 
   return {
@@ -241,5 +241,5 @@ export const parseQueryParams = (query: any): ParsedQueryParams => {
     sort: sortOption,
     skip,
     limit: parseInt(limit as string, 10),
-  }
-}
+  };
+};

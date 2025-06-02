@@ -1,54 +1,54 @@
-import type { Config } from 'jest'
-import nextJest from 'next/jest'
+import type { Config } from "jest";
+import nextJest from "next/jest";
 
 const createJestConfig = nextJest({
   // Provide the path to your Next.js app to load next.config.js and .env files in your test environment
-  dir: './',
-})
+  dir: "./",
+});
 
 // Add any custom config to be passed to Jest
 const config: Config = {
-  coverageProvider: 'v8',
-  testEnvironment: 'jest-environment-jsdom',
+  coverageProvider: "v8",
+  testEnvironment: "node",
   // Add more setup options before each test is run
-  setupFilesAfterEnv: ['<rootDir>/jest.setup.js'],
+  setupFilesAfterEnv: ["<rootDir>/jest.setup.js"],
   // Exclude utility files from test discovery
   testPathIgnorePatterns: [
-    '<rootDir>/.next/',
-    '<rootDir>/node_modules/',
-    '<rootDir>/__tests__/utils/',
+    "<rootDir>/.next/",
+    "<rootDir>/node_modules/",
+    "<rootDir>/__tests__/utils/",
   ],
   // Transform ES modules in node_modules
-  transformIgnorePatterns: ['node_modules/(?!(nanoid|shortid)/)'],
+  transformIgnorePatterns: ["node_modules/(?!(nanoid|shortid)/)"],
   moduleNameMapper: {
     /*
      * Handle CSS imports (with CSS modules)
      * https://jestjs.io/docs/webpack#mocking-css-modules
      */
-    '^.+\\.module\\.(css|sass|scss)$': 'identity-obj-proxy',
+    "^.+\\.module\\.(css|sass|scss)$": "identity-obj-proxy",
 
     // Handle CSS imports (without CSS modules)
-    '^.+\\.(css|sass|scss)$': '<rootDir>/__mocks__/styleMock.js',
+    "^.+\\.(css|sass|scss)$": "<rootDir>/__mocks__/styleMock.js",
 
     /*
      * Handle image imports
      * https://jestjs.io/docs/webpack#handling-static-assets
      */
-    '^.+\\.(png|jpg|jpeg|gif|webp|avif|ico|bmp|svg)$/i':
-      '<rootDir>/__mocks__/fileMock.js',
+    "^.+\\.(png|jpg|jpeg|gif|webp|avif|ico|bmp|svg)$/i":
+      "<rootDir>/__mocks__/fileMock.js",
 
     // Handle module aliases
-    '^@/(.*)$': '<rootDir>/$1',
+    "^@/(.*)$": "<rootDir>/$1",
 
     // Mock problematic ES modules
-    '^nanoid$': '<rootDir>/__mocks__/nanoid.js',
-    '^shortid$': '<rootDir>/__mocks__/shortid.js',
+    "^nanoid$": "<rootDir>/__mocks__/nanoid.js",
+    "^shortid$": "<rootDir>/__mocks__/shortid.js",
   },
   // Add Babel preset for Next.js
   transform: {
-    '^.+\\.(js|jsx|ts|tsx)$': ['babel-jest', { presets: ['next/babel'] }],
+    "^.+\\.(js|jsx|ts|tsx)$": ["babel-jest", { presets: ["next/babel"] }],
   },
-}
+};
 
 // createJestConfig is exported this way to ensure that next/jest can load the Next.js config which is async
-export default createJestConfig(config)
+export default createJestConfig(config);

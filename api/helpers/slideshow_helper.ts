@@ -2,9 +2,9 @@
  * @fileoverview Slideshow helper functions for the API
  */
 
-import Slideshow, { ISlideshow } from '../models/Slideshow' // Assuming Slideshow.ts exports ISlideshow
-import Slide from '../models/Slide' // Assuming Slide.ts exports ISlide
-import mongoose from 'mongoose'
+import Slideshow, { ISlideshow } from "../models/Slideshow"; // Assuming Slideshow.ts exports ISlideshow
+import Slide from "../models/Slide"; // Assuming Slide.ts exports ISlide
+import mongoose from "mongoose";
 
 /**
  * Validates if all provided slide IDs exist.
@@ -13,23 +13,25 @@ import mongoose from 'mongoose'
  */
 export const validateSlidesExist = async (
   slideIds: (string | mongoose.Types.ObjectId)[]
-): Promise<boolean> => {
+): Promise<string[]> => {
   if (!slideIds || slideIds.length === 0) {
-    return true // No slides to validate, so considered valid
+    return []; // No slides to validate, return empty array
   }
   try {
     const objectIdSlideIds = slideIds.map((id) =>
-      typeof id === 'string' ? new mongoose.Types.ObjectId(id) : id
-    )
+      typeof id === "string" ? new mongoose.Types.ObjectId(id) : id
+    );
     const foundSlides = await Slide.find({
       _id: { $in: objectIdSlideIds },
-    }).select('_id')
-    return foundSlides.length === objectIdSlideIds.length
+    }).select("_id");
+    return foundSlides.map((slide) =>
+      (slide._id as mongoose.Types.ObjectId).toString()
+    );
   } catch (error) {
-    console.error('Error validating slides:', error)
-    return false // Error during validation, assume invalid
+    console.error("Error validating slides:", error);
+    return []; // Error during validation, return empty array
   }
-}
+};
 
 /**
  * Reorders slides within a slideshow.
@@ -44,7 +46,7 @@ export const reorderSlidesInSlideshow = async (
   oldIndex: number,
   newIndex: number
 ): Promise<ISlideshow> => {
-  const slides = slideshow.slides as mongoose.Types.ObjectId[] // Assuming slides are ObjectIds
+  const slides = slideshow.slides as mongoose.Types.ObjectId[]; // Assuming slides are ObjectIds
 
   if (
     oldIndex < 0 ||
@@ -52,19 +54,17 @@ export const reorderSlidesInSlideshow = async (
     newIndex < 0 ||
     newIndex >= slides.length
   ) {
-    throw new Error('Invalid slide indices for reordering.')
+    throw new Error("Invalid slide indices for reordering.");
   }
 
-  const [movedSlide] = slides.splice(oldIndex, 1)
-  slides.splice(newIndex, 0, movedSlide)
+  const [movedSlide] = slides.splice(oldIndex, 1);
+  slides.splice(newIndex, 0, movedSlide);
 
-  slideshow.slides = slides
-  /*
-   * Caller is responsible for saving the slideshow document
-   * await slideshow.save();
-   */
-  return slideshow
-}
+  slideshow.slides = slides;
+  // Save the slideshow document
+  await slideshow.save();
+  return slideshow;
+};
 
 /**
  * Populates the slides for a given slideshow.
@@ -75,29 +75,29 @@ export const populateSlideshowSlides = async (
   slideshow: ISlideshow | null
 ): Promise<ISlideshow | null> => {
   if (!slideshow) {
-    return null
+    return null;
   }
   try {
     // Check if slideshow.populate is a function before calling it
-    if (typeof slideshow.populate === 'function') {
+    if (typeof slideshow.populate === "function") {
       // Remove explicit generic type argument from populate
-      const populatedSlideshow = await slideshow.populate('slides')
-      return populatedSlideshow as ISlideshow // Cast if necessary, ensure ISlideshow expects populated slides
+      const populatedSlideshow = await slideshow.populate("slides");
+      return populatedSlideshow as ISlideshow; // Cast if necessary, ensure ISlideshow expects populated slides
     } else {
       /*
        * If not a full Mongoose document with populate, fetch and populate
        * Remove explicit generic type argument from populate
        */
       const foundSlideshow = await Slideshow.findById(slideshow._id).populate(
-        'slides'
-      )
-      return foundSlideshow
+        "slides"
+      );
+      return foundSlideshow;
     }
   } catch (error) {
-    console.error(`Error populating slideshow ${slideshow._id}:`, error)
-    return slideshow // Return original if population fails
+    console.error(`Error populating slideshow ${slideshow._id}:`, error);
+    return slideshow; // Return original if population fails
   }
-}
+};
 
 // Example of another helper if needed:
 /**
@@ -109,20 +109,20 @@ export const getAllSlideshowsWithPopulatedSlides = async (): Promise<
 > => {
   try {
     // Remove explicit generic type argument from populate
-    const slideshows = await Slideshow.find().populate('slides')
-    return slideshows as ISlideshow[] // Cast if necessary
+    const slideshows = await Slideshow.find().populate("slides");
+    return slideshows as ISlideshow[]; // Cast if necessary
   } catch (error) {
     console.error(
-      'Error fetching all slideshows with populated slides:',
+      "Error fetching all slideshows with populated slides:",
       error
-    )
-    return []
+    );
+    return [];
   }
-}
+};
 
-import Widget from '../models/Widget' // Assuming path to Widget model
-import Display from '../models/Display' // Assuming path to Display model
-import { WidgetType } from '../models/Widget' // Assuming WidgetType is in Widget model file
+import Widget from "../models/Widget"; // Assuming path to Widget model
+import Display from "../models/Display"; // Assuming path to Display model
+import { WidgetType } from "../models/Widget"; // Assuming WidgetType is in Widget model file
 
 /**
  * Finds all Display IDs that are currently showing a given slideshow.
@@ -136,42 +136,42 @@ export async function getDisplayIdsForSlideshow(
   try {
     // Ensure slideshowId is an ObjectId if it's a string
     const sId =
-      typeof slideshowId === 'string'
+      typeof slideshowId === "string"
         ? new mongoose.Types.ObjectId(slideshowId)
-        : slideshowId
+        : slideshowId;
 
     const widgets = await Widget.find({
       type: WidgetType.SLIDESHOW,
-      'data.slideshow_id': sId,
+      "data.slideshow_id": sId,
     })
-      .select('_id')
-      .lean()
+      .select("_id")
+      .lean();
 
     if (!widgets || widgets.length === 0) {
-      return []
+      return [];
     }
 
-    const widgetIds = widgets.map((widget) => widget._id)
+    const widgetIds = widgets.map((widget) => widget._id);
 
     const displays = await Display.find({
       widgets: { $in: widgetIds },
     })
-      .select('_id')
-      .lean()
+      .select("_id")
+      .lean();
 
     if (!displays || displays.length === 0) {
-      return []
+      return [];
     }
 
     // Using Set to ensure uniqueness and converting ObjectId to string
     const displayIds = Array.from(
       new Set(displays.map((display) => display._id.toString()))
-    )
+    );
 
-    return displayIds
+    return displayIds;
   } catch (error) {
-    console.error('Error fetching display IDs for slideshow:', error)
+    console.error("Error fetching display IDs for slideshow:", error);
     // Rethrow the error to be handled by the caller
-    throw error
+    throw error;
   }
 }
