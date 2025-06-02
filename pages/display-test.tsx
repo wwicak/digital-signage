@@ -146,15 +146,32 @@ const DisplayTestPage: React.FC = () => {
 
 // Wrapper component to inject mock data into the display context
 const TestDisplayWrapper: React.FC<{ displayData: any }> = ({ displayData }) => {
-  const { state, setId } = require('../contexts/DisplayContext').useDisplayContext()
+  const [isClient, setIsClient] = React.useState(false)
+  
+  // Check if we're in a browser environment after component mounts
+  React.useEffect(() => {
+    setIsClient(true)
+  }, [])
+  
+  // For SSR, render a loading state without using context hooks
+  if (!isClient) {
+    return <div>Loading display...</div>
+  }
+  
+  // Now we can safely render the client-side component
+  return <ClientSideDisplayWrapper displayData={displayData} />
+}
+
+// Separate client-side component that uses hooks
+const ClientSideDisplayWrapper: React.FC<{ displayData: any }> = ({ displayData }) => {
+  const { useDisplayContext } = require('../contexts/DisplayContext')
+  const { setId } = useDisplayContext()
   
   React.useEffect(() => {
     // Mock the display data by directly setting it in the context
     if (displayData) {
       // Simulate setting the ID and data
       setId(displayData._id)
-      // We would need to mock the data fetching here
-      // For now, we'll just render the display component
     }
   }, [displayData, setId])
 
