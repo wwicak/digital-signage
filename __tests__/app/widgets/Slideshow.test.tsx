@@ -17,19 +17,23 @@ const mockSlideRef: ISlideInstance = {
 
 jest.mock('../../../widgets/slideshow/src/Slide/Generic', () => require('react').forwardRef((props: any, ref: any) => {
   require('react').useImperativeHandle(ref, () => mockSlideRef)
-  return require('react').createElement('div', { 'data-testid': 'mock-generic-slide', 'data-slideid': props.slide._id, 'data-active': props.show }, `Generic: ${props.slide.data.title}`)
+  const text = props.slide.data.caption || props.slide.name || props.slide.data.url || 'Generic Slide'
+  return require('react').createElement('div', { 'data-testid': 'mock-generic-slide', 'data-slideid': props.slide._id, 'data-active': props.show }, `Generic: ${text}`)
 }))
 jest.mock('../../../widgets/slideshow/src/Slide/Photo', () => require('react').forwardRef((props: any, ref: any) => {
   require('react').useImperativeHandle(ref, () => mockSlideRef)
-  return require('react').createElement('div', { 'data-testid': 'mock-photo-slide', 'data-slideid': props.slide._id, 'data-active': props.show }, `Photo: ${props.slide.data.title}`)
+  const text = props.slide.data.caption || props.slide.name || 'Photo Slide'
+  return require('react').createElement('div', { 'data-testid': 'mock-photo-slide', 'data-slideid': props.slide._id, 'data-active': props.show }, `Photo: ${text}`)
 }))
 jest.mock('../../../widgets/slideshow/src/Slide/Youtube', () => require('react').forwardRef((props: any, ref: any) => {
   require('react').useImperativeHandle(ref, () => mockSlideRef)
-  return require('react').createElement('div', { 'data-testid': 'mock-youtube-slide', 'data-slideid': props.slide._id, 'data-active': props.show }, `Youtube: ${props.slide.data.title}`)
+  const text = props.slide.data.videoId || props.slide.name || 'Youtube Slide'
+  return require('react').createElement('div', { 'data-testid': 'mock-youtube-slide', 'data-slideid': props.slide._id, 'data-active': props.show }, `Youtube: ${text}`)
 }))
 jest.mock('../../../widgets/slideshow/src/Slide/Web', () => require('react').forwardRef((props: any, ref: any) => {
   require('react').useImperativeHandle(ref, () => mockSlideRef)
-  return require('react').createElement('div', { 'data-testid': 'mock-web-slide', 'data-slideid': props.slide._id, 'data-active': props.show }, `Web: ${props.slide.data.title}`)
+  const text = props.slide.data.url || props.slide.name || 'Web Slide'
+  return require('react').createElement('div', { 'data-testid': 'mock-web-slide', 'data-slideid': props.slide._id, 'data-active': props.show }, `Web: ${text}`)
 }))
 
 // Mock Progress component
