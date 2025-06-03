@@ -9,23 +9,14 @@ import Slide, { SlideType } from "../../../api/models/Slide";
 import Slideshow from "../../../api/models/Slideshow";
 import { jest } from "@jest/globals";
 
-// MongoDB connection string
-const MONGODB_URI =
-  "mongodb+srv://dimastw:dya0gVD7m9xJNJpo@cluster0.jez3b.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0";
+// Mock the models
+jest.mock("../../../api/models/Slide");
+jest.mock("../../../api/models/Slideshow");
 
 describe("Slide Helper Functions", () => {
-  beforeAll(async () => {
-    await mongoose.connect(MONGODB_URI);
-  });
-
-  afterAll(async () => {
-    await mongoose.connection.close();
-  });
-
-  afterEach(async () => {
-    // Clean up test data after each test
-    await Slide.deleteMany({});
-    await Slideshow.deleteMany({});
+  beforeEach(async () => {
+    // Reset mocks
+    jest.clearAllMocks();
   });
 
   describe("addSlideToSlideshows", () => {
