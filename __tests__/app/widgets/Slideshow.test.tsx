@@ -15,25 +15,25 @@ const mockSlideRef: ISlideInstance = {
   loadedPromise: Promise.resolve(),
 }
 
-jest.mock('../../../widgets/slideshow/src/Slide/Generic', () => React.forwardRef((props: any, ref: any) => {
-  React.useImperativeHandle(ref, () => mockSlideRef)
-  return <div data-testid='mock-generic-slide' data-slideid={props.slide._id} data-active={props.show}>Generic: {props.slide.data.title}</div>
+jest.mock('../../../widgets/slideshow/src/Slide/Generic', () => require('react').forwardRef((props: any, ref: any) => {
+  require('react').useImperativeHandle(ref, () => mockSlideRef)
+  return require('react').createElement('div', { 'data-testid': 'mock-generic-slide', 'data-slideid': props.slide._id, 'data-active': props.show }, `Generic: ${props.slide.data.title}`)
 }))
-jest.mock('../../../widgets/slideshow/src/Slide/Photo', () => React.forwardRef((props: any, ref: any) => {
-  React.useImperativeHandle(ref, () => mockSlideRef)
-  return <div data-testid='mock-photo-slide' data-slideid={props.slide._id} data-active={props.show}>Photo: {props.slide.data.title}</div>
+jest.mock('../../../widgets/slideshow/src/Slide/Photo', () => require('react').forwardRef((props: any, ref: any) => {
+  require('react').useImperativeHandle(ref, () => mockSlideRef)
+  return require('react').createElement('div', { 'data-testid': 'mock-photo-slide', 'data-slideid': props.slide._id, 'data-active': props.show }, `Photo: ${props.slide.data.title}`)
 }))
-jest.mock('../../../widgets/slideshow/src/Slide/Youtube', () => React.forwardRef((props: any, ref: any) => {
-  React.useImperativeHandle(ref, () => mockSlideRef)
-  return <div data-testid='mock-youtube-slide' data-slideid={props.slide._id} data-active={props.show}>Youtube: {props.slide.data.title}</div>
+jest.mock('../../../widgets/slideshow/src/Slide/Youtube', () => require('react').forwardRef((props: any, ref: any) => {
+  require('react').useImperativeHandle(ref, () => mockSlideRef)
+  return require('react').createElement('div', { 'data-testid': 'mock-youtube-slide', 'data-slideid': props.slide._id, 'data-active': props.show }, `Youtube: ${props.slide.data.title}`)
 }))
-jest.mock('../../../widgets/slideshow/src/Slide/Web', () => React.forwardRef((props: any, ref: any) => {
-  React.useImperativeHandle(ref, () => mockSlideRef)
-  return <div data-testid='mock-web-slide' data-slideid={props.slide._id} data-active={props.show}>Web: {props.slide.data.title}</div>
+jest.mock('../../../widgets/slideshow/src/Slide/Web', () => require('react').forwardRef((props: any, ref: any) => {
+  require('react').useImperativeHandle(ref, () => mockSlideRef)
+  return require('react').createElement('div', { 'data-testid': 'mock-web-slide', 'data-slideid': props.slide._id, 'data-active': props.show }, `Web: ${props.slide.data.title}`)
 }))
 
 // Mock Progress component
-jest.mock('./Progress', () => {
+jest.mock('../../../widgets/slideshow/src/Progress', () => {
   return jest.fn((props: any) => (
     <div data-testid='mock-progress' data-current={props.current} data-total={props.orderedSlides.length}>
       Progress: {props.current + 1}/{props.orderedSlides.length}
@@ -42,12 +42,12 @@ jest.mock('./Progress', () => {
 })
 
 // Mock getSlides action
-const actualMockGetSlides = jest.fn()
+const mockGetSlides = jest.fn()
 jest.mock('../../../actions/slide', () => {
   const originalModule = jest.requireActual('../../../actions/slide')
   return {
     ...originalModule,
-    getSlides: (...args: any[]) => actualMockGetSlides(...args),
+    getSlides: (...args: any[]) => mockGetSlides(...args),
   }
 })
 
@@ -78,11 +78,11 @@ describe('Slideshow', () => {
 
   beforeEach(() => {
     jest.useFakeTimers()
-    actualMockGetSlides.mockClear();
+    mockGetSlides.mockClear();
     (mockSlideRef.play as jest.Mock).mockClear();
     (mockSlideRef.stop as jest.Mock).mockClear();
     // Reset any other necessary mocks here
-    (jest.requireMock('./Progress') as jest.Mock).mockClear()
+    (jest.requireMock('../../../widgets/slideshow/src/Progress') as jest.Mock).mockClear()
   })
 
   afterEach(() => {
@@ -91,11 +91,11 @@ describe('Slideshow', () => {
   })
 
   test('renders loading state initially then fetches and displays slides', async () => {
-    actualMockGetSlides.mockResolvedValueOnce([...mockSlides])
+    mockGetSlides.mockResolvedValueOnce([...mockSlides])
     renderSlideshow()
 
     expect(screen.getByText('Loading Slideshow...')).toBeInTheDocument()
-    await waitFor(() => expect(actualMockGetSlides).toHaveBeenCalledWith('test-slideshow-id'))
+    await waitFor(() => expect(mockGetSlides).toHaveBeenCalledWith('test-slideshow-id'))
 
     await waitFor(() => {
       expect(screen.getByTestId('mock-photo-slide')).toBeInTheDocument()
@@ -106,7 +106,7 @@ describe('Slideshow', () => {
   })
 
   test('displays error message if getSlides fails', async () => {
-    actualMockGetSlides.mockRejectedValueOnce(new Error('Fetch failed'))
+    mockGetSlides.mockRejectedValueOnce(new Error('Fetch failed'))
     renderSlideshow()
 
     await waitFor(() => {
@@ -123,7 +123,7 @@ describe('Slideshow', () => {
   })
 
   test('displays message if slideshow has no slides', async () => {
-    actualMockGetSlides.mockResolvedValueOnce([])
+    mockGetSlides.mockResolvedValueOnce([])
     renderSlideshow()
     await waitFor(() => {
         expect(screen.getByText('This slideshow has no slides.')).toBeInTheDocument()
@@ -131,7 +131,7 @@ describe('Slideshow', () => {
   })
 
   test('cycles through slides', async () => {
-    actualMockGetSlides.mockResolvedValueOnce([...mockSlides])
+    mockGetSlides.mockResolvedValueOnce([...mockSlides])
     renderSlideshow()
 
     await waitFor(() => expect(screen.getByTestId('mock-photo-slide')).toHaveAttribute('data-active', 'true'))
@@ -160,7 +160,7 @@ describe('Slideshow', () => {
   })
 
   test('renders Progress component when show_progressbar is true (default)', async () => {
-    actualMockGetSlides.mockResolvedValueOnce([...mockSlides])
+    mockGetSlides.mockResolvedValueOnce([...mockSlides])
     renderSlideshow()
     await waitFor(() => expect(screen.getByTestId('mock-progress')).toBeInTheDocument())
     expect(screen.getByTestId('mock-progress')).toHaveAttribute('data-current', '0')
@@ -168,14 +168,14 @@ describe('Slideshow', () => {
   })
 
   test('does not render Progress component when show_progressbar is false', async () => {
-    actualMockGetSlides.mockResolvedValueOnce([...mockSlides])
+    mockGetSlides.mockResolvedValueOnce([...mockSlides])
     renderSlideshow({ data: { slideshow_id: defaultProps.data?.slideshow_id || null, show_progressbar: false } })
-    await waitFor(() => expect(actualMockGetSlides).toHaveBeenCalled()) // Ensure slides are loaded
+    await waitFor(() => expect(mockGetSlides).toHaveBeenCalled()) // Ensure slides are loaded
     expect(screen.queryByTestId('mock-progress')).not.toBeInTheDocument()
   })
 
   test('uses defaultDuration for slides with 0 or undefined duration', async () => {
-    actualMockGetSlides.mockResolvedValueOnce([mockSlides[1]]) // Only slide 2 with duration 0
+    mockGetSlides.mockResolvedValueOnce([mockSlides[1]]) // Only slide 2 with duration 0
     renderSlideshow()
 
     await waitFor(() => expect(screen.getByTestId('mock-youtube-slide')).toHaveAttribute('data-active', 'true'))
@@ -200,20 +200,20 @@ describe('Slideshow', () => {
   })
 
   test('re-fetches slides when slideshow_id changes', async () => {
-    actualMockGetSlides.mockResolvedValueOnce([...mockSlides])
+    mockGetSlides.mockResolvedValueOnce([...mockSlides])
     const { rerender } = renderSlideshow()
-    await waitFor(() => expect(actualMockGetSlides).toHaveBeenCalledWith('test-slideshow-id'))
-    expect(actualMockGetSlides).toHaveBeenCalledTimes(1)
+    await waitFor(() => expect(mockGetSlides).toHaveBeenCalledWith('test-slideshow-id'))
+    expect(mockGetSlides).toHaveBeenCalledTimes(1)
 
     const newSlides: ISlideData[] = [
       { _id: 's4', type: SlideType.IMAGE, duration: 5, data: { url: 'http://example.com/slide4.jpg', caption: 'New Slide 4' }, slideshow_ids: ['new-id'], is_enabled: true, name:'S4N', creator_id: 'user1' },
     ]
-    actualMockGetSlides.mockResolvedValueOnce(newSlides) // Set up for the next call
+    mockGetSlides.mockResolvedValueOnce(newSlides) // Set up for the next call
 
     rerender(<Slideshow {...defaultProps} data={{ ...defaultProps.data, slideshow_id: 'new-slideshow-id' }} />)
 
-    await waitFor(() => expect(actualMockGetSlides).toHaveBeenCalledWith('new-slideshow-id'))
-    expect(actualMockGetSlides).toHaveBeenCalledTimes(2)
+    await waitFor(() => expect(mockGetSlides).toHaveBeenCalledWith('new-slideshow-id'))
+    expect(mockGetSlides).toHaveBeenCalledTimes(2)
     await waitFor(() => expect(screen.getByTestId('mock-generic-slide')).toBeInTheDocument())
     expect(screen.getByText('Generic: New Slide 4')).toBeInTheDocument()
   })

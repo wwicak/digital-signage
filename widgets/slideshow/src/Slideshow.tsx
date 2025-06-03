@@ -192,22 +192,36 @@ class Slideshow extends Component<ISlideshowWidgetContentProps, ISlideshowWidget
     }
   }
 
-  getSlideComponent = React.useMemo(() => (type: string): ComponentType<any> => {
-    // Memoize the component selection to avoid repeated switch statements
+  // Memoize component selection for better performance in class components
+  private componentCache = new Map<string, ComponentType<any>>()
+  
+  getSlideComponent = (type: string): ComponentType<any> => {
+    // Use manual caching for performance optimization in class components
+    if (this.componentCache.has(type)) {
+      return this.componentCache.get(type)!
+    }
+    
+    let component: ComponentType<any>
     switch (type) {
       case 'photo':
-        return PhotoSlide
+        component = PhotoSlide
+        break
       case 'youtube':
-        return YoutubeSlide
+        component = YoutubeSlide
+        break
       case 'web':
-        return WebSlide
+        component = WebSlide
+        break
       // Add cases for 'announcement', 'list', 'congrats', 'image' etc. if they can be part of a slideshow
       default:
-        return GenericSlide // Fallback for unknown or generic types
+        component = GenericSlide // Fallback for unknown or generic types
     }
-  }, [])
+    
+    this.componentCache.set(type, component)
+    return component
+  }
 
-  renderSlide = React.useCallback((slide: ISlideData, index: number): JSX.Element => {
+  renderSlide = (slide: ISlideData, index: number): JSX.Element => {
     const { currentSlideIndex } = this.state
     const SlideComponent = this.getSlideComponent(slide.type)
 
@@ -220,7 +234,7 @@ class Slideshow extends Component<ISlideshowWidgetContentProps, ISlideshowWidget
         // Other props like isPreview can be passed here if needed
       />
     )
-  }, [this.state.currentSlideIndex, this.getSlideComponent])
+  }
 
   render() {
     const { data, defaultDuration = DEFAULT_SLIDE_DURATION_MS } = this.props
