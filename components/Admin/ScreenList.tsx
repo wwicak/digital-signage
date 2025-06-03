@@ -3,6 +3,7 @@ import ContentLoader from 'react-content-loader'
 
 import ScreenCard from './ScreenCard' // Assuming ScreenCard.tsx and its props
 import { useDisplays } from '../../hooks/useDisplays'
+import { useGlobalDisplaySSE } from '../../hooks/useGlobalDisplaySSE'
 
 // This component doesn't seem to receive any specific props from its parent in the current usage.
 export interface IScreenListProps {
@@ -15,9 +16,11 @@ export interface IScreenListProps {
 export interface IScreenListRef {
   refresh: () => void;
 }
-
 const ScreenList = forwardRef<IScreenListRef, IScreenListProps>((props, ref) => {
   const { data: screens, isLoading, error, refetch } = useDisplays()
+  
+  // Enable global SSE for real-time client connection updates
+  const { isConnected: sseConnected } = useGlobalDisplaySSE(true)
 
   // Expose refresh method via ref
   useImperativeHandle(ref, () => ({
@@ -25,7 +28,6 @@ const ScreenList = forwardRef<IScreenListRef, IScreenListProps>((props, ref) => 
       refetch()
     }
   }))
-
   if (error) {
     return <div className='error-message'>Failed to load screens. Please try again later.</div>
   }

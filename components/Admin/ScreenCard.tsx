@@ -19,6 +19,8 @@ const ScreenCardValueSchema = z.object({
   name: z.string().optional(), // Based on usage: value.name || 'Untitled Display'
   orientation: z.enum(['landscape', 'portrait']).optional(), // Display orientation
   widgets: z.array(z.union([z.string(), z.object({})])).optional(), // Based on usage: Array.isArray(value.widgets)
+  clientCount: z.number(), // Number of clients paired to this display
+  isOnline: z.boolean(), // Online status of the display
   /*
    * Add other fields from IDisplayData if they were directly used by ScreenCard and need validation.
    * For this component, only _id, name, and widgets structure seem directly accessed.
@@ -114,8 +116,9 @@ const ScreenCard: React.FC<IScreenCardProps> = ({ value, refresh = () => {} }) =
                 <div className='icon'>
                   <FontAwesomeIcon icon={faChromecast as IconProp} fixedWidth color='#878787' />
                 </div>
-                {/* TODO: Client count is hardcoded, should come from data if available */}
-                <span className='text'>1 client paired</span>
+                <span className='text'>
+                  {value?.clientCount || 0} client{(value?.clientCount || 0) !== 1 ? 's' : ''} paired
+                </span>
               </div>
               <div className='orientation-control'>
                 <OrientationPreview orientation={value?.orientation || null} />
@@ -130,9 +133,8 @@ const ScreenCard: React.FC<IScreenCardProps> = ({ value, refresh = () => {} }) =
                   <option value='portrait'>Portrait</option>
                 </select>
               </div>
-              <div className='online'>
-                {/* TODO: Online status is hardcoded, should come from data if available */}
-                <span className='text'>online</span>
+              <div className={`online ${value?.isOnline ? 'online-status' : 'offline-status'}`}>
+                <span className='text'>{value?.isOnline ? 'online' : 'offline'}</span>
               </div>
             </div>
           </div>
@@ -269,13 +271,26 @@ const ScreenCard: React.FC<IScreenCardProps> = ({ value, refresh = () => {} }) =
                 /* vertical-align: middle; */ /* Not needed with flex */
               }
 
-              .online {
+              .online-status {
                 color: #7bc043;
               }
 
-              .online::before {
+              .offline-status {
+                color: #dc3545;
+              }
+
+              .online-status::before {
                 content: '•';
                 color: #7bc043;
+                font-size: 32px; /* Visual size of dot */
+                line-height: 14px; /* Align with text */
+                margin-right: 4px; /* Spacing from text */
+                vertical-align: middle; /* Better alignment */
+              }
+
+              .offline-status::before {
+                content: '•';
+                color: #dc3545;
                 font-size: 32px; /* Visual size of dot */
                 line-height: 14px; /* Align with text */
                 margin-right: 4px; /* Spacing from text */
