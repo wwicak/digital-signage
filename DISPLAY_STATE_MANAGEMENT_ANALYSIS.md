@@ -10,8 +10,6 @@ The digital signage system currently uses a hybrid approach combining React Cont
 
 **Current Implementation:**
 
-- **Actions Layer:** [`actions/display.ts`](actions/display.ts:1) provides typed API functions (`getDisplays`, `addDisplay`, `getDisplay`, `updateDisplay`, `deleteDisplay`)
-- **Backend API:** [`api/routes/display.ts`](api/routes/display.ts:1) handles CRUD operations with SSE events for real-time updates
 - **SSE Manager:** [`api/sse_manager.ts`](api/sse_manager.ts:1) manages Server-Sent Events for real-time communication
 
 ### 2. State Management Layers

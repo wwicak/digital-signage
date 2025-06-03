@@ -1,30 +1,33 @@
-import { Response } from 'express'
-import { sendSseEvent } from './helpers/common_helper'
+import { Response } from "express";
+import { sendSseEvent } from "./helpers/common_helper";
 
-export let sseClients: Record<string, Response[]> = {}
+export let sseClients: Record<string, Response[]> = {};
 
 // Function for tests to inspect clients if needed
 export function getConnectedClients() {
-  return sseClients
+  return sseClients;
 }
 
 export function addClient(displayId: string, response: Response): void {
   if (!sseClients[displayId]) {
-    sseClients[displayId] = []
+    sseClients[displayId] = [];
   }
-  sseClients[displayId].push(response)
+  sseClients[displayId].push(response);
 }
 
 export function removeClient(displayId: string, response: Response): void {
   if (sseClients[displayId]) {
-    sseClients[displayId] = sseClients[displayId].filter(client => client !== response)
+    sseClients[displayId] = sseClients[displayId].filter(
+      (client) => client !== response
+    );
     if (sseClients[displayId].length === 0) {
-      delete sseClients[displayId]
+      delete sseClients[displayId];
     }
   }
 }
 
-export function initializeSSE(app: any): void { // app should be Express
+export function initializeSSE(app: any): void {
+  // app should be Express
   /*
    * In a real scenario, this would set up the app.get('/api/v1/events/:displayId', handler) route.
    * The handler would then use addClient and removeClient.
@@ -40,26 +43,33 @@ export function sendSSEUpdate(data: any): void {
    * This function is expected by tests to send an 'adminUpdate' event to ALL clients.
    * This is a broad cast to every client connected for any displayId.
    */
-  Object.values(sseClients).forEach(clientList => {
-    clientList.forEach(client => {
+  Object.values(sseClients).forEach((clientList) => {
+    clientList.forEach((client) => {
       try {
-        sendSseEvent(client, 'adminUpdate', data)
+        sendSseEvent(client, "adminUpdate", data);
       } catch (error) {
-        console.error(`[SSE] Error sending update to client: ${client}`, error)
+        console.error(`[SSE] Error sending update to client: ${client}`, error);
       }
-    })
-  })
+    });
+  });
 }
 
-
-export function sendEventToDisplay(displayId: string, eventName: string, data: any): void {
+export function sendEventToDisplay(
+  displayId: string,
+  eventName: string,
+  data: any
+): void {
   if (sseClients[displayId]) {
-    sseClients[displayId].forEach(client => {
-      sendSseEvent(client, eventName, data)
-    })
+    sseClients[displayId].forEach((client) => {
+      sendSseEvent(client, eventName, data);
+    });
   }
 }
 
+export function getConnectedClientCount(displayId: string): number {
+  return sseClients[displayId]?.length || 0;
+}
+
 export function resetSseClientsForTesting(): void {
-  sseClients = {}
+  sseClients = {};
 }

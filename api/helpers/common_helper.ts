@@ -243,3 +243,43 @@ export const parseQueryParams = (query: any): ParsedQueryParams => {
     limit: parseInt(limit as string, 10),
   };
 };
+
+/**
+ * Augments display objects with clientCount and isOnline properties
+ * @param {any[]} displays - Array of display objects
+ * @param {Function} getClientCount - Function to get client count for a display ID
+ * @returns {any[]} - Augmented display objects
+ */
+export const augmentDisplaysWithClientInfo = (
+  displays: any[],
+  getClientCount: (displayId: string) => number
+): any[] => {
+  return displays.map((display) => {
+    const displayObj = display.toObject ? display.toObject() : display;
+    const clientCount = getClientCount(displayObj._id.toString());
+    return {
+      ...displayObj,
+      clientCount,
+      isOnline: clientCount > 0,
+    };
+  });
+};
+
+/**
+ * Augments a single display object with clientCount and isOnline properties
+ * @param {any} display - Display object
+ * @param {Function} getClientCount - Function to get client count for a display ID
+ * @returns {any} - Augmented display object
+ */
+export const augmentDisplayWithClientInfo = (
+  display: any,
+  getClientCount: (displayId: string) => number
+): any => {
+  const displayObj = display.toObject ? display.toObject() : display;
+  const clientCount = getClientCount(displayObj._id.toString());
+  return {
+    ...displayObj,
+    clientCount,
+    isOnline: clientCount > 0,
+  };
+};

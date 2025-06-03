@@ -16,6 +16,9 @@ export interface IDisplay extends Document {
     color?: string;
     elements: string[]; // e.g., ['clock', 'weather', 'logo']
   };
+  // Dynamic properties (not stored in database)
+  clientCount?: number;
+  isOnline?: boolean;
 }
 
 const DisplaySchema = new Schema<IDisplay>(
@@ -99,6 +102,9 @@ export const DisplaySchemaZod = z.object({
   layout: z.string().default("spaced"),
   orientation: z.string().default("landscape"),
   statusBar: StatusBarSchemaZod.default({ enabled: true, elements: [] }), // Provide default for the object itself
+  // Dynamic properties (calculated at runtime)
+  clientCount: z.number().optional(),
+  isOnline: z.boolean().optional(),
   __v: z.number().optional(),
 });
 

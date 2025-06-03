@@ -209,25 +209,6 @@ sudo powermetrics --samplers smc -a --hide-cpu-duty-cycle -n 1
 # or use browser DevTools Network tab throttling
 ```
 
-### 4.3 Application Logging
-
-Add monitoring code to detect potential issues:
-
-```javascript
-// Add to Display.tsx for SSE monitoring
-useEffect(() => {
-  let reconnectCount = 0;
-  const originalSetupSSE = setupSSE;
-
-  const monitoredSetupSSE = () => {
-    console.log(`SSE Connection attempt: ${++reconnectCount}`);
-    originalSetupSSE();
-  };
-
-  return monitoredSetupSSE;
-}, []);
-```
-
 ## 5. Test Execution Protocol
 
 ### 5.1 Pre-Test Setup

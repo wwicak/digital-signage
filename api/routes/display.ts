@@ -20,8 +20,17 @@ import {
   updateWidgetsForDisplay,
   deleteWidgetsForDisplay,
 } from "../helpers/display_helper";
-import { sendSseEvent } from "../helpers/common_helper";
-import { addClient, removeClient, sendEventToDisplay } from "../sse_manager";
+import {
+  sendSseEvent,
+  augmentDisplaysWithClientInfo,
+  augmentDisplayWithClientInfo,
+} from "../helpers/common_helper";
+import {
+  addClient,
+  removeClient,
+  sendEventToDisplay,
+  getConnectedClientCount,
+} from "../sse_manager";
 
 const router: Router = express.Router();
 
@@ -70,14 +79,28 @@ const ensureAuthenticated = (
 };
 
 // GET all displays for the logged-in user
-router.get("/", ensureAuthenticated, (req: Request, res: Response) => {
+router.get("/", ensureAuthenticated, async (req: Request, res: Response) => {
   const user = req.user as IUser;
   if (!user || !user._id) {
     res.status(400).json({ message: "User information not found." });
     return;
   }
-  // findAllAndSend will handle the response
-  findAllAndSend(Display, res, "widgets", { creator_id: user._id });
+
+  try {
+    const displays = await Display.find({ creator_id: user._id }).populate(
+      "widgets"
+    );
+    const augmentedDisplays = augmentDisplaysWithClientInfo(
+      displays,
+      getConnectedClientCount
+    );
+    res.json(augmentedDisplays);
+  } catch (error: any) {
+    console.error("Error fetching displays:", error);
+    res
+      .status(500)
+      .json({ message: "Error fetching displays", error: error.message });
+  }
 });
 
 // GET a specific display by ID
@@ -101,7 +124,11 @@ router.get(
           .json({ message: "Display not found or not authorized." });
         return;
       }
-      res.json(display);
+      const augmentedDisplay = augmentDisplayWithClientInfo(
+        display,
+        getConnectedClientCount
+      );
+      res.json(augmentedDisplay);
     } catch (err: any) {
       res
         .status(500)
