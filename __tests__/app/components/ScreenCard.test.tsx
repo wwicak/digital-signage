@@ -67,7 +67,6 @@ jest.mock('@fortawesome/react-fontawesome', () => ({
   FontAwesomeIcon: jest.fn((props) => <i data-testid={`mock-fa-icon-${props.icon.iconName}`} />),
 }))
 
-
 const mockRefresh = jest.fn()
 
 const defaultScreenValue: IDisplayData = {
@@ -78,6 +77,8 @@ const defaultScreenValue: IDisplayData = {
     { _id: 'w2', name: 'Widget 2', type: 'image', x: 1, y: 0, w: 1, h: 1, data: {} }
   ],
   creator_id: 'user1',
+  clientCount: 1,
+  isOnline: true,
 }
 
 const renderScreenCard = (props?: Partial<IScreenCardProps>) => {

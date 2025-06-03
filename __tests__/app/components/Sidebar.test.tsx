@@ -2,7 +2,8 @@ import React from 'react'
 import { render, screen, fireEvent, waitFor, within } from '@testing-library/react' // Import within
 import '@testing-library/jest-dom'
 import { NextRouter } from 'next/router'
-import SidebarComponentWithRouter, { ISidebarProps } from '../../../components/Admin/Sidebar'
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import Sidebar, { ISidebarProps } from '../../../components/Admin/Sidebar'
 import { IDisplayData } from '../../../actions/display'
 
 // --- Mocks ---
@@ -37,28 +38,13 @@ let currentMockRouterState: NextRouter = {
 
 jest.mock('next/router', () => ({
   __esModule: true,
-  useRouter: () => currentMockRouterState,
-  withRouter: (Component: any) => {
-    const WrappedComponent = (props: any) => {
-      return <Component {...props} router={props.router || currentMockRouterState} />
-    }
-    WrappedComponent.displayName = `withRouter(${Component.displayName || Component.name || 'Component'})`
-    return WrappedComponent
-  },
-  default: {
-    get push() { return currentMockRouterState.push },
-    get replace() { return currentMockRouterState.replace },
-    get reload() { return currentMockRouterState.reload },
-    get route() { return currentMockRouterState.route },
-    get pathname() { return currentMockRouterState.pathname },
-    get query() { return currentMockRouterState.query },
-    get asPath() { return currentMockRouterState.asPath },
-    events: {
-      on: jest.fn(),
-      off: jest.fn(),
-      emit: jest.fn(),
-    },
-  },
+  useRouter: jest.fn(),
+}))
+
+jest.mock('next/navigation', () => ({
+  __esModule: true,
+  useRouter: jest.fn(),
+  usePathname: jest.fn(),
 }))
 
 jest.mock('next/link', () => {
@@ -89,7 +75,7 @@ jest.mock('../../../actions/display', () => ({
   getDisplays: jest.fn(),
 }))
 
-jest.mock('../../components/DropdownButton', () => {
+jest.mock('../../../components/DropdownButton', () => {
   const InnerMockDropdownButton = jest.fn(({ children, onSelect, choices, style, menuStyle, ...rest }) => (
     <div data-testid='mock-dropdown-button' style={style} {...rest}>
       <div data-testid='dropdown-button-children-container'>{children}</div>
@@ -137,7 +123,18 @@ const initialMockRouterState: NextRouter = {
 
 const renderSidebar = (props: Partial<ISidebarProps> = {}, routerOverrides: Partial<NextRouter> = {}) => {
   currentMockRouterState = { ...initialMockRouterState, ...routerOverrides, push:mockRouterPush, replace:mockRouterReplace, reload:mockRouterReload, events: {...initialMockRouterState.events}, back: jest.fn(), beforePopState: jest.fn(), prefetch: jest.fn(() => Promise.resolve()) }
-  return render(<SidebarComponentWithRouter router={currentMockRouterState} {...props} />)
+  const queryClient = new QueryClient({
+    defaultOptions: {
+      queries: {
+        retry: false,
+      },
+    },
+  })
+  return render(
+    <QueryClientProvider client={queryClient}>
+      <Sidebar {...props} />
+    </QueryClientProvider>
+  )
 }
 
 describe('Sidebar Component', () => {
@@ -149,10 +146,10 @@ describe('Sidebar Component', () => {
   beforeEach(() => {
     jest.clearAllMocks()
 
-    MockedDropdownButton = require('../DropdownButton').default
-    logoutMock = require('../../helpers/auth').logout
-    useDisplayContextMock = require('../../contexts/DisplayContext').useDisplayContext
-    getDisplaysMock = require('../../actions/display').getDisplays
+    MockedDropdownButton = require('../../../components/DropdownButton').default
+    logoutMock = require('../../../helpers/auth').logout
+    useDisplayContextMock = require('../../../contexts/DisplayContext').useDisplayContext
+    getDisplaysMock = require('../../../actions/display').getDisplays
 
     currentMockRouterState = {
         ...initialMockRouterState,
@@ -165,14 +162,20 @@ describe('Sidebar Component', () => {
         prefetch: jest.fn(() => Promise.resolve())
     }
 
+    // Setup router mocks
+    const { useRouter } = require('next/navigation')
+    const { usePathname } = require('next/navigation')
+    useRouter.mockReturnValue(currentMockRouterState)
+    usePathname.mockReturnValue('/')
+
     useDisplayContextMock.mockReturnValue({
       state: { id: 'display1', name: 'Display One' },
       setId: mockSetIdGlobal,
     })
 
     getDisplaysMock.mockResolvedValue([
-      { _id: 'display1', name: 'Display One', creator_id: 'user1', widgets: [] },
-      { _id: 'display2', name: 'Display Two', creator_id: 'user1', slideshow_id: 's2', widgets: [] },
+      { _id: 'display1', name: 'Display One', creator_id: 'user1', widgets: [], clientCount: 0, isOnline: true },
+      { _id: 'display2', name: 'Display Two', creator_id: 'user1', widgets: [], clientCount: 1, isOnline: false },
     ] as IDisplayData[])
   })
 
@@ -195,8 +198,8 @@ describe('Sidebar Component', () => {
   describe('Logged In State', () => {
     const loggedInProps: Partial<ISidebarProps> = { loggedIn: true }
     const initialDisplays: IDisplayData[] = [
-      { _id: 'display1', name: 'Display One', creator_id: 'user1', widgets: [] },
-      { _id: 'display2', name: 'Display Two', creator_id: 'user1', widgets: [] },
+      { _id: 'display1', name: 'Display One', creator_id: 'user1', widgets: [], clientCount: 0, isOnline: true },
+      { _id: 'display2', name: 'Display Two', creator_id: 'user1', widgets: [], clientCount: 1, isOnline: false },
     ]
 
     test('renders admin menu items with correct paths using context displayId', async () => {
@@ -263,7 +266,9 @@ describe('Sidebar Component', () => {
           state: { id: 'display1', name: 'Display One' },
           setId: mockSetIdGlobal,
       })
-      renderSidebar(loggedInProps, { pathname: activePath })
+      const { usePathname } = require('next/navigation')
+      usePathname.mockReturnValue(activePath)
+      renderSidebar(loggedInProps)
 
       await waitFor(() => expect(screen.getByText('Layout').closest('li')).toHaveClass('active'))
       expect(screen.getByText('Screens').closest('li')).not.toHaveClass('active')
