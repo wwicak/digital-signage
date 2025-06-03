@@ -22,12 +22,13 @@ jest.mock('next/router', () => ({
 
 
 jest.mock('next/link', () => {
+    const React = require('react')
     return ({ children, href, ...rest }: { children: React.ReactNode, href: string, [key: string]: any }) => {
         // If the child is an <a> tag, clone it and add href. Otherwise, wrap with <a>.
-        if (React.isValidElement(children) && children.type === 'a') {
-            return React.cloneElement(children as React.ReactElement<any>, { href, ...rest, ...(children.props || {}) })
+        if (React.isValidElement(children) && (children as any).type === 'a') {
+            return React.cloneElement(children as React.ReactElement<any>, { href, ...rest, ...((children as any).props || {}) })
         }
-        return <a href={href} {...rest}>{children}</a>
+        return React.createElement('a', { href, ...rest }, children)
     }
 })
 
