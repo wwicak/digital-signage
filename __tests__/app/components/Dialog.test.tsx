@@ -11,18 +11,18 @@ jest.mock('../../../components/ui/dialog-legacy', () => {
   const mockLegacyOpen = jest.fn()
   const mockLegacyClose = jest.fn()
 
-  const MockDialogLegacyComponent = React.forwardRef<DialogWrapperMethods, any>(
+  const MockDialogLegacyComponent = require('react').forwardRef(
     ({ children, title, description, className }, ref) => {
-      React.useImperativeHandle(ref, () => ({
+      require('react').useImperativeHandle(ref, () => ({
         open: mockLegacyOpen,
         close: mockLegacyClose,
       }))
-      return (
-        <div data-testid='mock-dialog-legacy' className={className}>
-          {title && <h2 data-testid='mock-dialog-title'>{title}</h2>}
-          {description && <p data-testid='mock-dialog-description'>{description}</p>}
-          {children}
-        </div>
+      return require('react').createElement(
+        'div',
+        { 'data-testid': 'mock-dialog-legacy', className },
+        title && require('react').createElement('h2', { 'data-testid': 'mock-dialog-title' }, title),
+        description && require('react').createElement('p', { 'data-testid': 'mock-dialog-description' }, description),
+        children
       )
     }
   )
@@ -45,7 +45,7 @@ describe('Dialog Component (Wrapper)', () => {
   beforeEach(() => {
     jest.clearAllMocks()
     // Access the mock functions from the mocked module
-    const DialogLegacyMock = require('./ui/dialog-legacy').default
+    const DialogLegacyMock = require('../../../components/ui/dialog-legacy').default
     mockLegacyOpen = (DialogLegacyMock as any).mockOpen
     mockLegacyClose = (DialogLegacyMock as any).mockClose
   })

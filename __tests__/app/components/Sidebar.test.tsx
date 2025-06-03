@@ -89,7 +89,7 @@ jest.mock('../../../actions/display', () => ({
   getDisplays: jest.fn(),
 }))
 
-jest.mock('../DropdownButton', () => {
+jest.mock('../../components/DropdownButton', () => {
   const InnerMockDropdownButton = jest.fn(({ children, onSelect, choices, style, menuStyle, ...rest }) => (
     <div data-testid='mock-dropdown-button' style={style} {...rest}>
       <div data-testid='dropdown-button-children-container'>{children}</div>

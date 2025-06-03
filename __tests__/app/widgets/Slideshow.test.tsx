@@ -27,7 +27,7 @@ jest.mock('../../../widgets/slideshow/src/Slide/Youtube', () => React.forwardRef
   React.useImperativeHandle(ref, () => mockSlideRef)
   return <div data-testid='mock-youtube-slide' data-slideid={props.slide._id} data-active={props.show}>Youtube: {props.slide.data.title}</div>
 }))
-jest.mock('./Slide/Web', () => React.forwardRef((props: any, ref: any) => {
+jest.mock('../../../widgets/slideshow/src/Slide/Web', () => React.forwardRef((props: any, ref: any) => {
   React.useImperativeHandle(ref, () => mockSlideRef)
   return <div data-testid='mock-web-slide' data-slideid={props.slide._id} data-active={props.show}>Web: {props.slide.data.title}</div>
 }))
