@@ -12,6 +12,12 @@ export interface IReservation extends Document {
   agenda_meeting: string;
   creation_date: Date;
   last_update: Date;
+  // External calendar integration fields
+  externalCalendarEventId?: string;
+  externalCalendarId?: string;
+  sourceCalendarType?: "google" | "outlook" | "internal";
+  lastSyncedAt?: Date;
+  isExternallyManaged?: boolean;
 }
 
 const ReservationSchema = new Schema<IReservation>(
@@ -57,6 +63,27 @@ const ReservationSchema = new Schema<IReservation>(
       type: Date,
       default: Date.now,
     },
+    // External calendar integration fields
+    externalCalendarEventId: {
+      type: String,
+      trim: true,
+    },
+    externalCalendarId: {
+      type: String,
+      trim: true,
+    },
+    sourceCalendarType: {
+      type: String,
+      enum: ["google", "outlook", "internal"],
+      default: "internal",
+    },
+    lastSyncedAt: {
+      type: Date,
+    },
+    isExternallyManaged: {
+      type: Boolean,
+      default: false,
+    },
   },
   {
     timestamps: { createdAt: "creation_date", updatedAt: "last_update" },
@@ -81,6 +108,10 @@ ReservationSchema.pre("save", function (next) {
 // Index for efficient querying by room and time
 ReservationSchema.index({ room_id: 1, start_time: 1, end_time: 1 });
 
+// Additional indexes for external calendar integration
+ReservationSchema.index({ externalCalendarEventId: 1 });
+ReservationSchema.index({ sourceCalendarType: 1, isExternallyManaged: 1 });
+
 const ReservationModel: Model<IReservation> = mongoose.model<IReservation>(
   "Reservation",
   ReservationSchema
@@ -99,6 +130,14 @@ export const ReservationSchemaZod = z
     agenda_meeting: z.string().optional(),
     creation_date: z.date().optional(), // Defaulted by Mongoose
     last_update: z.date().optional(), // Defaulted by Mongoose
+    // External calendar integration fields
+    externalCalendarEventId: z.string().optional(),
+    externalCalendarId: z.string().optional(),
+    sourceCalendarType: z
+      .enum(["google", "outlook", "internal"])
+      .default("internal"),
+    lastSyncedAt: z.date().optional(),
+    isExternallyManaged: z.boolean().default(false),
     __v: z.number().optional(),
   })
   .refine((data) => data.end_time > data.start_time, {

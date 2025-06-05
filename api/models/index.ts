@@ -43,3 +43,7 @@ export { RoomSchemaZod } from "./Room";
 export { default as Reservation } from "./Reservation";
 export type { IReservation } from "./Reservation";
 export { ReservationSchemaZod } from "./Reservation";
+
+export { default as UserCalendarLink } from "./UserCalendarLink";
+export type { IUserCalendarLink } from "./UserCalendarLink";
+export { UserCalendarLinkSchemaZod } from "./UserCalendarLink";
