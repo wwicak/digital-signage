@@ -17,7 +17,9 @@
     "test": "jest --coverage",
     "update": "git pull && bun install && bun run build",
     "heroku-postbuild": "next build",
-    "prepare": "husky"
+    "prepare": "husky",
+    "seed:admin": "bun run create-admin.ts",
+    "seed:meeting-rooms": "bun run scripts/seedMeetingAdmin.ts"
   },
   "type": "git",
   "url": "git+https://github.com/alexander-e-andrews/CSSeniorDisplayProject.git",
@@ -88,6 +90,8 @@
     "styled-components": "^6.1.8",
     "styled-jsx": "^5.1.7",
     "superagent": "^5.0.5",
+    "swagger-jsdoc": "^6.2.8",
+    "swagger-ui-express": "^5.0.1",
     "tailwind-merge": "^3.3.0",
     "tailwindcss-animate": "^1.0.7",
     "turbo": "latest",
@@ -124,6 +128,8 @@
     "@types/styled-jsx": "^2.2.9",
     "@types/superagent": "^8.1.9",
     "@types/supertest": "^6.0.3",
+    "@types/swagger-jsdoc": "^6.0.4",
+    "@types/swagger-ui-express": "^4.1.8",
     "@types/uuid": "^10.0.0",
     "@types/webfontloader": "^1.6.38",
     "@typescript-eslint/eslint-plugin": "^7.18.0",
