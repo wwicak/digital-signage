@@ -11,6 +11,8 @@ import buildingRoutes from "./buildings";
 import roomRoutes from "./rooms";
 import reservationRoutes from "./reservations";
 import scheduleRoutes from "./schedule";
+// Import calendar integration routes
+import calendarIntegrationRoutes from "./calendar_integration";
 
 const router: Router = express.Router();
 
@@ -34,5 +36,8 @@ router.use("/buildings", buildingRoutes);
 router.use("/rooms", roomRoutes);
 router.use("/reservations", reservationRoutes);
 router.use("/schedule", scheduleRoutes);
+
+// Mount calendar integration routes
+router.use("/calendar", calendarIntegrationRoutes);
 
 export default router;

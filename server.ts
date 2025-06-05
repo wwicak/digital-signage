@@ -9,6 +9,8 @@ import bodyParser from "body-parser";
 import * as Keys from "./keys";
 import User from "./api/models/User";
 import { setupSwagger } from "./api/swagger";
+import { initializeOutlookAuth } from "./api/auth/outlook_strategy";
+import { initializeGoogleAuth } from "./api/auth/google_strategy";
 
 const dev: boolean = Keys.ENVIRON !== "PROD";
 const app = Next({ dev, dir: "." });
@@ -51,6 +53,20 @@ server.use(
 passport.use(User.createStrategy());
 passport.serializeUser(User.serializeUser());
 passport.deserializeUser(User.deserializeUser());
+
+// Initialize calendar OAuth strategies
+try {
+  initializeOutlookAuth();
+} catch (error) {
+  console.warn("Outlook OAuth strategy initialization failed:", error);
+}
+
+try {
+  initializeGoogleAuth();
+} catch (error) {
+  console.warn("Google OAuth strategy initialization failed:", error);
+}
+
 server.use(passport.initialize());
 server.use(passport.session());
 
