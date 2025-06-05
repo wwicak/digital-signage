@@ -35,10 +35,18 @@ node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
 
 ## Authentication & OAuth
 
+### Google Calendar Integration
+
 - `GOOGLE_CLIENT_ID` - Google OAuth client ID (required for Google Calendar integration)
 - `GOOGLE_CLIENT_SECRET` - Google OAuth client secret (required for Google Calendar integration)
+- `GOOGLE_CALLBACK_URL` - OAuth callback URL for Google authentication (optional, defaults to `/api/v1/calendar/google/callback`)
+
+### Microsoft Outlook Integration
+
 - `OUTLOOK_CLIENT_ID` - Microsoft OAuth client ID (required for Outlook Calendar integration)
 - `OUTLOOK_CLIENT_SECRET` - Microsoft OAuth client secret (required for Outlook Calendar integration)
+- `OUTLOOK_TENANT_ID` - Microsoft Azure Tenant ID (optional, defaults to 'common' for multi-tenant)
+- `OUTLOOK_CALLBACK_URL` - OAuth callback URL for Outlook authentication (optional, defaults to `/api/v1/calendar/outlook/callback`)
 
 ## Session Management
 
