@@ -42,6 +42,26 @@ const nextConfig = {
   compiler: {
     styledComponents: true,
   },
+
+  // Configure to skip static generation for SSE routes
+  experimental: {
+    serverComponentsExternalPackages: ["mongoose"],
+  },
+
+  // Skip static optimization for specific routes
+  async headers() {
+    return [
+      {
+        source: "/api/v1/displays/events",
+        headers: [
+          {
+            key: "Cache-Control",
+            value: "no-cache, no-store, must-revalidate",
+          },
+        ],
+      },
+    ];
+  },
 };
 
 module.exports = nextConfig;

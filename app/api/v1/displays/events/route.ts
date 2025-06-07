@@ -1,6 +1,23 @@
 import { NextRequest } from "next/server";
 
 export async function GET(request: NextRequest) {
+  // During build time, return a simple response to avoid timeout
+  if (process.env.NODE_ENV === "production" && !globalThis.fetch) {
+    return new Response("Build-time placeholder", {
+      status: 200,
+      headers: { "Content-Type": "text/plain" },
+    });
+  }
+
+  // Check if this is a build-time request (no real client connection)
+  const userAgent = request.headers.get("user-agent") || "";
+  if (userAgent.includes("Next.js") || userAgent === "") {
+    return new Response("SSE endpoint - not available during build", {
+      status: 200,
+      headers: { "Content-Type": "text/plain" },
+    });
+  }
+
   // Set headers for SSE
   const headers = new Headers({
     "Content-Type": "text/event-stream",
@@ -43,3 +60,7 @@ export async function GET(request: NextRequest) {
 
   return new Response(stream, { headers });
 }
+
+// Mark this route as dynamic to prevent static optimization
+export const dynamic = "force-dynamic";
+// Using default runtime (compatible with Bun)

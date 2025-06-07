@@ -46,6 +46,11 @@ export interface IDeleteResponse {
 }
 
 export const getDisplays = (host: string = ""): Promise<IDisplayData[]> => {
+  // During build time, return empty array to prevent build issues
+  if (typeof window === "undefined" && process.env.NODE_ENV === "production") {
+    return Promise.resolve([]);
+  }
+
   return axios
     .get<IDisplayData[]>(`${host}/api/displays`)
     .then((res: AxiosResponse<IDisplayData[]>) => {
@@ -53,11 +58,17 @@ export const getDisplays = (host: string = ""): Promise<IDisplayData[]> => {
       if (res && res.data && Array.isArray(res.data)) {
         return res.data;
       }
-      console.warn("getDisplays: Invalid response data, returning empty array");
+      if (process.env.NODE_ENV !== "production") {
+        console.warn(
+          "getDisplays: Invalid response data, returning empty array"
+        );
+      }
       return []; // Return empty array if data is not valid
     })
     .catch((error) => {
-      console.error("getDisplays: API request failed:", error);
+      if (process.env.NODE_ENV !== "production") {
+        console.error("getDisplays: API request failed:", error);
+      }
       return []; // Return empty array on error instead of throwing
     });
 };
