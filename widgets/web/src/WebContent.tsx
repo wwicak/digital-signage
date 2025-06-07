@@ -32,7 +32,7 @@ const DEFAULT_ALLOW_INTERACTION = false
 const WebContent: React.FC<IWebContentProps> = React.memo(({ data, isPreview }) => {
   const [iframeKey, setIframeKey] = useState<number>(Date.now())
   const iframeRef = useRef<HTMLIFrameElement>(null)
-  const refreshTimerRef = useRef<NodeJS.Timeout | null>(null)
+  const refreshTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   const {
     title = null,

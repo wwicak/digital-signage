@@ -35,7 +35,7 @@ const AutoScroll: React.FC<IAutoScrollProps> = ({
   ...restDivProps
 }) => {
   const containerRef = useRef<HTMLDivElement>(null)
-  const intervalIdRef = useRef<NodeJS.Timeout | null>(null)
+  const intervalIdRef = useRef<ReturnType<typeof setInterval> | null>(null)
   const isHoveringRef = useRef<boolean>(false)
   const currentScrollTargetRef = useRef<'bottom' | 'top'>('bottom') // To track next scroll direction
 

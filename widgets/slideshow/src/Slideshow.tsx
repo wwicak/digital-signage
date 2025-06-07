@@ -52,7 +52,7 @@ type ISlideshowWidgetContentState = z.infer<typeof SlideshowWidgetContentStateSc
 
 class Slideshow extends Component<ISlideshowWidgetContentProps, ISlideshowWidgetContentState> {
   private slideRefs: Array<ISlideInstance | null> = []
-  private slideAdvanceTimeoutId: NodeJS.Timeout | null = null
+  private slideAdvanceTimeoutId: ReturnType<typeof setTimeout> | null = null
   private isMounted: boolean = false
 
   constructor(props: ISlideshowWidgetContentProps) {
