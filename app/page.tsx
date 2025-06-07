@@ -59,7 +59,7 @@ export default async function HomePage() {
         </Link>
         <div style={{ margin: 20 }}>
           <DropdownButton
-            icon='chevron-down'
+            icon='caret-down'
             text='Display Home'
             style={styles.btn}
             onSelect={navigateToDisplay}

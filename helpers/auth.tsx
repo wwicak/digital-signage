@@ -166,29 +166,10 @@ export const protect = <P extends object>(
             displayId = displayIdFromQuery
         }
 
+        // Skip fetching displays in the HOC to avoid circular dependency
+        // Let individual pages handle display fetching after authentication
         if (!displayId) {
-          try {
-            const displayList: IDisplayData[] = await getDisplays(host) // getDisplays should be callable server-side
-            if (displayList && displayList.length > 0 && displayList[0]._id) {
-              displayId = displayList[0]._id
-            } else {
-                // Handle case where no displays are found, maybe redirect to a setup page or error
-                console.warn('No displays found for user or default.')
-                // displayId remains undefined
-            }
-          } catch (error) {
-            console.error('Failed to fetch displays in HOC:', error)
-            // displayId remains undefined
-          }
-        }
-        
-        if (!displayId) {
-            /*
-             * Fallback if no displayId could be determined (e.g. no displays exist)
-             * This might mean redirecting to a page where user can create a display, or an error page.
-             * For now, we'll let it pass as undefined, but the page might need to handle this.
-             */
-            console.warn('ProtectedPage HOC: displayId could not be determined.')
+            console.log('ProtectedPage HOC: No displayId in query, will be handled by the page component.')
         }
 
         // Call wrapped component's getInitialProps if it exists

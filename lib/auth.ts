@@ -151,24 +151,54 @@ export function withAuth(
  * Set authentication cookie
  */
 export function setAuthCookie(res: any, token: string) {
-  res.setHeader(
-    "Set-Cookie",
-    `auth-token=${token}; HttpOnly; Path=/; Max-Age=${
-      7 * 24 * 60 * 60
-    }; SameSite=Strict${
-      process.env.NODE_ENV === "production" ? "; Secure" : ""
-    }`
-  );
+  // Check if this is a NextResponse (App Router) or ServerResponse (Pages Router)
+  if (res.cookies && typeof res.cookies.set === "function") {
+    // App Router - use NextResponse.cookies.set()
+    res.cookies.set("auth-token", token, {
+      httpOnly: true,
+      path: "/",
+      maxAge: 7 * 24 * 60 * 60, // 7 days in seconds
+      sameSite: "strict",
+      secure: process.env.NODE_ENV === "production",
+    });
+  } else if (res.setHeader && typeof res.setHeader === "function") {
+    // Pages Router - use setHeader
+    res.setHeader(
+      "Set-Cookie",
+      `auth-token=${token}; HttpOnly; Path=/; Max-Age=${
+        7 * 24 * 60 * 60
+      }; SameSite=Strict${
+        process.env.NODE_ENV === "production" ? "; Secure" : ""
+      }`
+    );
+  } else {
+    throw new Error("Invalid response object for setting auth cookie");
+  }
 }
 
 /**
  * Clear authentication cookie
  */
 export function clearAuthCookie(res: any) {
-  res.setHeader(
-    "Set-Cookie",
-    `auth-token=; HttpOnly; Path=/; Max-Age=0; SameSite=Strict${
-      process.env.NODE_ENV === "production" ? "; Secure" : ""
-    }`
-  );
+  // Check if this is a NextResponse (App Router) or ServerResponse (Pages Router)
+  if (res.cookies && typeof res.cookies.set === "function") {
+    // App Router - use NextResponse.cookies.set()
+    res.cookies.set("auth-token", "", {
+      httpOnly: true,
+      path: "/",
+      maxAge: 0, // Expire immediately
+      sameSite: "strict",
+      secure: process.env.NODE_ENV === "production",
+    });
+  } else if (res.setHeader && typeof res.setHeader === "function") {
+    // Pages Router - use setHeader
+    res.setHeader(
+      "Set-Cookie",
+      `auth-token=; HttpOnly; Path=/; Max-Age=0; SameSite=Strict${
+        process.env.NODE_ENV === "production" ? "; Secure" : ""
+      }`
+    );
+  } else {
+    throw new Error("Invalid response object for clearing auth cookie");
+  }
 }

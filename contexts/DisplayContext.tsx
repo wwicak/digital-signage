@@ -124,6 +124,15 @@ const DisplayContext = createContext<DisplayContextType | undefined>(undefined)
 export const DisplayProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [state, dispatch] = useReducer(displayReducer, initialState)
   const queryClient = useQueryClient()
+  
+  // Debug logging for state changes
+  React.useEffect(() => {
+    console.log('[DEBUG] DisplayContext: State changed:', {
+      id: state.id,
+      name: state.name,
+      widgetsCount: state.widgets.length
+    })
+  }, [state.id, state.name, state.widgets.length])
   // Use TanStack Query to fetch display data with optimized settings
   const { data: displayData, isLoading, error } = useQuery({
     queryKey: ['display', state.id],
@@ -182,7 +191,11 @@ export const DisplayProvider: React.FC<{ children: React.ReactNode }> = ({ child
   }, [updateDisplayThrottled])
 
   const setId = useCallback(async (id: string): Promise<void> => {
-    if (!id) return
+    if (!id) {
+      console.warn('[DEBUG] DisplayContext: setId called with empty/null ID')
+      return
+    }
+    console.log(`[DEBUG] DisplayContext: Setting display ID to: ${id}`)
     dispatch({ type: 'SET_ID', payload: id })
     
     /*

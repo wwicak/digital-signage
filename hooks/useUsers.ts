@@ -45,21 +45,37 @@ export const useUsers = () => {
   });
 
   const fetchUsers = async (page = 1, limit = 10) => {
+    console.log(
+      `[DEBUG] useUsers: Attempting to fetch users from /api/users?page=${page}&limit=${limit}`
+    );
     setLoading(true);
     setError(null);
 
     try {
       const response = await fetch(`/api/users?page=${page}&limit=${limit}`);
+      console.log(
+        `[DEBUG] useUsers: Response status: ${response.status}, statusText: ${response.statusText}`
+      );
 
       if (!response.ok) {
-        throw new Error(`Failed to fetch users: ${response.statusText}`);
+        const errorText = await response.text();
+        console.error(`[DEBUG] useUsers: API error response:`, errorText);
+        throw new Error(
+          `Failed to fetch users: ${response.statusText} - ${errorText}`
+        );
       }
 
       const data: UsersResponse = await response.json();
+      console.log(
+        `[DEBUG] useUsers: Successfully fetched ${data.users.length} users`
+      );
       setUsers(data.users);
       setPagination(data.pagination);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to fetch users");
+      const errorMessage =
+        err instanceof Error ? err.message : "Failed to fetch users";
+      console.error(`[DEBUG] useUsers: Error in fetchUsers:`, err);
+      setError(errorMessage);
     } finally {
       setLoading(false);
     }
