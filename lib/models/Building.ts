@@ -42,10 +42,9 @@ BuildingSchema.pre("save", function (next) {
   next();
 });
 
-const BuildingModel: Model<IBuilding> = mongoose.model<IBuilding>(
-  "Building",
-  BuildingSchema
-);
+const BuildingModel: Model<IBuilding> =
+  (mongoose.models?.Building as Model<IBuilding>) ||
+  mongoose.model<IBuilding>("Building", BuildingSchema);
 
 // Zod schema for IBuilding
 export const BuildingSchemaZod = z.object({

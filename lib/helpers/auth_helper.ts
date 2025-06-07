@@ -18,10 +18,19 @@ export async function requireAuth(req: any): Promise<AuthenticatedUser> {
   // Temporary implementation for development/testing
   // TODO: Replace with next-auth integration in production
 
+  console.log("[DEBUG] requireAuth: Request object keys:", Object.keys(req));
+  console.log(
+    "[DEBUG] requireAuth: Headers:",
+    req.headers ? Object.keys(req.headers) : "No headers"
+  );
+
   // Check for authorization header or session
-  const authHeader = req.headers.authorization;
+  const authHeader = req.headers?.authorization;
   const userId =
-    req.headers["x-user-id"] || req.query.userId || req.body.userId;
+    req.headers?.["x-user-id"] || req.query?.userId || req.body?.userId;
+
+  console.log("[DEBUG] requireAuth: authHeader:", authHeader);
+  console.log("[DEBUG] requireAuth: userId:", userId);
 
   if (authHeader && authHeader.startsWith("Bearer ")) {
     // Extract user ID from token (simplified for development)
@@ -56,6 +65,9 @@ export async function requireAuth(req: any): Promise<AuthenticatedUser> {
 
   // For development, return the existing admin user if no auth provided
   // TODO: Remove this in production and throw authentication error
+  console.log(
+    "[DEBUG] requireAuth: Returning default admin user for development"
+  );
   return {
     _id: "683ecc9948ffe97555dde0cc", // Use the actual admin user ID from MongoDB
     email: "admin@example.com",
