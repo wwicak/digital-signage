@@ -93,14 +93,54 @@ class GenericSlide extends Component<GenericSlideProps, GenericSlideState> {
    * Stops the slide's content from playing when the slide is out of focus
    */
   stop = (): void => {
-    // TODO(@wassgha) Execute code to stop slide content
+    // Stop any playing content (videos, animations, etc.)
+    const slideElement = document.querySelector('.slide-content');
+    if (slideElement) {
+      // Stop videos
+      const videos = slideElement.querySelectorAll('video');
+      videos.forEach(video => {
+        video.pause();
+      });
+      
+      // Stop iframes (YouTube, etc.)
+      const iframes = slideElement.querySelectorAll('iframe');
+      iframes.forEach(iframe => {
+        const src = iframe.src;
+        iframe.src = '';
+        iframe.src = src; // This will stop and reload the iframe
+      });
+      
+      // Stop any CSS animations
+      const animatedElements = slideElement.querySelectorAll('*');
+      animatedElements.forEach(element => {
+        (element as HTMLElement).style.animationPlayState = 'paused';
+      });
+    }
   }
 
   /**
    * Starts or resumes the slide's content when the slide is in focus
    */
   play = (): void => {
-    // TODO(@wassgha) Execute code to resume/restart slide content
+    // Resume any paused content (videos, animations, etc.)
+    const slideElement = document.querySelector('.slide-content');
+    if (slideElement) {
+      // Play videos
+      const videos = slideElement.querySelectorAll('video');
+      videos.forEach(video => {
+        video.play().catch(error => {
+          console.log('Video autoplay prevented:', error);
+        });
+      });
+      
+      // Resume CSS animations
+      const animatedElements = slideElement.querySelectorAll('*');
+      animatedElements.forEach(element => {
+        (element as HTMLElement).style.animationPlayState = 'running';
+      });
+      
+      // Note: iframes (YouTube) will auto-play based on their parameters
+    }
   }
 
   /**

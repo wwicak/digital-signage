@@ -17,6 +17,7 @@ import DropdownButton, { IDropdownChoice } from '../DropdownButton' // Already .
 import { logout } from '../../helpers/auth' // Assuming auth.js will be typed or allowJs
 import { useDisplayContext } from '../../contexts/DisplayContext'
 import { useDisplays } from '../../hooks/useDisplays'
+import { useDisplayStatus } from '../../hooks/useDisplayStatus'
 
 // Simplified display data for local state
 interface ISimpleDisplay {
@@ -120,7 +121,7 @@ const Sidebar: React.FC<ISidebarProps> = ({ loggedIn, displayId }) => {
             </div>
             <div className='info'>
               <span className='name'>{context.state.name || 'Select Display'}</span>
-              <span className='status online'>online</span> {/* TODO: Hardcoded status */}
+              <DisplayStatusIndicator displayId={context.state.id || undefined} />
             </div>
             <div className='caret'>
               <FontAwesomeIcon icon={faCaretDown} fixedWidth />
@@ -292,5 +293,20 @@ const Sidebar: React.FC<ISidebarProps> = ({ loggedIn, displayId }) => {
     </div>
   )
 }
+
+// DisplayStatusIndicator component
+const DisplayStatusIndicator: React.FC<{ displayId?: string }> = ({ displayId }) => {
+  const { getDisplayStatus } = useDisplayStatus();
+  
+  if (!displayId) {
+    return <span className='status offline'>offline</span>;
+  }
+  
+  const status = getDisplayStatus(displayId);
+  const statusClass = status.isOnline ? 'online' : 'offline';
+  const statusText = status.isOnline ? 'online' : 'offline';
+  
+  return <span className={`status ${statusClass}`}>{statusText}</span>;
+};
 
 export default Sidebar

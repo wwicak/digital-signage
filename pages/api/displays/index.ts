@@ -6,17 +6,8 @@ import { WidgetType } from "../../../api/models/Widget";
 import { createWidgetsForDisplay } from "../../../api/helpers/display_helper";
 import { z } from "zod";
 
-// --- Placeholder authentication helper ---
-// TODO: Replace with next-auth getServerSession integration
-async function requireAuth(req: NextApiRequest) {
-  // Example: Assume user is attached to req (for migration only)
-  // In production, use next-auth and getServerSession
-  const user = (req as any).user;
-  if (!user || !user._id) {
-    throw { status: 401, message: "User not authenticated" };
-  }
-  return user;
-}
+import { requireAuth } from "../../../api/helpers/auth_helper";
+import { sendEventToDisplay } from "../../../api/sse_manager";
 
 // --- Zod schemas ---
 const DisplayCreateSchema = z.object({
@@ -46,10 +37,7 @@ const DisplayCreateSchema = z.object({
     .optional(),
 });
 
-export default async function handler(
-  req: NextApiRequest,
-  res: NextApiResponse
-) {
+export default async function handler(req: any, res: any) {
   await dbConnect();
 
   if (req.method === "GET") {
@@ -59,7 +47,7 @@ export default async function handler(
       const displays = await Display.find({ creator_id: user._id }).populate(
         "widgets"
       );
-      // TODO: augmentDisplaysWithClientInfo if needed
+      // Note: augmentDisplaysWithClientInfo could be added here if needed
       res.status(200).json(displays);
     } catch (err: any) {
       res
@@ -97,7 +85,16 @@ export default async function handler(
       }
       const savedDisplay = await newDisplayDoc.save();
       const populatedDisplay = await savedDisplay.populate("widgets");
-      // TODO: sendEventToDisplay for SSE
+      // Send SSE event for display creation
+      try {
+        sendEventToDisplay("global", "display-updated", {
+          displayId: savedDisplay._id,
+          action: "create",
+          display: populatedDisplay,
+        });
+      } catch (error) {
+        console.error("Failed to send SSE event:", error);
+      }
       res.status(201).json(populatedDisplay);
     } catch (err: any) {
       res

@@ -1,5 +1,5 @@
 // Next.js API route for /api/slides/[id] (GET one, PUT update, DELETE)
-import { NextApiRequest, NextApiResponse } from "next";
+import type { NextApiRequest, NextApiResponse } from "next/types";
 import dbConnect from "../../../lib/mongodb";
 import Slide, { SlideSchemaZod, SlideTypeZod } from "../../../api/models/Slide";
 import Slideshow from "../../../api/models/Slideshow";
@@ -121,7 +121,9 @@ export default async function handler(
       // Notify relevant displays (SSE logic to be migrated for serverless)
       // TODO: Replace with serverless-friendly SSE or WebSocket logic
       try {
-        const displayIds = await getDisplayIdsForSlide(savedSlide._id);
+        const displayIds = await getDisplayIdsForSlide(
+          savedSlide._id.toString()
+        );
         // for (const displayId of displayIds) {
         //   sendEventToDisplay(displayId, 'display_updated', {
         //     displayId,

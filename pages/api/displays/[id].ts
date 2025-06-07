@@ -9,17 +9,8 @@ import {
 } from "../../../api/helpers/display_helper";
 import { z } from "zod";
 
-// --- Placeholder authentication helper ---
-// TODO: Replace with next-auth getServerSession integration
-async function requireAuth(req: NextApiRequest) {
-  // Example: Assume user is attached to req (for migration only)
-  // In production, use next-auth and getServerSession
-  const user = (req as any).user;
-  if (!user || !user._id) {
-    throw { status: 401, message: "User not authenticated" };
-  }
-  return user;
-}
+import { requireAuth } from "../../../api/helpers/auth_helper";
+import { sendEventToDisplay } from "../../../api/sse_manager";
 
 // --- Zod schemas ---
 const DisplayUpdateSchema = z.object({
@@ -50,10 +41,7 @@ const DisplayUpdateSchema = z.object({
     .optional(),
 });
 
-export default async function handler(
-  req: NextApiRequest,
-  res: NextApiResponse
-) {
+export default async function handler(req: any, res: any) {
   await dbConnect();
 
   const { id } = req.query;
@@ -75,7 +63,7 @@ export default async function handler(
           .status(404)
           .json({ message: "Display not found or not authorized." });
       }
-      // TODO: augmentDisplayWithClientInfo if needed
+      // Note: augmentDisplayWithClientInfo could be added here if needed
       res.status(200).json(display);
     } catch (err: any) {
       res
@@ -113,7 +101,21 @@ export default async function handler(
       }
       const savedDisplay = await displayToUpdate.save();
       const populatedDisplay = await savedDisplay.populate("widgets");
-      // TODO: sendEventToDisplay for SSE
+      // Send SSE event for display update
+      try {
+        sendEventToDisplay(id as string, "display_updated", {
+          displayId: id,
+          action: "update",
+          display: populatedDisplay,
+        });
+        sendEventToDisplay("global", "display-updated", {
+          displayId: id,
+          action: "update",
+          display: populatedDisplay,
+        });
+      } catch (error) {
+        console.error("Failed to send SSE event:", error);
+      }
       res.status(200).json(populatedDisplay);
     } catch (err: any) {
       res
@@ -132,7 +134,19 @@ export default async function handler(
       }
       await deleteWidgetsForDisplay(display);
       await Display.findByIdAndDelete(id);
-      // TODO: sendEventToDisplay for SSE
+      // Send SSE event for display deletion
+      try {
+        sendEventToDisplay(id as string, "display_updated", {
+          displayId: id,
+          action: "delete",
+        });
+        sendEventToDisplay("global", "display-updated", {
+          displayId: id,
+          action: "delete",
+        });
+      } catch (error) {
+        console.error("Failed to send SSE event:", error);
+      }
       res.status(200).json({
         message: "Display and associated widgets deleted successfully",
       });

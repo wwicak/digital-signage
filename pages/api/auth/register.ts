@@ -1,6 +1,7 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import dbConnect from "../../../lib/mongodb";
 import { registerUser, sanitizeUser } from "../../../api/helpers/auth_helper";
+import { generateToken, setAuthCookie } from "../../../lib/auth";
 import User from "../../../api/models/User";
 import { z } from "zod";
 
@@ -13,10 +14,7 @@ const RegisterRequestSchema = z.object({
 
 type RegisterRequestBody = z.infer<typeof RegisterRequestSchema>;
 
-export default async function handler(
-  req: NextApiRequest,
-  res: NextApiResponse
-) {
+export default async function handler(req: any, res: any) {
   if (req.method !== "POST") {
     return res.status(405).json({ message: "Method not allowed" });
   }
@@ -47,8 +45,9 @@ export default async function handler(
     // Return sanitized user data
     const userResponse = sanitizeUser(registeredUser);
 
-    // TODO: Implement next-auth session management here
-    // For now, we'll just return the user data without establishing a session
+    // Generate JWT token and set cookie for immediate login
+    const token = generateToken(registeredUser);
+    setAuthCookie(res, token);
     res.status(201).json({
       message: "User registered successfully",
       user: userResponse,

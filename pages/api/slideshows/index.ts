@@ -1,4 +1,4 @@
-import type { NextApiRequest, NextApiResponse } from "next";
+import type { NextApiRequest, NextApiResponse } from "next/types";
 import dbConnect from "../../../lib/mongodb";
 import Slideshow from "../../../api/models/Slideshow";
 import { CreateSlideshowSchema } from "../../../api/schemas/slideshow";

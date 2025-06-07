@@ -1,9 +1,10 @@
-import type { NextApiRequest, NextApiResponse } from "next";
+import type { NextApiRequest, NextApiResponse } from "next/types";
 import dbConnect from "../../../lib/mongodb";
 import {
   authenticateUser,
   sanitizeUser,
 } from "../../../api/helpers/auth_helper";
+import { generateToken, setAuthCookie } from "../../../lib/auth";
 import { z } from "zod";
 
 // Request body schema for login
@@ -42,11 +43,14 @@ export default async function handler(
     // Return sanitized user data
     const userResponse = sanitizeUser(user);
 
-    // TODO: Implement next-auth session management here
-    // For now, we'll just return the user data without establishing a session
+    // Generate JWT token and set cookie
+    const token = generateToken(user);
+    setAuthCookie(res, token);
+
     res.status(200).json({
       message: "Login successful",
       user: userResponse,
+      token: token, // Also return token for client-side storage if needed
     });
   } catch (error: any) {
     console.error("Login error:", error);

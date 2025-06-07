@@ -1,4 +1,5 @@
-import type { NextApiRequest, NextApiResponse } from "next";
+import type { NextApiRequest, NextApiResponse } from "next/types";
+import mongoose from "mongoose";
 import dbConnect from "../../../lib/mongodb";
 import Slideshow from "../../../api/models/Slideshow";
 import { UpdateSlideshowSchema } from "../../../api/schemas/slideshow";
@@ -107,7 +108,9 @@ export default async function handler(
             });
           }
         }
-        slideshowToUpdate.slides = slide_ids;
+        slideshowToUpdate.slides = slide_ids.map(
+          (id) => new mongoose.Types.ObjectId(id)
+        );
       }
 
       const savedSlideshow = await slideshowToUpdate.save();

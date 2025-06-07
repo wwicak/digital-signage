@@ -5,7 +5,7 @@ import Slide, { SlideSchemaZod, SlideTypeZod } from "../../../api/models/Slide";
 import { handleSlideInSlideshows } from "../../../api/helpers/slide_helper";
 
 // Placeholder for authentication/session check
-async function getAuthenticatedUser(req: NextApiRequest): Promise<any> {
+async function getAuthenticatedUser(req: any): Promise<any> {
   // TODO: Replace with next-auth session logic
   // const session = await getServerSession(req, res, authOptions);
   // if (!session || !session.user) return null;
@@ -19,10 +19,7 @@ async function getAuthenticatedUser(req: NextApiRequest): Promise<any> {
   };
 }
 
-export default async function handler(
-  req: NextApiRequest,
-  res: NextApiResponse
-) {
+export default async function handler(req: any, res: any) {
   await dbConnect();
 
   // Authentication: Replace with actual logic
