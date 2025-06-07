@@ -1,7 +1,33 @@
 import axios, { AxiosResponse } from "axios";
 import * as z from "zod";
 import { SlideTypeZod, SlideDataZod } from "../api/models/Slide"; // Using Zod schemas from the model
-import { SlideshowActionDataSchema } from "./slideshow"; // Import slideshow schema
+// Local slideshow schema to avoid circular dependency
+const LocalSlideshowSchema = z.object({
+  _id: z.string(),
+  name: z.string(),
+  description: z.string().optional(),
+  slides: z.array(z.any()), // Will contain slide objects or IDs
+  creator_id: z.string().optional(),
+  creation_date: z
+    .preprocess(
+      (arg) =>
+        typeof arg === "string" || typeof arg === "number"
+          ? new Date(arg)
+          : arg,
+      z.date()
+    )
+    .optional(),
+  last_update: z
+    .preprocess(
+      (arg) =>
+        typeof arg === "string" || typeof arg === "number"
+          ? new Date(arg)
+          : arg,
+      z.date()
+    )
+    .optional(),
+  is_enabled: z.boolean().optional().default(true),
+});
 
 // Zod schema for slide data in actions context
 export const SlideActionDataSchema = z.object({
@@ -62,11 +88,11 @@ export const getSlides = (
     .get<unknown>(`${host}/api/slideshows/${slideshowId}`) // Get the slideshow which includes populated slides
     .then((res: AxiosResponse<unknown>) => {
       if (res && res.data) {
-        const slideshow = SlideshowActionDataSchema.parse(res.data);
+        const slideshow = LocalSlideshowSchema.parse(res.data);
         // Extract slides from the slideshow, ensuring they are full slide objects, not just IDs
         if (slideshow.slides && Array.isArray(slideshow.slides)) {
           const fullSlides = slideshow.slides.filter(
-            (slide) => typeof slide === "object" && slide !== null
+            (slide: any) => typeof slide === "object" && slide !== null
           ) as ISlideData[];
           return fullSlides;
         }

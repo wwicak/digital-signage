@@ -49,7 +49,9 @@ UserSchema.plugin(passportLocalMongoose, {
   usernameField: "email", // Using email as the username field for PLM
 });
 
-const UserModel = mongoose.model<IUser, IUserModel>("User", UserSchema);
+const UserModel =
+  (mongoose.models.User as IUserModel) ||
+  mongoose.model<IUser, IUserModel>("User", UserSchema);
 
 // Zod schema for IUser
 export const UserSchemaZod = z.object({

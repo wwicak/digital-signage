@@ -47,13 +47,13 @@ export async function requireAuth(req: any): Promise<AuthenticatedUser> {
     };
   }
 
-  // For development, return a default user if no auth provided
+  // For development, return the existing admin user if no auth provided
   // TODO: Remove this in production and throw authentication error
   return {
-    _id: "temp_user_id",
-    email: "temp@example.com",
-    name: "Temp User",
-    role: "user",
+    _id: "683ecc9948ffe97555dde0cc", // Use the actual admin user ID from MongoDB
+    email: "admin@example.com",
+    name: "Administrator",
+    role: "admin",
   };
 
   // Future implementation with next-auth would look like:

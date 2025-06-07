@@ -75,10 +75,9 @@ DisplaySchema.pre("save", function (next) {
   next();
 });
 
-const DisplayModel: Model<IDisplay> = mongoose.model<IDisplay>(
-  "Display",
-  DisplaySchema
-);
+const DisplayModel: Model<IDisplay> =
+  (mongoose.models.Display as Model<IDisplay>) ||
+  mongoose.model<IDisplay>("Display", DisplaySchema);
 
 // Zod schema for StatusBar
 export const StatusBarSchemaZod = z.object({
