@@ -1,7 +1,8 @@
 // Next.js API route for /api/widgets/[id] (GET one, PUT update, DELETE)
 import type { NextApiRequest, NextApiResponse } from "next/types";
 import dbConnect from "../../../lib/mongodb";
-import Widget from "../../../api/models/Widget";
+import Widget, { IWidget } from "../../../api/models/Widget";
+import Display, { IDisplay } from "../../../api/models/Display";
 import { validateWidgetData } from "../../../api/helpers/widget_helper";
 import { sendEventToDisplay } from "../../../api/sse_manager";
 import { requireAuth } from "../../../api/helpers/auth_helper";
@@ -73,19 +74,22 @@ export default async function handler(
 
       // Notify relevant displays via SSE
       try {
-        const Display = (await import("../../../api/models/Display")).default;
-        const displays = await Display.find({
+        const displays = (await Display.find({
           widgets: savedWidget._id,
           creator_id: user._id, // Ensure user owns the display
-        });
+        })) as IDisplay[];
 
         for (const display of displays) {
-          sendEventToDisplay(display._id.toString(), "display_updated", {
-            displayId: display._id.toString(),
-            action: "update",
-            reason: "widget_change",
-            widgetId: savedWidget._id.toString(),
-          });
+          sendEventToDisplay(
+            (display._id as any).toString(),
+            "display_updated",
+            {
+              displayId: (display._id as any).toString(),
+              action: "update",
+              reason: "widget_change",
+              widgetId: (savedWidget._id as any).toString(),
+            }
+          );
         }
       } catch (notifyError) {
         console.error("SSE notification failed:", notifyError);
@@ -122,7 +126,6 @@ export default async function handler(
       }
 
       // Remove widget from all displays that reference it
-      const Display = (await import("../../../api/models/Display")).default;
       await Display.updateMany({ widgets: id }, { $pull: { widgets: id } });
 
       // Delete the widget
@@ -136,19 +139,22 @@ export default async function handler(
 
       // Notify relevant displays via SSE
       try {
-        const Display = (await import("../../../api/models/Display")).default;
-        const displays = await Display.find({
+        const displays = (await Display.find({
           widgets: id,
           creator_id: user._id, // Ensure user owns the display
-        });
+        })) as IDisplay[];
 
         for (const display of displays) {
-          sendEventToDisplay(display._id.toString(), "display_updated", {
-            displayId: display._id.toString(),
-            action: "update",
-            reason: "widget_deleted",
-            widgetId: id,
-          });
+          sendEventToDisplay(
+            (display._id as any).toString(),
+            "display_updated",
+            {
+              displayId: (display._id as any).toString(),
+              action: "update",
+              reason: "widget_deleted",
+              widgetId: id,
+            }
+          );
         }
       } catch (notifyError) {
         console.error("SSE notification failed:", notifyError);
