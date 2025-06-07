@@ -14,13 +14,13 @@ const LoginContent = memo(function LoginContent() {
   const searchParams = useSearchParams()
   const displayId = searchParams?.get('display')
 
-  const [username, setUsername] = useState('')
+  const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [alert, setAlert] = useState<'success' | 'error' | 'info' | null>(null)
 
   const performLogin = async () => {
     try {
-      const resp = await login({ username, password }, undefined, displayId || undefined)
+      const resp = await login({ email, password }, undefined, displayId || undefined)
       if (!resp.success) {
         setAlert('error')
       } else {
@@ -76,14 +76,14 @@ const LoginContent = memo(function LoginContent() {
                 </span>
             </div>
           )}
-          <label htmlFor='username'>Username</label>
+          <label htmlFor='email'>Email</label>
           <input
-            type='text'
-            className='username'
-            id='username'
-            placeholder='Enter your username...'
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
+            type='email'
+            className='email'
+            id='email'
+            placeholder='Enter your email...'
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
           />
           <label htmlFor='password'>Password</label>
           <input
@@ -142,7 +142,7 @@ const LoginContent = memo(function LoginContent() {
             display: flex;
             flex-direction: column;
           }
-          .form input[type='text'],
+          .form input[type='email'],
           .form input[type='password'] {
             outline: none;
             background: #ededed;

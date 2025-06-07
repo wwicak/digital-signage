@@ -1,4 +1,4 @@
-iimport mongoose, { Document, Model, Schema } from "mongoose";
+import mongoose, { Document, Model, Schema } from "mongoose";
 import * as z from "zod";
 import { ISlide, SlideSchemaZod as ImportedSlideSchemaZod } from "./Slide"; // Import Zod schema for ISlide
 
@@ -63,7 +63,7 @@ SlideshowSchema.pre("save", function (next) {
 });
 
 const SlideshowModel: Model<ISlideshow> =
-  (mongoose.models.Slideshow as Model<ISlideshow>) ||
+  (mongoose.models?.Slideshow as Model<ISlideshow>) ||
   mongoose.model<ISlideshow>("Slideshow", SlideshowSchema);
 
 // Zod schema for ISlideshow

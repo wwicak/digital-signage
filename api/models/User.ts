@@ -50,7 +50,7 @@ UserSchema.plugin(passportLocalMongoose, {
 });
 
 const UserModel =
-  (mongoose.models.User as IUserModel) ||
+  (mongoose.models?.User as IUserModel) ||
   mongoose.model<IUser, IUserModel>("User", UserSchema);
 
 // Zod schema for IUser

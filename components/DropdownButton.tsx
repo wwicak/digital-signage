@@ -2,13 +2,7 @@
 
 import React, { Component, ReactNode, CSSProperties } from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { library, config, IconProp, IconPrefix } from '@fortawesome/fontawesome-svg-core'
-import { fas } from '@fortawesome/free-solid-svg-icons'
-import { fab } from '@fortawesome/free-brands-svg-icons'
-
-config.autoAddCss = false
-library.add(fas)
-library.add(fab)
+import { IconProp, IconPrefix } from '@fortawesome/fontawesome-svg-core'
 
 export interface IDropdownChoice {
   key: string; // Used as the value for onSelect

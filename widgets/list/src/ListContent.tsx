@@ -1,11 +1,11 @@
 import React, { Component, CSSProperties } from 'react'
-import { config } from '@fortawesome/fontawesome-svg-core' // Only config is used
+// FontAwesome configuration is handled globally
 
 import AutoScroll from '../../../components/AutoScroll' // Assuming .js or .tsx
 // Import IListItem from widget index
 import * as z from 'zod'
 
-config.autoAddCss = false
+
 
 // Zod schema for IListItem
 export const ListItemSchema = z.object({

@@ -4,11 +4,13 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
 import { DisplayProvider } from '../contexts/DisplayContext'
 
+// Import FontAwesome configuration
+import '../lib/fontawesome'
+
 // Import global styles
 import '../styles/globals.css'
 import '../styles/GridLayoutStyles.css'
 import 'react-resizable/css/styles.css'
-import '@fortawesome/fontawesome-svg-core/styles.css' // Prevent Font Awesome from adding its own CSS automatically
 
 // Create a client
 const queryClient = new QueryClient({

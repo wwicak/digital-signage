@@ -1,12 +1,10 @@
 import React from 'react'
-import { config, IconProp } from '@fortawesome/fontawesome-svg-core'
+import { IconProp } from '@fortawesome/fontawesome-svg-core'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faExclamationTriangle } from '@fortawesome/free-solid-svg-icons'
 
 import AutoScroll from '../../../components/AutoScroll'
 import * as z from 'zod'
-
-config.autoAddCss = false
 
 // Zod schema for the announcement widget's content data, matching the component's internal usage
 export const AnnouncementWidgetContentDataSchema = z.object({

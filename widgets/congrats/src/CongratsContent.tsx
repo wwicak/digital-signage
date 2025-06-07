@@ -1,12 +1,12 @@
 import React, { Component } from 'react'
 import Lottie, { Options as LottieOptions } from 'react-lottie'
-import { config } from '@fortawesome/fontawesome-svg-core'
+// FontAwesome configuration is handled globally
 import AutoScroll from '../../../components/AutoScroll'
 import * as z from 'zod'
 import { CongratsWidgetContentDataSchema } from './types'
 import { animationUtils } from './animationUtils' // Import the utility
 
-config.autoAddCss = false
+
 
 export const CongratsContentPropsSchema = z.object({
   data: CongratsWidgetContentDataSchema.optional(),

@@ -1,6 +1,6 @@
 import React, { Component } from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { config, IconDefinition } from '@fortawesome/fontawesome-svg-core'
+import { IconDefinition } from '@fortawesome/fontawesome-svg-core'
 import {
   faBolt,
   faSmog,
@@ -12,8 +12,6 @@ import {
   faSnowflake,
   faCloudMoon,
 } from '@fortawesome/free-solid-svg-icons'
-
-config.autoAddCss = false
 
 // Define a type for the weather icon codes for better type safety
 type WeatherIconCode =

@@ -1,6 +1,6 @@
 import React, { useRef } from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { library, config, IconProp } from '@fortawesome/fontawesome-svg-core'
+import { IconProp } from '@fortawesome/fontawesome-svg-core'
 import {
   faPlay,
   faFont,
@@ -12,8 +12,7 @@ import {
   faCog,
 } from '@fortawesome/free-solid-svg-icons'
 
-config.autoAddCss = false // Prevent Font Awesome from adding its own CSS automatically
-library.add(faList, faPlay, faFont, faMousePointer, faCloudSun, faCalendar, faTimes, faCog)
+// FontAwesome configuration is handled globally
 
 import Widgets from '../../widgets'
 import { IBaseWidget } from '../../widgets/base_widget'

@@ -134,7 +134,7 @@ SlideSchema.pre("save", function (next) {
 });
 
 const SlideModel: Model<ISlide> =
-  (mongoose.models.Slide as Model<ISlide>) ||
+  (mongoose.models?.Slide as Model<ISlide>) ||
   mongoose.model<ISlide>("Slide", SlideSchema);
 
 // Zod Schemas

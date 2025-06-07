@@ -1,9 +1,9 @@
 import React from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { config, IconDefinition } from '@fortawesome/fontawesome-svg-core'
+import { IconDefinition } from '@fortawesome/fontawesome-svg-core'
 import { faTimes } from '@fortawesome/free-solid-svg-icons'
 
-config.autoAddCss = false
+
 
 // Define prop types, even if empty, for clarity and future use
 interface EmptyWidgetProps {}

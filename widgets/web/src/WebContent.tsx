@@ -1,9 +1,9 @@
 import React, { useState, useEffect, useRef, useCallback, CSSProperties } from 'react'
-import { config as FaConfig } from '@fortawesome/fontawesome-svg-core'
+// FontAwesome configuration is handled globally
 
 import * as z from 'zod'
 
-FaConfig.autoAddCss = false
+
 
 // Zod schema for IWebDefaultData (used in props.data)
 export const WebWidgetDataSchema = z.object({

@@ -142,7 +142,7 @@ const WidgetSchema = new Schema<IWidget>(
  */
 
 const WidgetModel: Model<IWidget> =
-  (mongoose.models.Widget as Model<IWidget>) ||
+  (mongoose.models?.Widget as Model<IWidget>) ||
   mongoose.model<IWidget>("Widget", WidgetSchema);
 
 // Zod Schemas

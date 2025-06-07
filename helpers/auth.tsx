@@ -21,7 +21,7 @@ import { getDisplays, IDisplayData } from '../actions/display' // Assuming IDisp
 // --- Interfaces ---
 
 export interface ICredentials {
-  username: string;
+  email: string;
   password?: string; // Password might be optional if using other auth methods later
 }
 
@@ -65,7 +65,7 @@ export const login = async (
 ): Promise<ILoginAuthResponse> => {
   try {
     const response: AxiosResponse<ILoginAuthResponse> = await axios.post(
-      `${host}/api/v1/user/login`,
+      `${host}/api/auth/login`,
       credentials
     )
 
@@ -81,13 +81,8 @@ export const login = async (
         path: '/',
       })
       
-      const redirectPath = `/layout${displayId ? `?display=${Array.isArray(displayId) ? displayId[0] : displayId}` : ''}`
-      /*
-       * Using Router.push for client-side navigation is generally preferred.
-       * window.location.href causes a full page reload.
-       * Router.push(redirectPath);
-       */
-      window.location.href = redirectPath // Kept original behavior
+      // Let the calling component handle the redirect
+      // Removed automatic redirect to allow login page to control navigation
     }
     return response.data
   } catch (error: any) {

@@ -1,14 +1,14 @@
 import React, { useState, useEffect, useCallback } from 'react'
 import axios, { AxiosResponse } from 'axios'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { config as FaConfig, IconProp } from '@fortawesome/fontawesome-svg-core'
+import { IconProp } from '@fortawesome/fontawesome-svg-core'
 import { faMapMarkerAlt } from '@fortawesome/free-solid-svg-icons'
 
 import WeatherIcon from './WeatherIcon'
 import { TWeatherUnit } from '../index'
 import * as z from 'zod'
 
-FaConfig.autoAddCss = false
+
 
 // Zod schema for TWeatherUnit
 export const TWeatherUnitSchema = z.enum(['metric', 'imperial'])

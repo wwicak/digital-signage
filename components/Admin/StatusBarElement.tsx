@@ -1,13 +1,10 @@
 import React, { Component } from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { library, config, IconProp } from '@fortawesome/fontawesome-svg-core'
+import { IconProp } from '@fortawesome/fontawesome-svg-core'
 import { faTimes } from '@fortawesome/free-solid-svg-icons'
 import { Draggable, DraggableProvided, DraggableStateSnapshot } from '@hello-pangea/dnd'
 
 import { StatusBarElementTypes, IStatusBarElementDefinition } from '../../helpers/statusbar' // Assuming statusbar.js will be typed
-
-config.autoAddCss = false
-library.add(faTimes)
 
 export interface IStatusBarElementProps {
   item: string; // Unique ID for the draggable item, e.g., "type_uniqueId"

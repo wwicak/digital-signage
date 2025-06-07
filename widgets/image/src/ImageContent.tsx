@@ -1,10 +1,10 @@
 import React, { Component, CSSProperties } from 'react'
-import { config } from '@fortawesome/fontawesome-svg-core'
+// FontAwesome configuration is handled globally
 import * as z from 'zod'
 
 import { TImageFit } from '../index' // Import TImageFit from the widget index
 
-config.autoAddCss = false
+
 
 // Zod schema for TImageFit (based on its definition in ../index.ts)
 export const TImageFitSchema = z.enum(['contain', 'cover', 'fill', 'none', 'scale-down'])
