@@ -1,4 +1,4 @@
-import type { NextApiRequest, NextApiResponse } from "next";
+//import type { NextApiRequest, NextApiResponse } from "next";
 import dbConnect from "../../../lib/mongodb";
 import { registerUser, sanitizeUser } from "../../../api/helpers/auth_helper";
 import { generateToken, setAuthCookie } from "../../../lib/auth";

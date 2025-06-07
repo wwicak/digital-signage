@@ -1,5 +1,5 @@
 // Next.js API route for /api/displays/[id] (GET, PUT, DELETE)
-import type { NextApiRequest, NextApiResponse } from "next";
+//import type { NextApiRequest, NextApiResponse } from "next";
 import dbConnect from "../../../lib/mongodb";
 import Display from "../../../api/models/Display";
 import { WidgetType } from "../../../api/models/Widget";

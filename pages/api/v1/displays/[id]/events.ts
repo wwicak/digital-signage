@@ -1,4 +1,4 @@
-import type { NextApiRequest, NextApiResponse } from "next";
+//import type { NextApiRequest, NextApiResponse } from "next";
 import { addClient, removeClient } from "../../../../../api/sse_manager";
 
 export default function handler(req: any, res: any) {

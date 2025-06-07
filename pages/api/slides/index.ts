@@ -1,5 +1,5 @@
 // Next.js API route for /api/slides (GET all, POST create)
-import type { NextApiRequest, NextApiResponse } from "next";
+//import type { NextApiRequest, NextApiResponse } from "next";
 import dbConnect from "../../../lib/mongodb";
 import Slide, { SlideSchemaZod, SlideTypeZod } from "../../../api/models/Slide";
 import { handleSlideInSlideshows } from "../../../api/helpers/slide_helper";
