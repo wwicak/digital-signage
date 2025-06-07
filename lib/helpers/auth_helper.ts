@@ -1,4 +1,4 @@
-import User, {u IUser, IUserRole, UserRoleName } from "../models/User";
+import User, { IUser, IUserRole, UserRoleName } from "../models/User";
 
 // TODO: Replace with next-auth integration
 // This is a placeholder authentication helper that will be replaced with next-auth
