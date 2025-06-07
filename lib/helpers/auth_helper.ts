@@ -1,4 +1,4 @@
-import User, { IUser, IUserRole, UserRoleName } from "../models/User";
+import User, {u IUser, IUserRole, UserRoleName } from "../models/User";
 
 // TODO: Replace with next-auth integration
 // This is a placeholder authentication helper that will be replaced with next-auth
@@ -18,19 +18,22 @@ export async function requireAuth(req: any): Promise<AuthenticatedUser> {
   // Temporary implementation for development/testing
   // TODO: Replace with next-auth integration in production
 
-  console.log("[DEBUG] requireAuth: Request object keys:", Object.keys(req));
-  console.log(
-    "[DEBUG] requireAuth: Headers:",
-    req.headers ? Object.keys(req.headers) : "No headers"
-  );
-
   // Check for authorization header or session
   const authHeader = req.headers?.authorization;
   const userId =
     req.headers?.["x-user-id"] || req.query?.userId || req.body?.userId;
+  const cookies = req.headers?.cookie;
 
-  console.log("[DEBUG] requireAuth: authHeader:", authHeader);
-  console.log("[DEBUG] requireAuth: userId:", userId);
+  // Parse cookies to check for loggedIn status
+  let isLoggedInViaCookie = false;
+  if (cookies) {
+    const cookieObj = cookies.split(";").reduce((acc: any, cookie: string) => {
+      const [key, value] = cookie.trim().split("=");
+      acc[key] = value;
+      return acc;
+    }, {});
+    isLoggedInViaCookie = cookieObj.loggedIn === "true";
+  }
 
   if (authHeader && authHeader.startsWith("Bearer ")) {
     // Extract user ID from token (simplified for development)
@@ -63,11 +66,23 @@ export async function requireAuth(req: any): Promise<AuthenticatedUser> {
     };
   }
 
+  // Check cookie-based authentication
+  // Check cookie-based authentication
+  if (isLoggedInViaCookie) {
+    return {
+      _id: "683ecc9948ffe97555dde0cc", // Use the actual admin user ID from MongoDB
+      email: "admin@example.com",
+      name: "Administrator",
+      role: {
+        name: UserRoleName.SUPER_ADMIN,
+        associatedDisplayIds: [],
+        associatedBuildingIds: [],
+      },
+    };
+  }
+
   // For development, return the existing admin user if no auth provided
   // TODO: Remove this in production and throw authentication error
-  console.log(
-    "[DEBUG] requireAuth: Returning default admin user for development"
-  );
   return {
     _id: "683ecc9948ffe97555dde0cc", // Use the actual admin user ID from MongoDB
     email: "admin@example.com",

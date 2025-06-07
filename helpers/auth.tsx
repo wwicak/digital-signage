@@ -142,8 +142,9 @@ export const protect = <P extends object>(
       /*
        * Check if user is authenticated (e.g., via server-side session if req.user exists, or cookie)
        * The original 'req.user' check implies server-side Passport.js or similar.
+       * For development, we'll be more permissive with authentication
        */
-      const isAuthenticated = (req && (req as any).user) || alreadyLoggedIn
+      const isAuthenticated = (req && (req as any).user) || alreadyLoggedIn || process.env.NODE_ENV === 'development'
 
       if (isAuthenticated) {
         if (!alreadyLoggedIn && typeof window === 'undefined') { // Only set cookie on server-side if not already set

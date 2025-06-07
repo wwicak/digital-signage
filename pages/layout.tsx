@@ -33,11 +33,11 @@ const LayoutPage: React.FC<ILayoutPageProps> = ({ loggedIn, displayId }) => {
   const displayContext = useDisplayContext()
 
   useEffect(() => {
-    if (displayId) {
+    if (displayId && displayId !== displayContext.state.id) {
       displayContext.setId(displayId)
       refreshWidgets(displayId)
     }
-  }, [displayId, displayContext])
+  }, [displayId, displayContext.state.id]) // Only depend on the specific state value, not the whole context
 
   const refreshWidgets = (displayId: string): Promise<void> => {
     return getWidgets(displayId).then(widgets => {
@@ -70,15 +70,25 @@ const LayoutPage: React.FC<ILayoutPageProps> = ({ loggedIn, displayId }) => {
   }
 
   const handleLayoutChange = (layout: RglLayout[]): void => {
+    console.log('[DEBUG] handleLayoutChange called with layout:', layout.length)
     for (const widgetLayout of layout) {
-      const widgetData: IUpdateWidgetData = {
-        x: widgetLayout.x,
-        y: widgetLayout.y,
-        w: widgetLayout.w,
-        h: widgetLayout.h,
+      // Find the current widget to check if position actually changed
+      const currentWidget = widgets.find(w => w._id === widgetLayout.i)
+      if (currentWidget &&
+          (currentWidget.x !== widgetLayout.x ||
+           currentWidget.y !== widgetLayout.y ||
+           currentWidget.w !== widgetLayout.w ||
+           currentWidget.h !== widgetLayout.h)) {
+        console.log('[DEBUG] Widget position changed, updating:', widgetLayout.i)
+        const widgetData: IUpdateWidgetData = {
+          x: widgetLayout.x,
+          y: widgetLayout.y,
+          w: widgetLayout.w,
+          h: widgetLayout.h,
+        }
+        updateWidget(widgetLayout.i, widgetData)
+          .catch(error => console.error(`Failed to update widget ${widgetLayout.i} layout:`, error))
       }
-      updateWidget(widgetLayout.i, widgetData)
-        .catch(error => console.error(`Failed to update widget ${widgetLayout.i} layout:`, error))
       // Note: No refreshWidgets here to avoid jumpiness; optimistic update or server should confirm.
     }
   }

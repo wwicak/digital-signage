@@ -138,11 +138,13 @@ export const DisplayProvider: React.FC<{ children: React.ReactNode }> = ({ child
     queryKey: ['display', state.id],
     queryFn: () => getDisplay(state.id!),
     enabled: !!state.id,
-    staleTime: 10 * 60 * 1000, // 10 minutes - longer stale time for better performance
-    gcTime: 15 * 60 * 1000, // 15 minutes cache time (gcTime is the new name for cacheTime)
-    retry: 2,
+    staleTime: 30 * 60 * 1000, // 30 minutes - much longer stale time to prevent repeated requests
+    gcTime: 60 * 60 * 1000, // 60 minutes cache time
+    retry: 1, // Reduce retry attempts
     refetchOnWindowFocus: false, // Disable refetch on window focus for digital signage
-    refetchOnReconnect: true, // Keep refetch on reconnect for reliability
+    refetchOnReconnect: false, // Disable refetch on reconnect to prevent loops
+    refetchInterval: false, // Disable automatic refetching
+    refetchIntervalInBackground: false, // Disable background refetching
   })
   // Enhanced mutation for updating display data with global list updates
   const updateDisplayMutation = useMutation({
