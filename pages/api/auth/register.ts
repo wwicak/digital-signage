@@ -1,6 +1,7 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import dbConnect from "../../../lib/mongodb";
-import User, { IUser, UserSchemaZod } from "../../../api/models/User";
+import { registerUser, sanitizeUser } from "../../../api/helpers/auth_helper";
+import User from "../../../api/models/User";
 import { z } from "zod";
 
 // Request body schema for registration
@@ -11,18 +12,6 @@ const RegisterRequestSchema = z.object({
 });
 
 type RegisterRequestBody = z.infer<typeof RegisterRequestSchema>;
-
-interface RegisterResponse {
-  message: string;
-  user?: {
-    _id: any;
-    email: string;
-    name?: string;
-    role?: string;
-  };
-  errors?: any;
-  error?: string;
-}
 
 export default async function handler(
   req: NextApiRequest,
@@ -52,34 +41,11 @@ export default async function handler(
       return res.status(409).json({ message: "User already exists" });
     }
 
-    // Create new user object
-    const userToRegister = new User({
-      email: email,
-      name: name,
-    });
-
-    // Register user with passport-local-mongoose
-    const registeredUser = await new Promise<IUser>((resolve, reject) => {
-      User.register(userToRegister, password, (err: any, user?: IUser) => {
-        if (err) {
-          reject(err);
-        } else if (!user) {
-          reject(
-            new Error("User registration failed, user object not returned")
-          );
-        } else {
-          resolve(user);
-        }
-      });
-    });
+    // Register user using helper function
+    const registeredUser = await registerUser(email, password, name);
 
     // Return sanitized user data
-    const userResponse = {
-      _id: registeredUser._id,
-      email: registeredUser.email,
-      name: registeredUser.name,
-      role: registeredUser.role,
-    };
+    const userResponse = sanitizeUser(registeredUser);
 
     // TODO: Implement next-auth session management here
     // For now, we'll just return the user data without establishing a session

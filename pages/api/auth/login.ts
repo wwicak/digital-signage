@@ -1,6 +1,9 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import dbConnect from "../../../lib/mongodb";
-import User, { IUser } from "../../../api/models/User";
+import {
+  authenticateUser,
+  sanitizeUser,
+} from "../../../api/helpers/auth_helper";
 import { z } from "zod";
 
 // Request body schema for login
@@ -10,18 +13,6 @@ const LoginRequestSchema = z.object({
 });
 
 type LoginRequestBody = z.infer<typeof LoginRequestSchema>;
-
-interface LoginResponse {
-  message: string;
-  user?: {
-    _id: any;
-    email: string;
-    name?: string;
-    role?: string;
-  };
-  errors?: any;
-  error?: string;
-}
 
 export default async function handler(
   req: NextApiRequest,
@@ -45,45 +36,11 @@ export default async function handler(
 
     const { email, password } = validation.data;
 
-    // Find user by email
-    const user = await User.findByUsername(email);
-    if (!user) {
-      return res.status(401).json({ message: "Invalid credentials" });
-    }
-
-    // Authenticate user using passport-local-mongoose's authenticate method
-    const authResult = await new Promise<{ user?: IUser; error?: any }>(
-      (resolve) => {
-        // Use the authenticate method from passport-local-mongoose
-        User.authenticate()(
-          email,
-          password,
-          (err: any, authenticatedUser?: IUser | false, options?: any) => {
-            if (err) {
-              resolve({ error: err });
-            } else if (!authenticatedUser) {
-              resolve({ error: { message: "Invalid credentials" } });
-            } else {
-              resolve({ user: authenticatedUser });
-            }
-          }
-        );
-      }
-    );
-
-    if (authResult.error || !authResult.user) {
-      return res.status(401).json({
-        message: authResult.error?.message || "Invalid credentials",
-      });
-    }
+    // Authenticate user using helper function
+    const user = await authenticateUser(email, password);
 
     // Return sanitized user data
-    const userResponse = {
-      _id: authResult.user._id,
-      email: authResult.user.email,
-      name: authResult.user.name,
-      role: authResult.user.role,
-    };
+    const userResponse = sanitizeUser(user);
 
     // TODO: Implement next-auth session management here
     // For now, we'll just return the user data without establishing a session
@@ -93,6 +50,11 @@ export default async function handler(
     });
   } catch (error: any) {
     console.error("Login error:", error);
+
+    // Handle authentication errors
+    if (error.message === "Invalid credentials") {
+      return res.status(401).json({ message: "Invalid credentials" });
+    }
 
     res.status(500).json({
       message: "Error during login",
