@@ -54,13 +54,14 @@ const LayoutAdminContent = memo(function LayoutAdminContent() {
       return
     }
     const widgetDefinition = Widgets[type]
-    const newWidgetData: Partial<INewWidgetData> = {
-        display: context.state.id,
+    const newWidgetData: INewWidgetData = {
         type: type as WidgetType,
+        name: `${type} Widget`, // Provide a default name since it's required by the new API
         data: widgetDefinition?.defaultData || {},
+        display_id: context.state.id, // Pass display ID to associate widget with display
     }
 
-    addWidget(newWidgetData as INewWidgetData)
+    addWidget(newWidgetData)
         .then(() => refreshWidgets(context.state.id!)) // context.state.id should be stable if refreshWidgets is called
         .catch(error => console.error('Failed to add widget:', error))
   }

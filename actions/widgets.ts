@@ -1,9 +1,8 @@
-import axios, { AxiosResponse } from 'axios'
-import { WidgetType, WidgetData } from '../api/models/Widget'
+import axios, { AxiosResponse } from "axios";
+import { WidgetType, WidgetData } from "../api/models/Widget";
 
 export interface IWidgetData {
   _id: string;
-  display_id: string; // ID of the display this widget belongs to
   name?: string; // Optional name for the widget
   type: WidgetType;
   x: number;
@@ -18,7 +17,6 @@ export interface IWidgetData {
 
 // Interface for the data sent when adding a new widget
 export interface INewWidgetData {
-  display: string; // Display ID
   type: WidgetType;
   name?: string;
   x?: number; // Optional during creation, server might assign default
@@ -26,6 +24,7 @@ export interface INewWidgetData {
   w?: number; // Optional during creation
   h?: number; // Optional during creation
   data?: WidgetData;
+  display_id?: string; // Optional display ID to associate widget with display
 }
 
 /*
@@ -35,7 +34,7 @@ export interface INewWidgetData {
 export interface IUpdateWidgetData
   extends Omit<
     Partial<IWidgetData>,
-    '_id' | 'display_id' | 'creator_id' | 'creation_date' | 'last_update'
+    "_id" | "creator_id" | "creation_date" | "last_update"
   > {
   // No additional fields needed here usually, but can be extended
 }
@@ -48,41 +47,42 @@ interface IDeleteResponse {
 
 export const addWidget = (
   widgetDetails: INewWidgetData,
-  host: string = ''
+  host: string = ""
 ): Promise<IWidgetData> => {
   return axios
-    .post<IWidgetData>(`${host}/api/v1/widgets`, widgetDetails)
+    .post<IWidgetData>(`${host}/api/widgets`, widgetDetails)
     .then((res: AxiosResponse<IWidgetData>) => {
       if (res && res.data) {
-        return res.data
+        return res.data;
       }
-      throw new Error('Failed to add widget: no data received')
-    })
-}
+      throw new Error("Failed to add widget: no data received");
+    });
+};
 
 export const getWidgets = (
   displayId: string,
-  host: string = ''
+  host: string = ""
 ): Promise<IWidgetData[]> => {
+  // Get widgets by display ID using query parameter
   return axios
-    .get<IWidgetData[]>(`${host}/api/v1/display/${displayId}/widgets`)
+    .get<IWidgetData[]>(`${host}/api/widgets?display_id=${displayId}`)
     .then((res: AxiosResponse<IWidgetData[]>) => {
       if (res && res.data) {
-        return res.data
+        return res.data;
       }
-      return [] // Or throw an error if data is always expected
-    })
-}
+      return []; // Or throw an error if data is always expected
+    });
+};
 
 export const deleteWidget = (
   id: string,
-  host: string = ''
+  host: string = ""
 ): Promise<IDeleteResponse> => {
   return axios
-    .delete(`${host}/api/v1/widgets/${id}`)
+    .delete(`${host}/api/widgets/${id}`)
     .then((res: AxiosResponse<IDeleteResponse>) => {
       if (res && res.data) {
-        return res.data
+        return res.data;
       }
       /*
        * If server doesn't send a body on delete, this might be an empty object or string.
@@ -91,35 +91,35 @@ export const deleteWidget = (
        */
       throw new Error(
         `Failed to delete widget ${id}: no confirmation received`
-      )
-    })
-}
+      );
+    });
+};
 
 export const updateWidget = (
   id: string,
   data: IUpdateWidgetData,
-  host: string = ''
+  host: string = ""
 ): Promise<IWidgetData> => {
   return axios
-    .put<IWidgetData>(`${host}/api/v1/widgets/${id}`, data)
+    .put<IWidgetData>(`${host}/api/widgets/${id}`, data)
     .then((res: AxiosResponse<IWidgetData>) => {
       if (res && res.data) {
-        return res.data
+        return res.data;
       }
-      throw new Error(`Failed to update widget ${id}: no data received`)
-    })
-}
+      throw new Error(`Failed to update widget ${id}: no data received`);
+    });
+};
 
 export const getWidget = (
   id: string,
-  host: string = ''
+  host: string = ""
 ): Promise<IWidgetData> => {
   return axios
-    .get<IWidgetData>(`${host}/api/v1/widgets/${id}`)
+    .get<IWidgetData>(`${host}/api/widgets/${id}`)
     .then((res: AxiosResponse<IWidgetData>) => {
       if (res && res.data) {
-        return res.data
+        return res.data;
       }
-      throw new Error(`Failed to get widget ${id}: no data received`)
-    })
-}
+      throw new Error(`Failed to get widget ${id}: no data received`);
+    });
+};

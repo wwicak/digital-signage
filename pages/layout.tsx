@@ -50,14 +50,15 @@ const LayoutPage: React.FC<ILayoutPageProps> = ({ loggedIn, displayId }) => {
 
   const handleAddWidget = (type: string): void => {
     const widgetDefinition: IWidgetDefinition | undefined = Widgets[type]
-    const newWidgetData: Partial<INewWidgetData> = { // Construct data for addWidget action
-        display: displayContext.state.id!, // displayContext.state.id should be set
+    const newWidgetData: INewWidgetData = { // Construct data for addWidget action
         type: type as WidgetType,
+        name: `${type} Widget`, // Provide a default name since it's required by the new API
         data: widgetDefinition?.defaultData || {},
+        display_id: displayContext.state.id!, // Pass display ID to associate widget with display
         // x, y, w, h can be omitted if server assigns defaults or if not needed immediately
     }
 
-    addWidget(newWidgetData as INewWidgetData) // Type assertion if confident structure is met
+    addWidget(newWidgetData)
         .then(() => refreshWidgets(displayContext.state.id!))
         .catch(error => console.error('Failed to add widget:', error))
   }

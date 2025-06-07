@@ -47,7 +47,7 @@ export interface IDeleteResponse {
 
 export const getDisplays = (host: string = ""): Promise<IDisplayData[]> => {
   return axios
-    .get<IDisplayData[]>(`${host}/api/v1/display`)
+    .get<IDisplayData[]>(`${host}/api/displays`)
     .then((res: AxiosResponse<IDisplayData[]>) => {
       // Ensure we have valid response data and it's an array
       if (res && res.data && Array.isArray(res.data)) {
@@ -62,14 +62,16 @@ export const getDisplays = (host: string = ""): Promise<IDisplayData[]> => {
     });
 };
 
-export const addDisplay = (host: string = ""): Promise<IDisplayData> => {
+export const addDisplay = (
+  host: string = "",
+  data?: Partial<IDisplayData>
+): Promise<IDisplayData> => {
   /*
-   * Typically, a POST request for creation might take some initial data,
-   * but the original function doesn't pass any.
-   * If it should, add a 'data: Partial<IDisplayData>' parameter.
+   * Updated to use new Next.js API route and allow optional initial data
    */
+  const displayData = data || { name: "New Display" }; // Provide default name if none specified
   return axios
-    .post<IDisplayData>(`${host}/api/v1/display`)
+    .post<IDisplayData>(`${host}/api/displays`, displayData)
     .then((res: AxiosResponse<IDisplayData>) => {
       if (res && res.data) {
         return res.data;
@@ -84,7 +86,7 @@ export const getDisplay = (
   host: string = ""
 ): Promise<IDisplayData> => {
   return axios
-    .get<IDisplayData>(`${host}/api/v1/display/${id}`)
+    .get<IDisplayData>(`${host}/api/displays/${id}`)
     .then((res: AxiosResponse<IDisplayData>) => {
       if (res && res.data) {
         return res.data;
@@ -98,7 +100,7 @@ export const deleteDisplay = (
   host: string = ""
 ): Promise<IDeleteResponse> => {
   return axios
-    .delete(`${host}/api/v1/display/${id}`)
+    .delete(`${host}/api/displays/${id}`)
     .then((res: AxiosResponse<IDeleteResponse>) => {
       if (res && res.data) {
         return res.data;
@@ -115,7 +117,7 @@ export const updateDisplay = (
   host: string = ""
 ): Promise<IDisplayData> => {
   return axios
-    .patch<IDisplayData>(`${host}/api/v1/display/${id}`, data)
+    .put<IDisplayData>(`${host}/api/displays/${id}`, data)
     .then((res: AxiosResponse<IDisplayData>) => {
       if (res && res.data) {
         return res.data;

@@ -31,7 +31,7 @@ const ScreensComponent = memo(function ScreensComponent({ loggedIn, displayId }:
 
   const add = (): Promise<void> => {
     return new Promise((resolve, reject) => {
-      createDisplay.mutate(undefined, {
+      createDisplay.mutate({ data: { name: "New Display" } }, {
         onSuccess: () => {
           // Type guard for ref
           if (screenListRef && screenListRef.current) {
