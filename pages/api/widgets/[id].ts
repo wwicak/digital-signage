@@ -1,12 +1,8 @@
 // Next.js API route for /api/widgets/[id] (GET one, PUT update, DELETE)
 import { NextApiRequest, NextApiResponse } from "next";
 import dbConnect from "../../../lib/mongodb";
-import Widget, { WidgetType } from "../../../api/models/Widget";
-import {
-  validateWidgetData,
-  deleteWidgetAndCleanReferences,
-  getDisplayIdsForWidget,
-} from "../../../api/helpers/widget_helper";
+import Widget from "../../../api/models/Widget";
+import { validateWidgetData } from "../../../api/helpers/widget_helper";
 // import { sendEventToDisplay } from "../../../api/sse_manager"; // TODO: SSE migration
 
 // Placeholder for authentication/session check

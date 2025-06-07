@@ -48,13 +48,9 @@ export async function requireAuth(req: any): Promise<AuthenticatedUser> {
  * TODO: Replace with next-auth session validation
  */
 export function withAuth(
-  handler: (
-    req: any,
-    res: NextApiResponse,
-    user: AuthenticatedUser
-  ) => Promise<void>
+  handler: (req: any, res: any, user: AuthenticatedUser) => Promise<void>
 ) {
-  return async (req: any, res: NextApiResponse) => {
+  return async (req: any, res: any) => {
     try {
       const user = await requireAuth(req);
       return await handler(req, res, user);

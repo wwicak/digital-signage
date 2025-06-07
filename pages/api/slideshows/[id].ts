@@ -1,7 +1,7 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import dbConnect from "../../../lib/mongodb";
 import Slideshow from "../../../api/models/Slideshow";
-import { UpdateSlideshowSchema } from "../../../api/routes/slideshow";
+import { UpdateSlideshowSchema } from "../../../api/schemas/slideshow";
 import {
   validateSlidesExist,
   reorderSlidesInSlideshow,

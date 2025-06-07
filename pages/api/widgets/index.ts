@@ -1,7 +1,7 @@
 // Next.js API route for /api/widgets (GET all, POST create)
 import { NextApiRequest, NextApiResponse } from "next";
 import dbConnect from "../../../lib/mongodb";
-import Widget, { WidgetType } from "../../../api/models/Widget";
+import Widget from "../../../api/models/Widget";
 import { validateWidgetData } from "../../../api/helpers/widget_helper";
 
 // Placeholder for authentication/session check
