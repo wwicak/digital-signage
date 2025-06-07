@@ -3,7 +3,7 @@ import Dialog, { DialogMethods } from '../Dialog'
 import { Form, Button, ButtonGroup } from '../Form'
 import { getWidget, updateWidget, IWidgetData } from '../../actions/widgets' // IWidgetData is likely an interface
 import * as z from 'zod'
-import { WidgetDataZod, WidgetTypeZod } from '../../api/models/Widget' // Import Zod schema for widget's 'data' field and type
+import { WidgetDataZod, WidgetTypeZod } from '@/lib/models/Widget' // Import Zod schema for widget's 'data' field and type
 
 // Interface for methods exposed via ref - Zod not directly applicable
 export interface IWidgetEditDialog {

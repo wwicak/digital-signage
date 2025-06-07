@@ -1,5 +1,5 @@
 import axios, { AxiosResponse } from "axios";
-import { WidgetType, WidgetData } from "../api/models/Widget";
+import { WidgetType, WidgetData } from "../lib/models/Widget";
 
 export interface IWidgetData {
   _id: string;

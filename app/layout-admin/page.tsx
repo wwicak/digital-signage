@@ -19,7 +19,7 @@ import { StatusBarElementTypes } from '../../helpers/statusbar'
 import Widgets from '../../widgets'
 
 import { addWidget, getWidgets, deleteWidget, updateWidget, IWidgetData, INewWidgetData, IUpdateWidgetData } from '../../actions/widgets'
-import { WidgetType } from '../../api/models/Widget'
+import { WidgetType } from '../../lib/models/Widget'
 
 const GridLayoutWithWidth = WidthProvider(GridLayout as any)
 

@@ -1,4 +1,3 @@
-import type { NextApiRequest, NextApiResponse } from "next";
 import User, { IUser } from "../models/User";
 
 // TODO: Replace with next-auth integration

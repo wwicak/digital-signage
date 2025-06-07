@@ -1,4 +1,4 @@
-import { IUser } from '../api/models/User' // Adjust path if api/models/User.ts is elsewhere
+import { IUser } from "../lib/models/User";
 
 declare global {
   namespace Express {

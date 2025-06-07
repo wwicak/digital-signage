@@ -3,7 +3,7 @@
  * Handles Google Calendar API operations including authentication and meeting retrieval
  */
 
-import { google, calendar_v3 } from "googleapis";
+import { google } from "googleapis";
 import { OAuth2Client } from "google-auth-library";
 import axios from "axios";
 

@@ -1,6 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from "next/types";
 import { IncomingMessage } from "http";
-import User, { IUser } from "../api/models/User";
+import User, { IUser } from "./models/User";
 import * as jwt from "jsonwebtoken";
 import dbConnect from "./mongodb";
 

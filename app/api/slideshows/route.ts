@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import dbConnect from "@/lib/mongodb";
 import Slideshow from "@/lib/models/Slideshow";
-import { CreateSlideshowSchema } from "@/api/schemas/slideshow";
+import { CreateSlideshowSchema } from "@/lib/schemas/slideshow";
 import {
   validateSlidesExist,
   populateSlideshowSlides,

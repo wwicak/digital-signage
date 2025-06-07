@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import mongoose from "mongoose";
 import dbConnect from "@/lib/mongodb";
 import Slideshow from "@/lib/models/Slideshow";
-import { UpdateSlideshowSchema } from "@/api/schemas/slideshow";
+import { UpdateSlideshowSchema } from "@/lib/schemas/slideshow";
 import {
   validateSlidesExist,
   reorderSlidesInSlideshow,

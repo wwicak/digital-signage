@@ -1,6 +1,6 @@
 import axios, { AxiosResponse } from "axios";
 import * as z from "zod";
-import { SlideTypeZod, SlideDataZod } from "../api/models/Slide"; // Using Zod schemas from the model
+import { SlideTypeZod, SlideDataZod } from "@/lib/models/Slide"; // Using Zod schemas from the model
 // Local slideshow schema to avoid circular dependency
 const LocalSlideshowSchema = z.object({
   _id: z.string(),

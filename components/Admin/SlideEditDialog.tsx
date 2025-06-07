@@ -8,7 +8,7 @@ import { getSlide, addSlide, updateSlide, ISlideData, SlideAddPayload as SlideAd
 import {
   SlideType, SlideData, SlideTypeZod, SlideDataZod,
   ImageSlideData, VideoSlideData, WebSlideData, MarkdownSlideData, PhotoSlideData, YoutubeSlideData // Import specific types
-} from '../../api/models/Slide'
+} from '@/lib/models/Slide'
 import * as z from 'zod'
 
 // Interface for methods exposed via ref - Zod is not typically used for ref method signatures

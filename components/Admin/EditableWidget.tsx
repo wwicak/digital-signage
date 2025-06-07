@@ -12,7 +12,7 @@ import Widgets from '../../widgets'
 import { IBaseWidget } from '../../widgets/base_widget'
 import WidgetEditDialog from './WidgetEditDialog' // Removed IWidgetEditDialog import assuming it's default export or typed internally
 import * as z from 'zod'
-import { WidgetType, WidgetTypeZod } from '../../api/models/Widget' // Import enum and its Zod schema
+import { WidgetType, WidgetTypeZod } from '@/lib/models/Widget' // Import enum and its Zod schema
 
 // Zod schema for EditableWidget props
 export const EditableWidgetPropsSchema = z.object({

@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-import UserModel from "../api/models/User";
+import UserModel from "../lib/models/User";
 
 const MONGODB_URI =
   "mongodb+srv://dimastw:dya0gVD7m9xJNJpo@cluster0.jez3b.mongodb.net/digital-signage?retryWrites=true&w=majority&appName=Cluster0";
