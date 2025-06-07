@@ -122,7 +122,7 @@ export default async function handler(
       // TODO: Replace with serverless-friendly SSE or WebSocket logic
       try {
         const displayIds = await getDisplayIdsForSlide(
-          savedSlide._id.toString()
+          (savedSlide._id as any).toString()
         );
         // for (const displayId of displayIds) {
         //   sendEventToDisplay(displayId, 'display_updated', {

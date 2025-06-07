@@ -80,12 +80,13 @@ export default async function handler(
         const Display = (await import("../../../api/models/Display")).default;
         const displays = await Display.find({ widgets: savedWidget._id });
         for (const display of displays) {
-          sendEventToDisplay(display._id.toString(), "display_updated", {
-            displayId: display._id.toString(),
-            action: "update",
-            reason: "widget_change",
-            widgetId: savedWidget._id.toString(),
-          });
+          // sendEventToDisplay(display._id.toString(), "display_updated", {
+          //   displayId: display._id.toString(),
+          //   action: "update",
+          //   reason: "widget_change",
+          //   widgetId: savedWidget._id.toString(),
+          // });
+          // TODO: Implement SSE for serverless environment
         }
       } catch (notifyError) {
         console.error("SSE notification failed:", notifyError);
@@ -139,12 +140,13 @@ export default async function handler(
         const Display = (await import("../../../api/models/Display")).default;
         const displays = await Display.find({ widgets: id });
         for (const display of displays) {
-          sendEventToDisplay(display._id.toString(), "display_updated", {
-            displayId: display._id.toString(),
-            action: "update",
-            reason: "widget_deleted",
-            widgetId: id,
-          });
+          // sendEventToDisplay(display._id.toString(), "display_updated", {
+          //   displayId: display._id.toString(),
+          //   action: "update",
+          //   reason: "widget_deleted",
+          //   widgetId: id,
+          // });
+          // TODO: Implement SSE for serverless environment
         }
       } catch (notifyError) {
         console.error("SSE notification failed:", notifyError);
