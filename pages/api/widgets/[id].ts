@@ -1,7 +1,7 @@
 // Next.js API route for /api/widgets/[id] (GET one, PUT update, DELETE)
 import type { NextApiRequest, NextApiResponse } from "next/types";
 import dbConnect from "../../../lib/mongodb";
-import Widget, { IWidget } from "../../../api/models/Widget";
+import Widget from "../../../api/models/Widget";
 import Display, { IDisplay } from "../../../api/models/Display";
 import { validateWidgetData } from "../../../api/helpers/widget_helper";
 import { sendEventToDisplay } from "../../../api/sse_manager";
