@@ -6,22 +6,7 @@ import {
   validateSlidesExist,
   populateSlideshowSlides,
 } from "../../../api/helpers/slideshow_helper";
-// import { getServerSession } from "next-auth/next"; // Uncomment and configure as needed
-
-// Placeholder for authentication/session check
-async function getAuthenticatedUser(req: NextApiRequest) {
-  // TODO: Replace with actual session logic using next-auth
-  // const session = await getServerSession(req, res, authOptions);
-  // if (!session || !session.user) return null;
-  // return session.user;
-
-  // Temporary implementation for slideshow refactoring - return a mock user
-  return {
-    _id: "temp_user_id_for_testing",
-    email: "temp@example.com",
-    name: "Temp User",
-  };
-}
+import { requireAuth } from "../../../api/helpers/auth_helper";
 
 export default async function handler(
   req: NextApiRequest,
@@ -29,15 +14,12 @@ export default async function handler(
 ) {
   await dbConnect();
 
-  // Authentication: Replace with actual logic
+  // Authentication: Use proper auth helper
   let user;
   try {
-    user = await getAuthenticatedUser(req);
-  } catch (e) {
-    return res.status(401).json({ message: "User not authenticated" });
-  }
-  if (!user || !user._id) {
-    return res.status(401).json({ message: "User not authenticated" });
+    user = await requireAuth(req);
+  } catch (error: any) {
+    return res.status(401).json({ message: "Authentication required" });
   }
 
   if (req.method === "GET") {

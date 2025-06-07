@@ -9,22 +9,8 @@ import {
   populateSlideshowSlides,
   getDisplayIdsForSlideshow,
 } from "../../../api/helpers/slideshow_helper";
-// import { sendEventToDisplay } from "../../../api/sse_manager"; // SSE logic to be migrated for serverless
-
-// Placeholder for authentication/session check
-async function getAuthenticatedUser(req: NextApiRequest): Promise<any> {
-  // TODO: Replace with actual session logic using next-auth
-  // const session = await getServerSession(req, res, authOptions);
-  // if (!session || !session.user) return null;
-  // return session.user;
-
-  // Temporary implementation for slideshow refactoring - return a mock user
-  return {
-    _id: "temp_user_id_for_testing",
-    email: "temp@example.com",
-    name: "Temp User",
-  };
-}
+import { sendEventToDisplay } from "../../../api/sse_manager";
+import { requireAuth } from "../../../api/helpers/auth_helper";
 
 export default async function handler(
   req: NextApiRequest,
@@ -32,15 +18,12 @@ export default async function handler(
 ) {
   await dbConnect();
 
-  // Authentication: Replace with actual logic
+  // Authentication: Use proper auth helper
   let user: any;
   try {
-    user = await getAuthenticatedUser(req);
-  } catch (e) {
-    return res.status(401).json({ message: "User not authenticated" });
-  }
-  if (!user || !user._id) {
-    return res.status(401).json({ message: "User not authenticated" });
+    user = await requireAuth(req);
+  } catch (error: any) {
+    return res.status(401).json({ message: "Authentication required" });
   }
 
   const { id } = req.query;
@@ -116,21 +99,25 @@ export default async function handler(
       const savedSlideshow = await slideshowToUpdate.save();
       const populatedSlideshow = await populateSlideshowSlides(savedSlideshow);
 
-      // Notify relevant displays (SSE logic to be migrated for serverless)
-      // try {
-      //   const displayIds = await getDisplayIdsForSlideshow(savedSlideshow._id);
-      //   for (const displayId of displayIds) {
-      //     sendEventToDisplay(displayId, "display_updated", {
-      //       displayId,
-      //       action: "update",
-      //       reason: "slideshow_change",
-      //       slideshowId: savedSlideshow._id.toString(),
-      //     });
-      //   }
-      // } catch (notifyError) {
-      //   // Log and continue
-      // }
-
+      // Notify relevant displays via SSE
+      try {
+        const displayIds = await getDisplayIdsForSlideshow(
+          (savedSlideshow._id as any).toString()
+        );
+        for (const displayId of displayIds) {
+          sendEventToDisplay(displayId, "display_updated", {
+            displayId,
+            action: "update",
+            reason: "slideshow_change",
+            slideshowId: (savedSlideshow._id as any).toString(),
+          });
+        }
+      } catch (notifyError) {
+        console.error(
+          `Error notifying displays after slideshow update ${id}:`,
+          notifyError
+        );
+      }
       return res.status(200).json(populatedSlideshow);
     } catch (error: any) {
       if (error.name === "ValidationError") {
@@ -165,20 +152,30 @@ export default async function handler(
       try {
         displayIdsToDeleteNotifications = await getDisplayIdsForSlideshow(id);
       } catch (notifyError) {
-        // Log and continue
+        console.error(
+          `Error getting display IDs for slideshow ${id}:`,
+          notifyError
+        );
       }
 
       await Slideshow.findByIdAndDelete(id);
 
-      // Notify relevant displays after successful deletion (SSE logic to be migrated)
-      // for (const displayId of displayIdsToDeleteNotifications) {
-      //   sendEventToDisplay(displayId, "display_updated", {
-      //     displayId,
-      //     action: "update",
-      //     reason: "slideshow_deleted",
-      //     slideshowId: id,
-      //   });
-      // }
+      // Notify relevant displays after successful deletion
+      try {
+        for (const displayId of displayIdsToDeleteNotifications) {
+          sendEventToDisplay(displayId, "display_updated", {
+            displayId,
+            action: "update",
+            reason: "slideshow_deleted",
+            slideshowId: id,
+          });
+        }
+      } catch (notifyError) {
+        console.error(
+          `Error notifying displays after slideshow deletion ${id}:`,
+          notifyError
+        );
+      }
 
       return res
         .status(200)

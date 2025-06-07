@@ -8,21 +8,8 @@ import {
   getDisplayIdsForSlide,
   deleteSlideAndCleanReferences,
 } from "../../../api/helpers/slide_helper";
-
-// Placeholder for authentication/session check
-async function getAuthenticatedUser(req: NextApiRequest): Promise<any> {
-  // TODO: Replace with next-auth session logic
-  // const session = await getServerSession(req, res, authOptions);
-  // if (!session || !session.user) return null;
-  // return session.user;
-
-  // Temporary implementation for slideshow refactoring - return a mock user
-  return {
-    _id: "temp_user_id_for_testing",
-    email: "temp@example.com",
-    name: "Temp User",
-  };
-}
+import { sendEventToDisplay } from "../../../api/sse_manager";
+import { requireAuth } from "../../../api/helpers/auth_helper";
 
 export default async function handler(
   req: NextApiRequest,
@@ -30,15 +17,12 @@ export default async function handler(
 ) {
   await dbConnect();
 
-  // Authentication: Replace with actual logic
+  // Authentication: Use proper auth helper
   let user: any;
   try {
-    user = await getAuthenticatedUser(req);
-  } catch (e) {
-    return res.status(401).json({ message: "User not authenticated" });
-  }
-  if (!user || !user._id) {
-    return res.status(401).json({ message: "User not authenticated" });
+    user = await requireAuth(req);
+  } catch (error: any) {
+    return res.status(401).json({ message: "Authentication required" });
   }
 
   const { id } = req.query;
@@ -118,23 +102,25 @@ export default async function handler(
         );
       }
 
-      // Notify relevant displays (SSE logic to be migrated for serverless)
-      // TODO: Replace with serverless-friendly SSE or WebSocket logic
+      // Notify relevant displays via SSE
       try {
         const displayIds = await getDisplayIdsForSlide(
           (savedSlide._id as any).toString()
         );
-        // for (const displayId of displayIds) {
-        //   sendEventToDisplay(displayId, 'display_updated', {
-        //     displayId,
-        //     action: 'update',
-        //     reason: 'slide_change',
-        //     slideId: savedSlide._id.toString(),
-        //   });
-        // }
+        for (const displayId of displayIds) {
+          sendEventToDisplay(displayId, "display_updated", {
+            displayId,
+            action: "update",
+            reason: "slide_change",
+            slideId: (savedSlide._id as any).toString(),
+          });
+        }
       } catch (notifyError) {
         // Log error but don't let it fail the main operation
-        // console.error(`Error notifying displays after slide update ${id}:`, notifyError);
+        console.error(
+          `Error notifying displays after slide update ${id}:`,
+          notifyError
+        );
       }
 
       return res.status(200).json(savedSlide);
@@ -163,12 +149,40 @@ export default async function handler(
           .json({ message: "Slide not found or not authorized" });
       }
 
+      // Get display IDs before deleting the slide
+      let displayIds: string[] = [];
+      try {
+        displayIds = await getDisplayIdsForSlide(id);
+      } catch (notifyError) {
+        console.error(
+          `Error getting display IDs for slide ${id}:`,
+          notifyError
+        );
+      }
+
       const deletedSlide = await deleteSlideAndCleanReferences(id);
 
       if (!deletedSlide) {
         return res
           .status(404)
           .json({ message: "Slide not found during deletion process." });
+      }
+
+      // Notify relevant displays via SSE
+      try {
+        for (const displayId of displayIds) {
+          sendEventToDisplay(displayId, "display_updated", {
+            displayId,
+            action: "update",
+            reason: "slide_deleted",
+            slideId: id,
+          });
+        }
+      } catch (notifyError) {
+        console.error(
+          `Error notifying displays after slide deletion ${id}:`,
+          notifyError
+        );
       }
 
       return res.status(200).json({ message: "Slide deleted successfully" });

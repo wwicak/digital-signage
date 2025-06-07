@@ -3,7 +3,7 @@
 import dbConnect from "../../../lib/mongodb";
 import Widget from "../../../api/models/Widget";
 import { validateWidgetData } from "../../../api/helpers/widget_helper";
-
+import { sendEventToDisplay } from "../../../api/sse_manager";
 import { requireAuth } from "../../../api/helpers/auth_helper";
 
 export default async function handler(req: any, res: any) {
@@ -75,11 +75,31 @@ export default async function handler(req: any, res: any) {
         // If display_id is provided, add widget to display's widgets array
         if (display_id) {
           const Display = (await import("../../../api/models/Display")).default;
-          await Display.findByIdAndUpdate(
-            display_id,
+          const updatedDisplay = await Display.findOneAndUpdate(
+            { _id: display_id, creator_id: user._id }, // Ensure user owns the display
             { $addToSet: { widgets: savedWidget._id } },
             { new: true }
           );
+
+          if (!updatedDisplay) {
+            // If display not found or not owned by user, delete the widget and return error
+            await savedWidget.deleteOne();
+            return res
+              .status(404)
+              .json({ message: "Display not found or not authorized" });
+          }
+
+          // Send SSE event for display update
+          try {
+            sendEventToDisplay(display_id, "display_updated", {
+              displayId: display_id,
+              action: "update",
+              reason: "widget_added",
+              widgetId: (savedWidget._id as any).toString(),
+            });
+          } catch (sseError) {
+            console.error("SSE notification failed:", sseError);
+          }
         }
 
         return res.status(201).json(savedWidget);

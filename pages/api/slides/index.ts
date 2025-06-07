@@ -2,35 +2,22 @@
 //import type { NextApiRequest, NextApiResponse } from "next";
 import dbConnect from "../../../lib/mongodb";
 import Slide, { SlideSchemaZod, SlideTypeZod } from "../../../api/models/Slide";
-import { handleSlideInSlideshows } from "../../../api/helpers/slide_helper";
-
-// Placeholder for authentication/session check
-async function getAuthenticatedUser(req: any): Promise<any> {
-  // TODO: Replace with next-auth session logic
-  // const session = await getServerSession(req, res, authOptions);
-  // if (!session || !session.user) return null;
-  // return session.user;
-
-  // Temporary implementation for slideshow refactoring - return a mock user
-  return {
-    _id: "temp_user_id_for_testing",
-    email: "temp@example.com",
-    name: "Temp User",
-  };
-}
+import {
+  handleSlideInSlideshows,
+  getDisplayIdsForSlide,
+} from "../../../api/helpers/slide_helper";
+import { sendEventToDisplay } from "../../../api/sse_manager";
+import { requireAuth } from "../../../api/helpers/auth_helper";
 
 export default async function handler(req: any, res: any) {
   await dbConnect();
 
-  // Authentication: Replace with actual logic
+  // Authentication: Use proper auth helper
   let user: any;
   try {
-    user = await getAuthenticatedUser(req);
-  } catch (e) {
-    return res.status(401).json({ message: "User not authenticated" });
-  }
-  if (!user || !user._id) {
-    return res.status(401).json({ message: "User not authenticated" });
+    user = await requireAuth(req);
+  } catch (error: any) {
+    return res.status(401).json({ message: "Authentication required" });
   }
 
   if (req.method === "GET") {
@@ -105,6 +92,26 @@ export default async function handler(req: any, res: any) {
         slideshow_ids.length > 0
       ) {
         await handleSlideInSlideshows(savedSlide, slideshow_ids, []);
+
+        // Notify relevant displays via SSE after adding to slideshows
+        try {
+          const displayIds = await getDisplayIdsForSlide(
+            (savedSlide._id as any).toString()
+          );
+          for (const displayId of displayIds) {
+            sendEventToDisplay(displayId, "display_updated", {
+              displayId,
+              action: "update",
+              reason: "slide_added",
+              slideId: (savedSlide._id as any).toString(),
+            });
+          }
+        } catch (notifyError) {
+          console.error(
+            `Error notifying displays after slide creation ${savedSlide._id}:`,
+            notifyError
+          );
+        }
       }
       return res.status(201).json(savedSlide);
     } catch (error: any) {

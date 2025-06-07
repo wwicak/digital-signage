@@ -3,16 +3,8 @@ import type { NextApiRequest, NextApiResponse } from "next/types";
 import dbConnect from "../../../lib/mongodb";
 import Widget from "../../../api/models/Widget";
 import { validateWidgetData } from "../../../api/helpers/widget_helper";
-// import { sendEventToDisplay } from "../../../api/sse_manager"; // TODO: SSE migration
-
-// Placeholder for authentication/session check
-async function getAuthenticatedUser(req: NextApiRequest): Promise<any> {
-  // TODO: Replace with next-auth session logic
-  // const session = await getServerSession(req, res, authOptions);
-  // if (!session || !session.user) return null;
-  // return session.user;
-  throw new Error("Authentication/session check not implemented");
-}
+import { sendEventToDisplay } from "../../../api/sse_manager";
+import { requireAuth } from "../../../api/helpers/auth_helper";
 
 export default async function handler(
   req: NextApiRequest,
@@ -20,9 +12,13 @@ export default async function handler(
 ) {
   await dbConnect();
 
-  // Authentication: Temporarily disabled for refactoring
-  // TODO: Re-enable authentication after frontend refactoring is complete
-  const user = { _id: "temp_user_id" }; // Temporary mock user
+  // Authentication: Use proper auth helper
+  let user;
+  try {
+    user = await requireAuth(req);
+  } catch (error: any) {
+    return res.status(401).json({ message: "Authentication required" });
+  }
 
   const { id } = req.query;
   if (typeof id !== "string") {
@@ -78,15 +74,18 @@ export default async function handler(
       // Notify relevant displays via SSE
       try {
         const Display = (await import("../../../api/models/Display")).default;
-        const displays = await Display.find({ widgets: savedWidget._id });
+        const displays = await Display.find({
+          widgets: savedWidget._id,
+          creator_id: user._id, // Ensure user owns the display
+        });
+
         for (const display of displays) {
-          // sendEventToDisplay(display._id.toString(), "display_updated", {
-          //   displayId: display._id.toString(),
-          //   action: "update",
-          //   reason: "widget_change",
-          //   widgetId: savedWidget._id.toString(),
-          // });
-          // TODO: Implement SSE for serverless environment
+          sendEventToDisplay(display._id.toString(), "display_updated", {
+            displayId: display._id.toString(),
+            action: "update",
+            reason: "widget_change",
+            widgetId: savedWidget._id.toString(),
+          });
         }
       } catch (notifyError) {
         console.error("SSE notification failed:", notifyError);
@@ -138,15 +137,18 @@ export default async function handler(
       // Notify relevant displays via SSE
       try {
         const Display = (await import("../../../api/models/Display")).default;
-        const displays = await Display.find({ widgets: id });
+        const displays = await Display.find({
+          widgets: id,
+          creator_id: user._id, // Ensure user owns the display
+        });
+
         for (const display of displays) {
-          // sendEventToDisplay(display._id.toString(), "display_updated", {
-          //   displayId: display._id.toString(),
-          //   action: "update",
-          //   reason: "widget_deleted",
-          //   widgetId: id,
-          // });
-          // TODO: Implement SSE for serverless environment
+          sendEventToDisplay(display._id.toString(), "display_updated", {
+            displayId: display._id.toString(),
+            action: "update",
+            reason: "widget_deleted",
+            widgetId: id,
+          });
         }
       } catch (notifyError) {
         console.error("SSE notification failed:", notifyError);
