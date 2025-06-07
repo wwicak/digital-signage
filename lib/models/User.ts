@@ -3,11 +3,28 @@ import passportLocalMongoose from "passport-local-mongoose";
 import passport from "passport"; // Import for passport.Strategy
 import * as z from "zod";
 
+// Enum for Role Names
+export enum UserRoleName {
+  SUPER_ADMIN = "SuperAdmin",
+  RESOURCE_MANAGER = "ResourceManager",
+  DISPLAY_MANAGER = "DisplayManager",
+  VIEWER = "Viewer",
+}
+
+// Interface for the role object
+export interface IUserRole {
+  name: UserRoleName;
+  // Buildings this role is associated with (primarily for ResourceManager)
+  associatedBuildingIds?: mongoose.Types.ObjectId[];
+  // Displays this role is associated with (for ResourceManager, DisplayManager, Viewer)
+  associatedDisplayIds?: mongoose.Types.ObjectId[];
+}
+
 // Interface for the User document instance
 export interface IUser extends Document {
   name?: string;
   email?: string; // If using email as usernameField for PLM
-  role?: string;
+  role: IUserRole; // Updated role structure
   username?: string; // If PLM uses 'username' (default)
 }
 
@@ -38,8 +55,17 @@ export interface IUserModel extends Model<IUser> {
 const UserSchema = new Schema<IUser>(
   {
     name: { type: String, trim: true },
-    email: { type: String, trim: true, unique: true }, // Ensure unique if used as usernameField
-    role: { type: String, default: "user" },
+    email: { type: String, trim: true, unique: true, required: true }, // Ensure unique if used as usernameField
+    role: {
+      name: {
+        type: String,
+        enum: Object.values(UserRoleName), // Use enum values
+        default: UserRoleName.VIEWER, // Default to Viewer
+        required: true,
+      },
+      associatedBuildingIds: [{ type: Schema.Types.ObjectId, ref: "Building" }],
+      associatedDisplayIds: [{ type: Schema.Types.ObjectId, ref: "Display" }],
+    },
     // username: { type: String, trim: true, sparse: true }, // Only if username is a separate field
   },
   { timestamps: true }
@@ -53,12 +79,27 @@ const UserModel =
   (mongoose.models?.User as IUserModel) ||
   mongoose.model<IUser, IUserModel>("User", UserSchema);
 
+// Zod schema for IUserRole
+export const UserRoleSchemaZod = z.object({
+  name: z.nativeEnum(UserRoleName),
+  associatedBuildingIds: z
+    .array(z.instanceof(mongoose.Types.ObjectId))
+    .optional(),
+  associatedDisplayIds: z
+    .array(z.instanceof(mongoose.Types.ObjectId))
+    .optional(),
+});
+
 // Zod schema for IUser
 export const UserSchemaZod = z.object({
   _id: z.instanceof(mongoose.Types.ObjectId).optional(),
   name: z.string().optional(),
-  email: z.string().email({ message: "Invalid email address" }).optional(), // passport-local-mongoose might enforce presence
-  role: z.string().optional(),
+  email: z.string().email({ message: "Invalid email address" }),
+  role: UserRoleSchemaZod.default({
+    name: UserRoleName.VIEWER,
+    associatedDisplayIds: [],
+    associatedBuildingIds: [],
+  }),
   username: z.string().optional(), // Only if 'username' is distinct from 'email' and used
   // Timestamps from Mongoose { timestamps: true }
   createdAt: z.date().optional(),
