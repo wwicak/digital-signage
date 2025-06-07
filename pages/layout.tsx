@@ -18,7 +18,7 @@ import { StatusBarElementTypes, IStatusBarElementDefinition } from '../helpers/s
 import Widgets, { IWidgetDefinition } from '../widgets' // Assuming widgets/index.js will be typed
 
 import { addWidget, getWidgets, deleteWidget, updateWidget, IWidgetData, INewWidgetData, IUpdateWidgetData } from '../actions/widgets' // Already .tsx
-import { WidgetType } from '../api/models/Widget'
+import { WidgetType } from '../lib/models/Widget'
 import { protect, ProtectProps } from '../helpers/auth' // Assuming auth.js will be typed or allowJs
 import { useDisplayContext } from '../contexts/DisplayContext'
 
