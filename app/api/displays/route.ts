@@ -4,6 +4,11 @@ import Display from "@/lib/models/Display";
 import { WidgetType } from "@/lib/models/Widget";
 import { createWidgetsForDisplay } from "@/lib/helpers/display_helper";
 import { requireAuth } from "@/lib/helpers/auth_helper";
+import {
+  hasPermission,
+  addAccessFilter,
+  canManageDisplay,
+} from "@/lib/helpers/rbac_helper";
 import { sendEventToDisplay } from "@/lib/sse_manager";
 import { z } from "zod";
 
@@ -39,9 +44,20 @@ export async function GET(request: NextRequest) {
   try {
     await dbConnect();
     const user = await requireAuth(request);
-    const displays = await Display.find({ creator_id: user._id }).populate(
-      "widgets"
-    );
+
+    // Check if user has permission to read displays
+    if (!hasPermission(user, { action: "read", resource: "display" })) {
+      return NextResponse.json(
+        { message: "Access denied: Cannot view displays" },
+        { status: 403 }
+      );
+    }
+
+    // Apply access filter based on user's role
+    let query = {};
+    query = addAccessFilter(user, "display", query);
+
+    const displays = await Display.find(query).populate("widgets");
     return NextResponse.json(displays);
   } catch (error: any) {
     return NextResponse.json(
@@ -55,6 +71,15 @@ export async function POST(request: NextRequest) {
   try {
     await dbConnect();
     const user = await requireAuth(request);
+
+    // Check if user has permission to create displays
+    if (!hasPermission(user, { action: "create", resource: "display" })) {
+      return NextResponse.json(
+        { message: "Access denied: Cannot create displays" },
+        { status: 403 }
+      );
+    }
+
     const body = await request.json();
 
     const parseResult = DisplayCreateSchema.safeParse(body);

@@ -7,6 +7,7 @@ import {
   deleteWidgetsForDisplay,
 } from "@/lib/helpers/display_helper";
 import { requireAuth } from "@/lib/helpers/auth_helper";
+import { canAccessDisplay, canManageDisplay } from "@/lib/helpers/rbac_helper";
 import { sendEventToDisplay } from "@/lib/sse_manager";
 import { z } from "zod";
 
@@ -46,14 +47,20 @@ export async function GET(
   try {
     await dbConnect();
     const user = await requireAuth(request);
-    const display = await Display.findOne({
-      _id: params.id,
-      creator_id: user._id,
-    }).populate("widgets");
+
+    // Check if user can access this display
+    if (!canAccessDisplay(user, params.id)) {
+      return NextResponse.json(
+        { message: "Access denied: Cannot view this display" },
+        { status: 403 }
+      );
+    }
+
+    const display = await Display.findById(params.id).populate("widgets");
 
     if (!display) {
       return NextResponse.json(
-        { message: "Display not found or not authorized." },
+        { message: "Display not found" },
         { status: 404 }
       );
     }
@@ -74,6 +81,15 @@ export async function PUT(
   try {
     await dbConnect();
     const user = await requireAuth(request);
+
+    // Check if user can manage this display
+    if (!canManageDisplay(user, params.id)) {
+      return NextResponse.json(
+        { message: "Access denied: Cannot modify this display" },
+        { status: 403 }
+      );
+    }
+
     const body = await request.json();
 
     const parseResult = DisplayUpdateSchema.safeParse(body);
@@ -85,14 +101,11 @@ export async function PUT(
     }
 
     const { widgets: newWidgetsData, ...displayData } = parseResult.data;
-    const displayToUpdate = await Display.findOne({
-      _id: params.id,
-      creator_id: user._id,
-    });
+    const displayToUpdate = await Display.findById(params.id);
 
     if (!displayToUpdate) {
       return NextResponse.json(
-        { message: "Display not found or not authorized" },
+        { message: "Display not found" },
         { status: 404 }
       );
     }
@@ -144,14 +157,19 @@ export async function DELETE(
     await dbConnect();
     const user = await requireAuth(request);
 
-    const display = await Display.findOne({
-      _id: params.id,
-      creator_id: user._id,
-    });
+    // Check if user can manage this display (delete permission)
+    if (!canManageDisplay(user, params.id)) {
+      return NextResponse.json(
+        { message: "Access denied: Cannot delete this display" },
+        { status: 403 }
+      );
+    }
+
+    const display = await Display.findById(params.id);
 
     if (!display) {
       return NextResponse.json(
-        { message: "Display not found or not authorized" },
+        { message: "Display not found" },
         { status: 404 }
       );
     }

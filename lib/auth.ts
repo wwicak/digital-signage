@@ -1,6 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from "next/types";
 import { IncomingMessage } from "http";
-import User, { IUser } from "./models/User";
+import User, { IUser, IUserRole, UserRoleName } from "./models/User";
 import * as jwt from "jsonwebtoken";
 import dbConnect from "./mongodb";
 
@@ -13,7 +13,7 @@ export interface AuthenticatedUser {
   _id: any;
   email: string;
   name?: string;
-  role?: string;
+  role: IUserRole;
 }
 
 export interface SessionData {
@@ -30,7 +30,11 @@ export function generateToken(user: IUser): string {
       _id: user._id,
       email: user.email!,
       name: user.name,
-      role: user.role || "user",
+      role: user.role || {
+        name: UserRoleName.VIEWER,
+        associatedDisplayIds: [],
+        associatedBuildingIds: [],
+      },
     },
     exp: Math.floor(Date.now() / 1000) + 7 * 24 * 60 * 60, // 7 days
   };

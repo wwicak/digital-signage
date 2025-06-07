@@ -1,4 +1,4 @@
-import User, { IUser } from "../models/User";
+import User, { IUser, IUserRole, UserRoleName } from "../models/User";
 
 // TODO: Replace with next-auth integration
 // This is a placeholder authentication helper that will be replaced with next-auth
@@ -7,7 +7,7 @@ export interface AuthenticatedUser {
   _id: any;
   email: string;
   name?: string;
-  role?: string;
+  role: IUserRole;
 }
 
 /**
@@ -32,7 +32,11 @@ export async function requireAuth(req: any): Promise<AuthenticatedUser> {
       _id: token || "temp_user_id",
       email: "temp@example.com",
       name: "Temp User",
-      role: "user",
+      role: {
+        name: UserRoleName.VIEWER,
+        associatedDisplayIds: [],
+        associatedBuildingIds: [],
+      },
     };
   }
 
@@ -42,7 +46,11 @@ export async function requireAuth(req: any): Promise<AuthenticatedUser> {
       _id: userId,
       email: "temp@example.com",
       name: "Temp User",
-      role: "user",
+      role: {
+        name: UserRoleName.VIEWER,
+        associatedDisplayIds: [],
+        associatedBuildingIds: [],
+      },
     };
   }
 
@@ -52,7 +60,11 @@ export async function requireAuth(req: any): Promise<AuthenticatedUser> {
     _id: "683ecc9948ffe97555dde0cc", // Use the actual admin user ID from MongoDB
     email: "admin@example.com",
     name: "Administrator",
-    role: "admin",
+    role: {
+      name: UserRoleName.SUPER_ADMIN,
+      associatedDisplayIds: [],
+      associatedBuildingIds: [],
+    },
   };
 
   // Future implementation with next-auth would look like:

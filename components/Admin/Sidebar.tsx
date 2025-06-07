@@ -10,6 +10,7 @@ import {
   faImages,
   faSignOutAlt,
   faCaretDown, // Added missing caret-down
+  faUsers, // Added users icon
   IconDefinition,
 } from '@fortawesome/free-solid-svg-icons'
 import DropdownButton, { IDropdownChoice } from '../DropdownButton' // Already .tsx
@@ -90,6 +91,12 @@ const Sidebar: React.FC<ISidebarProps> = ({ loggedIn, displayId }) => {
           name: 'Slideshows',
           path: `/slideshows?display=${currentDisplayId}`,
           icon: faImages,
+        },
+        {
+          id: 'users',
+          name: 'Users',
+          path: `/users`,
+          icon: faUsers,
         },
       ]
     : [
