@@ -7,6 +7,7 @@
     "setup": "[ -f .env ] || makeconf",
     "dev": "next dev",
     "build": "next build",
+    "build:fast": "DISABLE_ESLINT_PLUGIN=true next build --no-lint",
     "start": "next start",
     "lint": "eslint --cache --ext .js,.jsx,.ts,.tsx --ignore-path .gitignore .",
     "lint:fix": "eslint --cache --ext .js,.jsx,.ts,.tsx --ignore-path .gitignore . --fix",
@@ -21,10 +22,6 @@
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "bugs": {
-    "url": "https://github.com/alexander-e-andrews/CSSeniorDisplayProject/issues"
-  },
-  "homepage": "https://github.com/alexander-e-andrews/CSSeniorDisplayProject#readme",
   "dependencies": {
     "@azure/msal-node": "^3.6.0",
     "@dnd-kit/core": "^6.1.0",

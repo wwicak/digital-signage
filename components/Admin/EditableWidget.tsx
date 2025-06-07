@@ -2,12 +2,6 @@ import React, { useRef } from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { IconProp } from '@fortawesome/fontawesome-svg-core'
 import {
-  faPlay,
-  faFont,
-  faList,
-  faMousePointer,
-  faCloudSun,
-  faCalendar,
   faTimes,
   faCog,
 } from '@fortawesome/free-solid-svg-icons'
