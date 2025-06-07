@@ -1,5 +1,5 @@
 import { AuthenticatedUser } from "../auth";
-import { UserRoleName, IUserRole } from "../models/User";
+import { UserRoleName } from "../models/User";
 import mongoose from "mongoose";
 
 /**
