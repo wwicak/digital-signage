@@ -1,94 +1,352 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { useGlobalDisplaySSE } from "./useGlobalDisplaySSE";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+
+interface DisplayStatusDetail {
+  isOnline: boolean;
+  clientCount: number;
+  lastSeen?: Date;
+  lastHeartbeat?: Date;
+  consecutiveFailures: number;
+  responseTime?: number;
+  uptimePercentage?: number;
+  connectionType?: "sse" | "websocket" | "polling";
+  ipAddress?: string;
+  disconnectionReason?: string;
+  alertCount?: number;
+}
 
 interface DisplayStatus {
-  [displayId: string]: {
-    isOnline: boolean;
-    clientCount: number;
-    lastSeen?: Date;
+  [displayId: string]: DisplayStatusDetail;
+}
+
+interface MonitoringStats {
+  displays: {
+    total: number;
+    online: number;
+    offline: number;
+    uptimePercentage: number;
   };
+  alerts: {
+    active: number;
+  };
+  heartbeats: {
+    lastHour: number;
+  };
+  service: {
+    isRunning: boolean;
+  };
+  lastUpdated: string;
 }
 
 /**
- * Hook to track display online/offline status and client connections
+ * Enhanced hook to track display online/offline status with real-time monitoring
  */
-export const useDisplayStatus = () => {
+export const useDisplayStatus = (options?: {
+  enableRealTimeUpdates?: boolean;
+  refreshInterval?: number;
+  offlineThresholdMinutes?: number;
+}) => {
+  const {
+    enableRealTimeUpdates = true,
+    refreshInterval = 30000, // 30 seconds
+    offlineThresholdMinutes = 5,
+  } = options || {};
+
   const [displayStatus, setDisplayStatus] = useState<DisplayStatus>({});
-  const { isConnected } = useGlobalDisplaySSE(true);
+  const [lastUpdateTime, setLastUpdateTime] = useState<Date>(new Date());
+  const { isConnected } = useGlobalDisplaySSE(enableRealTimeUpdates);
+  const queryClient = useQueryClient();
+  const updateTimeoutRef = useRef<NodeJS.Timeout>();
 
-  // Simulate status updates for now - in a real implementation,
-  // this would come from the SSE connection or periodic API calls
-  useEffect(() => {
-    const updateStatus = () => {
-      // This is a placeholder implementation
-      // In a real system, you would get this data from:
-      // 1. SSE events for real-time updates
-      // 2. Periodic API calls to check display status
-      // 3. WebSocket connections from display clients
+  // Fetch monitoring stats
+  const {
+    data: monitoringStats,
+    isLoading: isLoadingStats,
+    error: statsError,
+    refetch: refetchStats,
+  } = useQuery<MonitoringStats>({
+    queryKey: ["monitoring-stats"],
+    queryFn: async () => {
+      const response = await fetch("/api/v1/monitoring/stats");
+      if (!response.ok) {
+        throw new Error("Failed to fetch monitoring stats");
+      }
+      return response.json();
+    },
+    staleTime: 30000, // 30 seconds
+    refetchInterval: refreshInterval,
+    enabled: enableRealTimeUpdates,
+  });
 
-      setDisplayStatus((prevStatus) => {
-        const newStatus = { ...prevStatus };
+  // Fetch detailed status for all displays
+  const fetchDisplayStatuses = useCallback(async () => {
+    try {
+      const response = await fetch("/api/v1/monitoring/displays");
+      if (!response.ok) {
+        throw new Error("Failed to fetch display statuses");
+      }
+      const data = await response.json();
 
-        // For demo purposes, mark displays as online if SSE is connected
-        // In reality, this would be based on actual display client connections
-        Object.keys(newStatus).forEach((displayId) => {
-          newStatus[displayId] = {
-            ...newStatus[displayId],
-            isOnline: isConnected,
-            lastSeen: new Date(),
-          };
-        });
-
-        return newStatus;
+      const statusMap: DisplayStatus = {};
+      data.displays?.forEach((display: any) => {
+        statusMap[display.displayId] = {
+          isOnline: display.isOnline,
+          clientCount: display.clientCount || 0,
+          lastSeen: display.lastSeen ? new Date(display.lastSeen) : undefined,
+          lastHeartbeat: display.lastHeartbeat
+            ? new Date(display.lastHeartbeat)
+            : undefined,
+          consecutiveFailures: display.consecutiveFailures || 0,
+          responseTime: display.responseTime,
+          uptimePercentage: display.uptimePercentage,
+          connectionType: display.connectionType,
+          ipAddress: display.ipAddress,
+          disconnectionReason: display.disconnectionReason,
+          alertCount: display.alertCount || 0,
+        };
       });
+
+      setDisplayStatus(statusMap);
+      setLastUpdateTime(new Date());
+    } catch (error) {
+      console.error("Error fetching display statuses:", error);
+    }
+  }, []);
+
+  // Real-time status updates via SSE
+  useEffect(() => {
+    if (!enableRealTimeUpdates) return;
+
+    const handleDisplayStatusUpdate = (event: MessageEvent) => {
+      try {
+        const data = JSON.parse(event.data);
+        const { displayId, status } = data;
+
+        if (displayId && status) {
+          setDisplayStatus((prev) => ({
+            ...prev,
+            [displayId]: {
+              ...prev[displayId],
+              ...status,
+              lastSeen: status.lastSeen
+                ? new Date(status.lastSeen)
+                : prev[displayId]?.lastSeen,
+              lastHeartbeat: status.lastHeartbeat
+                ? new Date(status.lastHeartbeat)
+                : prev[displayId]?.lastHeartbeat,
+            },
+          }));
+          setLastUpdateTime(new Date());
+        }
+      } catch (error) {
+        console.error("Error processing display status update:", error);
+      }
     };
 
-    // Update status every 30 seconds
-    const interval = setInterval(updateStatus, 30000);
+    // Listen for SSE events if connected
+    if (isConnected && typeof window !== "undefined") {
+      const eventSource = new EventSource("/api/v1/displays/events");
 
-    // Initial update
-    updateStatus();
+      eventSource.addEventListener(
+        "display-status-changed",
+        handleDisplayStatusUpdate
+      );
+      eventSource.addEventListener(
+        "display-heartbeat",
+        handleDisplayStatusUpdate
+      );
+
+      return () => {
+        eventSource.close();
+      };
+    }
+  }, [isConnected, enableRealTimeUpdates]);
+
+  // Periodic status updates
+  useEffect(() => {
+    // Initial fetch
+    fetchDisplayStatuses();
+
+    // Set up periodic updates
+    const interval = setInterval(fetchDisplayStatuses, refreshInterval);
 
     return () => clearInterval(interval);
-  }, [isConnected]);
+  }, [fetchDisplayStatuses, refreshInterval]);
 
-  const getDisplayStatus = (displayId: string) => {
-    return (
-      displayStatus[displayId] || {
-        isOnline: false,
-        clientCount: 0,
-        lastSeen: undefined,
-      }
+  // Utility functions
+  const getDisplayStatus = useCallback(
+    (displayId: string): DisplayStatusDetail => {
+      return (
+        displayStatus[displayId] || {
+          isOnline: false,
+          clientCount: 0,
+          lastSeen: undefined,
+          lastHeartbeat: undefined,
+          consecutiveFailures: 0,
+          responseTime: undefined,
+          uptimePercentage: undefined,
+          connectionType: undefined,
+          ipAddress: undefined,
+          disconnectionReason: undefined,
+          alertCount: 0,
+        }
+      );
+    },
+    [displayStatus]
+  );
+
+  const isDisplayOnline = useCallback(
+    (displayId: string): boolean => {
+      const status = getDisplayStatus(displayId);
+      if (!status.lastSeen) return false;
+
+      const offlineThresholdMs = offlineThresholdMinutes * 60 * 1000;
+      const timeSinceLastSeen = Date.now() - status.lastSeen.getTime();
+
+      return status.isOnline && timeSinceLastSeen < offlineThresholdMs;
+    },
+    [getDisplayStatus, offlineThresholdMinutes]
+  );
+
+  const getOfflineDisplays = useCallback((): string[] => {
+    return Object.keys(displayStatus).filter(
+      (displayId) => !isDisplayOnline(displayId)
     );
-  };
+  }, [displayStatus, isDisplayOnline]);
 
-  const setDisplayOnline = (displayId: string, clientCount: number = 1) => {
-    setDisplayStatus((prev) => ({
-      ...prev,
-      [displayId]: {
-        isOnline: true,
-        clientCount,
-        lastSeen: new Date(),
-      },
-    }));
-  };
+  const getOnlineDisplays = useCallback((): string[] => {
+    return Object.keys(displayStatus).filter((displayId) =>
+      isDisplayOnline(displayId)
+    );
+  }, [displayStatus, isDisplayOnline]);
 
-  const setDisplayOffline = (displayId: string) => {
-    setDisplayStatus((prev) => ({
-      ...prev,
-      [displayId]: {
-        isOnline: false,
-        clientCount: 0,
-        lastSeen: prev[displayId]?.lastSeen || new Date(),
-      },
-    }));
-  };
+  const getDisplaysWithAlerts = useCallback((): string[] => {
+    return Object.keys(displayStatus).filter((displayId) => {
+      const status = getDisplayStatus(displayId);
+      return status.alertCount && status.alertCount > 0;
+    });
+  }, [displayStatus, getDisplayStatus]);
+
+  const getTotalUptimePercentage = useCallback((): number => {
+    const statuses = Object.values(displayStatus);
+    if (statuses.length === 0) return 100;
+
+    const totalUptime = statuses.reduce((sum, status) => {
+      return sum + (status.uptimePercentage || 0);
+    }, 0);
+
+    return totalUptime / statuses.length;
+  }, [displayStatus]);
+
+  const sendHeartbeat = useCallback(
+    async (displayId: string, clientInfo?: any): Promise<boolean> => {
+      try {
+        const response = await fetch(
+          `/api/v1/displays/${displayId}/heartbeat`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              timestamp: new Date().toISOString(),
+              clientInfo,
+            }),
+          }
+        );
+
+        if (response.ok) {
+          // Update local status optimistically
+          setDisplayStatus((prev) => ({
+            ...prev,
+            [displayId]: {
+              ...prev[displayId],
+              isOnline: true,
+              lastSeen: new Date(),
+              lastHeartbeat: new Date(),
+              consecutiveFailures: 0,
+            },
+          }));
+          return true;
+        }
+
+        return false;
+      } catch (error) {
+        console.error(
+          `Error sending heartbeat for display ${displayId}:`,
+          error
+        );
+        return false;
+      }
+    },
+    []
+  );
+
+  const refreshStatus = useCallback(async (): Promise<void> => {
+    await Promise.all([fetchDisplayStatuses(), refetchStats()]);
+  }, [fetchDisplayStatuses, refetchStats]);
+
+  // Manual status setters (for backward compatibility and testing)
+  const setDisplayOnline = useCallback(
+    (displayId: string, clientCount: number = 1) => {
+      setDisplayStatus((prev) => ({
+        ...prev,
+        [displayId]: {
+          ...prev[displayId],
+          isOnline: true,
+          clientCount,
+          lastSeen: new Date(),
+          lastHeartbeat: new Date(),
+          consecutiveFailures: 0,
+        },
+      }));
+    },
+    []
+  );
+
+  const setDisplayOffline = useCallback(
+    (displayId: string, reason?: string) => {
+      setDisplayStatus((prev) => ({
+        ...prev,
+        [displayId]: {
+          ...prev[displayId],
+          isOnline: false,
+          clientCount: 0,
+          disconnectionReason: reason,
+          consecutiveFailures: (prev[displayId]?.consecutiveFailures || 0) + 1,
+        },
+      }));
+    },
+    []
+  );
 
   return {
+    // Status data
     displayStatus,
+    monitoringStats,
+    lastUpdateTime,
+
+    // Status queries
     getDisplayStatus,
+    isDisplayOnline,
+    getOfflineDisplays,
+    getOnlineDisplays,
+    getDisplaysWithAlerts,
+    getTotalUptimePercentage,
+
+    // Actions
+    sendHeartbeat,
+    refreshStatus,
     setDisplayOnline,
     setDisplayOffline,
+
+    // Loading states
+    isLoadingStats,
+    statsError,
+
+    // Connection status
     isSSEConnected: isConnected,
+    isRealTimeEnabled: enableRealTimeUpdates,
   };
 };
