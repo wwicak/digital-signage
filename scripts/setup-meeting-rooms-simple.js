@@ -1,86 +1,13 @@
 #!/usr/bin/env node
 
 /**
- * Setup script for Meeting Room Reservation System
- * This script helps configure the meeting room system with sample data
+ * Simple Setup script for Meeting Room Reservation System
+ * This script creates sample data using direct MongoDB operations
  */
 
-const mongoose = require('mongoose');
+const { MongoClient } = require('mongodb');
 const readline = require('readline');
-const path = require('path');
 require('dotenv').config();
-
-// Since we're using CommonJS, we need to define the models inline
-// Building Model
-const BuildingSchema = new mongoose.Schema({
-  name: {
-    type: String,
-    required: [true, "Building name is required"],
-    trim: true,
-  },
-  address: {
-    type: String,
-    required: [true, "Building address is required"],
-    trim: true,
-  },
-  creation_date: {
-    type: Date,
-    default: Date.now,
-  },
-  last_update: {
-    type: Date,
-    default: Date.now,
-  },
-}, {
-  timestamps: { createdAt: "creation_date", updatedAt: "last_update" },
-});
-
-const Building = mongoose.models.Building || mongoose.model('Building', BuildingSchema);
-
-// Room Model
-const RoomSchema = new mongoose.Schema({
-  name: {
-    type: String,
-    required: [true, "Room name is required"],
-    trim: true,
-  },
-  building_id: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "Building",
-    required: [true, "Building reference is required"],
-  },
-  capacity: {
-    type: Number,
-    required: [true, "Room capacity is required"],
-    min: [1, "Capacity must be at least 1"],
-  },
-  facilities: [{
-    type: String,
-    trim: true,
-  }],
-  creation_date: {
-    type: Date,
-    default: Date.now,
-  },
-  last_update: {
-    type: Date,
-    default: Date.now,
-  },
-}, {
-  timestamps: { createdAt: "creation_date", updatedAt: "last_update" },
-});
-
-const Room = mongoose.models.Room || mongoose.model('Room', RoomSchema);
-
-// User Model (simplified for permissions)
-const UserSchema = new mongoose.Schema({
-  username: String,
-  email: String,
-  role: String,
-  permissions: [String],
-});
-
-const User = mongoose.models.User || mongoose.model('User', UserSchema);
 
 const rl = readline.createInterface({
   input: process.stdin,
@@ -92,43 +19,52 @@ const question = (query) => new Promise((resolve) => rl.question(query, resolve)
 async function connectToDatabase() {
   try {
     const mongoUri = process.env.MONGODB_URI || 'mongodb://localhost:27017/digital-signage';
-    await mongoose.connect(mongoUri);
+    const client = new MongoClient(mongoUri);
+    await client.connect();
     console.log('✅ Connected to MongoDB');
+    return client;
   } catch (error) {
     console.error('❌ Failed to connect to MongoDB:', error.message);
     process.exit(1);
   }
 }
 
-async function createSampleBuildings() {
+async function createSampleBuildings(db) {
   console.log('\n📍 Creating sample buildings...');
   
   const buildings = [
     {
       name: 'Main Office Building',
-      address: '123 Business District, Downtown City'
+      address: '123 Business District, Downtown City',
+      creation_date: new Date(),
+      last_update: new Date()
     },
     {
       name: 'Innovation Center',
-      address: '456 Tech Park, Silicon Valley'
+      address: '456 Tech Park, Silicon Valley',
+      creation_date: new Date(),
+      last_update: new Date()
     },
     {
       name: 'Conference Center',
-      address: '789 Meeting Plaza, Business District'
+      address: '789 Meeting Plaza, Business District',
+      creation_date: new Date(),
+      last_update: new Date()
     }
   ];
 
+  const buildingsCollection = db.collection('buildings');
   const createdBuildings = [];
   
   for (const buildingData of buildings) {
     try {
-      const existingBuilding = await Building.findOne({ name: buildingData.name });
+      const existingBuilding = await buildingsCollection.findOne({ name: buildingData.name });
       if (existingBuilding) {
         console.log(`⚠️  Building "${buildingData.name}" already exists`);
         createdBuildings.push(existingBuilding);
       } else {
-        const building = new Building(buildingData);
-        await building.save();
+        const result = await buildingsCollection.insertOne(buildingData);
+        const building = { ...buildingData, _id: result.insertedId };
         console.log(`✅ Created building: ${buildingData.name}`);
         createdBuildings.push(building);
       }
@@ -140,7 +76,7 @@ async function createSampleBuildings() {
   return createdBuildings;
 }
 
-async function createSampleRooms(buildings) {
+async function createSampleRooms(db, buildings) {
   console.log('\n🏢 Creating sample meeting rooms...');
   
   const roomsData = [
@@ -149,25 +85,33 @@ async function createSampleRooms(buildings) {
       name: 'Executive Boardroom',
       building_id: buildings[0]._id,
       capacity: 20,
-      facilities: ['Projector', 'Video Conference', 'Whiteboard', 'Audio System']
+      facilities: ['Projector', 'Video Conference', 'Whiteboard', 'Audio System'],
+      creation_date: new Date(),
+      last_update: new Date()
     },
     {
       name: 'Conference Room A',
       building_id: buildings[0]._id,
       capacity: 12,
-      facilities: ['Projector', 'Whiteboard', 'Phone']
+      facilities: ['Projector', 'Whiteboard', 'Phone'],
+      creation_date: new Date(),
+      last_update: new Date()
     },
     {
       name: 'Conference Room B',
       building_id: buildings[0]._id,
       capacity: 8,
-      facilities: ['TV Display', 'Whiteboard']
+      facilities: ['TV Display', 'Whiteboard'],
+      creation_date: new Date(),
+      last_update: new Date()
     },
     {
       name: 'Small Meeting Room',
       building_id: buildings[0]._id,
       capacity: 4,
-      facilities: ['TV Display']
+      facilities: ['TV Display'],
+      creation_date: new Date(),
+      last_update: new Date()
     },
     
     // Innovation Center rooms
@@ -175,19 +119,25 @@ async function createSampleRooms(buildings) {
       name: 'Innovation Lab',
       building_id: buildings[1]._id,
       capacity: 15,
-      facilities: ['Interactive Whiteboard', 'Video Conference', 'Projector', 'Sound System']
+      facilities: ['Interactive Whiteboard', 'Video Conference', 'Projector', 'Sound System'],
+      creation_date: new Date(),
+      last_update: new Date()
     },
     {
       name: 'Brainstorm Room',
       building_id: buildings[1]._id,
       capacity: 6,
-      facilities: ['Whiteboard', 'Flip Chart', 'Markers']
+      facilities: ['Whiteboard', 'Flip Chart', 'Markers'],
+      creation_date: new Date(),
+      last_update: new Date()
     },
     {
       name: 'Tech Demo Room',
       building_id: buildings[1]._id,
       capacity: 10,
-      facilities: ['Large Display', 'Video Conference', 'Audio System']
+      facilities: ['Large Display', 'Video Conference', 'Audio System'],
+      creation_date: new Date(),
+      last_update: new Date()
     },
     
     // Conference Center rooms
@@ -195,27 +145,34 @@ async function createSampleRooms(buildings) {
       name: 'Grand Hall',
       building_id: buildings[2]._id,
       capacity: 100,
-      facilities: ['Stage', 'Microphones', 'Projector', 'Audio System', 'Lighting']
+      facilities: ['Stage', 'Microphones', 'Projector', 'Audio System', 'Lighting'],
+      creation_date: new Date(),
+      last_update: new Date()
     },
     {
       name: 'Seminar Room 1',
       building_id: buildings[2]._id,
       capacity: 30,
-      facilities: ['Projector', 'Audio System', 'Whiteboard']
+      facilities: ['Projector', 'Audio System', 'Whiteboard'],
+      creation_date: new Date(),
+      last_update: new Date()
     },
     {
       name: 'Seminar Room 2',
       building_id: buildings[2]._id,
       capacity: 25,
-      facilities: ['TV Display', 'Audio System', 'Whiteboard']
+      facilities: ['TV Display', 'Audio System', 'Whiteboard'],
+      creation_date: new Date(),
+      last_update: new Date()
     }
   ];
 
+  const roomsCollection = db.collection('rooms');
   const createdRooms = [];
   
   for (const roomData of roomsData) {
     try {
-      const existingRoom = await Room.findOne({ 
+      const existingRoom = await roomsCollection.findOne({ 
         name: roomData.name, 
         building_id: roomData.building_id 
       });
@@ -224,8 +181,8 @@ async function createSampleRooms(buildings) {
         console.log(`⚠️  Room "${roomData.name}" already exists in building`);
         createdRooms.push(existingRoom);
       } else {
-        const room = new Room(roomData);
-        await room.save();
+        const result = await roomsCollection.insertOne(roomData);
+        const room = { ...roomData, _id: result.insertedId };
         console.log(`✅ Created room: ${roomData.name} (${roomData.capacity} capacity)`);
         createdRooms.push(room);
       }
@@ -237,29 +194,33 @@ async function createSampleRooms(buildings) {
   return createdRooms;
 }
 
-async function setupAdminPermissions() {
+async function setupAdminPermissions(db) {
   console.log('\n👤 Setting up admin permissions for meeting rooms...');
-
+  
   try {
+    const usersCollection = db.collection('users');
+    
     // Find admin users
-    let adminUsers = await User.find({ role: 'admin' });
-
+    let adminUsers = await usersCollection.find({ role: 'admin' }).toArray();
+    
     if (adminUsers.length === 0) {
       console.log('⚠️  No admin users found. Creating a default admin user...');
-
+      
       // Create a default admin user
-      const defaultAdmin = new User({
+      const defaultAdmin = {
         username: 'admin',
         email: 'admin@example.com',
         role: 'admin',
-        permissions: []
-      });
-
-      await defaultAdmin.save();
-      adminUsers = [defaultAdmin];
+        permissions: [],
+        creation_date: new Date(),
+        last_update: new Date()
+      };
+      
+      const result = await usersCollection.insertOne(defaultAdmin);
+      adminUsers = [{ ...defaultAdmin, _id: result.insertedId }];
       console.log('✅ Created default admin user (username: admin, email: admin@example.com)');
     }
-
+    
     // Add meeting room permissions to admin users
     const meetingRoomPermissions = [
       'building:read',
@@ -280,25 +241,27 @@ async function setupAdminPermissions() {
       'calendar:delete',
       'dashboard:read'
     ];
-
+    
     for (const admin of adminUsers) {
-      let updated = false;
-
-      for (const permission of meetingRoomPermissions) {
-        if (!admin.permissions.includes(permission)) {
-          admin.permissions.push(permission);
-          updated = true;
-        }
-      }
-
-      if (updated) {
-        await admin.save();
+      const currentPermissions = admin.permissions || [];
+      const newPermissions = [...new Set([...currentPermissions, ...meetingRoomPermissions])];
+      
+      if (newPermissions.length > currentPermissions.length) {
+        await usersCollection.updateOne(
+          { _id: admin._id },
+          { 
+            $set: { 
+              permissions: newPermissions,
+              last_update: new Date()
+            }
+          }
+        );
         console.log(`✅ Updated permissions for admin: ${admin.username}`);
       } else {
         console.log(`✅ Admin ${admin.username} already has meeting room permissions`);
       }
     }
-
+    
   } catch (error) {
     console.error('❌ Failed to setup admin permissions:', error.message);
   }
@@ -328,13 +291,6 @@ async function displaySummary(buildings, rooms) {
   console.log('   • Calendar Sync - Connect Google/Outlook calendars');
   console.log('3. Add the Meeting Room Display widget to your digital signage displays');
   
-  console.log('\n🔧 Calendar Integration Setup:');
-  console.log('To enable calendar integration, you need to:');
-  console.log('1. Set up Google OAuth 2.0 credentials');
-  console.log('2. Set up Microsoft Graph API credentials');
-  console.log('3. Add the credentials to your .env file');
-  console.log('4. Restart the server');
-  
   console.log('\n✨ Your meeting room reservation system is ready!');
 }
 
@@ -342,15 +298,18 @@ async function main() {
   console.log('🚀 Meeting Room Reservation System Setup');
   console.log('========================================');
   
+  let client;
+  
   try {
-    await connectToDatabase();
+    client = await connectToDatabase();
+    const db = client.db();
     
     const answer = await question('\nDo you want to create sample buildings and rooms? (y/N): ');
     
     if (answer.toLowerCase() === 'y' || answer.toLowerCase() === 'yes') {
-      const buildings = await createSampleBuildings();
-      const rooms = await createSampleRooms(buildings);
-      await setupAdminPermissions();
+      const buildings = await createSampleBuildings(db);
+      const rooms = await createSampleRooms(db, buildings);
+      await setupAdminPermissions(db);
       await displaySummary(buildings, rooms);
     } else {
       console.log('Setup cancelled. You can run this script again anytime.');
@@ -360,7 +319,9 @@ async function main() {
     console.error('❌ Setup failed:', error.message);
   } finally {
     rl.close();
-    await mongoose.disconnect();
+    if (client) {
+      await client.close();
+    }
     console.log('\n👋 Goodbye!');
   }
 }
@@ -369,7 +330,6 @@ async function main() {
 process.on('SIGINT', async () => {
   console.log('\n\n⚠️  Setup interrupted');
   rl.close();
-  await mongoose.disconnect();
   process.exit(0);
 });
 
