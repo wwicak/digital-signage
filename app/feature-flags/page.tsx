@@ -7,6 +7,18 @@ import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Checkbox } from "@/components/ui/checkbox";
+import {
   Settings,
   Menu,
   Puzzle,
@@ -16,7 +28,9 @@ import {
   Trash2,
   Users,
   Shield,
-  AlertTriangle
+  AlertTriangle,
+  Save,
+  X
 } from "lucide-react";
 import {
   useFeatureFlags,
@@ -36,6 +50,18 @@ import Frame from "@/components/Admin/Frame";
 const FeatureFlagsPage: React.FC = () => {
   const [selectedType, setSelectedType] = useState<FeatureFlagType | "all">("all");
   const [editingFlag, setEditingFlag] = useState<IFeatureFlag | null>(null);
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [editFormData, setEditFormData] = useState<{
+    displayName: string;
+    description: string;
+    enabled: boolean;
+    allowedRoles: UserRoleName[];
+  }>({
+    displayName: "",
+    description: "",
+    enabled: true,
+    allowedRoles: []
+  });
 
   const { data: featureFlags, isLoading, error } = useFeatureFlags();
   const updateFeatureFlag = useUpdateFeatureFlag();
@@ -63,14 +89,66 @@ const FeatureFlagsPage: React.FC = () => {
       toast.success(`${flag.displayName} ${!flag.enabled ? 'enabled' : 'disabled'}`);
     } catch (error: any) {
       console.error('Failed to update feature flag:', error);
-      toast.error(`Failed to update ${flag.displayName}: ${error?.response?.data?.message || error.message}`);
+      const errorMessage = error?.response?.data?.message || error.message;
+      if (errorMessage.includes('Access denied') || errorMessage.includes('Cannot update')) {
+        toast.error(`Permission denied: Only super admins can modify feature flags`);
+      } else {
+        toast.error(`Failed to update ${flag.displayName}: ${errorMessage}`);
+      }
     }
   };
 
   const handleEditFlag = (flag: IFeatureFlag) => {
     setEditingFlag(flag);
-    // For now, just show a toast. Later we can implement a proper edit dialog
-    toast.info(`Edit functionality for "${flag.displayName}" - Coming soon!`);
+    setEditFormData({
+      displayName: flag.displayName,
+      description: flag.description || "",
+      enabled: flag.enabled,
+      allowedRoles: [...flag.allowedRoles]
+    });
+    setIsEditDialogOpen(true);
+  };
+
+  const handleSaveEdit = async () => {
+    if (!editingFlag) return;
+
+    try {
+      await updateFeatureFlag.mutateAsync({
+        id: editingFlag._id!,
+        data: editFormData
+      });
+      toast.success(`${editFormData.displayName} updated successfully`);
+      setIsEditDialogOpen(false);
+      setEditingFlag(null);
+    } catch (error: any) {
+      console.error('Failed to update feature flag:', error);
+      const errorMessage = error?.response?.data?.message || error.message;
+      if (errorMessage.includes('Access denied') || errorMessage.includes('Cannot update')) {
+        toast.error(`Permission denied: Only super admins can modify feature flags`);
+      } else {
+        toast.error(`Failed to update ${editFormData.displayName}: ${errorMessage}`);
+      }
+    }
+  };
+
+  const handleCancelEdit = () => {
+    setIsEditDialogOpen(false);
+    setEditingFlag(null);
+    setEditFormData({
+      displayName: "",
+      description: "",
+      enabled: true,
+      allowedRoles: []
+    });
+  };
+
+  const handleRoleToggle = (role: UserRoleName, checked: boolean) => {
+    setEditFormData(prev => ({
+      ...prev,
+      allowedRoles: checked
+        ? [...prev.allowedRoles, role]
+        : prev.allowedRoles.filter(r => r !== role)
+    }));
   };
 
   const handleDeleteFlag = async (flag: IFeatureFlag) => {
@@ -84,7 +162,12 @@ const FeatureFlagsPage: React.FC = () => {
       toast.success(`${flag.displayName} deleted successfully`);
     } catch (error: any) {
       console.error('Failed to delete feature flag:', error);
-      toast.error(`Failed to delete ${flag.displayName}: ${error?.response?.data?.message || error.message}`);
+      const errorMessage = error?.response?.data?.message || error.message;
+      if (errorMessage.includes('Access denied') || errorMessage.includes('Cannot delete')) {
+        toast.error(`Permission denied: Only super admins can delete feature flags`);
+      } else {
+        toast.error(`Failed to delete ${flag.displayName}: ${errorMessage}`);
+      }
     }
   };
 
@@ -268,6 +351,82 @@ const FeatureFlagsPage: React.FC = () => {
           </div>
         </TabsContent>
       </Tabs>
+
+      {/* Edit Feature Flag Dialog */}
+      <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
+        <DialogContent className="sm:max-w-[600px]">
+          <DialogHeader>
+            <DialogTitle>Edit Feature Flag</DialogTitle>
+            <DialogDescription>
+              Modify the feature flag settings. Only super admins can make changes.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="grid gap-4 py-4">
+            <div className="grid gap-2">
+              <Label htmlFor="displayName">Display Name</Label>
+              <Input
+                id="displayName"
+                value={editFormData.displayName}
+                onChange={(e) => setEditFormData(prev => ({ ...prev, displayName: e.target.value }))}
+                placeholder="Enter display name"
+              />
+            </div>
+
+            <div className="grid gap-2">
+              <Label htmlFor="description">Description</Label>
+              <Textarea
+                id="description"
+                value={editFormData.description}
+                onChange={(e) => setEditFormData(prev => ({ ...prev, description: e.target.value }))}
+                placeholder="Enter description (optional)"
+                rows={3}
+              />
+            </div>
+
+            <div className="flex items-center space-x-2">
+              <Switch
+                id="enabled"
+                checked={editFormData.enabled}
+                onCheckedChange={(checked) => setEditFormData(prev => ({ ...prev, enabled: checked }))}
+              />
+              <Label htmlFor="enabled">Enabled</Label>
+            </div>
+
+            <div className="grid gap-2">
+              <Label>Allowed Roles</Label>
+              <div className="grid grid-cols-2 gap-2">
+                {Object.values(UserRoleName).map((role) => (
+                  <div key={role} className="flex items-center space-x-2">
+                    <Checkbox
+                      id={role}
+                      checked={editFormData.allowedRoles.includes(role)}
+                      onCheckedChange={(checked) => handleRoleToggle(role, checked as boolean)}
+                    />
+                    <Label htmlFor={role} className="text-sm">
+                      {role.replace('_', ' ')}
+                    </Label>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          <DialogFooter>
+            <Button variant="outline" onClick={handleCancelEdit}>
+              <X className="h-4 w-4 mr-2" />
+              Cancel
+            </Button>
+            <Button
+              onClick={handleSaveEdit}
+              disabled={updateFeatureFlag.isPending || !editFormData.displayName.trim()}
+            >
+              <Save className="h-4 w-4 mr-2" />
+              {updateFeatureFlag.isPending ? 'Saving...' : 'Save Changes'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </Frame>
   );
 };
