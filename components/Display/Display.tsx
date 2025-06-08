@@ -106,13 +106,18 @@ const Display: React.FC<IDisplayComponentProps> = React.memo(({ display }) => {
   const renderWidget = useCallback((widget: any) => {
     const WidgetDefinition: IBaseWidget | undefined = Widgets[widget.type]
     const WidgetComponent = WidgetDefinition ? WidgetDefinition.Widget : EmptyWidget
-    
+
     return (
-      <div key={widget._id} className={'widget-wrapper'}>
+      <div
+        key={widget._id}
+        className={`w-full h-full overflow-hidden transition-all duration-300 ease-in-out bg-gray-100 bg-opacity-10 ${
+          currentLayout === 'spaced' ? 'rounded-md' : 'rounded-none'
+        } ${isPortrait ? 'min-h-[120px]' : ''}`}
+      >
         <WidgetComponent {...(widget.data ? { data: widget.data } : {})} />
       </div>
     )
-  }, [])
+  }, [currentLayout, isPortrait])
 
   // Determine orientation-specific styling and grid configuration
   const isPortrait = state.orientation === 'portrait'
@@ -130,7 +135,15 @@ const Display: React.FC<IDisplayComponentProps> = React.memo(({ display }) => {
      * Assuming this.state.statusBar (from displayData.statusBar.elements) is string[]
      */
     <Frame statusBar={state.statusBar?.elements || DEFAULT_STATUS_BAR} orientation={state.orientation}>
-      <div className={`gridContainer ${orientationClass}`} ref={containerRef}>
+      <div
+        className={`flex-1 overflow-hidden transition-all duration-300 ease-in-out ${
+          currentLayout === 'spaced' ? 'mb-2' : 'mb-0'
+        } ${orientationClass}`}
+        ref={containerRef}
+        style={{
+          marginBottom: currentLayout === 'spaced' ? '10px' : '0px'
+        }}
+      >
         <RglComponent
           className='layout' // Default class, react-grid-layout uses this
           isDraggable={false} // From original JS
@@ -145,44 +158,7 @@ const Display: React.FC<IDisplayComponentProps> = React.memo(({ display }) => {
         >
           {state.widgets.map(renderWidget)}
         </RglComponent>
-        <style jsx>
-          {`
-            .gridContainer {
-              flex: 1;
-              overflow: hidden; /* Important for RGL and scrolling */
-              margin-bottom: ${currentLayout === 'spaced' ? '10px' : '0px'};
-              transition: all 0.3s ease-in-out;
-              /* background: #eee; */ /* Optional: for visualizing grid container */
-            }
-            
-            /* Portrait orientation styles */
-            .gridContainer.portrait-display {
-              /* Container adjustments for portrait mode */
-              width: 100%;
-              height: 100%;
-            }
-            
-            /* Landscape orientation styles (default) */
-            .gridContainer.landscape-display {
-              /* Container adjustments for landscape mode */
-              width: 100%;
-              height: 100%;
-            }
-            
-            .widget-wrapper { /* Renamed from .widget */
-              border-radius: ${currentLayout === 'spaced' ? '6px' : '0px'};
-              overflow: hidden; /* Clip widget content */
-              background-color: rgba(200,200,200,0.1); /* Example placeholder background */
-              transition: all 0.3s ease-in-out; /* Smooth transitions for orientation changes */
-            }
-            
-            /* Portrait-specific widget adjustments */
-            .portrait-display .widget-wrapper {
-              /* Adjust widget styling for portrait orientation */
-              min-height: ${isPortrait ? '120px' : 'auto'}; /* Ensure minimum height in portrait */
-            }
-          `}
-        </style>
+
       </div>
     </Frame>
   )

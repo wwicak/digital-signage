@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useCallback, Suspense, memo } from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faThLarge, faTh, faPencilAlt } from '@fortawesome/free-solid-svg-icons'
+import { faThLarge, faTh, faPencilAlt, faDesktop, faMobile } from '@fortawesome/free-solid-svg-icons'
 import GridLayout, { Layout as RglLayout } from 'react-grid-layout'
 import { useSearchParams } from 'next/navigation'
 import { DragDropContext, Droppable, DropResult } from '@hello-pangea/dnd'
@@ -103,6 +103,10 @@ const LayoutAdminContent = memo(function LayoutAdminContent() {
   
   const handleLayoutTypeChange = (name: string, checked: boolean): void => {
     context.updateLayout(checked ? 'spaced' : 'compact')
+  }
+
+  const handleOrientationChange = (name: string, checked: boolean): void => {
+    context.updateOrientation(checked ? 'portrait' : 'landscape')
   }
 
   const rglLayout: RglLayout[] = widgets.map(widget => ({
@@ -211,13 +215,27 @@ const LayoutAdminContent = memo(function LayoutAdminContent() {
             checked={context.state.layout === 'spaced'}
             onValueChange={handleLayoutTypeChange}
           />
+          <Switch
+            name='orientation'
+            checkedLabel={'Portrait'}
+            uncheckedLabel={'Landscape'}
+            checkedIcon={faMobile}
+            uncheckedIcon={faDesktop}
+            checked={context.state.orientation === 'portrait'}
+            onValueChange={handleOrientationChange}
+          />
         </Form>
       </div>
 
-      <div className='layout' style={{ borderRadius: context.state.layout === 'spaced' ? '8px' : '0px' }}>
+      <div className='layout' style={{
+        borderRadius: context.state.layout === 'spaced' ? '8px' : '0px',
+        aspectRatio: context.state.orientation === 'portrait' ? '9/16' : '16/9',
+        maxWidth: context.state.orientation === 'portrait' ? '600px' : '100%',
+        margin: context.state.orientation === 'portrait' ? '0 auto' : '0'
+      }}>
         <GridLayoutWithWidth
           layout={rglLayout}
-          cols={6}
+          cols={context.state.orientation === 'portrait' ? 4 : 6}
           onLayoutChange={handleLayoutChange}
           draggableCancel={'.ReactModalPortal,.controls'}
           margin={context.state.layout === 'spaced' ? [12, 12] : [4, 4]}
