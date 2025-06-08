@@ -1,15 +1,16 @@
+"use client";
+
 import React, { useState } from "react";
-import type { GetServerSideProps } from "next";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { 
-  Settings, 
-  Menu, 
-  Puzzle, 
-  Star, 
+import {
+  Settings,
+  Menu,
+  Puzzle,
+  Star,
   Plus,
   Edit,
   Trash2,
@@ -17,29 +18,25 @@ import {
   Shield,
   AlertTriangle
 } from "lucide-react";
-import { 
-  useFeatureFlags, 
-  useUpdateFeatureFlag, 
-  useDeleteFeatureFlag 
+import {
+  useFeatureFlags,
+  useUpdateFeatureFlag,
+  useDeleteFeatureFlag
 } from "@/hooks/useFeatureFlags";
-import { 
-  IFeatureFlag, 
-  FeatureFlagType, 
-  FeatureFlagName 
+import {
+  IFeatureFlag,
+  FeatureFlagType,
+  FeatureFlagName
 } from "@/lib/types/feature-flags";
 import { UserRoleName } from "@/lib/models/User";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
-import { requireAuth } from "@/lib/helpers/auth_helper";
-import { canReadFeatureFlags } from "@/lib/helpers/rbac_helper";
+import Frame from "@/components/Admin/Frame";
 
-interface FeatureFlagsPageProps {
-  user: any;
-}
-
-const FeatureFlagsPage: React.FC<FeatureFlagsPageProps> = ({ user }) => {
+const FeatureFlagsPage: React.FC = () => {
   const [selectedType, setSelectedType] = useState<FeatureFlagType | "all">("all");
-  
+  const [editingFlag, setEditingFlag] = useState<IFeatureFlag | null>(null);
+
   const { data: featureFlags, isLoading, error } = useFeatureFlags();
   const updateFeatureFlag = useUpdateFeatureFlag();
   const deleteFeatureFlag = useDeleteFeatureFlag();
@@ -58,14 +55,22 @@ const FeatureFlagsPage: React.FC<FeatureFlagsPageProps> = ({ user }) => {
 
   const handleToggleEnabled = async (flag: IFeatureFlag) => {
     try {
+      console.log('Toggling feature flag:', flag.name, 'from', flag.enabled, 'to', !flag.enabled);
       await updateFeatureFlag.mutateAsync({
         id: flag._id!,
         data: { enabled: !flag.enabled }
       });
       toast.success(`${flag.displayName} ${!flag.enabled ? 'enabled' : 'disabled'}`);
-    } catch (error) {
-      toast.error(`Failed to update ${flag.displayName}`);
+    } catch (error: any) {
+      console.error('Failed to update feature flag:', error);
+      toast.error(`Failed to update ${flag.displayName}: ${error?.response?.data?.message || error.message}`);
     }
+  };
+
+  const handleEditFlag = (flag: IFeatureFlag) => {
+    setEditingFlag(flag);
+    // For now, just show a toast. Later we can implement a proper edit dialog
+    toast.info(`Edit functionality for "${flag.displayName}" - Coming soon!`);
   };
 
   const handleDeleteFlag = async (flag: IFeatureFlag) => {
@@ -74,10 +79,12 @@ const FeatureFlagsPage: React.FC<FeatureFlagsPageProps> = ({ user }) => {
     }
 
     try {
+      console.log('Deleting feature flag:', flag.name);
       await deleteFeatureFlag.mutateAsync(flag._id!);
       toast.success(`${flag.displayName} deleted successfully`);
-    } catch (error) {
-      toast.error(`Failed to delete ${flag.displayName}`);
+    } catch (error: any) {
+      console.error('Failed to delete feature flag:', error);
+      toast.error(`Failed to delete ${flag.displayName}: ${error?.response?.data?.message || error.message}`);
     }
   };
 
@@ -124,11 +131,7 @@ const FeatureFlagsPage: React.FC<FeatureFlagsPageProps> = ({ user }) => {
 
   if (isLoading) {
     return (
-      <div className="container mx-auto p-6">
-        <div className="flex items-center gap-2 mb-6">
-          <Settings className="h-6 w-6" />
-          <h1 className="text-2xl font-bold">Feature Flags</h1>
-        </div>
+      <Frame loggedIn={true} title="Feature Flags">
         <div className="grid gap-4">
           {[1, 2, 3].map(i => (
             <Card key={i} className="animate-pulse">
@@ -142,33 +145,28 @@ const FeatureFlagsPage: React.FC<FeatureFlagsPageProps> = ({ user }) => {
             </Card>
           ))}
         </div>
-      </div>
+      </Frame>
     );
   }
 
   if (error) {
     return (
-      <div className="container mx-auto p-6">
-        <div className="flex items-center gap-2 mb-6">
-          <AlertTriangle className="h-6 w-6 text-destructive" />
-          <h1 className="text-2xl font-bold">Feature Flags</h1>
-        </div>
+      <Frame loggedIn={true} title="Feature Flags">
         <Card className="border-destructive">
           <CardContent className="pt-6">
-            <p className="text-destructive">Failed to load feature flags. Please try again.</p>
+            <div className="flex items-center gap-2">
+              <AlertTriangle className="h-5 w-5 text-destructive" />
+              <p className="text-destructive">Failed to load feature flags. Please try again.</p>
+            </div>
           </CardContent>
         </Card>
-      </div>
+      </Frame>
     );
   }
 
   return (
-    <div className="container mx-auto p-6">
+    <Frame loggedIn={true} title="Feature Flags">
       <div className="flex items-center justify-between mb-6">
-        <div className="flex items-center gap-2">
-          <Settings className="h-6 w-6" />
-          <h1 className="text-2xl font-bold">Feature Flags</h1>
-        </div>
         <Button>
           <Plus className="h-4 w-4 mr-2" />
           Add Feature Flag
@@ -217,15 +215,22 @@ const FeatureFlagsPage: React.FC<FeatureFlagsPageProps> = ({ user }) => {
                         checked={flag.enabled}
                         onCheckedChange={() => handleToggleEnabled(flag)}
                         disabled={updateFeatureFlag.isPending}
+                        title={`Toggle ${flag.displayName} ${flag.enabled ? 'off' : 'on'}`}
                       />
-                      <Button variant="ghost" size="sm">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleEditFlag(flag)}
+                        title={`Edit ${flag.displayName}`}
+                      >
                         <Edit className="h-4 w-4" />
                       </Button>
-                      <Button 
-                        variant="ghost" 
+                      <Button
+                        variant="ghost"
                         size="sm"
                         onClick={() => handleDeleteFlag(flag)}
                         disabled={deleteFeatureFlag.isPending}
+                        title={`Delete ${flag.displayName}`}
                       >
                         <Trash2 className="h-4 w-4" />
                       </Button>
@@ -263,38 +268,8 @@ const FeatureFlagsPage: React.FC<FeatureFlagsPageProps> = ({ user }) => {
           </div>
         </TabsContent>
       </Tabs>
-    </div>
+    </Frame>
   );
-};
-
-export const getServerSideProps = async (context: any) => {
-  try {
-    const user = await requireAuth(context.req as any);
-    
-    // Check if user can read feature flags
-    const canRead = await canReadFeatureFlags(user);
-    if (!canRead) {
-      return {
-        redirect: {
-          destination: '/dashboard',
-          permanent: false,
-        },
-      };
-    }
-
-    return {
-      props: {
-        user: JSON.parse(JSON.stringify(user)),
-      },
-    };
-  } catch (error) {
-    return {
-      redirect: {
-        destination: '/login',
-        permanent: false,
-      },
-    };
-  }
 };
 
 export default FeatureFlagsPage;
