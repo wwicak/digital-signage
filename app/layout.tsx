@@ -1,12 +1,12 @@
 import React from 'react'
 import StyledComponentsRegistry from './lib/registry'
 import { Providers } from './providers'
+import { Edit, X, Trash2, Plus, Minus, Eye, User, Settings, Key, Tv, Grid3X3, Grid2X2, Images, Image, Play, Pause, Stop, Clock, Calendar, ExternalLink, Download, Upload, Save, LogOut, ChevronDown, ChevronUp, Layout, Cast, Smartphone, Tablet, Monitor } from 'lucide-react'
 
 // Import global styles
 import '../styles/globals.css'
 import '../styles/GridLayoutStyles.css'
 import 'react-resizable/css/styles.css'
-import '@fortawesome/fontawesome-svg-core/styles.css'
 
 export const metadata = {
   title: 'Digital Signage',

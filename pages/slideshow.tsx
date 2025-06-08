@@ -1,6 +1,4 @@
 import React, { useState, useEffect, useRef, memo } from 'react'
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faPencilAlt, IconDefinition } from '@fortawesome/free-solid-svg-icons'
 import _ from 'lodash'
 
 import Frame from '../components/Admin/Frame'
@@ -13,6 +11,7 @@ import Dialog from '../components/Dialog'
 import { getSlideshow, updateSlideshow, ISlideshowData } from '../actions/slideshow'
 import { protect, IProtectedPageProps } from '../helpers/auth'
 import { useDisplayContext } from '../contexts/DisplayContext'
+import { Edit, X, Trash2, Plus, Minus, Eye, User, Settings, Key, Tv, Grid3X3, Grid2X2, Images, Image, Play, Pause, Stop, Clock, Calendar, ExternalLink, Download, Upload, Save, LogOut, ChevronDown, ChevronUp, Layout, Cast, Smartphone, Tablet, Monitor } from 'lucide-react'
 
 // Define the structure of a slideshow object
 interface SlideshowData extends ISlideshowData {
@@ -92,7 +91,7 @@ const SlideshowPageComponent = memo(function SlideshowPageComponent({ slideshow:
           size={(slideshow && slideshow.name && slideshow.name.length) || 20}
         />
         <div className='icon'>
-          <FontAwesomeIcon icon={faPencilAlt as IconDefinition} fixedWidth color='#828282' />
+          <LucideIcon icon={faPencilAlt as LucideIcon color='#828282' />
         </div>
       </div>
       <div className='wrapper'>

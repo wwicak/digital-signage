@@ -1,12 +1,9 @@
 import React, { useState, useRef } from 'react'
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { IconProp } from '@fortawesome/fontawesome-svg-core'
-import { faClock } from '@fortawesome/free-regular-svg-icons'
-import { faTrash, faEdit, faPlay, faGlobe, faFileImage, faFileVideo, faFileAlt } from '@fortawesome/free-solid-svg-icons'
 import * as z from 'zod'
 
 import SlideEditDialog from './SlideEditDialog' // Removed ISlideEditDialogRef, assuming default export or internal typing
 import { deleteSlide, SlideActionDataSchema } from '../../actions/slide' // ISlideData is z.infer<typeof SlideActionDataSchema>
+import { Edit, X, Trash2, Plus, Minus, Eye, User, Settings, Key, Tv, Grid3X3, Grid2X2, Images, Image, Play, Pause, Stop, Clock, Calendar, ExternalLink, Download, Upload, Save, LogOut, ChevronDown, ChevronUp, Layout, Cast, Smartphone, Tablet, Monitor } from 'lucide-react'
 
 // Zod schema for the 'value' prop, extending SlideActionDataSchema
 const SlideCardValueSchema = SlideActionDataSchema.extend({
@@ -50,7 +47,7 @@ const SlideCard: React.FC<ISlideCardProps> = ({ value, refresh = () => {} }) => 
       })
   }
 
-  const getThumbnailIcon = (slideType: string): IconProp => {
+  const getThumbnailIcon = (slideType: string): LucideIcon => {
     switch (slideType) {
       case 'youtube': // Assuming 'youtube' is a value for ISlideData.type
       case 'video': // Or if ISlideData.type can be 'video'
@@ -107,7 +104,7 @@ const SlideCard: React.FC<ISlideCardProps> = ({ value, refresh = () => {} }) => 
           style={thumbnailStyle}
         >
           {!showBackgroundImage && (
-            <FontAwesomeIcon icon={getThumbnailIcon(slideType)} fixedWidth size='lg' color='#FFFFFF' />
+            <LucideIcon icon={getThumbnailIcon(slideType) size='lg' color='#FFFFFF' />
           )}
         </div>
       </div>
@@ -117,7 +114,7 @@ const SlideCard: React.FC<ISlideCardProps> = ({ value, refresh = () => {} }) => 
         </div>
         <div className="font-sans text-sm text-gray-500 flex items-center">
           <div className="mr-1">
-            <FontAwesomeIcon icon={faClock} fixedWidth color='#878787' />
+            <LucideIcon icon={Clock color='#878787' />
           </div>
           <span>{(value.duration || 0)}s</span>
         </div>
@@ -131,7 +128,7 @@ const SlideCard: React.FC<ISlideCardProps> = ({ value, refresh = () => {} }) => 
           onKeyPress={(e) => {if(e.key === 'Enter' || e.key === ' ') handleEdit()}}
           aria-label='Edit slide'
         >
-          <FontAwesomeIcon icon={faEdit} fixedWidth color='#828282' />
+          <LucideIcon icon={Edit color='#828282' />
         </div>
         <div
           className={`ml-2 p-2 rounded-full transition-colors duration-200 ${loading ? 'cursor-not-allowed' : 'cursor-pointer hover:bg-gray-100'}`}
@@ -142,8 +139,8 @@ const SlideCard: React.FC<ISlideCardProps> = ({ value, refresh = () => {} }) => 
           aria-label='Delete slide'
           aria-disabled={loading}
         >
-          <FontAwesomeIcon
-            icon={faTrash}
+          <LucideIcon
+            icon={Trash2}
             fixedWidth
             color={loading ? '#ccc' : '#828282'}
           />

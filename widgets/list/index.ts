@@ -1,10 +1,9 @@
 import { ComponentType } from 'react'
-import { IconProp } from '@fortawesome/fontawesome-svg-core'
-import { faListUl } from '@fortawesome/free-solid-svg-icons' // Using faListUl for a generic list icon
 
 import BaseWidget, { IBaseWidget, IWidgetDefinitionArgs } from '../base_widget'
 import ListContent from './src/ListContent' // Assuming .js for now
 import ListOptions from './src/ListOptions' // Assuming .js for now
+import { Edit, X, Trash2, Plus, Minus, Eye, User, Settings, Key, Tv, Grid3X3, Grid2X2, Images, Image, Play, Pause, Stop, Clock, Calendar, ExternalLink, Download, Upload, Save, LogOut, ChevronDown, ChevronUp, Layout, Cast, Smartphone, Tablet, Monitor } from 'lucide-react'
 
 // Define the structure for a single list item
 export interface IListItem {
@@ -28,7 +27,7 @@ const listDefinitionArgs: IWidgetDefinitionArgs = {
   name: 'List',
   type: 'list', // Added 'type' field as it's required
   version: '0.1',
-  icon: faListUl as IconProp, // Use the imported icon
+  icon: faListUl , // Use the imported icon
   defaultData: {
     title: null,
     color: '#34495e', // Wet Asphalt

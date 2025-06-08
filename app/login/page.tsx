@@ -3,11 +3,10 @@
 import { useState, Suspense, memo } from 'react'
 import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faTv, faCheck, faTimes, faAngleLeft } from '@fortawesome/free-solid-svg-icons'
 
 import Frame from '../../components/Admin/Frame'
 import { login } from '../../helpers/auth'
+import { Edit, X, Trash2, Plus, Minus, Eye, User, Settings, Key, Tv, Grid3X3, Grid2X2, Images, Image, Play, Pause, Stop, Clock, Calendar, ExternalLink, Download, Upload, Save, LogOut, ChevronDown, ChevronUp, Layout, Cast, Smartphone, Tablet, Monitor } from 'lucide-react'
 
 const LoginContent = memo(function LoginContent() {
   const router = useRouter()
@@ -48,13 +47,13 @@ const LoginContent = memo(function LoginContent() {
       <div className='formContainer'>
         <div className='logo'>
           <div className='icon'>
-            <FontAwesomeIcon icon={faTv} fixedWidth size='lg' color='#7bc043' />
+            <LucideIcon icon={Tv size='lg' color='#7bc043' />
           </div>
         </div>
         <form className='form' onSubmit={handleSubmit}>
           {alert && (
             <div className={`alert-${alert}`}>
-              <FontAwesomeIcon
+              <LucideIcon
                 icon={alert === 'success' ? faCheck : faTimes}
                 fixedWidth
                 size='sm'
@@ -98,7 +97,7 @@ const LoginContent = memo(function LoginContent() {
         </form>
         <Link href='/'>
           <span className='back'>
-            <FontAwesomeIcon icon={faAngleLeft} fixedWidth /> Back to the home page
+            <LucideIcon icon={faAngleLeft /> Back to the home page
           </span>
         </Link>
       </div>

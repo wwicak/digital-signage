@@ -1,10 +1,9 @@
 import { ComponentType } from 'react'
-import { IconProp } from '@fortawesome/fontawesome-svg-core'
-import { faGlobe } from '@fortawesome/free-solid-svg-icons' // Import the specific icon
 
 import BaseWidget, { IBaseWidget, IWidgetDefinitionArgs } from '../base_widget'
 import WebContent from './src/WebContent' // Assuming .js for now
 import WebOptions from './src/WebOptions' // Assuming .js for now
+import { Edit, X, Trash2, Plus, Minus, Eye, User, Settings, Key, Tv, Grid3X3, Grid2X2, Images, Image, Play, Pause, Stop, Clock, Calendar, ExternalLink, Download, Upload, Save, LogOut, ChevronDown, ChevronUp, Layout, Cast, Smartphone, Tablet, Monitor } from 'lucide-react'
 
 // Define the structure for the web widget's default data
 export interface IWebDefaultData {
@@ -21,7 +20,7 @@ const webDefinitionArgs: IWidgetDefinitionArgs = {
   name: 'Web Page', // Changed name to be more descriptive
   type: 'web', // Added 'type' field as it's required
   version: '0.1',
-  icon: faGlobe as IconProp, // Use the imported icon
+  icon: faGlobe , // Use the imported icon
   defaultData: {
     title: null,
     url: 'https://www.plnindonesiapower.co.id/',

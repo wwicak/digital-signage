@@ -1,13 +1,11 @@
 import React, { Component } from 'react'
 import { Form, Input, InlineInputGroup, Button } from '../../../components/Form'
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faTrash } from '@fortawesome/free-solid-svg-icons'
-import { IconProp } from '@fortawesome/fontawesome-svg-core'
 import * as z from 'zod'
 
 import ListContent from './ListContent' // IListWidgetData (now inferred) is not directly used here.
 import { IListItem } from '../index' // IListItem is interface, IListDefaultData is interface
 import { ListItemSchema } from './ListContent' // Import Zod schema for IListItem
+import { Edit, X, Trash2, Plus, Minus, Eye, User, Settings, Key, Tv, Grid3X3, Grid2X2, Images, Image, Play, Pause, Stop, Clock, Calendar, ExternalLink, Download, Upload, Save, LogOut, ChevronDown, ChevronUp, Layout, Cast, Smartphone, Tablet, Monitor } from 'lucide-react'
 
 // Zod schema for IListDefaultData (used for props.data and state)
 export const ListOptionsDataSchema = z.object({
@@ -218,8 +216,8 @@ class ListOptions extends Component<IListOptionsProps, IListOptionsState> {
                   expand={false}
                 />
                 <div className={'deleteBtn'} onClick={() => this.deleteItem(index)} role='button' tabIndex={0} onKeyPress={(e) => {if(e.key === 'Enter' || e.key === ' ') this.deleteItem(index)}} aria-label='Delete item'>
-                  <FontAwesomeIcon
-                    icon={faTrash as IconProp}
+                  <LucideIcon
+                    icon={faTrash }
                     fixedWidth
                     color='#828282'
                   />

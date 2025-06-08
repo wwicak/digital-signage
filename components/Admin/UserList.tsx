@@ -1,5 +1,4 @@
 import React, { useState, forwardRef, useImperativeHandle } from 'react';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faEdit,
   faTrash,
@@ -11,6 +10,7 @@ import {
 import useUsers, { User } from '@/hooks/useUsers';
 import { UserRoleName } from '@/lib/models/User';
 import UserEditDialog from './UserEditDialog';
+import { Edit, X, Trash2, Plus, Minus, Eye, User, Settings, Key, Tv, Grid3X3, Grid2X2, Images, Image, Play, Pause, Stop, Clock, Calendar, ExternalLink, Download, Upload, Save, LogOut, ChevronDown, ChevronUp, Layout, Cast, Smartphone, Tablet, Monitor } from 'lucide-react'
 
 export interface IUserListRef {
   refresh: () => void;
@@ -63,7 +63,7 @@ const UserCard: React.FC<UserCardProps> = ({ user, onEdit, onDelete }) => {
     <div className="p-3 font-sans rounded bg-white my-3 flex flex-row items-center relative z-10 shadow-sm hover:shadow-md transition-shadow duration-200">
       <div className="flex justify-center items-center pr-3">
         <div className={`h-12 w-12 rounded flex justify-center items-center ${getRoleColor(user.role.name)}`}>
-          <FontAwesomeIcon icon={getRoleIcon(user.role.name)} fixedWidth size='lg' color='#FFFFFF' />
+          <LucideIcon icon={getRoleIcon(user.role.name) size='lg' color='#FFFFFF' />
         </div>
       </div>
       <div className="font-sans flex flex-col justify-center pr-2 flex-1 min-w-0">
@@ -87,7 +87,7 @@ const UserCard: React.FC<UserCardProps> = ({ user, onEdit, onDelete }) => {
           onKeyPress={(e) => {if(e.key === 'Enter' || e.key === ' ') onEdit(user)}}
           aria-label='Edit user'
         >
-          <FontAwesomeIcon icon={faEdit} fixedWidth color='#828282' />
+          <LucideIcon icon={Edit color='#828282' />
         </div>
         <div
           className="ml-2 p-2 rounded-full cursor-pointer transition-colors duration-200 hover:bg-gray-100"
@@ -97,7 +97,7 @@ const UserCard: React.FC<UserCardProps> = ({ user, onEdit, onDelete }) => {
           onKeyPress={(e) => {if(e.key === 'Enter' || e.key === ' ') onDelete(user)}}
           aria-label='Delete user'
         >
-          <FontAwesomeIcon icon={faTrash} fixedWidth color='#828282' />
+          <LucideIcon icon={Trash2 color='#828282' />
         </div>
       </div>
     </div>

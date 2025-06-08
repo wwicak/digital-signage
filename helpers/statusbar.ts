@@ -1,4 +1,4 @@
-import { library, config, IconProp } from '@fortawesome/fontawesome-svg-core'
+import { Edit, X, Trash2, Plus, Minus, Eye, User, Settings, Key, Tv, Grid3X3, Grid2X2, Images, Image, Play, Pause, Stop, Clock, Calendar, ExternalLink, Download, Upload, Save, LogOut, ChevronDown, ChevronUp, Layout, Cast, Smartphone, Tablet, Monitor } from 'lucide-react'
 import {
   faRss,
   faGripVertical,
@@ -18,7 +18,7 @@ library.add(faRss, faGripVertical, faClock, faCalendarAlt)
 export interface IStatusBarElementDefinition {
   // 'type' field is implicit as it's the key in StatusBarElementTypes record
   name: string; // Display name for UI, e.g., in a selection dropdown
-  icon: IconProp; // FontAwesome icon to represent this element type
+  icon: LucideIcon; // FontAwesome icon to represent this element type
   /*
    * Potentially add other properties if needed in the future,
    * e.g., a default component for rendering, or specific configuration options.
@@ -29,11 +29,11 @@ export interface IStatusBarElementDefinition {
 export const StatusBarElementTypes: Record<string, IStatusBarElementDefinition> = {
   time: {
     name: 'Time', // Capitalized for display
-    icon: faClock as IconProp,
+    icon: faClock ,
   },
   date: {
     name: 'Date', // Capitalized
-    icon: faCalendarAlt as IconProp,
+    icon: faCalendarAlt ,
   },
   spacer: {
     /*
@@ -42,7 +42,7 @@ export const StatusBarElementTypes: Record<string, IStatusBarElementDefinition> 
      * For now, assuming it's an icon-based element.
      */
     name: 'Spacer / Handle', // Clarified name
-    icon: faGripVertical as IconProp,
+    icon: faGripVertical ,
   },
   connection: {
     /*
@@ -51,13 +51,13 @@ export const StatusBarElementTypes: Record<string, IStatusBarElementDefinition> 
      * Assuming faRss is the intended icon for selection here.
      */
     name: 'Connection Status', // More descriptive name
-    icon: faRss as IconProp,
+    icon: faRss ,
   },
   /*
    * Example of adding a new one:
    * weather: {
    *   name: 'Current Weather',
-   *   icon: faCloudSun as IconProp,
+   *   icon: faCloudSun ,
    * }
    */
 }
@@ -66,7 +66,7 @@ export const StatusBarElementTypes: Record<string, IStatusBarElementDefinition> 
 export interface IStatusBarElementChoice {
   id: string; // The type key, e.g., "time"
   label: string; // The display name, e.g., "Time"
-  icon: IconProp;
+  icon: LucideIcon;
 }
 
 export const statusBarElementChoices: IStatusBarElementChoice[] = Object.keys(StatusBarElementTypes).map(typeKey => ({

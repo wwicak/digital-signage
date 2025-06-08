@@ -1,5 +1,6 @@
 import React, { ReactNode } from 'react'
 import * as z from 'zod'
+import { Container } from '@/components/ui/container'
 
 import Sidebar from './Sidebar' // Assuming Sidebar.js or Sidebar.tsx
 import { useDisplayContext } from '../../contexts/DisplayContext'
@@ -27,12 +28,14 @@ const Frame: React.FC<IFrameProps> = (props) => {
   const { state } = useDisplayContext()
 
   return (
-    <div className="flex flex-row flex-1 min-h-screen">
+    <div className="flex flex-row flex-1 min-h-screen bg-background">
       {/* Only render Sidebar when user is logged in */}
       {props.loggedIn && <Sidebar loggedIn={props.loggedIn} displayId={state.id} />}
-      <div className="flex-1 p-10 bg-gray-50 overflow-y-auto">
-        {props.children}
-      </div>
+      <main className="flex-1 overflow-y-auto">
+        <Container className="py-8">
+          {props.children}
+        </Container>
+      </main>
     </div>
   )
 }

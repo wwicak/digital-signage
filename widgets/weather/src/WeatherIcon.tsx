@@ -1,6 +1,5 @@
 import React, { Component } from 'react'
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { IconDefinition } from '@fortawesome/fontawesome-svg-core'
+import { Edit, X, Trash2, Plus, Minus, Eye, User, Settings, Key, Tv, Grid3X3, Grid2X2, Images, Image, Play, Pause, Stop, Clock, Calendar, ExternalLink, Download, Upload, Save, LogOut, ChevronDown, ChevronUp, Layout, Cast, Smartphone, Tablet, Monitor } from 'lucide-react'
 import {
   faBolt,
   faSmog,
@@ -25,14 +24,14 @@ type WeatherIconCode =
   | '50d' | '50n'
   | string; // Fallback for any other string, though specific codes are better
 
-interface WeatherIconProps {
+interface WeatherLucideIcons {
   icon?: WeatherIconCode; // Make icon prop optional as in original code (defaulted to '')
 }
 
 interface WeatherIconState {} // No state used
 
-class WeatherIcon extends Component<WeatherIconProps, WeatherIconState> {
-  convertIcon(iconCode: WeatherIconCode | undefined): IconDefinition {
+class WeatherIcon extends Component<WeatherLucideIcons, WeatherIconState> {
+  convertIcon(iconCode: WeatherIconCode | undefined): LucideIcon {
     switch (iconCode) {
       case '01d':
         return faSun
@@ -69,7 +68,7 @@ class WeatherIcon extends Component<WeatherIconProps, WeatherIconState> {
 
   render() {
     const { icon } = this.props // icon will be undefined if not provided, matching original default of ''
-    return <FontAwesomeIcon icon={this.convertIcon(icon)} size={'2x'} />
+    return <LucideIcon icon={this.convertIcon(icon) className={'2x'} />
   }
 }
 

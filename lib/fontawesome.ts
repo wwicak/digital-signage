@@ -1,6 +1,5 @@
+import { Edit, X, Trash2, Plus, Minus, Eye, User, Settings, Key, Tv, Grid3X3, Grid2X2, Images, Image, Play, Pause, Stop, Clock, Calendar, ExternalLink, Download, Upload, Save, LogOut, ChevronDown, ChevronUp, Layout, Cast, Smartphone, Tablet, Monitor } from 'lucide-react'
 // FontAwesome v6 configuration
-import { config, library } from "@fortawesome/fontawesome-svg-core";
-import "@fortawesome/fontawesome-svg-core/styles.css"; // Import the CSS
 
 // Prevent FontAwesome from adding its CSS since we're importing it manually
 config.autoAddCss = false;
@@ -44,8 +43,6 @@ import {
   faImages,
   faWindowRestore,
 } from "@fortawesome/free-regular-svg-icons";
-
-import { faChromecast } from "@fortawesome/free-brands-svg-icons";
 
 // Add all icons to the library
 library.add(

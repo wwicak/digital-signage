@@ -1,6 +1,4 @@
 import React, { useRef } from 'react'
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { IconProp } from '@fortawesome/fontawesome-svg-core'
 import {
   faTimes,
   faCog,
@@ -13,6 +11,7 @@ import { IBaseWidget } from '../../widgets/base_widget'
 import WidgetEditDialog from './WidgetEditDialog' // Removed IWidgetEditDialog import assuming it's default export or typed internally
 import * as z from 'zod'
 import { WidgetType, WidgetTypeZod } from '@/lib/models/Widget' // Import enum and its Zod schema
+import { Edit, X, Trash2, Plus, Minus, Eye, User, Settings, Key, Tv, Grid3X3, Grid2X2, Images, Image, Play, Pause, Stop, Clock, Calendar, ExternalLink, Download, Upload, Save, LogOut, ChevronDown, ChevronUp, Layout, Cast, Smartphone, Tablet, Monitor } from 'lucide-react'
 
 // Zod schema for EditableWidget props
 export const EditableWidgetPropsSchema = z.object({
@@ -53,15 +52,15 @@ const EditableWidget: React.FC<IEditableWidgetProps> = ({ id, type = WidgetType.
     <div className={'widget-editable-container'}>
       <div className={'controls'}>
         <div className={'edit-btn'} onClick={openDialog} role='button' tabIndex={0}>
-          <FontAwesomeIcon icon={faCog} size={'xs'} fixedWidth />
+          <LucideIcon icon={Settings className={'xs' />
         </div>
         <div className={'delete-btn'} onClick={handleDeleteClick} role='button' tabIndex={0}>
-          <FontAwesomeIcon icon={faTimes} size={'xs'} fixedWidth />
+          <LucideIcon icon={X className={'xs' />
         </div>
       </div>
       <div className={'info'}>
         <div className={'icon-display'}>
-          <FontAwesomeIcon icon={widgetIcon as IconProp} size={'2x'} /> {/* Cast to IconProp */}
+          <LucideIcon icon={widgetIcon  className={'2x'} /> {/* Cast to LucideIcon */}
         </div>
         <span className={'type-name'}>{widgetName}</span>
       </div>

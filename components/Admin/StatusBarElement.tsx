@@ -1,10 +1,8 @@
 import React, { Component } from 'react'
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { IconProp } from '@fortawesome/fontawesome-svg-core'
-import { faTimes } from '@fortawesome/free-solid-svg-icons'
 import { Draggable, DraggableProvided, DraggableStateSnapshot } from '@hello-pangea/dnd'
 
 import { StatusBarElementTypes, IStatusBarElementDefinition } from '../../helpers/statusbar' // Assuming statusbar.js will be typed
+import { Edit, X, Trash2, Plus, Minus, Eye, User, Settings, Key, Tv, Grid3X3, Grid2X2, Images, Image, Play, Pause, Stop, Clock, Calendar, ExternalLink, Download, Upload, Save, LogOut, ChevronDown, ChevronUp, Layout, Cast, Smartphone, Tablet, Monitor } from 'lucide-react'
 
 export interface IStatusBarElementProps {
   item: string; // Unique ID for the draggable item, e.g., "type_uniqueId"
@@ -36,7 +34,7 @@ class StatusBarElement extends Component<IStatusBarElementProps> {
     const itemTypeKey = item.includes('_') ? item.split('_')[0] : item
     
     const elementType: IStatusBarElementDefinition | undefined = StatusBarElementTypes[itemTypeKey as keyof typeof StatusBarElementTypes]
-    const iconToDisplay: IconProp = (elementType?.icon as IconProp) || faTimes // Fallback icon
+    const iconToDisplay: LucideIcon = (elementType?.icon ) || faTimes // Fallback icon
     const typeName: string = elementType?.name || itemTypeKey || 'Unknown'
 
     return (
@@ -54,12 +52,12 @@ class StatusBarElement extends Component<IStatusBarElementProps> {
           >
             <div className={'controls-overlay'}> {/* Renamed class */}
               <div className={'delete-btn'} onClick={this.handleDeleteClick} role='button' tabIndex={0} onKeyPress={(e) => {if(e.key === 'Enter' || e.key === ' ') this.handleDeleteClick()}} aria-label='Delete item'> {/* Renamed class */}
-                <FontAwesomeIcon icon={faTimes} size={'xs'} fixedWidth />
+                <LucideIcon icon={X className={'xs' />
               </div>
             </div>
             <div className={'info-content'}> {/* Renamed class */}
               <div className={'icon-display'}> {/* Renamed class */}
-                <FontAwesomeIcon icon={iconToDisplay} size={'sm'} />
+                <LucideIcon icon={iconToDisplay className={'sm'} />
               </div>
               <span className={'type-name'}>{typeName}</span> {/* Renamed class */}
             </div>

@@ -1,10 +1,6 @@
 import React, { useState } from 'react'
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { IconProp } from '@fortawesome/fontawesome-svg-core'
-import { faWindowRestore } from '@fortawesome/free-regular-svg-icons'
-import { faChromecast } from '@fortawesome/free-brands-svg-icons'
-import { faTrash, faTv, faEye, faLink } from '@fortawesome/free-solid-svg-icons'
 import OrientationPreview from './OrientationPreview'
+import { Edit, X, Trash2, Plus, Minus, Eye, User, Settings, Key, Tv, Grid3X3, Grid2X2, Images, Image, Play, Pause, Stop, Clock, Calendar, ExternalLink, Download, Upload, Save, LogOut, ChevronDown, ChevronUp, Layout, Cast, Smartphone, Tablet, Monitor } from 'lucide-react'
 
 interface IDisplayData {
   _id: string;
@@ -63,7 +59,7 @@ const ScreenCardDemo: React.FC<IScreenCardDemoProps> = ({ value, onOrientationCh
     <div className='card'>
       <div className='left'>
         <div className={'thumbnail'}>
-          <FontAwesomeIcon icon={faTv as IconProp} fixedWidth size='lg' color='#7bc043' />
+          <LucideIcon icon={faTv  size='lg' color='#7bc043' />
         </div>
       </div>
       <div className='middle'>
@@ -71,13 +67,13 @@ const ScreenCardDemo: React.FC<IScreenCardDemoProps> = ({ value, onOrientationCh
         <div className='info'>
           <div className='widgetnum'>
             <div className='icon'>
-              <FontAwesomeIcon icon={faWindowRestore as IconProp} fixedWidth color='#878787' />
+              <LucideIcon icon={faWindowRestore  color='#878787' />
             </div>
             <span className='text'>{widgetCount} widgets</span>
           </div>
           <div className='clientnum'>
             <div className='icon'>
-              <FontAwesomeIcon icon={faChromecast as IconProp} fixedWidth color='#878787' />
+              <LucideIcon icon={faChromecast  color='#878787' />
             </div>
             <span className='text'>1 client paired</span>
           </div>
@@ -101,13 +97,13 @@ const ScreenCardDemo: React.FC<IScreenCardDemoProps> = ({ value, onOrientationCh
       </div>
       <div className='right'>
         <div className='actionIcon' onClick={handleEdit} aria-label='Edit Layout'>
-          <FontAwesomeIcon icon={faEye as IconProp} fixedWidth color='#828282' />
+          <LucideIcon icon={faEye  color='#828282' />
         </div>
         <div className='actionIcon' onClick={handleView} aria-label='View Display'>
-          <FontAwesomeIcon icon={faLink as IconProp} fixedWidth color='#828282' />
+          <LucideIcon icon={faLink  color='#828282' />
         </div>
         <div className='actionIcon' onClick={handleDelete} aria-label='Delete Display'>
-          <FontAwesomeIcon icon={faTrash as IconProp} fixedWidth color='#828282' />
+          <LucideIcon icon={faTrash  color='#828282' />
         </div>
       </div>
       <style jsx>

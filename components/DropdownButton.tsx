@@ -1,19 +1,17 @@
 'use client'
 
 import React, { Component, ReactNode, CSSProperties } from 'react'
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { IconProp, IconPrefix } from '@fortawesome/fontawesome-svg-core'
+import { LucideIcon } from 'lucide-react'
+import { getIcon, type IconComponent } from '@/lib/icons'
 
 export interface IDropdownChoice {
   key: string; // Used as the value for onSelect
   name: string; // Display text for the choice
-  icon?: IconProp; // Optional: icon for the choice
-  iconPrefix?: IconPrefix; // Optional: icon prefix (e.g., 'fab' for brands)
-  // Potentially other fields like 'href' if choices can be links, or 'disabled'
+  icon?: LucideIcon | string; // Lucide icon component or icon name
 }
 
 export interface IDropdownButtonProps {
-  icon?: IconProp;
+  icon?: LucideIcon | string; // Lucide icon component or icon name
   text?: string;
   choices?: IDropdownChoice[];
   onSelect?: (key: string) => void;
@@ -77,6 +75,19 @@ class DropdownButton extends Component<IDropdownButtonProps, IDropdownButtonStat
     }
   }
 
+  renderIcon = (icon: LucideIcon | string, className: string = "w-4 h-4") => {
+    if (typeof icon === 'string') {
+      // Icon name - get from mapping
+      const IconComponent = getIcon(icon)
+      return <IconComponent className={className} />
+    } else if (typeof icon === 'function') {
+      // Direct Lucide icon component
+      const IconComponent = icon as LucideIcon
+      return <IconComponent className={className} />
+    }
+    return null
+  }
+
   render() {
     const {
       icon,
@@ -100,7 +111,7 @@ class DropdownButton extends Component<IDropdownButtonProps, IDropdownButtonStat
             onClick={this.showMenu}
             style={style}
           >
-            {icon && <div className="mr-4 inline"><FontAwesomeIcon icon={icon} /></div>}
+            {icon && <div className="mr-4 inline">{this.renderIcon(icon)}</div>}
             {text}
           </button>
         )}
@@ -122,7 +133,7 @@ class DropdownButton extends Component<IDropdownButtonProps, IDropdownButtonStat
               >
                 {choice.icon && (
                   <div className="mr-4 inline">
-                    <FontAwesomeIcon icon={choice.icon} />
+                    {this.renderIcon(choice.icon)}
                   </div>
                 )}
                 {choice.name}

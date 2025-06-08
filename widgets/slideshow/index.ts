@@ -1,10 +1,9 @@
 import { ComponentType } from 'react'
-import { IconProp } from '@fortawesome/fontawesome-svg-core'
-import { faImages } from '@fortawesome/free-solid-svg-icons' // Using faImages as it's typical for slideshows
 
 import BaseWidget, { IBaseWidget, IWidgetDefinitionArgs } from '../base_widget'
 import SlideshowContent from './src/Slideshow' // Assuming .js for now, will be .tsx later
 import SlideshowOptions from './src/SlideshowOptions' // Assuming .js for now, will be .tsx later
+import { Edit, X, Trash2, Plus, Minus, Eye, User, Settings, Key, Tv, Grid3X3, Grid2X2, Images, Image, Play, Pause, Stop, Clock, Calendar, ExternalLink, Download, Upload, Save, LogOut, ChevronDown, ChevronUp, Layout, Cast, Smartphone, Tablet, Monitor } from 'lucide-react'
 
 // Define the structure for the slideshow widget's default data
 export interface ISlideshowWidgetDefaultData {
@@ -19,7 +18,7 @@ const slideshowWidgetDefinitionArgs: IWidgetDefinitionArgs = {
   name: 'Slideshow',
   type: 'slideshow', // Added 'type' field as it's required
   version: '0.1',
-  icon: faImages as IconProp, // Use the imported icon
+  icon: faImages , // Use the imported icon
   defaultData: {
     slideshow_id: null,
     show_progressbar: true,

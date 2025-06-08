@@ -1,10 +1,9 @@
 import { ComponentType } from 'react'
-import { IconProp } from '@fortawesome/fontawesome-svg-core'
-import { faGifts } from '@fortawesome/free-solid-svg-icons' // Import the specific icon
 
 import BaseWidget, { IBaseWidget, IWidgetDefinitionArgs } from '../base_widget'
 import CongratsContent from './src/CongratsContent' // Assuming .js for now
 import CongratsOptions from './src/CongratsOptions' // Assuming .js for now
+import { Edit, X, Trash2, Plus, Minus, Eye, User, Settings, Key, Tv, Grid3X3, Grid2X2, Images, Image, Play, Pause, Stop, Clock, Calendar, ExternalLink, Download, Upload, Save, LogOut, ChevronDown, ChevronUp, Layout, Cast, Smartphone, Tablet, Monitor } from 'lucide-react'
 
 // Define the structure for the congrats widget's default data
 interface ICongratsDefaultData {
@@ -21,7 +20,7 @@ const congratsDefinitionArgs: IWidgetDefinitionArgs = {
   name: 'Congratulations',
   type: 'congrats', // Added 'type' field as it's required
   version: '0.1',
-  icon: faGifts as IconProp, // Use the imported icon
+  icon: faGifts , // Use the imported icon
   defaultData: {
     animation: 'confetti',
     text: 'Congratulations!',

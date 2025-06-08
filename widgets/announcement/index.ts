@@ -1,10 +1,9 @@
 import { ComponentType } from 'react'
-import { IconProp } from '@fortawesome/fontawesome-svg-core'
-import { faExclamationTriangle } from '@fortawesome/free-solid-svg-icons' // Import the specific icon
 
 import BaseWidget, { IBaseWidget, IWidgetDefinitionArgs } from '../base_widget'
 import AnnouncementContent from './src/AnnouncementContent' // Assuming .js for now
 import AnnouncementOptions from './src/AnnouncementOptions' // Assuming .js for now
+import { Edit, X, Trash2, Plus, Minus, Eye, User, Settings, Key, Tv, Grid3X3, Grid2X2, Images, Image, Play, Pause, Stop, Clock, Calendar, ExternalLink, Download, Upload, Save, LogOut, ChevronDown, ChevronUp, Layout, Cast, Smartphone, Tablet, Monitor } from 'lucide-react'
 
 // Define the structure for the announcement widget's default data
 interface IAnnouncementDefaultData {
@@ -21,7 +20,7 @@ const announcementDefinitionArgs: IWidgetDefinitionArgs = {
   name: 'Announcement',
   type: 'announcement', // Added 'type' field as it's required by IWidgetDefinitionArgs
   version: '0.1',
-  icon: faExclamationTriangle as IconProp, // Use the imported icon
+  icon: faExclamationTriangle , // Use the imported icon
   defaultData: {
     text: '',
     color: '#708090', // Slate gray

@@ -1,10 +1,9 @@
 import { ComponentType } from 'react'
-import { IconProp } from '@fortawesome/fontawesome-svg-core'
-import { faYoutube } from '@fortawesome/free-brands-svg-icons' // Import the specific icon
 
 import BaseWidget, { IBaseWidget, IWidgetDefinitionArgs } from '../base_widget'
 import YoutubeContent from './src/YoutubeContent' // Assuming .js for now
 import YoutubeOptions from './src/YoutubeOptions' // Assuming .js for now
+import { Edit, X, Trash2, Plus, Minus, Eye, User, Settings, Key, Tv, Grid3X3, Grid2X2, Images, Image, Play, Pause, Stop, Clock, Calendar, ExternalLink, Download, Upload, Save, LogOut, ChevronDown, ChevronUp, Layout, Cast, Smartphone, Tablet, Monitor } from 'lucide-react'
 
 // Define the structure for the YouTube widget's default data
 export interface IYoutubeDefaultData {
@@ -26,7 +25,7 @@ const youtubeDefinitionArgs: IWidgetDefinitionArgs = {
   name: 'YouTube Video', // More descriptive name
   type: 'youtube', // Added 'type' field as it's required
   version: '0.1',
-  icon: faYoutube as IconProp, // Use the imported icon
+  icon: faYoutube , // Use the imported icon
   defaultData: {
     video_id: '9xwazD5SyVg', // Example video ID
     autoplay: true,

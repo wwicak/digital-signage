@@ -1,6 +1,7 @@
 import React, { useState, ButtonHTMLAttributes, ReactNode, CSSProperties } from 'react'
-import { ButtonWithLoading } from '../ui/button-with-loading'
+import { Button as ShadcnButton } from '../ui/button'
 import { cn } from '@/lib/utils'
+import { Loader2 } from 'lucide-react'
 
 /*
  * Props for the Button component
@@ -65,7 +66,7 @@ const Button: React.FC<IButtonProps> = ({
   }
 
   return (
-    <ButtonWithLoading
+    <ShadcnButton
       variant={variant}
       size={size}
       className={cn(className)}
@@ -73,10 +74,10 @@ const Button: React.FC<IButtonProps> = ({
       {...restButtonProps} // Spread rest props first
       onClick={!isLoading && onClick ? onClickWrapper : undefined}
       disabled={isDisabled} // Explicit props later to ensure they override
-      isLoading={isLoading}
     >
+      {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
       {children || text}
-    </ButtonWithLoading>
+    </ShadcnButton>
   )
 }
 

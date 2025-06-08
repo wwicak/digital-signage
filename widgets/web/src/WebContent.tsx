@@ -2,8 +2,7 @@ import React, { useState, useEffect, useRef, useCallback, CSSProperties } from '
 // FontAwesome configuration is handled globally
 
 import * as z from 'zod'
-
-
+import { Edit, X, Trash2, Plus, Minus, Eye, User, Settings, Key, Tv, Grid3X3, Grid2X2, Images, Image, Play, Pause, Stop, Clock, Calendar, ExternalLink, Download, Upload, Save, LogOut, ChevronDown, ChevronUp, Layout, Cast, Smartphone, Tablet, Monitor } from 'lucide-react'
 
 // Zod schema for IWebDefaultData (used in props.data)
 export const WebWidgetDataSchema = z.object({

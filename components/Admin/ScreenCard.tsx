@@ -1,11 +1,19 @@
 import React, { useState } from 'react'
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { IconProp } from '@fortawesome/fontawesome-svg-core'
-import { faWindowRestore } from '@fortawesome/free-regular-svg-icons'
-import { faChromecast } from '@fortawesome/free-brands-svg-icons'
-import { faTrash, faTv, faEye, faLink, faEdit } from '@fortawesome/free-solid-svg-icons'
+import {
+  Layout,
+  Tv,
+  Eye,
+  ExternalLink,
+  Edit,
+  Trash2,
+  Cast
+} from 'lucide-react'
 import Link from 'next/link'
 import * as z from 'zod'
+import { Card, CardContent, CardHeader } from '@/components/ui/card'
+import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
+import { cn } from '@/lib/utils'
 import OrientationPreview from './OrientationPreview'
 import DisplayEditDialog from './DisplayEditDialog'
 
@@ -105,111 +113,133 @@ const ScreenCard: React.FC<IScreenCardProps> = ({ value, refresh = () => {} }) =
   const widgetCount = value && Array.isArray(value.widgets) ? value.widgets.length : 0
 
   return (
-    // The outer Link wraps the entire card. Clicks on action icons inside need stopPropagation.
-    <Link href={`/layout?display=${value?._id || ''}`} className="no-underline text-inherit block">
-      <div className="p-4 font-sans rounded-lg cursor-pointer bg-white my-10 flex flex-row justify-center relative z-10 shadow-md hover:shadow-lg transition-shadow duration-200">
-          <div className="flex justify-center items-center px-2">
-            <div className="h-16 w-16 bg-cover flex justify-center items-center border border-gray-200 rounded">
-              <FontAwesomeIcon icon={faTv as IconProp} fixedWidth size='lg' color='#7bc043' />
+    <Card className="group my-6 transition-all duration-200 hover:shadow-lg cursor-pointer">
+      <Link href={`/layout?display=${value?._id || ''}`} className="block">
+        <CardContent className="p-6">
+          <div className="flex items-center space-x-4">
+            {/* Display Icon */}
+            <div className="flex-shrink-0">
+              <div className="h-16 w-16 rounded-lg bg-primary/10 flex items-center justify-center border border-primary/20">
+                <Tv className="h-8 w-8 text-primary" />
+              </div>
             </div>
-          </div>
-          <div className="flex flex-col justify-center px-2 flex-1 min-w-0">
-            <div className="font-sans text-base overflow-hidden whitespace-nowrap text-ellipsis text-gray-600 mb-2">
-              {value?.name || 'Untitled Display'}
-            </div>
-            <div className="flex flex-row items-center">
-              <div className="font-sans text-sm text-gray-500 mr-3 flex items-center">
-                <div className="mr-1">
-                  <FontAwesomeIcon icon={faWindowRestore as IconProp} fixedWidth color='#878787' />
+
+            {/* Display Info */}
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center justify-between mb-2">
+                <h3 className="text-lg font-semibold text-foreground truncate">
+                  {value?.name || 'Untitled Display'}
+                </h3>
+                <Badge
+                  variant={value?.isOnline ? 'success' : 'destructive'}
+                  className="ml-2"
+                >
+                  {value?.isOnline ? 'Online' : 'Offline'}
+                </Badge>
+              </div>
+
+              <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
+                <div className="flex items-center gap-1">
+                  <Layout className="h-4 w-4" />
+                  <span>{widgetCount} widgets</span>
                 </div>
-                <span>{widgetCount} widgets</span>
-              </div>
-              <div className="font-sans text-sm text-gray-500 mr-3 flex items-center">
-                <div className="mr-1">
-                  <FontAwesomeIcon icon={faChromecast as IconProp} fixedWidth color='#878787' />
+                <div className="flex items-center gap-1">
+                  <Cast className="h-4 w-4" />
+                  <span>
+                    {value?.clientCount || 0} client{(value?.clientCount || 0) !== 1 ? 's' : ''} paired
+                  </span>
                 </div>
-                <span>
-                  {value?.clientCount || 0} client{(value?.clientCount || 0) !== 1 ? 's' : ''} paired
-                </span>
-              </div>
-              <div className="font-sans text-sm text-gray-500 mr-3 flex items-center gap-2">
-                <OrientationPreview orientation={value?.orientation || null} />
-                <span className="text-xs">
-                  {value?.orientation === 'portrait' ? 'Portrait' : 'Landscape'}
-                </span>
-              </div>
-              <div className={`font-sans text-sm mr-3 flex items-center ${value?.isOnline ? 'text-green-500' : 'text-red-500'}`}>
-                <span className={`text-2xl leading-3 mr-1 ${value?.isOnline ? 'text-green-500' : 'text-red-500'}`}>•</span>
-                <span>{value?.isOnline ? 'online' : 'offline'}</span>
+                <div className="flex items-center gap-2">
+                  <OrientationPreview orientation={value?.orientation || null} />
+                  <span className="text-xs">
+                    {value?.orientation === 'portrait' ? 'Portrait' : 'Landscape'}
+                  </span>
+                </div>
               </div>
             </div>
-          </div>
-          <div className="flex flex-row justify-center items-center px-2">
-            {/* Edit Display */}
-            <div
-              className="mx-1 p-2 rounded-full transition-colors duration-200 hover:bg-gray-100 flex items-center justify-center cursor-pointer"
-              onClick={handleEdit}
-              role='button'
-              tabIndex={0}
-              onKeyPress={(e: React.KeyboardEvent<HTMLDivElement>) => { if (e.key === 'Enter' || e.key === ' ') handleEdit(e as any)}}
-              aria-label='Edit Display'
-            >
-              <FontAwesomeIcon icon={faEdit as IconProp} fixedWidth color='#828282' />
-            </div>
-            {/* Edit Layout Link */}
-            <Link
-              href={`/layout?display=${value?._id || ''}`}
-              className="mx-1 p-2 rounded-full transition-colors duration-200 hover:bg-gray-100 flex items-center justify-center"
-              onClick={(e) => e.stopPropagation()}
-              aria-label='Edit Layout'
-            >
-              <FontAwesomeIcon icon={faEye as IconProp} fixedWidth color='#828282' />
-            </Link>
-            {/* View Display Link */}
-            <Link
-              href={`/display/${value?._id || ''}`}
-              className="mx-1 p-2 rounded-full transition-colors duration-200 hover:bg-gray-100 flex items-center justify-center"
-              onClick={(e) => e.stopPropagation()}
-              aria-label='View Display'
-            >
-              <FontAwesomeIcon icon={faLink as IconProp} fixedWidth color='#828282' />
-            </Link>
-            {/* Delete Action */}
-            <div
-              className="mx-1 p-2 rounded-full transition-colors duration-200 hover:bg-gray-100 flex items-center justify-center cursor-pointer"
-              onClick={handleDelete}
-              role='button'
-              tabIndex={0}
-              onKeyPress={(e: React.KeyboardEvent<HTMLDivElement>) => { if (e.key === 'Enter' || e.key === ' ') handleDelete(e as any)}}
-              aria-label='Delete Display'
-            >
-              <FontAwesomeIcon
-                icon={faTrash as IconProp}
-                fixedWidth
-                color='#828282'
-              />
+            {/* Action Buttons */}
+            <div className="flex items-center space-x-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={(e) => {
+                  e.preventDefault()
+                  e.stopPropagation()
+                  handleEdit(e as any)
+                }}
+                aria-label="Edit Display"
+                className="h-8 w-8"
+              >
+                <Edit className="h-4 w-4" />
+              </Button>
+
+              <Button
+                variant="ghost"
+                size="icon"
+                asChild
+                className="h-8 w-8"
+              >
+                <Link
+                  href={`/layout?display=${value?._id || ''}`}
+                  onClick={(e) => e.stopPropagation()}
+                  aria-label="Edit Layout"
+                >
+                  <Eye className="h-4 w-4" />
+                </Link>
+              </Button>
+
+              <Button
+                variant="ghost"
+                size="icon"
+                asChild
+                className="h-8 w-8"
+              >
+                <Link
+                  href={`/display/${value?._id || ''}`}
+                  onClick={(e) => e.stopPropagation()}
+                  aria-label="View Display"
+                >
+                  <ExternalLink className="h-4 w-4" />
+                </Link>
+              </Button>
+
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={(e) => {
+                  e.preventDefault()
+                  e.stopPropagation()
+                  handleDelete(e as any)
+                }}
+                aria-label="Delete Display"
+                className="h-8 w-8 text-destructive hover:text-destructive"
+              >
+                <Trash2 className="h-4 w-4" />
+              </Button>
             </div>
           </div>
 
-          {/* Edit Dialog */}
-          {isEditDialogOpen && (
-            <DisplayEditDialog
-              display={value ? {
-                _id: value._id,
-                name: value.name || '',
-                orientation: value.orientation,
-                layout: 'spaced' // Default layout, could be enhanced to get from display data
-              } : null}
-              isCreateMode={false}
-              onClose={() => setIsEditDialogOpen(false)}
-              onSave={() => {
-                setIsEditDialogOpen(false);
-                refresh();
-              }}
-            />
-          )}
-        </div>
-    </Link>
+        </CardContent>
+      </Link>
+
+      {/* Edit Dialog */}
+      {isEditDialogOpen && (
+        <DisplayEditDialog
+          display={value ? {
+            _id: value._id,
+            name: value.name || '',
+            orientation: value.orientation,
+            layout: 'spaced' // Default layout, could be enhanced to get from display data
+          } : null}
+          isCreateMode={false}
+          onClose={() => setIsEditDialogOpen(false)}
+          onSave={() => {
+            setIsEditDialogOpen(false);
+            refresh();
+          }}
+        />
+      )}
+    </Card>
   )
 }
 

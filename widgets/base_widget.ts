@@ -1,7 +1,7 @@
 import React, { ComponentType } from 'react'
 import EmptyWidget from '../components/Widgets/EmptyWidget' // Assuming .js or .tsx
 import EmptyWidgetOptions from '../components/Widgets/EmptyWidgetOptions' // Assuming .js or .tsx
-import { IconProp } from '@fortawesome/fontawesome-svg-core' // For the 'icon' field
+import { Edit, X, Trash2, Plus, Minus, Eye, User, Settings, Key, Tv, Grid3X3, Grid2X2, Images, Image, Play, Pause, Stop, Clock, Calendar, ExternalLink, Download, Upload, Save, LogOut, ChevronDown, ChevronUp, Layout, Cast, Smartphone, Tablet, Monitor } from 'lucide-react'
 
 // Generic widget content props interface
 export interface IWidgetContentProps<T = Record<string, any>> {
@@ -34,7 +34,7 @@ export interface IWidgetDefinitionArgs<TData = Record<string, any>> {
   name: string; // Human-readable name of the widget
   type: string; // Unique type identifier for the widget (e.g., 'clock', 'weather-map')
   version: string; // Version of the widget definition
-  icon: IconProp; // Icon to represent the widget in UI
+  icon: LucideIcon; // Icon to represent the widget in UI
   defaultData?: TData; // Default configuration data for a new instance of this widget
   WidgetComponent?: ComponentType<IWidgetContentProps<TData>>; // The actual React component to render the widget
   OptionsComponent?: ComponentType<IWidgetOptionsEditorProps<TData>>; // The React component to render widget-specific options/settings
@@ -49,7 +49,7 @@ export interface IBaseWidget<TData = Record<string, any>> {
   name: string;
   type: string;
   version: string;
-  icon: IconProp;
+  icon: LucideIcon;
   defaultData?: TData;
   Widget: ComponentType<IWidgetContentProps<TData>>; // Getter for the widget display component
   Options: ComponentType<IWidgetOptionsEditorProps<TData>>; // Getter for the widget options component
@@ -65,7 +65,7 @@ class BaseWidget implements IBaseWidget {
   public name: string
   public type: string
   public version: string
-  public icon: IconProp
+  public icon: LucideIcon
   public defaultData?: Record<string, any>
 
   // Store the components passed in definition, or use defaults

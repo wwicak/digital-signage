@@ -1,8 +1,5 @@
 import React, { ReactNode, JSX } from 'react'
 import Clock from 'react-live-clock' // react-live-clock might need @types/react-live-clock if not inherently typed
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faWifi } from '@fortawesome/free-solid-svg-icons'
-import { IconProp } from '@fortawesome/fontawesome-svg-core'
 
 /*
  * Define the structure for status bar items if they become more complex.
@@ -10,6 +7,7 @@ import { IconProp } from '@fortawesome/fontawesome-svg-core'
  * Example: 'date', 'time_1', 'connection_main'
  */
 import * as z from 'zod'
+import { Edit, X, Trash2, Plus, Minus, Eye, User, Settings, Key, Tv, Grid3X3, Grid2X2, Images, Image, Play, Pause, Stop, Clock, Calendar, ExternalLink, Download, Upload, Save, LogOut, ChevronDown, ChevronUp, Layout, Cast, Smartphone, Tablet, Monitor } from 'lucide-react'
 
 export const DisplayFramePropsSchema = z.object({
   children: z.custom<ReactNode>((val) => {
@@ -36,7 +34,7 @@ const Frame: React.FC<IDisplayFrameProps> = React.memo(({ children, statusBar = 
       case 'date':
         return <Clock key={`${type}-${index}`} ticking={true} format={'dddd, MMMM Do.'} />
       case 'connection':
-        return <FontAwesomeIcon key={`${type}-${index}`} className={'wifi-icon'} icon={faWifi as IconProp} />
+        return <LucideIcon key={`${type}-${index}`} className={'wifi-icon'} icon={faWifi } />
       case 'time':
         return <Clock key={`${type}-${index}`} ticking={true} format={'H:mm'} />
       default:

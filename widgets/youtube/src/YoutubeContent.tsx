@@ -5,8 +5,7 @@ import YouTube, { YouTubeProps, YouTubePlayer } from 'react-youtube' // Import Y
 
 // This is an interface
 import * as z from 'zod'
-
-
+import { Edit, X, Trash2, Plus, Minus, Eye, User, Settings, Key, Tv, Grid3X3, Grid2X2, Images, Image, Play, Pause, Stop, Clock, Calendar, ExternalLink, Download, Upload, Save, LogOut, ChevronDown, ChevronUp, Layout, Cast, Smartphone, Tablet, Monitor } from 'lucide-react'
 
 // Zod schema for IYoutubeDefaultData (used in props.data)
 export const YoutubeWidgetDataSchema = z.object({
@@ -62,7 +61,6 @@ class YoutubeContent extends Component<IYoutubeContentProps> {
     }
   }
 
-
   render() {
     const { data } = this.props
     // Use defaults from IYoutubeDefaultData defined in ../index.ts via props.data
@@ -87,7 +85,6 @@ class YoutubeContent extends Component<IYoutubeContentProps> {
      * const currentVideoId = extracted && extracted.service === 'youtube' ? extracted.id : null;
      */
     const currentVideoId = video_id
-
 
     const playerOpts: YouTubeProps['opts'] = {
       /*

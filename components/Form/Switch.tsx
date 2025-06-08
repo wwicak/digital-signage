@@ -1,7 +1,6 @@
 import React, { SyntheticEvent } from 'react'
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { IconProp } from '@fortawesome/fontawesome-svg-core'
 import ReactSwitch, { ReactSwitchProps } from 'react-switch'
+import { Edit, X, Trash2, Plus, Minus, Eye, User, Settings, Key, Tv, Grid3X3, Grid2X2, Images, Image, Play, Pause, Stop, Clock, Calendar, ExternalLink, Download, Upload, Save, LogOut, ChevronDown, ChevronUp, Layout, Cast, Smartphone, Tablet, Monitor } from 'lucide-react'
 
 /*
  * Props for the Switch component
@@ -15,8 +14,8 @@ export interface ISwitchProps {
   label?: string; // Optional main label for the switch group
   checkedLabel?: string; // Label for the 'checked' state side
   uncheckedLabel?: string; // Label for the 'unchecked' state side
-  checkedIcon?: IconProp; // Icon for the 'checked' state label
-  uncheckedIcon?: IconProp; // Icon for the 'unchecked' state label
+  checkedIcon?: LucideIcon; // Icon for the 'checked' state label
+  uncheckedIcon?: LucideIcon; // Icon for the 'unchecked' state label
   
   disabled?: boolean;
   color?: string; // Corresponds to onColor in ReactSwitch
@@ -101,7 +100,7 @@ const Switch: React.FC<ISwitchProps> = ({
           <label htmlFor={name} className="text-gray-500 font-sans flex items-center cursor-pointer text-sm">
               {uncheckedIcon && (
               <span className="mx-1 inline-flex items-center">
-                  <FontAwesomeIcon icon={uncheckedIcon} fixedWidth color='#828282' />
+                  <LucideIcon icon={uncheckedIcon color='#828282' />
               </span>
               )}
               {uncheckedLabel}
@@ -114,7 +113,7 @@ const Switch: React.FC<ISwitchProps> = ({
           <label htmlFor={name} className="text-gray-500 font-sans flex items-center cursor-pointer text-sm">
               {checkedIcon && (
               <span className="mx-1 inline-flex items-center">
-                  <FontAwesomeIcon icon={checkedIcon} fixedWidth color='#828282' />
+                  <LucideIcon icon={checkedIcon color='#828282' />
               </span>
               )}
               {checkedLabel}

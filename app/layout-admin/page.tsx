@@ -1,8 +1,7 @@
 'use client'
 
 import React, { useState, useEffect, useCallback, Suspense, memo } from 'react'
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faThLarge, faTh, faPencilAlt, faDesktop, faMobile } from '@fortawesome/free-solid-svg-icons'
+import { Grid3X3, Grid2X2, Edit, Monitor, Smartphone } from 'lucide-react'
 import GridLayout, { Layout as RglLayout } from 'react-grid-layout'
 import { useSearchParams } from 'next/navigation'
 import { DragDropContext, Droppable, DropResult } from '@hello-pangea/dnd'
@@ -149,14 +148,14 @@ const LayoutAdminContent = memo(function LayoutAdminContent() {
             size={(context.state.name && context.state.name.length > 0) ? context.state.name.length : undefined}
           />
           <div className='icon'>
-            <FontAwesomeIcon icon={faPencilAlt} fixedWidth color='#828282' />
+            <Edit className="w-4 h-4 text-gray-500" />
           </div>
         </div>
       </div>
 
       <div className='settings'>
         <DropdownButton
-          icon={faPencilAlt}
+          icon={Edit}
           text='Add Status Bar Item'
           onSelect={context.addStatusBarItem}
           choices={statusBarChoices}
@@ -200,7 +199,7 @@ const LayoutAdminContent = memo(function LayoutAdminContent() {
 
       <div className='settings'>
         <DropdownButton
-          icon={faPencilAlt}
+          icon={Edit}
           text='Add Widget'
           onSelect={handleAddWidget}
           choices={widgetChoices}
@@ -210,8 +209,8 @@ const LayoutAdminContent = memo(function LayoutAdminContent() {
             name='layoutStyle'
             checkedLabel={'Compact'}
             uncheckedLabel={'Spaced'}
-            checkedIcon={faTh}
-            uncheckedIcon={faThLarge}
+            checkedIcon={Grid2X2}
+            uncheckedIcon={Grid3X3}
             checked={context.state.layout === 'spaced'}
             onValueChange={handleLayoutTypeChange}
           />
@@ -219,8 +218,8 @@ const LayoutAdminContent = memo(function LayoutAdminContent() {
             name='orientation'
             checkedLabel={'Portrait'}
             uncheckedLabel={'Landscape'}
-            checkedIcon={faMobile}
-            uncheckedIcon={faDesktop}
+            checkedIcon={Smartphone}
+            uncheckedIcon={Monitor}
             checked={context.state.orientation === 'portrait'}
             onValueChange={handleOrientationChange}
           />
