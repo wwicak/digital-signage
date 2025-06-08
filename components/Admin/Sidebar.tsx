@@ -45,9 +45,10 @@ interface IMenuItem {
 export interface ISidebarProps {
   loggedIn?: boolean;
   displayId?: string | null; // This prop was passed from Frame.tsx
+  collapsed?: boolean;
 }
 
-const Sidebar: React.FC<ISidebarProps> = ({ loggedIn, displayId }) => {
+const Sidebar: React.FC<ISidebarProps> = ({ loggedIn, displayId, collapsed = false }) => {
   const router = useRouter();
   const pathname = usePathname();
   const { data: displaysData = [] } = useDisplays();
@@ -159,96 +160,95 @@ const Sidebar: React.FC<ISidebarProps> = ({ loggedIn, displayId }) => {
   }));
 
   return (
-    <Card className="min-w-[300px] max-w-[300px] min-h-screen flex flex-col border-r rounded-none lg:min-w-[300px] lg:max-w-[300px] md:min-w-[60px] md:max-w-[60px]">
-      <CardContent className="p-0 h-full flex flex-col">
-        {/* Logo/Brand Section */}
-        <div className="p-4 border-b">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center">
-              <div className="h-10 w-10 bg-primary rounded-lg flex items-center justify-center">
-                <Tv className="text-primary-foreground h-6 w-6" />
-              </div>
-              <div className="ml-3 md:hidden">
-                <h1 className="text-lg font-bold text-foreground">
-                  Digital Signage
-                </h1>
-              </div>
-            </div>
-            <div className="md:hidden">
-              <ThemeToggle />
-            </div>
+    <div className="h-full flex flex-col bg-card">
+      {/* Display Selector */}
+      {loggedIn && !collapsed && (
+        <div className="p-4 border-b border-border">
+          <div className="mb-3">
+            <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
+              Current Display
+            </p>
           </div>
+          <DropdownButton
+            onSelect={navigateToAdmin}
+            choices={dropdownChoices}
+            style={{ width: "100%" }}
+            menuStyle={{ left: 0, top: "calc(100% + 5px)", width: "100%" }}
+          >
+            <div className="flex flex-row items-center p-3 cursor-pointer border border-border rounded-lg hover:bg-accent/50 transition-colors duration-200 bg-background">
+              <div className="flex justify-center items-center pr-3">
+                <Tv className="text-primary h-4 w-4" />
+              </div>
+              <div className="flex flex-col justify-center flex-1 whitespace-nowrap overflow-hidden">
+                <span className="font-medium text-sm whitespace-nowrap overflow-hidden text-ellipsis">
+                  {context.state.name || "Select Display"}
+                </span>
+                <DisplayStatusIndicator
+                  displayId={context.state.id || undefined}
+                />
+              </div>
+              <div className="ml-auto pl-3">
+                <ChevronDown className="h-4 w-4 text-muted-foreground" />
+              </div>
+            </div>
+          </DropdownButton>
         </div>
+      )}
 
-        {/* Display Selector */}
-        {loggedIn && (
-          <div className="p-4 border-b">
-            <DropdownButton
-              onSelect={navigateToAdmin}
-              choices={dropdownChoices}
-              style={{ width: "100%" }}
-              menuStyle={{ left: 0, top: "calc(100% + 5px)", width: "100%" }}
-            >
-              <div className="flex flex-row items-center p-3 cursor-pointer border rounded-lg hover:bg-muted transition-colors duration-200">
-                <div className="flex justify-center items-center pr-4 text-xl md:pr-0">
-                  <Tv className="text-primary h-5 w-5" />
-                </div>
-                <div className="flex flex-col justify-center flex-1 whitespace-nowrap overflow-hidden md:hidden">
-                  <span className="font-semibold text-sm whitespace-nowrap overflow-hidden text-ellipsis">
-                    {context.state.name || "Select Display"}
-                  </span>
-                  <DisplayStatusIndicator
-                    displayId={context.state.id || undefined}
-                  />
-                </div>
-                <div className="ml-auto pl-3 md:hidden">
-                  <ChevronDown className="h-4 w-4" />
-                </div>
-              </div>
-            </DropdownButton>
-          </div>
-        )}
-        {/* Navigation Menu */}
-        <nav className="flex-1 p-2">
-          <ul className="space-y-1">
-            {menu.map((item) => (
-              <li key={item.id}>
-                <Button
-                  variant={item.path === pathname ? "secondary" : "ghost"}
+      {/* Navigation Menu */}
+      <nav className="flex-1 p-3">
+        <div className="space-y-1">
+          {menu.map((item) => {
+            const isActive = pathname === item.path || (pathname && pathname.startsWith(item.path.split('?')[0]));
+            return (
+              <Link key={item.id} href={item.path}>
+                <div
                   className={cn(
-                    "w-full justify-start md:justify-center h-12 px-3",
-                    item.path === pathname &&
-                      "bg-primary/10 text-primary hover:bg-primary/20",
+                    "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 group",
+                    collapsed ? "justify-center" : "justify-start",
+                    isActive
+                      ? "bg-primary/10 text-primary border border-primary/20"
+                      : "text-muted-foreground hover:text-foreground hover:bg-accent/50"
                   )}
-                  asChild
                 >
-                  <Link href={item.path}>
-                    <item.icon className="h-5 w-5" />
-                    <span className="ml-3 md:hidden font-medium">
+                  <item.icon className={cn("h-5 w-5", isActive && "text-primary")} />
+                  {!collapsed && (
+                    <span className="truncate">{item.name}</span>
+                  )}
+                  {collapsed && (
+                    <div className="absolute left-full ml-2 px-2 py-1 bg-popover text-popover-foreground text-xs rounded-md shadow-md opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-50">
                       {item.name}
-                    </span>
-                  </Link>
-                </Button>
-              </li>
-            ))}
-          </ul>
-        </nav>
+                    </div>
+                  )}
+                </div>
+              </Link>
+            );
+          })}
+        </div>
+      </nav>
 
-        {/* Logout Button */}
-        {loggedIn && (
-          <div className="p-2 border-t">
-            <Button
-              variant="ghost"
-              className="w-full justify-start md:justify-center h-12 px-3 text-destructive hover:text-destructive hover:bg-destructive/10"
-              onClick={handleLogout}
-            >
-              <LogOut className="h-5 w-5" />
-              <span className="ml-3 md:hidden font-medium">Logout</span>
-            </Button>
-          </div>
-        )}
-      </CardContent>
-    </Card>
+      {/* Logout Button */}
+      {loggedIn && (
+        <div className="p-3 border-t border-border">
+          <button
+            onClick={handleLogout}
+            className={cn(
+              "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 group w-full",
+              collapsed ? "justify-center" : "justify-start",
+              "text-destructive hover:bg-destructive/10"
+            )}
+          >
+            <LogOut className="h-5 w-5" />
+            {!collapsed && <span>Logout</span>}
+            {collapsed && (
+              <div className="absolute left-full ml-2 px-2 py-1 bg-popover text-popover-foreground text-xs rounded-md shadow-md opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-50">
+                Logout
+              </div>
+            )}
+          </button>
+        </div>
+      )}
+    </div>
   );
 };
 

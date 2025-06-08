@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from "react";
-import { NextPage } from "next";
 import Frame from "../components/Admin/Frame";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -70,7 +69,7 @@ interface IDashboardData {
   lastUpdated: string;
 }
 
-const DashboardPage: NextPage = () => {
+const DashboardPage = () => {
   const [data, setData] = useState<IDashboardData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -143,11 +142,11 @@ const DashboardPage: NextPage = () => {
   if (!data) return null;
 
   return (
-    <Frame loggedIn={true}>
+    <Frame loggedIn={true} title="Dashboard">
       <div className="space-y-6">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold tracking-tight">Dashboard</h1>
+            <h1 className="text-2xl font-bold tracking-tight">Dashboard</h1>
             <p className="text-muted-foreground">
               Meeting room system overview and statistics
             </p>
