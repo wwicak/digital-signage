@@ -139,18 +139,19 @@ const Sidebar: React.FC<ISidebarProps> = ({ loggedIn, displayId }) => {
       )}
       <ul className="list-none p-0 m-0 flex flex-col flex-1 w-full">
         {menu.map(item => (
-          <Link href={item.path} key={item.id} legacyBehavior>
-            <li className={`p-5 uppercase font-sans text-base font-semibold text-gray-600 block hover:bg-gray-100 cursor-pointer transition-colors duration-200 md:justify-center ${
-              item.path === pathname ? 'bg-gray-100' : ''
-            }`}>
-              <a className="no-underline text-inherit flex items-center md:justify-center">
-                <FontAwesomeIcon icon={item.icon} fixedWidth />
-                <span className="ml-2 md:hidden">
-                  {item.name}
-                </span>
-              </a>
-            </li>
-          </Link>
+          <li key={item.id}>
+            <Link
+              href={item.path}
+              className={`p-5 uppercase font-sans text-base font-semibold text-gray-600 block hover:bg-gray-100 cursor-pointer transition-colors duration-200 md:justify-center no-underline text-inherit flex items-center md:justify-center ${
+                item.path === pathname ? 'bg-gray-100' : ''
+              }`}
+            >
+              <FontAwesomeIcon icon={item.icon} fixedWidth />
+              <span className="ml-2 md:hidden">
+                {item.name}
+              </span>
+            </Link>
+          </li>
         ))}
       </ul>
       {loggedIn && (

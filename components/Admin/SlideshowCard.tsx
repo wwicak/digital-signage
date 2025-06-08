@@ -63,8 +63,7 @@ const SlideshowCard: React.FC<ISlideshowCardProps> = ({ value, refresh = () => {
   const slideshowTitle = value.name || 'Untitled Slideshow'
 
   return (
-    <Link href={`/slideshow/${value._id}?display=${displayId}`}>
-      <a className='slideshow-card-anchor'> {/* Use an anchor tag for proper semantics */}
+    <Link href={`/slideshow/${value._id}?display=${displayId}`} className='slideshow-card-anchor'> {/* Use Link directly for proper semantics */}
         <div className='slideshow-card'> {/* Renamed class */}
           <div className='left-content'> {/* Renamed class */}
             <div
@@ -231,7 +230,6 @@ const SlideshowCard: React.FC<ISlideshowCardProps> = ({ value, refresh = () => {
             `}
           </style>
         </div>
-      </a>
     </Link>
   )
 }

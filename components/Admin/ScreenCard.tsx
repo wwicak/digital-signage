@@ -106,9 +106,8 @@ const ScreenCard: React.FC<IScreenCardProps> = ({ value, refresh = () => {} }) =
 
   return (
     // The outer Link wraps the entire card. Clicks on action icons inside need stopPropagation.
-    <Link href={`/layout?display=${value?._id || ''}`}>
-      <a className="no-underline text-inherit block">
-        <div className="p-4 font-sans rounded-lg cursor-pointer bg-white my-10 flex flex-row justify-center relative z-10 shadow-md hover:shadow-lg transition-shadow duration-200">
+    <Link href={`/layout?display=${value?._id || ''}`} className="no-underline text-inherit block">
+      <div className="p-4 font-sans rounded-lg cursor-pointer bg-white my-10 flex flex-row justify-center relative z-10 shadow-md hover:shadow-lg transition-shadow duration-200">
           <div className="flex justify-center items-center px-2">
             <div className="h-16 w-16 bg-cover flex justify-center items-center border border-gray-200 rounded">
               <FontAwesomeIcon icon={faTv as IconProp} fixedWidth size='lg' color='#7bc043' />
@@ -158,16 +157,22 @@ const ScreenCard: React.FC<IScreenCardProps> = ({ value, refresh = () => {} }) =
               <FontAwesomeIcon icon={faEdit as IconProp} fixedWidth color='#828282' />
             </div>
             {/* Edit Layout Link */}
-            <Link href={`/layout?display=${value?._id || ''}`}>
-              <a className="mx-1 p-2 rounded-full transition-colors duration-200 hover:bg-gray-100 flex items-center justify-center" onClick={(e) => e.stopPropagation()} aria-label='Edit Layout'>
-                <FontAwesomeIcon icon={faEye as IconProp} fixedWidth color='#828282' />
-              </a>
+            <Link
+              href={`/layout?display=${value?._id || ''}`}
+              className="mx-1 p-2 rounded-full transition-colors duration-200 hover:bg-gray-100 flex items-center justify-center"
+              onClick={(e) => e.stopPropagation()}
+              aria-label='Edit Layout'
+            >
+              <FontAwesomeIcon icon={faEye as IconProp} fixedWidth color='#828282' />
             </Link>
             {/* View Display Link */}
-            <Link href={`/display/${value?._id || ''}`}>
-              <a className="mx-1 p-2 rounded-full transition-colors duration-200 hover:bg-gray-100 flex items-center justify-center" onClick={(e) => e.stopPropagation()} aria-label='View Display'>
-                <FontAwesomeIcon icon={faLink as IconProp} fixedWidth color='#828282' />
-              </a>
+            <Link
+              href={`/display/${value?._id || ''}`}
+              className="mx-1 p-2 rounded-full transition-colors duration-200 hover:bg-gray-100 flex items-center justify-center"
+              onClick={(e) => e.stopPropagation()}
+              aria-label='View Display'
+            >
+              <FontAwesomeIcon icon={faLink as IconProp} fixedWidth color='#828282' />
             </Link>
             {/* Delete Action */}
             <div
@@ -204,7 +209,6 @@ const ScreenCard: React.FC<IScreenCardProps> = ({ value, refresh = () => {} }) =
             />
           )}
         </div>
-      </a>
     </Link>
   )
 }
