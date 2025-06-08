@@ -151,8 +151,8 @@ describe('ImageOptions', () => {
     renderImageOptions()
     const mockFile = new File(['dummy'], 'test.jpg', { type: 'image/jpeg' })
     const uploadedUrl = 'http://example.com/uploaded.jpg'
-    // Assuming the mockResolvedValue should provide the structure expected by the component
-    mockStandaloneUpload.mockResolvedValueOnce({ data: { url: uploadedUrl } })
+    // Mock the response structure that standaloneUpload actually returns
+    mockStandaloneUpload.mockResolvedValueOnce({ url: uploadedUrl })
 
     fireEvent.change(screen.getByTestId('mock-input-upload'), { target: { files: [mockFile] } })
 

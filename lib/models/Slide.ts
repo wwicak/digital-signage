@@ -144,20 +144,20 @@ export const SlideTypeZod = z.nativeEnum(SlideType);
 
 // Schemas for SlideData variants
 export const ImageSlideDataSchema = z.object({
-  url: z.string().url(),
+  url: z.string().min(1), // Accept any non-empty string (relative or absolute URLs)
   alt: z.string().optional(),
   caption: z.string().optional(),
 });
 
 export const VideoSlideDataSchema = z.object({
-  url: z.string().url(),
+  url: z.string().min(1), // Accept any non-empty string (relative or absolute URLs)
   autoplay: z.boolean().optional(),
   loop: z.boolean().optional(),
   muted: z.boolean().optional(),
 });
 
 export const WebSlideDataSchema = z.object({
-  url: z.string().url(),
+  url: z.string().url(), // Keep strict URL validation for web content
   scale: z.number().optional(),
   allowInteraction: z.boolean().optional(),
 });
@@ -168,14 +168,14 @@ export const MarkdownSlideDataSchema = z.object({
 });
 
 export const PhotoSlideDataSchema = z.object({
-  url: z.string().url(),
+  url: z.string().min(1), // Accept any non-empty string (relative or absolute URLs)
   caption: z.string().optional(),
   effects: z.array(z.string()).optional(),
 });
 
 export const YoutubeSlideDataSchema = z.object({
   videoId: z.string(),
-  url: z.string().url(), // Restored .url()
+  url: z.string().url(), // Keep strict URL validation for YouTube URLs
   autoplay: z.boolean().optional(),
   startTime: z.number().optional(),
   endTime: z.number().optional(),

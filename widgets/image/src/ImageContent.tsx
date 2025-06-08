@@ -11,7 +11,7 @@ export const TImageFitSchema = z.enum(['contain', 'cover', 'fill', 'none', 'scal
 // Zod schema for the image widget's content data
 export const ImageWidgetContentDataSchema = z.object({
   title: z.string().nullable().optional(),
-  url: z.string().url().nullable().optional(), // Assuming URL if not null
+  url: z.string().min(1).nullable().optional(), // Accept any non-empty string (relative or absolute URLs)
   fit: TImageFitSchema.optional(),
   color: z.string().optional(), // Background color
   altText: z.string().optional(),
