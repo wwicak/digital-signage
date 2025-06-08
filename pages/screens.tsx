@@ -30,20 +30,12 @@ const ScreensComponent = memo(function ScreensComponent({ loggedIn, displayId }:
   }, [displayId, displayContext])
 
   const add = (): Promise<void> => {
-    return new Promise((resolve, reject) => {
-      createDisplay.mutate({ data: { name: "New Display" } }, {
-        onSuccess: () => {
-          // Type guard for ref
-          if (screenListRef && screenListRef.current) {
-            screenListRef.current.refresh()
-          }
-          resolve()
-        },
-        onError: (error) => {
-          console.error('Failed to create display:', error)
-          reject(error)
-        }
-      })
+    return new Promise((resolve) => {
+      // Open the create dialog instead of directly creating a display
+      if (screenListRef && screenListRef.current) {
+        screenListRef.current.openCreateDialog()
+      }
+      resolve()
     })
   }
 
@@ -54,8 +46,8 @@ const ScreensComponent = memo(function ScreensComponent({ loggedIn, displayId }:
         <ScreenListComponent ref={screenListRef as any} />
         <Dialog><div></div></Dialog>
         <Button
-          text={'+ Add new screen'}
-          color={'#8bc34a'}
+          text={'+ Add new display'}
+          color={'#7bc043'}
           onClick={add}
           style={{ marginLeft: 0, width: '100%' }}
         />

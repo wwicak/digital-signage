@@ -1,7 +1,8 @@
-import React, { forwardRef, useImperativeHandle } from 'react'
+import React, { forwardRef, useImperativeHandle, useState } from 'react'
 import ContentLoader from 'react-content-loader'
 
 import ScreenCard from './ScreenCard' // Assuming ScreenCard.tsx and its props
+import DisplayEditDialog from './DisplayEditDialog'
 import { useDisplays } from '../../hooks/useDisplays'
 import { useGlobalDisplaySSE } from '../../hooks/useGlobalDisplaySSE'
 
@@ -15,10 +16,12 @@ export interface IScreenListProps {
 
 export interface IScreenListRef {
   refresh: () => void;
+  openCreateDialog: () => void;
 }
 const ScreenList = forwardRef<IScreenListRef, IScreenListProps>((props, ref) => {
   const { data: screens, isLoading, error, refetch } = useDisplays()
-  
+  const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false)
+
   // Enable global SSE for real-time client connection updates
   const { isConnected: sseConnected } = useGlobalDisplaySSE(true)
 
@@ -26,6 +29,9 @@ const ScreenList = forwardRef<IScreenListRef, IScreenListProps>((props, ref) => 
   useImperativeHandle(ref, () => ({
     refresh: () => {
       refetch()
+    },
+    openCreateDialog: () => {
+      setIsCreateDialogOpen(true)
     }
   }))
   if (error) {
@@ -62,6 +68,20 @@ const ScreenList = forwardRef<IScreenListRef, IScreenListProps>((props, ref) => 
                 <rect x='0' y='80' rx='5' ry='5' width='100%' height='1' /> {/* Separator if any, or just part of overall height */}
               </ContentLoader>
             ))}
+
+      {/* Create Dialog */}
+      {isCreateDialogOpen && (
+        <DisplayEditDialog
+          display={null}
+          isCreateMode={true}
+          onClose={() => setIsCreateDialogOpen(false)}
+          onSave={() => {
+            setIsCreateDialogOpen(false);
+            refetch();
+          }}
+        />
+      )}
+
       <style jsx>
         {`
           .list {

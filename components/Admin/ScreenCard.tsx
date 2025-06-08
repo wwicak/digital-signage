@@ -3,10 +3,11 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { IconProp } from '@fortawesome/fontawesome-svg-core'
 import { faWindowRestore } from '@fortawesome/free-regular-svg-icons'
 import { faChromecast } from '@fortawesome/free-brands-svg-icons'
-import { faTrash, faTv, faEye, faLink } from '@fortawesome/free-solid-svg-icons'
+import { faTrash, faTv, faEye, faLink, faEdit } from '@fortawesome/free-solid-svg-icons'
 import Link from 'next/link'
 import * as z from 'zod'
 import OrientationPreview from './OrientationPreview'
+import DisplayEditDialog from './DisplayEditDialog'
 
 /*
  * Assuming IDisplayData is an interface. We'll define a Zod schema for the 'value' prop
@@ -41,6 +42,7 @@ export type IScreenCardProps = z.infer<typeof ScreenCardPropsSchema>;
 const ScreenCard: React.FC<IScreenCardProps> = ({ value, refresh = () => {} }) => {
   const { deleteDisplay, updateDisplay } = useDisplayMutations()
   const [isUpdatingOrientation, setIsUpdatingOrientation] = useState(false)
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
 
   const handleOrientationChange = (event: React.ChangeEvent<HTMLSelectElement>): void => {
     event.preventDefault()
@@ -68,11 +70,20 @@ const ScreenCard: React.FC<IScreenCardProps> = ({ value, refresh = () => {} }) =
     }
   }
 
+  const handleEdit = (event: React.MouseEvent): void => {
+    event.preventDefault()
+    event.stopPropagation()
+    setIsEditDialogOpen(true)
+  }
+
   const handleDelete = (event: React.MouseEvent): void => {
     event.preventDefault() // Prevent Link navigation when clicking delete icon
     event.stopPropagation() // Stop event from bubbling further
 
     if (value && value._id) {
+      const confirmDelete = window.confirm(`Are you sure you want to delete "${value.name || 'Untitled Display'}"?`)
+      if (!confirmDelete) return
+
       deleteDisplay.mutate(
         { id: value._id },
         {
@@ -122,18 +133,11 @@ const ScreenCard: React.FC<IScreenCardProps> = ({ value, refresh = () => {} }) =
                   {value?.clientCount || 0} client{(value?.clientCount || 0) !== 1 ? 's' : ''} paired
                 </span>
               </div>
-              <div className="font-sans text-sm text-gray-500 mr-3 flex flex-col items-start gap-1">
+              <div className="font-sans text-sm text-gray-500 mr-3 flex items-center gap-2">
                 <OrientationPreview orientation={value?.orientation || null} />
-                <select
-                  value={value?.orientation || 'landscape'}
-                  onChange={handleOrientationChange}
-                  disabled={isUpdatingOrientation}
-                  onClick={(e) => e.stopPropagation()}
-                  className="font-sans text-xs py-1 px-1 border border-gray-300 rounded bg-white text-gray-600 cursor-pointer min-w-[80px] hover:border-green-500 disabled:opacity-60 disabled:cursor-not-allowed"
-                >
-                  <option value='landscape'>Landscape</option>
-                  <option value='portrait'>Portrait</option>
-                </select>
+                <span className="text-xs">
+                  {value?.orientation === 'portrait' ? 'Portrait' : 'Landscape'}
+                </span>
               </div>
               <div className={`font-sans text-sm mr-3 flex items-center ${value?.isOnline ? 'text-green-500' : 'text-red-500'}`}>
                 <span className={`text-2xl leading-3 mr-1 ${value?.isOnline ? 'text-green-500' : 'text-red-500'}`}>•</span>
@@ -142,21 +146,32 @@ const ScreenCard: React.FC<IScreenCardProps> = ({ value, refresh = () => {} }) =
             </div>
           </div>
           <div className="flex flex-row justify-center items-center px-2">
+            {/* Edit Display */}
+            <div
+              className="mx-1 p-2 rounded-full transition-colors duration-200 hover:bg-gray-100 flex items-center justify-center cursor-pointer"
+              onClick={handleEdit}
+              role='button'
+              tabIndex={0}
+              onKeyPress={(e: React.KeyboardEvent<HTMLDivElement>) => { if (e.key === 'Enter' || e.key === ' ') handleEdit(e as any)}}
+              aria-label='Edit Display'
+            >
+              <FontAwesomeIcon icon={faEdit as IconProp} fixedWidth color='#828282' />
+            </div>
             {/* Edit Layout Link */}
             <Link href={`/layout?display=${value?._id || ''}`}>
-              <a className="mx-2 p-2 rounded-full transition-colors duration-200 hover:bg-gray-100 flex items-center justify-center" onClick={(e) => e.stopPropagation()} aria-label='Edit Layout'>
+              <a className="mx-1 p-2 rounded-full transition-colors duration-200 hover:bg-gray-100 flex items-center justify-center" onClick={(e) => e.stopPropagation()} aria-label='Edit Layout'>
                 <FontAwesomeIcon icon={faEye as IconProp} fixedWidth color='#828282' />
               </a>
             </Link>
             {/* View Display Link */}
             <Link href={`/display/${value?._id || ''}`}>
-              <a className="mx-2 p-2 rounded-full transition-colors duration-200 hover:bg-gray-100 flex items-center justify-center" onClick={(e) => e.stopPropagation()} aria-label='View Display'>
+              <a className="mx-1 p-2 rounded-full transition-colors duration-200 hover:bg-gray-100 flex items-center justify-center" onClick={(e) => e.stopPropagation()} aria-label='View Display'>
                 <FontAwesomeIcon icon={faLink as IconProp} fixedWidth color='#828282' />
               </a>
             </Link>
             {/* Delete Action */}
             <div
-              className="mx-2 p-2 rounded-full transition-colors duration-200 hover:bg-gray-100 flex items-center justify-center cursor-pointer"
+              className="mx-1 p-2 rounded-full transition-colors duration-200 hover:bg-gray-100 flex items-center justify-center cursor-pointer"
               onClick={handleDelete}
               role='button'
               tabIndex={0}
@@ -171,6 +186,23 @@ const ScreenCard: React.FC<IScreenCardProps> = ({ value, refresh = () => {} }) =
             </div>
           </div>
 
+          {/* Edit Dialog */}
+          {isEditDialogOpen && (
+            <DisplayEditDialog
+              display={value ? {
+                _id: value._id,
+                name: value.name || '',
+                orientation: value.orientation,
+                layout: 'spaced' // Default layout, could be enhanced to get from display data
+              } : null}
+              isCreateMode={false}
+              onClose={() => setIsEditDialogOpen(false)}
+              onSave={() => {
+                setIsEditDialogOpen(false);
+                refresh();
+              }}
+            />
+          )}
         </div>
       </a>
     </Link>

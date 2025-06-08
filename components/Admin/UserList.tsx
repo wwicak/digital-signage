@@ -1,9 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, forwardRef, useImperativeHandle } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faEdit,
   faTrash,
-  faThLarge, // Using faThLarge instead of faPlus
   faKey, // Using faKey instead of faUser
   faTv, // Using faTv instead of faUserShield
   faImages, // Using faImages instead of faUserTie
@@ -13,38 +12,18 @@ import useUsers, { User } from '@/hooks/useUsers';
 import { UserRoleName } from '@/lib/models/User';
 import UserEditDialog from './UserEditDialog';
 
-const UserList: React.FC = () => {
-  const { users, loading, error, pagination, fetchUsers, deleteUser } = useUsers();
-  const [selectedUser, setSelectedUser] = useState<User | null>(null);
-  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
-  const [isCreateMode, setIsCreateMode] = useState(false);
+export interface IUserListRef {
+  refresh: () => void;
+  openCreateDialog: () => void;
+}
 
-  const handleEditUser = (user: User) => {
-    setSelectedUser(user);
-    setIsCreateMode(false);
-    setIsEditDialogOpen(true);
-  };
+interface UserCardProps {
+  user: User;
+  onEdit: (user: User) => void;
+  onDelete: (user: User) => void;
+}
 
-  const handleCreateUser = () => {
-    setSelectedUser(null);
-    setIsCreateMode(true);
-    setIsEditDialogOpen(true);
-  };
-
-  const handleDeleteUser = async (user: User) => {
-    if (window.confirm(`Are you sure you want to delete user "${user.name || user.email}"?`)) {
-      try {
-        await deleteUser(user._id);
-      } catch (error) {
-        alert(`Failed to delete user: ${error instanceof Error ? error.message : 'Unknown error'}`);
-      }
-    }
-  };
-
-  const handlePageChange = (page: number) => {
-    fetchUsers(page, pagination.limit);
-  };
-
+const UserCard: React.FC<UserCardProps> = ({ user, onEdit, onDelete }) => {
   const getRoleIcon = (roleName: UserRoleName) => {
     switch (roleName) {
       case UserRoleName.SUPER_ADMIN:
@@ -80,86 +59,117 @@ const UserList: React.FC = () => {
     return new Date(dateString).toLocaleDateString();
   };
 
-  if (loading) {
-    return (
-      <div className="p-8 max-w-6xl mx-auto">
-        <div className="text-center text-lg text-gray-600">Loading users...</div>
+  return (
+    <div className="p-3 font-sans rounded bg-white my-3 flex flex-row items-center relative z-10 shadow-sm hover:shadow-md transition-shadow duration-200">
+      <div className="flex justify-center items-center pr-3">
+        <div className={`h-12 w-12 rounded flex justify-center items-center ${getRoleColor(user.role.name)}`}>
+          <FontAwesomeIcon icon={getRoleIcon(user.role.name)} fixedWidth size='lg' color='#FFFFFF' />
+        </div>
       </div>
-    );
+      <div className="font-sans flex flex-col justify-center pr-2 flex-1 min-w-0">
+        <div className="font-sans text-base overflow-hidden whitespace-nowrap text-ellipsis text-gray-600 mb-1">
+          {user.name || 'Unnamed User'}
+        </div>
+        <div className="font-sans text-sm text-gray-500 flex items-center flex-wrap gap-4">
+          <span>{user.email}</span>
+          <span className={`inline-block px-2 py-1 rounded text-xs font-medium text-white ${getRoleColor(user.role.name)}`}>
+            {user.role.name}
+          </span>
+          <span>Created: {formatDate(user.createdAt)}</span>
+        </div>
+      </div>
+      <div className="flex flex-row font-sans items-center">
+        <div
+          className="ml-2 p-2 rounded-full cursor-pointer transition-colors duration-200 hover:bg-gray-100"
+          onClick={() => onEdit(user)}
+          role='button'
+          tabIndex={0}
+          onKeyPress={(e) => {if(e.key === 'Enter' || e.key === ' ') onEdit(user)}}
+          aria-label='Edit user'
+        >
+          <FontAwesomeIcon icon={faEdit} fixedWidth color='#828282' />
+        </div>
+        <div
+          className="ml-2 p-2 rounded-full cursor-pointer transition-colors duration-200 hover:bg-gray-100"
+          onClick={() => onDelete(user)}
+          role='button'
+          tabIndex={0}
+          onKeyPress={(e) => {if(e.key === 'Enter' || e.key === ' ') onDelete(user)}}
+          aria-label='Delete user'
+        >
+          <FontAwesomeIcon icon={faTrash} fixedWidth color='#828282' />
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const UserList = forwardRef<IUserListRef>((props, ref) => {
+  const { users, loading, error, pagination, fetchUsers, deleteUser } = useUsers();
+  const [selectedUser, setSelectedUser] = useState<User | null>(null);
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [isCreateMode, setIsCreateMode] = useState(false);
+
+  useImperativeHandle(ref, () => ({
+    refresh: () => {
+      fetchUsers(pagination.page, pagination.limit);
+    },
+    openCreateDialog: () => {
+      handleCreateUser();
+    }
+  }));
+
+  const handleEditUser = (user: User) => {
+    setSelectedUser(user);
+    setIsCreateMode(false);
+    setIsEditDialogOpen(true);
+  };
+
+  const handleCreateUser = () => {
+    setSelectedUser(null);
+    setIsCreateMode(true);
+    setIsEditDialogOpen(true);
+  };
+
+  const handleDeleteUser = async (user: User) => {
+    if (window.confirm(`Are you sure you want to delete user "${user.name || user.email}"?`)) {
+      try {
+        await deleteUser(user._id);
+      } catch (error) {
+        alert(`Failed to delete user: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      }
+    }
+  };
+
+  const handlePageChange = (page: number) => {
+    fetchUsers(page, pagination.limit);
+  };
+
+  if (loading) {
+    return <div className="text-center text-gray-600">Loading users...</div>;
   }
 
   if (error) {
-    return (
-      <div className="p-8 max-w-6xl mx-auto">
-        <div className="text-center text-lg text-red-600">Error: {error}</div>
-      </div>
-    );
+    return <div className="text-center text-red-600">Error: {error}</div>;
   }
 
   return (
-    <div className="p-8 max-w-6xl mx-auto">
-      <div className="flex justify-between items-center mb-8 pb-6 border-b border-gray-200">
-        <h1 className="text-3xl font-semibold text-gray-800">User Management</h1>
-        <button 
-          className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md flex items-center gap-2 transition-colors"
-          onClick={handleCreateUser}
-        >
-          <FontAwesomeIcon icon={faThLarge} /> Create User
-        </button>
-      </div>
+    <div>
+      {/* User cards */}
+      {users.map((user) => (
+        <UserCard
+          key={user._id}
+          user={user}
+          onEdit={handleEditUser}
+          onDelete={handleDeleteUser}
+        />
+      ))}
 
-      <div className="bg-white rounded-lg shadow-sm overflow-hidden border border-gray-200">
-        {/* Header */}
-        <div className="grid grid-cols-5 gap-4 px-6 py-4 bg-gray-50 border-b border-gray-200 font-semibold text-gray-700 text-sm">
-          <div>Name</div>
-          <div>Email</div>
-          <div>Role</div>
-          <div>Created</div>
-          <div>Actions</div>
+      {users.length === 0 && (
+        <div className="text-center py-12 text-gray-500 font-sans">
+          No users found. Create your first user to get started.
         </div>
-
-        {/* User rows */}
-        {users.map((user) => (
-          <div key={user._id} className="grid grid-cols-5 gap-4 px-6 py-4 border-b border-gray-100 hover:bg-gray-50 items-center">
-            <div className="flex items-center">
-              <FontAwesomeIcon 
-                icon={getRoleIcon(user.role.name)} 
-                className={`w-4 h-4 mr-2 text-white p-1 rounded ${getRoleColor(user.role.name)}`}
-              />
-              <span className="font-medium text-gray-900">{user.name || 'Unnamed User'}</span>
-            </div>
-            <div className="text-gray-600">{user.email}</div>
-            <div>
-              <span className={`inline-block px-3 py-1 rounded-full text-xs font-medium text-white ${getRoleColor(user.role.name)}`}>
-                {user.role.name}
-              </span>
-            </div>
-            <div className="text-gray-600 text-sm">{formatDate(user.createdAt)}</div>
-            <div className="flex gap-2">
-              <button 
-                className="bg-gray-600 hover:bg-gray-700 text-white p-2 rounded transition-colors"
-                onClick={() => handleEditUser(user)}
-                title="Edit User"
-              >
-                <FontAwesomeIcon icon={faEdit} className="w-3 h-3" />
-              </button>
-              <button 
-                className="bg-red-600 hover:bg-red-700 text-white p-2 rounded transition-colors"
-                onClick={() => handleDeleteUser(user)}
-                title="Delete User"
-              >
-                <FontAwesomeIcon icon={faTrash} className="w-3 h-3" />
-              </button>
-            </div>
-          </div>
-        ))}
-
-        {users.length === 0 && (
-          <div className="text-center py-12 text-gray-500">
-            No users found. Create your first user to get started.
-          </div>
-        )}
-      </div>
+      )}
 
       {/* Pagination */}
       {pagination.pages > 1 && (
@@ -167,9 +177,9 @@ const UserList: React.FC = () => {
           {Array.from({ length: pagination.pages }, (_, i) => i + 1).map((page) => (
             <button
               key={page}
-              className={`px-3 py-2 rounded border transition-colors ${
+              className={`px-3 py-2 rounded border transition-colors font-sans ${
                 page === pagination.page
-                  ? 'bg-blue-600 text-white border-blue-600'
+                  ? 'bg-green-500 text-white border-green-500'
                   : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
               }`}
               onClick={() => handlePageChange(page)}
@@ -181,7 +191,7 @@ const UserList: React.FC = () => {
       )}
 
       {/* Stats */}
-      <div className="text-center text-sm text-gray-500 mt-6">
+      <div className="text-center text-sm text-gray-500 mt-6 font-sans">
         Showing {users.length} of {pagination.total} users
       </div>
 
@@ -199,6 +209,6 @@ const UserList: React.FC = () => {
       )}
     </div>
   );
-};
+});
 
 export default UserList;
