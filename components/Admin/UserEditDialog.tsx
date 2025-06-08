@@ -163,7 +163,7 @@ const UserEditDialog: React.FC<UserEditDialogProps> = ({
                 value={formData.name}
                 onChange={handleInputChange}
                 required
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
               />
             </div>
 
@@ -178,7 +178,7 @@ const UserEditDialog: React.FC<UserEditDialogProps> = ({
                 value={formData.email}
                 onChange={handleInputChange}
                 required
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
               />
             </div>
 
@@ -195,7 +195,7 @@ const UserEditDialog: React.FC<UserEditDialogProps> = ({
                   onChange={handleInputChange}
                   required
                   minLength={6}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
                 />
                 <p className="text-xs text-gray-500 mt-1">Minimum 6 characters</p>
               </div>
@@ -211,7 +211,7 @@ const UserEditDialog: React.FC<UserEditDialogProps> = ({
                 value={formData.roleName}
                 onChange={handleInputChange}
                 required
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
               >
                 {Object.values(UserRoleName).map((role) => (
                   <option key={role} value={role}>
@@ -236,7 +236,7 @@ const UserEditDialog: React.FC<UserEditDialogProps> = ({
                   value={formData.associatedDisplayIds}
                   onChange={(e) => handleMultiSelectChange(e, 'associatedDisplayIds')}
                   size={Math.min(displays.length, 6)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
                 >
                   {displays.map((display: any) => (
                     <option key={display._id} value={display._id}>
@@ -260,7 +260,7 @@ const UserEditDialog: React.FC<UserEditDialogProps> = ({
                   value={formData.associatedBuildingIds}
                   onChange={(e) => handleMultiSelectChange(e, 'associatedBuildingIds')}
                   size={Math.min(buildings.length, 6)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
                 >
                   {buildings.map((building) => (
                     <option key={building._id} value={building._id}>
@@ -281,9 +281,9 @@ const UserEditDialog: React.FC<UserEditDialogProps> = ({
             >
               Cancel
             </button>
-            <button 
-              type="submit" 
-              className="px-4 py-2 bg-blue-600 text-white hover:bg-blue-700 rounded-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            <button
+              type="submit"
+              className="px-4 py-2 bg-green-600 text-white hover:bg-green-700 rounded-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               disabled={loading}
             >
               {loading ? 'Saving...' : isCreateMode ? 'Create User' : 'Update User'}
