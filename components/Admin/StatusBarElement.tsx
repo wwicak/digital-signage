@@ -1,7 +1,8 @@
 import React, { Component } from 'react'
 import { Draggable, DraggableProvided, DraggableStateSnapshot } from '@hello-pangea/dnd'
+import { X } from 'lucide-react'
 
-import { StatusBarElementTypes, IStatusBarElementDefinition } from '../../helpers/statusbar' // Assuming statusbar.js will be typed
+import { StatusBarElementTypes, IStatusBarElementDefinition } from '../../helpers/statusbar'
 
 export interface IStatusBarElementProps {
   item: string; // Unique ID for the draggable item, e.g., "type_uniqueId"
@@ -33,7 +34,7 @@ class StatusBarElement extends Component<IStatusBarElementProps> {
     const itemTypeKey = item.includes('_') ? item.split('_')[0] : item
     
     const elementType: IStatusBarElementDefinition | undefined = StatusBarElementTypes[itemTypeKey as keyof typeof StatusBarElementTypes]
-    const iconToDisplay:  = (elementType?.icon ) || faTimes // Fallback icon
+    const IconComponent = elementType?.icon || X // Fallback icon
     const typeName: string = elementType?.name || itemTypeKey || 'Unknown'
 
     return (
@@ -43,22 +44,25 @@ class StatusBarElement extends Component<IStatusBarElementProps> {
             ref={provided.innerRef}
             {...provided.draggableProps}
             {...provided.dragHandleProps}
-            className={`status-bar-el ${snapshot.isDragging ? 'is-dragging' : ''}`}
+            className={`relative group bg-white border border-gray-200 rounded-lg cursor-move hover:shadow-md transition-all duration-200 ${snapshot.isDragging ? 'shadow-lg scale-105' : ''}`}
             style={{
               ...provided.draggableProps.style,
-              // Add any custom dragging styles based on snapshot.isDragging if needed
             }}
           >
-            <div className={'controls-overlay'}> {/* Renamed class */}
-              <div className={'delete-btn'} onClick={this.handleDeleteClick} role='button' tabIndex={0} onKeyPress={(e) => {if(e.key === 'Enter' || e.key === ' ') this.handleDeleteClick()}} aria-label='Delete item'> {/* Renamed class */}
-                <<X className={'xs' />
-              </div>
+            <div className="absolute top-1 right-1 opacity-0 group-hover:opacity-100 transition-opacity">
+              <button
+                className="p-1 rounded hover:bg-gray-100 transition-colors"
+                onClick={this.handleDeleteClick}
+                aria-label="Delete item"
+              >
+                <X className="w-3 h-3 text-gray-500" />
+              </button>
             </div>
-            <div className={'info-content' className="w-4 h-4" />> {/* Renamed class */}
-              <div className={'icon-display'}> {/* Renamed class */}
-                <<iconToDisplay className={'sm' className="w-4 h-4" /> />
+            <div className="flex flex-col items-center justify-center p-2 min-h-12">
+              <div className="mb-1">
+                <IconComponent className="w-4 h-4 text-primary" />
               </div>
-              <span className={'type-name'}>{typeName}</span> {/* Renamed class */}
+              <span className="text-xs font-medium text-gray-600 text-center">{typeName}</span>
             </div>
             
           </div>

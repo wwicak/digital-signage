@@ -1,14 +1,9 @@
 import React, { useRef } from 'react'
-import {
-  faTimes,
-  faCog,
-} from '@fortawesome/free-solid-svg-icons'
-
-// FontAwesome configuration is handled globally
+import { Settings, X } from 'lucide-react'
 
 import Widgets from '../../widgets'
 import { IBaseWidget } from '../../widgets/base_widget'
-import WidgetEditDialog from './WidgetEditDialog' // Removed IWidgetEditDialog import assuming it's default export or typed internally
+import WidgetEditDialog from './WidgetEditDialog'
 import * as z from 'zod'
 import { WidgetType, WidgetTypeZod } from '@/lib/models/Widget' // Import enum and its Zod schema
 
@@ -45,23 +40,31 @@ const EditableWidget: React.FC<IEditableWidgetProps> = ({ id, type = WidgetType.
   const widgetDefinition: IBaseWidget | undefined = Widgets[type]
 
   const widgetName = widgetDefinition?.name || 'Broken Widget'
-  const widgetIcon = widgetDefinition?.icon || faTimes // Default icon if not found
+  const WidgetIcon = widgetDefinition?.icon || X // Default icon if not found
 
   return (
-    <div className={'widget-editable-container'}>
-      <div className={'controls'}>
-        <div className={'edit-btn'} onClick={openDialog} role='button' tabIndex={0}>
-          <<Settings className={'xs' />
-        </div>
-        <div className={'delete-btn' className="w-4 h-4" /> onClick={handleDeleteClick} role='button' tabIndex={0}>
-          <<X className={'xs' />
-        </div>
+    <div className="relative bg-white border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
+      <div className="absolute top-2 right-2 flex space-x-1">
+        <button
+          className="p-1 rounded hover:bg-gray-100 transition-colors"
+          onClick={openDialog}
+          aria-label="Edit widget"
+        >
+          <Settings className="w-4 h-4 text-gray-500" />
+        </button>
+        <button
+          className="p-1 rounded hover:bg-gray-100 transition-colors"
+          onClick={handleDeleteClick}
+          aria-label="Delete widget"
+        >
+          <X className="w-4 h-4 text-gray-500" />
+        </button>
       </div>
-      <div className={'info' className="w-4 h-4" />>
-        <div className={'icon-display'}>
-          <<widgetIcon  className={'2x' className="w-4 h-4" /> /> {/* Cast to  */}
+      <div className="flex flex-col items-center justify-center h-full min-h-24">
+        <div className="mb-2">
+          <WidgetIcon className="w-8 h-8 text-primary" />
         </div>
-        <span className={'type-name'}>{widgetName}</span>
+        <span className="text-sm font-medium text-gray-600 text-center">{widgetName}</span>
       </div>
       <WidgetEditDialog
         ref={dialogRef}

@@ -90,11 +90,11 @@ const SlideshowPageComponent = memo(function SlideshowPageComponent({ slideshow:
           size={(slideshow && slideshow.name && slideshow.name.length) || 20}
         />
         <div className='icon'>
-          <<faPencilAlt as  color='#828282' />
+          <faPencilAlt 
         </div>
       </div>
       <div className="max-w-2xl">
-        <Upload slideshowId={slideshow && slideshow._id || '' className="w-4 h-4" /> refresh={refresh} />
+        <Upload slideshowId={slideshow && slideshow._id || ''  refresh={refresh} />
         <SlideEditDialogComponent
           slideshowId={slideshow && slideshow._id || ''}
           refresh={refresh}

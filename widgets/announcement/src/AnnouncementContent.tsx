@@ -38,7 +38,7 @@ const AnnouncementContent: React.FC<IAnnouncementContentProps> = React.memo(({ d
     <div className="relative box-border h-full w-full">
       <div className='title-bar'>
         <div className='icon'>
-          <<faExclamationTriangle  className="w-4 h-4" /> style={{ fontSize: '0.9em'  className={accentColor} />
+          <faExclamationTriangle  style={{ fontSize: '0.9em'  className={accentColor} />
         </div>
         <span>Announcement</span>
       </div>

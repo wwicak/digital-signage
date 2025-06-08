@@ -138,7 +138,7 @@ const UserEditDialog: React.FC<UserEditDialogProps> = ({
             className="text-gray-500 hover:text-gray-700 p-1"
             onClick={onClose}
           >
-            <<X className="w-4 h-4" /> />
+            <X  />
           </button>
         </div>
 

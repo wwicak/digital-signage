@@ -1,8 +1,9 @@
 import React, { useState, useRef } from 'react'
+import { Edit, Trash2, Play, Globe, FileImage, FileText, FileVideo, Clock } from 'lucide-react'
 import * as z from 'zod'
 
-import SlideEditDialog from './SlideEditDialog' // Removed ISlideEditDialogRef, assuming default export or internal typing
-import { deleteSlide, SlideActionDataSchema } from '../../actions/slide' // ISlideData is z.infer<typeof SlideActionDataSchema>
+import SlideEditDialog from './SlideEditDialog'
+import { deleteSlide, SlideActionDataSchema } from '../../actions/slide'
 
 // Zod schema for the 'value' prop, extending SlideActionDataSchema
 const SlideCardValueSchema = SlideActionDataSchema.extend({
@@ -46,20 +47,20 @@ const SlideCard: React.FC<ISlideCardProps> = ({ value, refresh = () => {} }) => 
       })
   }
 
-  const getThumbnailIcon = (slideType: string):  => {
+  const getThumbnailIcon = (slideType: string) => {
     switch (slideType) {
-      case 'youtube': // Assuming 'youtube' is a value for ISlideData.type
-      case 'video': // Or if ISlideData.type can be 'video'
-        return faPlay
+      case 'youtube':
+      case 'video':
+        return Play
       case 'web':
-        return faGlobe
-      case 'image': // Assuming 'image' type
-      case 'photo': // From original JS
-        return faFileImage
+        return Globe
+      case 'image':
+      case 'photo':
+        return FileImage
       case 'markdown':
-        return faFileAlt
+        return FileText
       default:
-        return faFileVideo // A generic fallback
+        return FileVideo
     }
   }
 
@@ -103,8 +104,8 @@ const SlideCard: React.FC<ISlideCardProps> = ({ value, refresh = () => {} }) => 
           style={thumbnailStyle}
         >
           {!showBackgroundImage && (
-            <<getThumbnailIcon(slideType) size='lg' color='#FFFFFF' />
-          ) className="w-4 h-4" />
+            React.createElement(getThumbnailIcon(slideType), { className: "w-6 h-6 text-white" })
+          )}
         </div>
       </div>
       <div className="font-sans flex flex-col justify-center pr-2 flex-1 min-w-0">
@@ -113,9 +114,9 @@ const SlideCard: React.FC<ISlideCardProps> = ({ value, refresh = () => {} }) => 
         </div>
         <div className="font-sans text-sm text-gray-500 flex items-center">
           <div className="mr-1">
-            <<Clock color='#878787' />
+            <Clock className="w-4 h-4 text-gray-500" />
           </div>
-          <span>{(value.duration || 0) className="w-4 h-4" />s</span>
+          <span>{(value.duration || 0)}s</span>
         </div>
       </div>
       <div className="flex flex-row font-sans items-center">
@@ -127,10 +128,10 @@ const SlideCard: React.FC<ISlideCardProps> = ({ value, refresh = () => {} }) => 
           onKeyPress={(e) => {if(e.key === 'Enter' || e.key === ' ') handleEdit()}}
           aria-label='Edit slide'
         >
-          <<Edit color='#828282' />
+          <Edit className="w-4 h-4 text-gray-500" />
         </div>
         <div
-          className={`ml-2 p-2 rounded-full transition-colors duration-200 ${loading ? 'cursor-not-allowed' : 'cursor-pointer hover:bg-gray-100' className="w-4 h-4" />`}
+          className={`ml-2 p-2 rounded-full transition-colors duration-200 ${loading ? 'cursor-not-allowed' : 'cursor-pointer hover:bg-gray-100'}`}
           onClick={!loading ? handleDelete : undefined}
           role='button'
           tabIndex={!loading ? 0 : -1}
@@ -138,11 +139,7 @@ const SlideCard: React.FC<ISlideCardProps> = ({ value, refresh = () => {} }) => 
           aria-label='Delete slide'
           aria-disabled={loading}
         >
-          <
-            icon={Trash2}
-            fixedWidth
-            color={loading ? '#ccc' : '#828282'}
-          />
+          <Trash2 className="w-4 h-4" />
         </div>
       </div>
       <SlideEditDialog ref={dialogRef} slideId={value._id} refresh={refresh} />

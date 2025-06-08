@@ -64,7 +64,7 @@ const SlideshowCard: React.FC<ISlideshowCardProps> = ({ value, refresh = () => {
 
   return (
     <Card className="group my-4 transition-all duration-200 hover:shadow-lg cursor-pointer">
-      <Link href={`/slideshow/${value._id}?display=${displayId}` className="block">
+      <Link href={`/slideshow/${value._id}?display=${displayId}`} className="block">
         <CardContent className="p-4">
           <div className="flex items-center space-x-4">
             {/* Slideshow Thumbnail */}

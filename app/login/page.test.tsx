@@ -30,9 +30,12 @@ jest.mock('../../components/Admin/Frame', () => {
   return jest.fn(({ children }) => <div data-testid='mock-frame'>{children}</div>)
 })
 
-// Mock @fortawesome/react-fontawesome
-jest.mock('@fortawesome/react-fontawesome', () => ({
-  : jest.fn((props) => <i data-testid='mock-fa-icon' data-icon={props.icon.iconName}></i>),
+// Mock lucide-react icons
+jest.mock('lucide-react', () => ({
+  Tv: jest.fn(() => <div data-testid="tv-icon" />),
+  Check: jest.fn(() => <div data-testid="check-icon" />),
+  X: jest.fn(() => <div data-testid="x-icon" />),
+  ChevronLeft: jest.fn(() => <div data-testid="chevron-left-icon" />),
 }))
 
 // --- Test Suite ---

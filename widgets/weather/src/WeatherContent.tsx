@@ -179,9 +179,9 @@ const WeatherContent: React.FC<IWeatherContentProps> = React.memo(({ data, isPre
         <div className='desc'>{description}</div>
         <div className="flex flex-row items-center">
           <div className='marker-icon'>
-            <<faMapMarkerAlt  className='xs' fixedWidth />
+            <faMapMarkerAlt 
           </div>
-          <div className='name-text'>{locationName className="w-4 h-4" /></div>
+          <div className='name-text'>{locationName </div>
         </div>
       </div>
       {iconCode && <div className="flex flex-col justify-start scale-200">

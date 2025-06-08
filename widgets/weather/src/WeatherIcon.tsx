@@ -67,7 +67,7 @@ class WeatherIcon extends Component<Weathers, WeatherIconState> {
 
   render() {
     const { icon } = this.props // icon will be undefined if not provided, matching original default of ''
-    return <<this.convertIcon(icon) className={'2x' className="w-4 h-4" /> />
+    return <this.convertIcon(icon) className={'2x'  />
   }
 }
 

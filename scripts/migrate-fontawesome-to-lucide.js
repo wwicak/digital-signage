@@ -65,7 +65,7 @@ const iconMappings = {
   ',': ',',
   '': '',
   '': '',
- className="w-4 h-4" />;
+ ;
 
 // Lucide imports to add
 const lucideImports = [
@@ -140,7 +140,7 @@ class FontAwesomeMigrator {
       // Replace FontAwesome component usage patterns
       content = content.replace(/<\s+icon=\{([^}]+)\}[^>]*\/>/g, (match, iconName) => {
         const cleanIconName = iconName.replace(/\s+as\s+/, '').trim();
-        return `<${cleanIconName className="w-4 h-4" />`;
+        return `<${cleanIconName `;
       });
       
       // Clean up empty lines and formatting

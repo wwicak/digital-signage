@@ -34,7 +34,7 @@ interface IMenuItem {
   id: string;
   name: string;
   path: string;
-  icon: ;
+  icon: LucideIcon;
 }
 
 export interface ISidebarProps {

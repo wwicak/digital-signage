@@ -147,14 +147,14 @@ const LayoutPage: React.FC<ILayoutPageProps> = ({ loggedIn, displayId }) => {
             size={(displayContext.state.name && displayContext.state.name.length > 0) ? displayContext.state.name.length : undefined}
           />
           <div className='icon'>
-            <<faPencilAlt color='#828282' />
+            <faPencilAlt 
           </div>
         </div>
       </div>
 
       <div className="flex flex-row items-center justify-between mb-4">
         <DropdownButton
-          icon={faPencilAlt  className="w-4 h-4" /> // Example icon, adjust as needed
+          icon={faPencilAlt   // Example icon, adjust as needed
           text='Add Status Bar Item'
           onSelect={displayContext.addStatusBarItem}
           choices={statusBarChoices}

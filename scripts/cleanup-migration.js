@@ -51,7 +51,7 @@ class MigrationCleanup {
       console.log(`Cleaning: ${filePath}`);
       
       // Fix broken icon syntax
-      content = content.replace(/ icon=\{([^}]+)\}/g, '<$1 className="w-4 h-4" />');
+      content = content.replace(/ icon=\{([^}]+)\}/g, '<$1 ');
       content = content.replace(//g, '');
       
       // Fix broken className patterns
@@ -105,7 +105,7 @@ class MigrationCleanup {
         };
         
         const lucideIcon = iconMap[iconName] || iconName;
-        return `<${lucideIcon className="w-4 h-4" />`;
+        return `<${lucideIcon `;
       });
       
       // Remove excessive imports
