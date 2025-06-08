@@ -5,15 +5,16 @@
  */
 
 const widgetTypes: string[] = [
-  'slideshow',
-  'weather',
-  'congrats',
-  'youtube',
-  'web',
-  'image',
-  'list',
-  'announcement',
-  'meeting-room',
-]
+  "slideshow",
+  "weather",
+  "congrats",
+  "youtube",
+  "web",
+  "image",
+  "list",
+  "announcement",
+  "media-player",
+  "meeting-room",
+];
 
-export default widgetTypes
+export default widgetTypes;

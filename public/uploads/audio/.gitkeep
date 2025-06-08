@@ -1,0 +1,2 @@
+# This file ensures the uploads/audio directory is tracked by git
+# Uploaded audio files will be stored in this directory

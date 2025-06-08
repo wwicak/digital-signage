@@ -7,6 +7,7 @@ export enum WidgetType {
   CONGRATS = "congrats",
   IMAGE = "image",
   LIST = "list",
+  MEDIA_PLAYER = "media-player",
   MEETING_ROOM = "meeting-room",
   SLIDESHOW = "slideshow", // Refers to a Slideshow model
   WEATHER = "weather",
@@ -40,6 +41,35 @@ export interface ListWidgetData {
   title?: string;
   items?: string[];
   color?: string;
+}
+
+export interface MediaPlayerWidgetData {
+  title?: string;
+  url?: string; // URL for uploaded file or remote media
+  mediaType?: "video" | "audio";
+  backgroundColor?: string;
+  // Playback controls
+  autoplay?: boolean;
+  loop?: boolean;
+  volume?: number; // 0-1
+  muted?: boolean;
+  showControls?: boolean;
+  // Display options
+  fit?: "contain" | "cover" | "fill";
+  // Scheduling
+  enableScheduling?: boolean;
+  schedule?: {
+    daysOfWeek?: number[]; // 0-6 (Sunday-Saturday)
+    timeSlots?: Array<{
+      startTime: string; // HH:MM format
+      endTime: string; // HH:MM format
+    }>;
+  };
+  // Fallback content
+  fallbackContent?: {
+    message?: string;
+    backgroundColor?: string;
+  };
 }
 
 export interface SlideshowWidgetData {
@@ -80,6 +110,7 @@ export type WidgetData =
   | CongratsWidgetData
   | ImageWidgetData
   | ListWidgetData
+  | MediaPlayerWidgetData
   | SlideshowWidgetData
   | WeatherWidgetData
   | WebWidgetData
@@ -178,6 +209,43 @@ export const ListWidgetDataSchema = z.object({
   color: z.string().optional(),
 });
 
+export const MediaPlayerWidgetDataSchema = z.object({
+  title: z.string().optional(),
+  url: z.string().optional(),
+  mediaType: z.enum(["video", "audio"]).optional(),
+  backgroundColor: z.string().optional(),
+  // Playback controls
+  autoplay: z.boolean().optional(),
+  loop: z.boolean().optional(),
+  volume: z.number().min(0).max(1).optional(),
+  muted: z.boolean().optional(),
+  showControls: z.boolean().optional(),
+  // Display options
+  fit: z.enum(["contain", "cover", "fill"]).optional(),
+  // Scheduling
+  enableScheduling: z.boolean().optional(),
+  schedule: z
+    .object({
+      daysOfWeek: z.array(z.number().min(0).max(6)).optional(),
+      timeSlots: z
+        .array(
+          z.object({
+            startTime: z.string().regex(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/), // HH:MM format
+            endTime: z.string().regex(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/), // HH:MM format
+          })
+        )
+        .optional(),
+    })
+    .optional(),
+  // Fallback content
+  fallbackContent: z
+    .object({
+      message: z.string().optional(),
+      backgroundColor: z.string().optional(),
+    })
+    .optional(),
+});
+
 export const SlideshowWidgetDataSchema = z.object({
   slideshow_id: z.string().optional(), // Could be refined to ObjectId if always the case
   title: z.string().optional(),
@@ -214,6 +282,7 @@ export const WidgetDataZod = z.union([
   CongratsWidgetDataSchema,
   ImageWidgetDataSchema,
   ListWidgetDataSchema,
+  MediaPlayerWidgetDataSchema,
   SlideshowWidgetDataSchema,
   WeatherWidgetDataSchema,
   WebWidgetDataSchema,
@@ -284,6 +353,15 @@ export const WidgetSchemaZod = z
             code: z.ZodIssueCode.custom,
             path: ["data"],
             message: "Data does not match LIST type schema",
+          });
+        }
+        break;
+      case WidgetType.MEDIA_PLAYER:
+        if (!MediaPlayerWidgetDataSchema.safeParse(val.data).success) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            path: ["data"],
+            message: "Data does not match MEDIA_PLAYER type schema",
           });
         }
         break;
