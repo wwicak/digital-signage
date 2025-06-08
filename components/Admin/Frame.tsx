@@ -34,7 +34,7 @@ const Frame: React.FC<IFrameProps> = (props) => {
         <Sidebar loggedIn={props.loggedIn} displayId={state.id} />
       )}
       <main className="flex-1 overflow-y-auto">
-        <Container className="py-8">{props.children}</Container>
+        <Container className="py-8 px-8 max-w-7xl">{props.children}</Container>
       </main>
     </div>
   );

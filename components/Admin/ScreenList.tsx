@@ -1,5 +1,6 @@
 import React, { forwardRef, useImperativeHandle, useState } from "react";
 import ContentLoader from "react-content-loader";
+import { Tv } from "lucide-react";
 
 import ScreenCard from "./ScreenCard"; // Assuming ScreenCard.tsx and its props
 import DisplayEditDialog from "./DisplayEditDialog";
@@ -44,88 +45,51 @@ const ScreenList = forwardRef<IScreenListRef, IScreenListProps>(
     }
 
     return (
-      <div className={"list"}>
-        {!isLoading && screens
-          ? screens.map((screen, index) => (
-              <ScreenCard
-                key={screen._id || `item-${index}`} // Use screen._id for key if available
-                value={screen}
-                refresh={refetch}
-              />
-            ))
-          : Array(4) // Show 4 loaders while data is being fetched
-              .fill(0) // Pass a value to fill to satisfy map's need for an array with actual elements
-              .map(
-                (
-                  _,
-                  index, // Use index for key of loaders
-                ) => (
-                  <ContentLoader
-                    key={`loader-${index}`}
-                    height={120} // Height of one card placeholder
-                    width={640} // Max width of card or list area
-                    speed={2}
-                    backgroundColor="#f3f3f3"
-                    foregroundColor="#ecebeb"
-                  >
-                    {/* Placeholder for ScreenCard structure */}
-                    <rect
-                      x="0"
-                      y="10"
-                      rx="4"
-                      ry="4"
-                      width="60"
-                      height="60"
-                    />{" "}
-                    {/* Thumbnail */}
-                    <rect
-                      x="70"
-                      y="10"
-                      rx="3"
-                      ry="3"
-                      width="300"
-                      height="15"
-                    />{" "}
-                    {/* Title */}
-                    <rect
-                      x="70"
-                      y="35"
-                      rx="3"
-                      ry="3"
-                      width="100"
-                      height="10"
-                    />{" "}
-                    {/* Widget Num */}
-                    <rect
-                      x="180"
-                      y="35"
-                      rx="3"
-                      ry="3"
-                      width="80"
-                      height="10"
-                    />{" "}
-                    {/* Client Num */}
-                    <rect
-                      x="270"
-                      y="35"
-                      rx="3"
-                      ry="3"
-                      width="50"
-                      height="10"
-                    />{" "}
-                    {/* Online Status */}
-                    <rect
-                      x="0"
-                      y="80"
-                      rx="5"
-                      ry="5"
-                      width="100%"
-                      height="1"
-                    />{" "}
-                    {/* Separator if any, or just part of overall height */}
-                  </ContentLoader>
-                ),
-              )}
+      <div className="space-y-6">
+        {!isLoading && screens ? (
+          <>
+            {screens.length === 0 ? (
+              <div className="text-center py-12">
+                <div className="mx-auto w-24 h-24 bg-muted rounded-full flex items-center justify-center mb-4">
+                  <Tv className="w-12 h-12 text-muted-foreground" />
+                </div>
+                <h3 className="text-lg font-semibold mb-2">No displays found</h3>
+                <p className="text-muted-foreground mb-4">
+                  Get started by creating your first display.
+                </p>
+              </div>
+            ) : (
+              <div className="grid gap-6">
+                {screens.map((screen, index) => (
+                  <ScreenCard
+                    key={screen._id || `item-${index}`}
+                    value={screen}
+                    refresh={refetch}
+                  />
+                ))}
+              </div>
+            )}
+          </>
+        ) : (
+          <div className="grid gap-6">
+            {Array(4)
+              .fill(0)
+              .map((_, index) => (
+                <div key={`loader-${index}`} className="animate-pulse">
+                  <div className="bg-card border rounded-lg p-6">
+                    <div className="flex items-center space-x-4">
+                      <div className="h-16 w-16 bg-muted rounded-lg"></div>
+                      <div className="flex-1 space-y-2">
+                        <div className="h-4 bg-muted rounded w-3/4"></div>
+                        <div className="h-3 bg-muted rounded w-1/2"></div>
+                      </div>
+                      <div className="h-6 w-16 bg-muted rounded-full"></div>
+                    </div>
+                  </div>
+                </div>
+              ))}
+          </div>
+        )}
 
         {/* Create Dialog */}
         {isCreateDialogOpen && (

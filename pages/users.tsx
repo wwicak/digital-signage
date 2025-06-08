@@ -1,9 +1,10 @@
 import React, { useRef, memo } from 'react'
+import { Users } from 'lucide-react'
 
 import Frame from '../components/Admin/Frame.tsx'
 import UserList, { IUserListRef } from '../components/Admin/UserList.tsx'
 import Dialog from '../components/Dialog.tsx'
-import { Button } from '../components/Form'
+import { Button } from '@/components/ui/button'
 
 import { protect, ProtectProps } from '../helpers/auth'
 
@@ -22,16 +23,31 @@ const UsersComponent = memo(function UsersComponent({ loggedIn }: UsersProps) {
 
   return (
     <Frame loggedIn={loggedIn}>
-      <h1 className="font-sans text-2xl text-gray-600 m-0">Users</h1>
-      <div className="my-10 mx-auto max-w-[640px]">
-        <UserList ref={userListRef} />
+      <div className="space-y-8">
+        {/* Header Section */}
+        <div className="flex flex-col space-y-4 sm:flex-row sm:items-center sm:justify-between sm:space-y-0">
+          <div>
+            <h1 className="text-3xl font-bold tracking-tight">Users</h1>
+            <p className="text-muted-foreground">
+              Manage user accounts and permissions for your digital signage system.
+            </p>
+          </div>
+          <Button
+            onClick={handleAddUser}
+            size="lg"
+            className="w-full sm:w-auto"
+          >
+            <Users className="mr-2 h-5 w-5" />
+            Add New User
+          </Button>
+        </div>
+
+        {/* Users List */}
+        <div className="space-y-6">
+          <UserList ref={userListRef} />
+        </div>
+        
         <Dialog><div></div></Dialog>
-        <Button
-          text={'+ Add new user'}
-          color={'#7bc043'}
-          onClick={handleAddUser}
-          style={{ marginLeft: 0, width: '100%' }}
-        />
       </div>
     </Frame>
   )

@@ -1,9 +1,10 @@
 import React, { useEffect, useRef, memo } from 'react'
+import { Tv } from 'lucide-react'
 
 import Frame from '../components/Admin/Frame.tsx' // Assuming .tsx
 import ScreenListComponent, { IScreenListRef } from '../components/Admin/ScreenList.tsx' // Renamed, Assuming .tsx
 import Dialog from '../components/Dialog.tsx' // Assuming .tsx
-import { Button } from '../components/Form' // Assuming Form components are in .tsx or have .d.ts
+import { Button } from '@/components/ui/button'
 
 import { useDisplayMutations } from '../hooks/useDisplayMutations'
 import { protect, ProtectProps } from '../helpers/auth' // Now .tsx
@@ -41,18 +42,32 @@ const ScreensComponent = memo(function ScreensComponent({ loggedIn, displayId }:
 
   return (
     <Frame loggedIn={loggedIn}>
-      <h1>Screens</h1>
-      <div className="max-w-2xl">
-        <ScreenListComponent ref={screenListRef as any} />
+      <div className="space-y-8">
+        {/* Header Section */}
+        <div className="flex flex-col space-y-4 sm:flex-row sm:items-center sm:justify-between sm:space-y-0">
+          <div>
+            <h1 className="text-3xl font-bold tracking-tight">Screens</h1>
+            <p className="text-muted-foreground">
+              Manage your digital displays and monitor their status in real-time.
+            </p>
+          </div>
+          <Button
+            onClick={add}
+            size="lg"
+            className="w-full sm:w-auto"
+          >
+            <Tv className="mr-2 h-5 w-5" />
+            Add New Display
+          </Button>
+        </div>
+
+        {/* Screens List */}
+        <div className="space-y-6">
+          <ScreenListComponent ref={screenListRef as any} />
+        </div>
+        
         <Dialog><div></div></Dialog>
-        <Button
-          text={'+ Add new display'}
-          color={'#7bc043'}
-          onClick={add}
-          style={{ marginLeft: 0, width: '100%' }}
-        />
       </div>
-      
     </Frame>
   )
 })

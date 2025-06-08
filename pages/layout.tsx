@@ -136,110 +136,166 @@ const LayoutPage: React.FC<ILayoutPageProps> = ({ loggedIn, displayId }) => {
 
   return (
     <Frame loggedIn={loggedIn}>
-      <div className={'head'}>
-        <h1>Layout</h1>
-        <div className="inline-block relative ml-4 mr-4 border-b-2 border-gray-400">
-          <input
-            className='input'
-            placeholder='Unnamed display'
-            value={displayContext.state.name || ''}
-            onChange={handleTitleChange}
-            onClick={(e: React.MouseEvent) => e.stopPropagation()}
-            size={(displayContext.state.name && displayContext.state.name.length > 0) ? displayContext.state.name.length : undefined}
-          />
-          <div className='icon'>
-            <Edit className="w-4 h-4 text-gray-500" />
+      <div className="space-y-8">
+        {/* Header Section */}
+        <div className="space-y-6">
+          <div className="flex flex-col space-y-4 sm:flex-row sm:items-center sm:justify-between sm:space-y-0">
+            <div>
+              <h1 className="text-3xl font-bold tracking-tight">Layout Designer</h1>
+              <p className="text-muted-foreground">
+                Design and customize your display layout with widgets and status bar elements.
+              </p>
+            </div>
+          </div>
+
+          {/* Display Name Editor */}
+          <div className="flex items-center space-x-3 p-4 bg-card border rounded-lg">
+            <Edit className="w-5 h-5 text-muted-foreground" />
+            <div className="flex-1">
+              <label className="text-sm font-medium text-muted-foreground">Display Name</label>
+              <input
+                className="block w-full mt-1 text-lg font-semibold bg-transparent border-none outline-none focus:ring-0 p-0"
+                placeholder="Unnamed display"
+                value={displayContext.state.name || ''}
+                onChange={handleTitleChange}
+                onClick={(e: React.MouseEvent) => e.stopPropagation()}
+              />
+            </div>
+          </div>
+        </div>
+
+        {/* Controls Section */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* Status Bar Controls */}
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <h3 className="text-lg font-semibold">Status Bar</h3>
+              <DropdownButton
+                icon={Edit}
+                text="Add Status Item"
+                onSelect={displayContext.addStatusBarItem}
+                choices={statusBarChoices}
+                style={{
+                  padding: '8px 16px',
+                  borderRadius: '6px',
+                  border: '1px solid hsl(var(--border))',
+                  background: 'hsl(var(--background))',
+                  fontSize: '14px'
+                }}
+              />
+            </div>
+
+            {displayContext.state.statusBar && displayContext.state.statusBar.elements && displayContext.state.statusBar.elements.length > 0 && (
+              <div className="bg-muted/50 rounded-lg p-4 min-h-[80px] border-2 border-dashed border-muted-foreground/25">
+                <DragDropContext onDragEnd={handleDragEnd}>
+                  <Droppable droppableId="droppable-statusbar" direction="horizontal">
+                    {(provided: DroppableProvided) => (
+                      <div
+                        ref={provided.innerRef}
+                        className="flex gap-2 overflow-auto h-full"
+                        {...provided.droppableProps}
+                      >
+                        {displayContext.state.statusBar.elements!.map((item: string, index: number) => (
+                          <StatusBarElement
+                            key={item}
+                            item={item}
+                            index={index}
+                            onDelete={() => displayContext.removeStatusBarItem(index)}
+                          />
+                        ))}
+                        {provided.placeholder}
+                      </div>
+                    )}
+                  </Droppable>
+                </DragDropContext>
+              </div>
+            )}
+          </div>
+
+          {/* Widget Controls */}
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <h3 className="text-lg font-semibold">Widgets</h3>
+              <div className="flex items-center space-x-3">
+                <DropdownButton
+                  icon={Edit}
+                  text="Add Widget"
+                  onSelect={handleAddWidget}
+                  choices={widgetChoices}
+                  style={{
+                    padding: '8px 16px',
+                    borderRadius: '6px',
+                    border: '1px solid hsl(var(--border))',
+                    background: 'hsl(var(--background))',
+                    fontSize: '14px'
+                  }}
+                />
+                <Form>
+                  <Switch
+                    name="layoutStyle"
+                    checkedLabel="Compact"
+                    uncheckedLabel="Spaced"
+                    checkedIcon={Grid2X2}
+                    uncheckedIcon={Grid3X3}
+                    checked={displayContext.state.layout === 'spaced'}
+                    onValueChange={handleLayoutTypeChange}
+                  />
+                </Form>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Layout Grid */}
+        <div className="space-y-4">
+          <h3 className="text-lg font-semibold">Layout Preview</h3>
+          <div
+            className="bg-muted/30 border-2 border-dashed border-muted-foreground/25 min-h-[400px] rounded-lg overflow-hidden"
+            style={{
+              borderRadius: displayContext.state.layout === 'spaced' ? '12px' : '8px',
+              background: displayContext.state.layout === 'spaced'
+                ? 'hsl(var(--muted) / 0.3)'
+                : 'hsl(var(--muted) / 0.5)'
+            }}
+          >
+            <GridLayoutWithWidth
+              layout={rglLayout}
+              cols={6}
+              onLayoutChange={handleLayoutChange}
+              draggableCancel={'.ReactModalPortal,.controls'}
+              margin={displayContext.state.layout === 'spaced' ? [16, 16] : [8, 8]}
+              rowHeight={120}
+              isBounded={true}
+              containerPadding={[16, 16]}
+            >
+              {widgets.map(widget => (
+                <div key={widget._id} className="bg-background border rounded-lg shadow-sm overflow-hidden">
+                  <EditableWidget
+                    id={widget._id}
+                    type={widget.type as WidgetType}
+                    onDelete={() => handleDeleteWidget(widget._id)}
+                    layout={displayContext.state.layout || 'compact'}
+                  />
+                </div>
+              ))}
+            </GridLayoutWithWidth>
+            
+            {widgets.length === 0 && (
+              <div className="flex items-center justify-center h-full text-center p-8">
+                <div className="space-y-3">
+                  <div className="w-16 h-16 mx-auto bg-muted rounded-full flex items-center justify-center">
+                    <Grid3X3 className="w-8 h-8 text-muted-foreground" />
+                  </div>
+                  <h4 className="text-lg font-medium">No widgets added yet</h4>
+                  <p className="text-muted-foreground">
+                    Start building your layout by adding widgets from the controls above.
+                  </p>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </div>
-
-      <div className="flex flex-row items-center justify-between mb-4">
-        <DropdownButton
-          icon={Edit}
-          text='Add Status Bar Item'
-          onSelect={displayContext.addStatusBarItem}
-          choices={statusBarChoices}
-        />
-      </div>
-
-      {displayContext.state.statusBar && displayContext.state.statusBar.elements && displayContext.state.statusBar.elements.length > 0 && (
-          <div className="bg-gray-300 rounded-lg flex-1 mb-4 h-16">
-              <DragDropContext onDragEnd={handleDragEnd}>
-              <Droppable droppableId='droppable-statusbar' direction='horizontal'>
-                  {(provided: DroppableProvided) => (
-                  <div
-                      ref={provided.innerRef}
-                      style={{
-                      display: 'flex',
-                      paddingTop: 8,
-                      paddingBottom: 8,
-                      paddingRight: 4,
-                      paddingLeft: 4,
-                      overflow: 'auto',
-                      height: '100%',
-                      boxSizing: 'border-box',
-                      }}
-                      {...provided.droppableProps}
-                  >
-                      {displayContext.state.statusBar.elements!.map((item: string, index: number) => ( // Added type for item
-                      <StatusBarElement
-                          key={item} // Assuming item is unique like 'type_id'
-                          item={item}
-                          index={index}
-                          onDelete={() => displayContext.removeStatusBarItem(index)}
-                      />
-                      ))}
-                      {provided.placeholder}
-                  </div>
-                  )}
-              </Droppable>
-              </DragDropContext>
-          </div>
-      )}
-
-      <div className="flex flex-row items-center justify-between mb-4">
-        <DropdownButton
-          icon={Edit}
-          text='Add Widget'
-          onSelect={handleAddWidget}
-          choices={widgetChoices}
-        />
-        <Form>
-          <Switch
-            name='layoutStyle' // Added name prop for Switch
-            checkedLabel={'Compact'}
-            uncheckedLabel={'Spaced'}
-            checkedIcon={Grid2X2}
-            uncheckedIcon={Grid3X3}
-            checked={displayContext.state.layout === 'spaced'}
-            onValueChange={handleLayoutTypeChange}
-          />
-        </Form>
-      </div>
-
-      <div className="bg-gray-300" style={{ borderRadius: displayContext.state.layout === 'spaced' ? '8px' : '0px' }}>
-        <GridLayoutWithWidth
-          layout={rglLayout}
-          cols={6}
-          onLayoutChange={handleLayoutChange}
-          draggableCancel={'.ReactModalPortal,.controls'} // CSS selectors
-          margin={displayContext.state.layout === 'spaced' ? [12, 12] : [4, 4]}
-          rowHeight={100} // Example, adjust as needed
-          isBounded={true} // Example, prevent items from dragging out of bounds
-        >
-          {widgets.map(widget => (
-            <div key={widget._id}>
-              <EditableWidget
-                id={widget._id}
-                type={widget.type as WidgetType} // Cast to the proper WidgetType enum
-                onDelete={() => handleDeleteWidget(widget._id)}
-                layout={displayContext.state.layout || 'compact'} // Provide a default if layout can be null
-              />
-            </div>
-          ))}
-        </GridLayoutWithWidth>
-      </div>
-      
     </Frame>
   )
 }

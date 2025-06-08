@@ -1,9 +1,10 @@
 import React, { useRef, useEffect } from 'react'
+import { Images } from 'lucide-react'
 
 import Frame from '../components/Admin/Frame.tsx'
 import SlideshowListComponent from '../components/Admin/SlideshowList.tsx' // Renamed
 import Dialog from '../components/Dialog.tsx'
-import { Button } from '../components/Form'
+import { Button } from '@/components/ui/button'
 
 import { addSlideshow } from '../actions/slideshow' // Assuming .ts and typed
 import { protect, ProtectProps } from '../helpers/auth' // Now .tsx
@@ -43,18 +44,32 @@ const Slideshows: React.FC<SlideshowsProps> = ({ loggedIn, displayId }) => {
 
   return (
     <Frame loggedIn={loggedIn}>
-      <h1>Slideshows</h1>
-      <div className="max-w-2xl">
-        <SlideshowListComponent ref={slideshowList as any} />
+      <div className="space-y-8">
+        {/* Header Section */}
+        <div className="flex flex-col space-y-4 sm:flex-row sm:items-center sm:justify-between sm:space-y-0">
+          <div>
+            <h1 className="text-3xl font-bold tracking-tight">Slideshows</h1>
+            <p className="text-muted-foreground">
+              Create and manage image slideshows for your digital displays.
+            </p>
+          </div>
+          <Button
+            onClick={add}
+            size="lg"
+            className="w-full sm:w-auto"
+          >
+            <Images className="mr-2 h-5 w-5" />
+            Add New Slideshow
+          </Button>
+        </div>
+
+        {/* Slideshows List */}
+        <div className="space-y-6">
+          <SlideshowListComponent ref={slideshowList as any} />
+        </div>
+        
         <Dialog><div></div></Dialog>
-        <Button
-          text={'+ Add new slideshow'}
-          color={'#8bc34a'}
-          onClick={add}
-          style={{ marginLeft: 0, width: '100%' }}
-        />
       </div>
-      
     </Frame>
   )
 }
