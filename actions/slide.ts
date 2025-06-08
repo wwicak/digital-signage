@@ -72,7 +72,7 @@ export type IApiResponse = z.infer<typeof ApiResponseSchema>;
 
 // Zod Schema for the standalone_upload response
 export const StandaloneUploadResponseSchema = z.object({
-  url: z.string().url(),
+  url: z.string().min(1), // Accept any non-empty string (relative or absolute URLs)
   // other potential fields like fileId, etc.
 });
 export type IStandaloneUploadResponse = z.infer<
