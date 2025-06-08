@@ -91,6 +91,7 @@ class WidgetEditDialog
 
   fetchWidgetData = (): void => {
     const { widgetId } = this.props;
+    
     if (!widgetId) {
       this.setState({
         error: "Widget ID is missing.",
@@ -138,7 +139,7 @@ class WidgetEditDialog
       .catch((error) => {
         console.error(`Failed to fetch widget data for ${widgetId}:`, error);
         this.setState({
-          error: "Failed to load widget configuration.",
+          error: `Failed to load widget configuration: ${error.message || error}`,
           initialWidgetData: null,
         });
       });
@@ -201,8 +202,14 @@ class WidgetEditDialog
 
     const isLoading = initialWidgetData === undefined && !error; // Still loading initial data
 
+    // Get widget type name for dialog title
+    const { widgetType } = this.props;
+    const dialogTitle = widgetType
+      ? `Configure ${widgetType.charAt(0).toUpperCase() + widgetType.slice(1).replace(/-/g, ' ')} Widget`
+      : 'Configure Widget';
+
     return (
-      <Dialog ref={this.dialogRef}>
+      <Dialog ref={this.dialogRef} title={dialogTitle}>
         {error && (
           <div style={{ color: "red", marginBottom: "10px" }}>
             Error: {error}

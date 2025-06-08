@@ -101,18 +101,12 @@ const LayoutPage: React.FC<ILayoutPageProps> = ({ loggedIn, displayId }) => {
   }
 
   const handleAddWidget = (type: string): void => {
-    console.log('[DEBUG] handleAddWidget called with type:', type)
-    console.log('[DEBUG] displayContext.state:', displayContext.state)
-    console.log('[DEBUG] displayContext.state.id:', displayContext.state.id)
-    
     if (!displayContext.state.id) {
-      console.error('[ERROR] No display ID available in context')
       alert('Error: No display selected. Please select a display first.')
       return
     }
 
     const widgetDefinition: IWidgetDefinition | undefined = Widgets[type]
-    console.log('[DEBUG] widgetDefinition:', widgetDefinition)
     
     const newWidgetData: INewWidgetData = { // Construct data for addWidget action
         type: type as WidgetType,
@@ -121,8 +115,6 @@ const LayoutPage: React.FC<ILayoutPageProps> = ({ loggedIn, displayId }) => {
         display_id: displayContext.state.id!, // Pass display ID to associate widget with display
         // x, y, w, h can be omitted if server assigns defaults or if not needed immediately
     }
-
-    console.log('[DEBUG] newWidgetData before API call:', JSON.stringify(newWidgetData, null, 2))
 
     addWidget(newWidgetData)
         .then(() => refreshWidgets(displayContext.state.id!))
@@ -330,11 +322,13 @@ const LayoutPage: React.FC<ILayoutPageProps> = ({ loggedIn, displayId }) => {
               layout={rglLayout}
               cols={6}
               onLayoutChange={handleLayoutChange}
-              draggableCancel={'.ReactModalPortal,.controls'}
+              draggableCancel={'.ReactModalPortal,.controls,button'}
               margin={displayContext.state.layout === 'spaced' ? [16, 16] : [8, 8]}
               rowHeight={120}
               isBounded={true}
               containerPadding={[16, 16]}
+              isDraggable={true}
+              isResizable={true}
             >
               {widgets.map(widget => (
                 <div key={widget._id} className="bg-background border rounded-lg shadow-sm overflow-hidden">

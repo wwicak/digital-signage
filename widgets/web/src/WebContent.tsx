@@ -103,6 +103,14 @@ const WebContent: React.FC<IWebContentProps> = React.memo(({ data, isPreview }) 
           ref={iframeRef}
           sandbox={sandboxPermissions}
           title={title || 'Web Content'}
+          onError={(e) => {
+            console.error('WebContent iframe error:', e);
+            console.error('Failed to load URL:', url);
+            console.error('This might be due to X-Frame-Options or CSP restrictions');
+          }}
+          onLoad={() => {
+            console.log('WebContent iframe loaded successfully:', url);
+          }}
         />
       </div>
       

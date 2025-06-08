@@ -7,6 +7,7 @@ export enum WidgetType {
   CONGRATS = "congrats",
   IMAGE = "image",
   LIST = "list",
+  MEETING_ROOM = "meeting-room",
   SLIDESHOW = "slideshow", // Refers to a Slideshow model
   WEATHER = "weather",
   WEB = "web",

@@ -36,6 +36,14 @@ class WebSlide extends GenericSlide {
         allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture"
         allowFullScreen
         title="Web content"
+        onError={(e) => {
+          console.error('WebSlide iframe error:', e);
+          console.error('Failed to load URL in slide:', data);
+          console.error('This might be due to X-Frame-Options or CSP restrictions');
+        }}
+        onLoad={() => {
+          console.log('WebSlide iframe loaded successfully:', data);
+        }}
       />
     )
   }

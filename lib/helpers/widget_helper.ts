@@ -102,44 +102,105 @@ export const validateWidgetData = async (
       }
       break;
     case WidgetType.IMAGE:
+      // Image widget allows null URL (for new widgets), so only validate if URL is provided
       if (
-        typeof data.url !== "string" ||
-        !data.url.match(/\.(jpeg|jpg|gif|png)$/)
+        data.url !== null &&
+        data.url !== undefined &&
+        typeof data.url !== "string"
       ) {
         throw new Error(
-          "Invalid data for Image widget: URL must be a valid image URL (jpeg, jpg, gif, png)."
+          "Invalid data for Image widget: URL must be a string or null."
+        );
+      }
+      // Optional validation for URL format if provided
+      if (
+        data.url &&
+        typeof data.url === "string" &&
+        !data.url.match(/^https?:\/\/.+/)
+      ) {
+        throw new Error(
+          "Invalid data for Image widget: URL must be a valid HTTP/HTTPS URL."
         );
       }
       break;
     case WidgetType.LIST:
       if (
-        !Array.isArray(data.items) ||
-        !data.items.every((item: any) => typeof item === "string")
+        !Array.isArray(data.list) ||
+        !data.list.every(
+          (item: any) =>
+            typeof item === "object" && typeof item.text === "string"
+        )
       ) {
-        // Added type for item
         throw new Error(
-          "Invalid data for List widget: items must be an array of strings."
+          "Invalid data for List widget: list must be an array of objects with text property."
         );
       }
-      if (data.title && typeof data.title !== "string") {
+      if (
+        data.title !== null &&
+        data.title !== undefined &&
+        typeof data.title !== "string"
+      ) {
         throw new Error(
-          "Invalid data for List widget: title, if provided, must be a string."
+          "Invalid data for List widget: title, if provided, must be a string or null."
+        );
+      }
+      break;
+    case WidgetType.MEETING_ROOM:
+      // Meeting room widget validation - all fields are optional
+      if (
+        data.buildingId !== undefined &&
+        typeof data.buildingId !== "string"
+      ) {
+        throw new Error(
+          "Invalid data for Meeting Room widget: buildingId, if provided, must be a string."
+        );
+      }
+      if (
+        data.refreshInterval !== undefined &&
+        typeof data.refreshInterval !== "number"
+      ) {
+        throw new Error(
+          "Invalid data for Meeting Room widget: refreshInterval, if provided, must be a number."
+        );
+      }
+      if (
+        data.showUpcoming !== undefined &&
+        typeof data.showUpcoming !== "boolean"
+      ) {
+        throw new Error(
+          "Invalid data for Meeting Room widget: showUpcoming, if provided, must be a boolean."
+        );
+      }
+      if (
+        data.maxReservations !== undefined &&
+        typeof data.maxReservations !== "number"
+      ) {
+        throw new Error(
+          "Invalid data for Meeting Room widget: maxReservations, if provided, must be a number."
+        );
+      }
+      if (data.title !== undefined && typeof data.title !== "string") {
+        throw new Error(
+          "Invalid data for Meeting Room widget: title, if provided, must be a string."
         );
       }
       break;
     case WidgetType.SLIDESHOW:
-      if (
-        !data.slideshow_id ||
-        !mongoose.Types.ObjectId.isValid(data.slideshow_id)
-      ) {
-        throw new Error(
-          "Invalid data for Slideshow widget: slideshow_id must be a valid ObjectId string."
-        );
-      }
-      // Check if the slideshow actually exists
-      const slideshowExists = await Slideshow.findById(data.slideshow_id);
-      if (!slideshowExists) {
-        throw new Error(`Slideshow with id ${data.slideshow_id} not found.`);
+      // Allow null slideshow_id for new widgets, but validate if provided
+      if (data.slideshow_id !== null && data.slideshow_id !== undefined) {
+        if (
+          typeof data.slideshow_id !== "string" ||
+          !mongoose.Types.ObjectId.isValid(data.slideshow_id)
+        ) {
+          throw new Error(
+            "Invalid data for Slideshow widget: slideshow_id must be a valid ObjectId string or null."
+          );
+        }
+        // Check if the slideshow actually exists (only if slideshow_id is provided)
+        const slideshowExists = await Slideshow.findById(data.slideshow_id);
+        if (!slideshowExists) {
+          throw new Error(`Slideshow with id ${data.slideshow_id} not found.`);
+        }
       }
       break;
     case WidgetType.WEATHER:
@@ -159,7 +220,7 @@ export const validateWidgetData = async (
       if (typeof data.url !== "string" || !data.url.startsWith("http")) {
         // Basic URL check
         throw new Error(
-          "Invalid data for Web widget: URL must be a valid web URL."
+          "Invalid data for Web widget: URL must be a valid web URL starting with http."
         );
       }
       break;

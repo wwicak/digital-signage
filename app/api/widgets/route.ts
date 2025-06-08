@@ -57,34 +57,9 @@ export async function POST(request: NextRequest) {
     const user = await requireAuth(request);
     const body = await request.json();
 
-    console.log(
-      "[DEBUG] POST /api/widgets - Request body:",
-      JSON.stringify(body, null, 2)
-    );
-    console.log("[DEBUG] POST /api/widgets - User:", {
-      _id: user._id,
-      email: user.email,
-    });
-
     const { name, type, x, y, w, h, data, display_id } = body;
 
-    console.log("[DEBUG] POST /api/widgets - Extracted values:", {
-      name,
-      type,
-      x,
-      y,
-      w,
-      h,
-      display_id,
-      data: JSON.stringify(data),
-    });
-
-    console.log("[DEBUG] POST /api/widgets - Starting validation...");
-
     if (!name || !type) {
-      console.log(
-        "[DEBUG] POST /api/widgets - Missing name or type validation failed"
-      );
       return NextResponse.json(
         { message: "Widget name and type are required." },
         { status: 400 }
@@ -92,7 +67,6 @@ export async function POST(request: NextRequest) {
     }
 
     if (!display_id) {
-      console.log("[DEBUG] POST /api/widgets - Missing display_id");
       return NextResponse.json(
         { message: "Display ID is required." },
         { status: 400 }
@@ -120,12 +94,6 @@ export async function POST(request: NextRequest) {
 
       // First check if display exists at all
       const displayExists = await Display.findById(display_id);
-      console.log("[DEBUG] POST /api/widgets - Display exists check:", {
-        display_id,
-        exists: !!displayExists,
-        display_creator_id: displayExists?.creator_id?.toString(),
-        user_id: user._id,
-      });
 
       // Try to find and update display with creator check
       let updatedDisplay = await Display.findOneAndUpdate(
@@ -136,9 +104,6 @@ export async function POST(request: NextRequest) {
 
       // If not found with creator_id, try without creator_id check (for legacy displays)
       if (!updatedDisplay && displayExists) {
-        console.log(
-          "[DEBUG] POST /api/widgets - Trying without creator_id check for legacy display"
-        );
         updatedDisplay = await Display.findOneAndUpdate(
           { _id: display_id }, // No creator check for legacy displays
           { $addToSet: { widgets: savedWidget._id } },
@@ -149,9 +114,6 @@ export async function POST(request: NextRequest) {
       if (!updatedDisplay) {
         // If display not found or not owned by user, delete the widget and return error
         await savedWidget.deleteOne();
-        console.log(
-          "[DEBUG] POST /api/widgets - Display not found or not authorized"
-        );
         return NextResponse.json(
           { message: "Display not found or not authorized" },
           { status: 404 }
