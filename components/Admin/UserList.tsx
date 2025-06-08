@@ -10,9 +10,9 @@ export interface IUserListRef {
 }
 
 interface UserCardProps {
-  user: User;
-  onEdit: (user: User) => void;
-  onDelete: (user: User) => void;
+  user: UserType;
+  onEdit: (user: UserType) => void;
+  onDelete: (user: UserType) => void;
 }
 
 const UserCard: React.FC<UserCardProps> = ({ user, onEdit, onDelete }) => {
@@ -60,7 +60,7 @@ const UserCard: React.FC<UserCardProps> = ({ user, onEdit, onDelete }) => {
       </div>
       <div className="font-sans flex flex-col justify-center pr-2 flex-1 min-w-0">
         <div className="font-sans text-base overflow-hidden whitespace-nowrap text-ellipsis text-gray-600 mb-1">
-          {user.name || 'Unnamed User' 
+          {user.name || 'Unnamed User'}
         </div>
         <div className="font-sans text-sm text-gray-500 flex items-center flex-wrap gap-4">
           <span>{user.email}</span>
@@ -79,26 +79,26 @@ const UserCard: React.FC<UserCardProps> = ({ user, onEdit, onDelete }) => {
           onKeyPress={(e) => {if(e.key === 'Enter' || e.key === ' ') onEdit(user)}}
           aria-label='Edit user'
         >
-          <Edit 
+          <Edit className="w-4 h-4 text-gray-500" />
         </div>
         <div
           className="ml-2 p-2 rounded-full cursor-pointer transition-colors duration-200 hover:bg-gray-100"
-          onClick={() => onDelete(user) 
+          onClick={() => onDelete(user)}
           role='button'
           tabIndex={0}
           onKeyPress={(e) => {if(e.key === 'Enter' || e.key === ' ') onDelete(user)}}
           aria-label='Delete user'
         >
-          <Trash2 color='#828282' />
+          <Trash2 className="w-4 h-4 text-gray-500" />
         </div>
       </div>
     </div>
   );
- ;
+};
 
 const UserList = forwardRef<IUserListRef>((props, ref) => {
   const { users, loading, error, pagination, fetchUsers, deleteUser } = useUsers();
-  const [selectedUser, setSelectedUser] = useState<User | null>(null);
+  const [selectedUser, setSelectedUser] = useState<UserType | null>(null);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isCreateMode, setIsCreateMode] = useState(false);
 
@@ -111,7 +111,7 @@ const UserList = forwardRef<IUserListRef>((props, ref) => {
     }
   }));
 
-  const handleEditUser = (user: User) => {
+  const handleEditUser = (user: UserType) => {
     setSelectedUser(user);
     setIsCreateMode(false);
     setIsEditDialogOpen(true);
@@ -123,7 +123,7 @@ const UserList = forwardRef<IUserListRef>((props, ref) => {
     setIsEditDialogOpen(true);
   };
 
-  const handleDeleteUser = async (user: User) => {
+  const handleDeleteUser = async (user: UserType) => {
     if (window.confirm(`Are you sure you want to delete user "${user.name || user.email}"?`)) {
       try {
         await deleteUser(user._id);

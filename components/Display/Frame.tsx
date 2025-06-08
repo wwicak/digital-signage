@@ -1,5 +1,6 @@
-import React, { ReactNode, JSX } from 'react'
-import Clock from 'react-live-clock' // react-live-clock might need @types/react-live-clock if not inherently typed
+import React, { ReactNode, JSX, memo, useCallback } from 'react'
+import { Wifi } from 'lucide-react'
+import Clock from 'react-live-clock'
 
 /*
  * Define the structure for status bar items if they become more complex.
@@ -33,7 +34,7 @@ const Frame: React.FC<IDisplayFrameProps> = React.memo(({ children, statusBar = 
       case 'date':
         return <Clock key={`${type}-${index}`} ticking={true} format={'dddd, MMMM Do.'} />
       case 'connection':
-        return < key={`${type}-${index}` className={'wifi-icon'} icon={faWifi } />
+        return <Wifi key={`${type}-${index}`} className="w-4 h-4 text-white" />
       case 'time':
         return <Clock key={`${type}-${index}`} ticking={true} format={'H:mm'} />
       default:
@@ -55,7 +56,7 @@ const Frame: React.FC<IDisplayFrameProps> = React.memo(({ children, statusBar = 
         <div className={'status-bar-container'}>
           {statusBar.map((item, index) => (
             // Each item in the status bar should have its own container for styling (e.g., margins)
-            <div key={`statusbar-item-${item}-${index}` className={`status-bar-item item-${item.split('_')[0]}`}>
+            <div key={`statusbar-item-${item}-${index}`} className={`status-bar-item item-${item.split('_')[0]}`}>
               {renderStatusBarItem(item, index)}
             </div>
           ))}

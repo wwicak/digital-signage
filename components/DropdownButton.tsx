@@ -82,7 +82,7 @@ class DropdownButton extends Component<IDropdownButtonProps, IDropdownButtonStat
       return <IconComponent className={className} />
     } else if (typeof icon === 'function') {
       // Direct Lucide icon component
-      const IconComponent = icon as 
+      const IconComponent = icon as LucideIcon
       return <IconComponent className={className} />
     }
     return null
