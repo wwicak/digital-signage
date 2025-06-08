@@ -111,7 +111,9 @@ export default async function handler(
     return res.status(500).json({
       error: "Failed to fetch the requested URL",
       details:
-        process.env.NODE_ENV === "development" ? error.message : undefined,
+        process.env.NODE_ENV === "development"
+          ? (error as Error).message
+          : undefined,
     });
   }
 }
