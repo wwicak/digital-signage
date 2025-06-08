@@ -3,7 +3,6 @@ import * as z from 'zod'
 
 import SlideEditDialog from './SlideEditDialog' // Removed ISlideEditDialogRef, assuming default export or internal typing
 import { deleteSlide, SlideActionDataSchema } from '../../actions/slide' // ISlideData is z.infer<typeof SlideActionDataSchema>
-import { Edit, X, Trash2, Plus, Minus, Eye, User, Settings, Key, Tv, Grid3X3, Grid2X2, Images, Image, Play, Pause, Stop, Clock, Calendar, ExternalLink, Download, Upload, Save, LogOut, ChevronDown, ChevronUp, Layout, Cast, Smartphone, Tablet, Monitor } from 'lucide-react'
 
 // Zod schema for the 'value' prop, extending SlideActionDataSchema
 const SlideCardValueSchema = SlideActionDataSchema.extend({
@@ -47,7 +46,7 @@ const SlideCard: React.FC<ISlideCardProps> = ({ value, refresh = () => {} }) => 
       })
   }
 
-  const getThumbnailIcon = (slideType: string): LucideIcon => {
+  const getThumbnailIcon = (slideType: string):  => {
     switch (slideType) {
       case 'youtube': // Assuming 'youtube' is a value for ISlideData.type
       case 'video': // Or if ISlideData.type can be 'video'
@@ -104,8 +103,8 @@ const SlideCard: React.FC<ISlideCardProps> = ({ value, refresh = () => {} }) => 
           style={thumbnailStyle}
         >
           {!showBackgroundImage && (
-            <LucideIcon icon={getThumbnailIcon(slideType) size='lg' color='#FFFFFF' />
-          )}
+            <<getThumbnailIcon(slideType) size='lg' color='#FFFFFF' />
+          ) className="w-4 h-4" />
         </div>
       </div>
       <div className="font-sans flex flex-col justify-center pr-2 flex-1 min-w-0">
@@ -114,9 +113,9 @@ const SlideCard: React.FC<ISlideCardProps> = ({ value, refresh = () => {} }) => 
         </div>
         <div className="font-sans text-sm text-gray-500 flex items-center">
           <div className="mr-1">
-            <LucideIcon icon={Clock color='#878787' />
+            <<Clock color='#878787' />
           </div>
-          <span>{(value.duration || 0)}s</span>
+          <span>{(value.duration || 0) className="w-4 h-4" />s</span>
         </div>
       </div>
       <div className="flex flex-row font-sans items-center">
@@ -128,10 +127,10 @@ const SlideCard: React.FC<ISlideCardProps> = ({ value, refresh = () => {} }) => 
           onKeyPress={(e) => {if(e.key === 'Enter' || e.key === ' ') handleEdit()}}
           aria-label='Edit slide'
         >
-          <LucideIcon icon={Edit color='#828282' />
+          <<Edit color='#828282' />
         </div>
         <div
-          className={`ml-2 p-2 rounded-full transition-colors duration-200 ${loading ? 'cursor-not-allowed' : 'cursor-pointer hover:bg-gray-100'}`}
+          className={`ml-2 p-2 rounded-full transition-colors duration-200 ${loading ? 'cursor-not-allowed' : 'cursor-pointer hover:bg-gray-100' className="w-4 h-4" />`}
           onClick={!loading ? handleDelete : undefined}
           role='button'
           tabIndex={!loading ? 0 : -1}
@@ -139,7 +138,7 @@ const SlideCard: React.FC<ISlideCardProps> = ({ value, refresh = () => {} }) => 
           aria-label='Delete slide'
           aria-disabled={loading}
         >
-          <LucideIcon
+          <
             icon={Trash2}
             fixedWidth
             color={loading ? '#ccc' : '#828282'}

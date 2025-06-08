@@ -6,7 +6,7 @@ import { useRouter, useSearchParams } from 'next/navigation'
 
 import Frame from '../../components/Admin/Frame'
 import { login } from '../../helpers/auth'
-import { Edit, X, Trash2, Plus, Minus, Eye, User, Settings, Key, Tv, Grid3X3, Grid2X2, Images, Image, Play, Pause, Stop, Clock, Calendar, ExternalLink, Download, Upload, Save, LogOut, ChevronDown, ChevronUp, Layout, Cast, Smartphone, Tablet, Monitor } from 'lucide-react'
+import { Tv, Check, X, ChevronLeft } from 'lucide-react'
 
 const LoginContent = memo(function LoginContent() {
   const router = useRouter()
@@ -47,18 +47,17 @@ const LoginContent = memo(function LoginContent() {
       <div className='formContainer'>
         <div className='logo'>
           <div className='icon'>
-            <LucideIcon icon={Tv size='lg' color='#7bc043' />
+            <Tv className="w-8 h-8 text-primary" />
           </div>
         </div>
         <form className='form' onSubmit={handleSubmit}>
           {alert && (
             <div className={`alert-${alert}`}>
-              <LucideIcon
-                icon={alert === 'success' ? faCheck : faTimes}
-                fixedWidth
-                size='sm'
-                color='white'
-              />
+              {alert === 'success' ? (
+                <Check className="w-4 h-4 text-white" />
+              ) : (
+                <X className="w-4 h-4 text-white" />
+              )}
               <span className={'alert-text'}>
                 {alert === 'success'
                   ? 'Successfully logged in to your account.'
@@ -97,7 +96,7 @@ const LoginContent = memo(function LoginContent() {
         </form>
         <Link href='/'>
           <span className='back'>
-            <LucideIcon icon={faAngleLeft /> Back to the home page
+            <ChevronLeft className="w-4 h-4 inline mr-1" /> Back to the home page
           </span>
         </Link>
       </div>

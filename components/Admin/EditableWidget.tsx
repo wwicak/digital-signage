@@ -11,7 +11,6 @@ import { IBaseWidget } from '../../widgets/base_widget'
 import WidgetEditDialog from './WidgetEditDialog' // Removed IWidgetEditDialog import assuming it's default export or typed internally
 import * as z from 'zod'
 import { WidgetType, WidgetTypeZod } from '@/lib/models/Widget' // Import enum and its Zod schema
-import { Edit, X, Trash2, Plus, Minus, Eye, User, Settings, Key, Tv, Grid3X3, Grid2X2, Images, Image, Play, Pause, Stop, Clock, Calendar, ExternalLink, Download, Upload, Save, LogOut, ChevronDown, ChevronUp, Layout, Cast, Smartphone, Tablet, Monitor } from 'lucide-react'
 
 // Zod schema for EditableWidget props
 export const EditableWidgetPropsSchema = z.object({
@@ -52,15 +51,15 @@ const EditableWidget: React.FC<IEditableWidgetProps> = ({ id, type = WidgetType.
     <div className={'widget-editable-container'}>
       <div className={'controls'}>
         <div className={'edit-btn'} onClick={openDialog} role='button' tabIndex={0}>
-          <LucideIcon icon={Settings className={'xs' />
+          <<Settings className={'xs' />
         </div>
-        <div className={'delete-btn'} onClick={handleDeleteClick} role='button' tabIndex={0}>
-          <LucideIcon icon={X className={'xs' />
+        <div className={'delete-btn' className="w-4 h-4" /> onClick={handleDeleteClick} role='button' tabIndex={0}>
+          <<X className={'xs' />
         </div>
       </div>
-      <div className={'info'}>
+      <div className={'info' className="w-4 h-4" />>
         <div className={'icon-display'}>
-          <LucideIcon icon={widgetIcon  className={'2x'} /> {/* Cast to LucideIcon */}
+          <<widgetIcon  className={'2x' className="w-4 h-4" /> /> {/* Cast to  */}
         </div>
         <span className={'type-name'}>{widgetName}</span>
       </div>

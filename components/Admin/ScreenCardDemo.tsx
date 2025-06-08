@@ -1,6 +1,5 @@
 import React, { useState } from 'react'
 import OrientationPreview from './OrientationPreview'
-import { Edit, X, Trash2, Plus, Minus, Eye, User, Settings, Key, Tv, Grid3X3, Grid2X2, Images, Image, Play, Pause, Stop, Clock, Calendar, ExternalLink, Download, Upload, Save, LogOut, ChevronDown, ChevronUp, Layout, Cast, Smartphone, Tablet, Monitor } from 'lucide-react'
 
 interface IDisplayData {
   _id: string;
@@ -59,26 +58,26 @@ const ScreenCardDemo: React.FC<IScreenCardDemoProps> = ({ value, onOrientationCh
     <div className='card'>
       <div className='left'>
         <div className={'thumbnail'}>
-          <LucideIcon icon={faTv  size='lg' color='#7bc043' />
+          <<faTv  size='lg' color='#7bc043' />
         </div>
       </div>
       <div className='middle'>
-        <div className='title'>{value?.name || 'Untitled Display'}</div>
+        <div className='title'>{value?.name || 'Untitled Display' className="w-4 h-4" /></div>
         <div className='info'>
           <div className='widgetnum'>
             <div className='icon'>
-              <LucideIcon icon={faWindowRestore  color='#878787' />
+              <<faWindowRestore  color='#878787' />
             </div>
-            <span className='text'>{widgetCount} widgets</span>
+            <span className='text'>{widgetCount className="w-4 h-4" /> widgets</span>
           </div>
           <div className='clientnum'>
             <div className='icon'>
-              <LucideIcon icon={faChromecast  color='#878787' />
+              <<faChromecast  color='#878787' />
             </div>
             <span className='text'>1 client paired</span>
           </div>
           <div className='orientation-control'>
-            <OrientationPreview orientation={value?.orientation || null} />
+            <OrientationPreview orientation={value?.orientation || null className="w-4 h-4" /> />
             <select 
               value={value?.orientation || 'landscape'} 
               onChange={handleOrientationChange}
@@ -97,13 +96,13 @@ const ScreenCardDemo: React.FC<IScreenCardDemoProps> = ({ value, onOrientationCh
       </div>
       <div className='right'>
         <div className='actionIcon' onClick={handleEdit} aria-label='Edit Layout'>
-          <LucideIcon icon={faEye  color='#828282' />
+          <<faEye  color='#828282' />
         </div>
-        <div className='actionIcon' onClick={handleView} aria-label='View Display'>
-          <LucideIcon icon={faLink  color='#828282' />
+        <div className='actionIcon' onClick={handleView className="w-4 h-4" /> aria-label='View Display'>
+          <<faLink  color='#828282' />
         </div>
-        <div className='actionIcon' onClick={handleDelete} aria-label='Delete Display'>
-          <LucideIcon icon={faTrash  color='#828282' />
+        <div className='actionIcon' onClick={handleDelete className="w-4 h-4" /> aria-label='Delete Display'>
+          <<faTrash  color='#828282' />
         </div>
       </div>
       <style jsx>
@@ -123,7 +122,7 @@ const ScreenCardDemo: React.FC<IScreenCardDemoProps> = ({ value, onOrientationCh
             z-index: 1;
             box-shadow: 0 2px 8px rgba(0,0,0,0.1);
             transition: box-shadow 0.2s ease-in-out;
-          }
+           className="w-4 h-4" />
           .card:hover {
             box-shadow: 0 4px 12px rgba(0,0,0,0.15);
           }

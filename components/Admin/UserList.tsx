@@ -10,7 +10,6 @@ import {
 import useUsers, { User } from '@/hooks/useUsers';
 import { UserRoleName } from '@/lib/models/User';
 import UserEditDialog from './UserEditDialog';
-import { Edit, X, Trash2, Plus, Minus, Eye, User, Settings, Key, Tv, Grid3X3, Grid2X2, Images, Image, Play, Pause, Stop, Clock, Calendar, ExternalLink, Download, Upload, Save, LogOut, ChevronDown, ChevronUp, Layout, Cast, Smartphone, Tablet, Monitor } from 'lucide-react'
 
 export interface IUserListRef {
   refresh: () => void;
@@ -63,12 +62,12 @@ const UserCard: React.FC<UserCardProps> = ({ user, onEdit, onDelete }) => {
     <div className="p-3 font-sans rounded bg-white my-3 flex flex-row items-center relative z-10 shadow-sm hover:shadow-md transition-shadow duration-200">
       <div className="flex justify-center items-center pr-3">
         <div className={`h-12 w-12 rounded flex justify-center items-center ${getRoleColor(user.role.name)}`}>
-          <LucideIcon icon={getRoleIcon(user.role.name) size='lg' color='#FFFFFF' />
+          <<getRoleIcon(user.role.name) size='lg' color='#FFFFFF' />
         </div>
       </div>
       <div className="font-sans flex flex-col justify-center pr-2 flex-1 min-w-0">
         <div className="font-sans text-base overflow-hidden whitespace-nowrap text-ellipsis text-gray-600 mb-1">
-          {user.name || 'Unnamed User'}
+          {user.name || 'Unnamed User' className="w-4 h-4" />
         </div>
         <div className="font-sans text-sm text-gray-500 flex items-center flex-wrap gap-4">
           <span>{user.email}</span>
@@ -87,22 +86,22 @@ const UserCard: React.FC<UserCardProps> = ({ user, onEdit, onDelete }) => {
           onKeyPress={(e) => {if(e.key === 'Enter' || e.key === ' ') onEdit(user)}}
           aria-label='Edit user'
         >
-          <LucideIcon icon={Edit color='#828282' />
+          <<Edit color='#828282' />
         </div>
         <div
           className="ml-2 p-2 rounded-full cursor-pointer transition-colors duration-200 hover:bg-gray-100"
-          onClick={() => onDelete(user)}
+          onClick={() => onDelete(user) className="w-4 h-4" />
           role='button'
           tabIndex={0}
           onKeyPress={(e) => {if(e.key === 'Enter' || e.key === ' ') onDelete(user)}}
           aria-label='Delete user'
         >
-          <LucideIcon icon={Trash2 color='#828282' />
+          <<Trash2 color='#828282' />
         </div>
       </div>
     </div>
   );
-};
+ className="w-4 h-4" />;
 
 const UserList = forwardRef<IUserListRef>((props, ref) => {
   const { users, loading, error, pagination, fetchUsers, deleteUser } = useUsers();

@@ -109,12 +109,12 @@ import {
   Clock as ClockIcon,
   Calendar as CalendarIcon,
   
-  type LucideIcon
+  type 
 } from 'lucide-react'
 
 // Icon mapping type
 export type IconName = string
-export type IconComponent = LucideIcon
+export type IconComponent = 
 
 // Comprehensive FontAwesome to Lucide mapping
 export const iconMap: Record<string, IconComponent> = {
@@ -242,13 +242,13 @@ export const getIcon = (iconName: string): IconComponent => {
 }
 
 // Helper component for rendering icons
-interface LucideIcons {
+interface IconProps {
   name: string
   className?: string
   size?: number
 }
 
-export const Icon: React.FC<LucideIcons> = ({ name, className = "w-4 h-4", size }) => {
+export const Icon: React.FC<IconProps> = ({ name, className = "w-4 h-4", size }) => {
   const IconComponent = getIcon(name)
   const sizeClass = size ? `w-${size} h-${size}` : className
   

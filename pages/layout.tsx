@@ -18,7 +18,6 @@ import { addWidget, getWidgets, deleteWidget, updateWidget, IWidgetData, INewWid
 import { WidgetType } from '../lib/models/Widget'
 import { protect, ProtectProps } from '../helpers/auth' // Assuming auth.js will be typed or allowJs
 import { useDisplayContext } from '../contexts/DisplayContext'
-import { Edit, X, Trash2, Plus, Minus, Eye, User, Settings, Key, Tv, Grid3X3, Grid2X2, Images, Image, Play, Pause, Stop, Clock, Calendar, ExternalLink, Download, Upload, Save, LogOut, ChevronDown, ChevronUp, Layout, Cast, Smartphone, Tablet, Monitor } from 'lucide-react'
 
 const GridLayoutWithWidth = WidthProvider(GridLayout as any)
 
@@ -121,7 +120,7 @@ const LayoutPage: React.FC<ILayoutPageProps> = ({ loggedIn, displayId }) => {
     return {
       key: key,
       name: elType.name,
-      icon: elType.icon as LucideIcon, // Cast if confident icon is always LucideIcon
+      icon: elType.icon as , // Cast if confident icon is always 
     }
   })
 
@@ -130,7 +129,7 @@ const LayoutPage: React.FC<ILayoutPageProps> = ({ loggedIn, displayId }) => {
       return {
           key: widgetDef.type || key, // Assuming Widgets might have a 'type' field or key is the type
           name: widgetDef.name,
-          icon: widgetDef.icon as LucideIcon,
+          icon: widgetDef.icon as ,
       }
   })
 
@@ -148,14 +147,14 @@ const LayoutPage: React.FC<ILayoutPageProps> = ({ loggedIn, displayId }) => {
             size={(displayContext.state.name && displayContext.state.name.length > 0) ? displayContext.state.name.length : undefined}
           />
           <div className='icon'>
-            <LucideIcon icon={faPencilAlt color='#828282' />
+            <<faPencilAlt color='#828282' />
           </div>
         </div>
       </div>
 
       <div className='settings'>
         <DropdownButton
-          icon={faPencilAlt } // Example icon, adjust as needed
+          icon={faPencilAlt  className="w-4 h-4" /> // Example icon, adjust as needed
           text='Add Status Bar Item'
           onSelect={displayContext.addStatusBarItem}
           choices={statusBarChoices}

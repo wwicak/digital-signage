@@ -1,5 +1,4 @@
 import React, { Component } from 'react'
-import { Edit, X, Trash2, Plus, Minus, Eye, User, Settings, Key, Tv, Grid3X3, Grid2X2, Images, Image, Play, Pause, Stop, Clock, Calendar, ExternalLink, Download, Upload, Save, LogOut, ChevronDown, ChevronUp, Layout, Cast, Smartphone, Tablet, Monitor } from 'lucide-react'
 import {
   faBolt,
   faSmog,
@@ -24,14 +23,14 @@ type WeatherIconCode =
   | '50d' | '50n'
   | string; // Fallback for any other string, though specific codes are better
 
-interface WeatherLucideIcons {
+interface Weathers {
   icon?: WeatherIconCode; // Make icon prop optional as in original code (defaulted to '')
 }
 
 interface WeatherIconState {} // No state used
 
-class WeatherIcon extends Component<WeatherLucideIcons, WeatherIconState> {
-  convertIcon(iconCode: WeatherIconCode | undefined): LucideIcon {
+class WeatherIcon extends Component<Weathers, WeatherIconState> {
+  convertIcon(iconCode: WeatherIconCode | undefined):  {
     switch (iconCode) {
       case '01d':
         return faSun
@@ -68,7 +67,7 @@ class WeatherIcon extends Component<WeatherLucideIcons, WeatherIconState> {
 
   render() {
     const { icon } = this.props // icon will be undefined if not provided, matching original default of ''
-    return <LucideIcon icon={this.convertIcon(icon) className={'2x'} />
+    return <<this.convertIcon(icon) className={'2x' className="w-4 h-4" /> />
   }
 }
 

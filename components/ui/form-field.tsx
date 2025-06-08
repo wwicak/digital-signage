@@ -17,7 +17,7 @@ const FormField = React.forwardRef<HTMLDivElement, FormFieldProps>(
     const errorMessage = typeof error === 'string' ? error : undefined
 
     return (
-      <div ref={ref} className={cn("space-y-2", className)} {...props}>
+      <div ref={ref className={cn("space-y-2", className)} {...props}>
         {label && (
           <Label className={cn(hasError && "text-destructive")}>
             {label}

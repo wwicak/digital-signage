@@ -7,7 +7,6 @@ import Clock from 'react-live-clock' // react-live-clock might need @types/react
  * Example: 'date', 'time_1', 'connection_main'
  */
 import * as z from 'zod'
-import { Edit, X, Trash2, Plus, Minus, Eye, User, Settings, Key, Tv, Grid3X3, Grid2X2, Images, Image, Play, Pause, Stop, Clock, Calendar, ExternalLink, Download, Upload, Save, LogOut, ChevronDown, ChevronUp, Layout, Cast, Smartphone, Tablet, Monitor } from 'lucide-react'
 
 export const DisplayFramePropsSchema = z.object({
   children: z.custom<ReactNode>((val) => {
@@ -34,7 +33,7 @@ const Frame: React.FC<IDisplayFrameProps> = React.memo(({ children, statusBar = 
       case 'date':
         return <Clock key={`${type}-${index}`} ticking={true} format={'dddd, MMMM Do.'} />
       case 'connection':
-        return <LucideIcon key={`${type}-${index}`} className={'wifi-icon'} icon={faWifi } />
+        return < key={`${type}-${index}` className={'wifi-icon'} icon={faWifi } />
       case 'time':
         return <Clock key={`${type}-${index}`} ticking={true} format={'H:mm'} />
       default:
@@ -56,7 +55,7 @@ const Frame: React.FC<IDisplayFrameProps> = React.memo(({ children, statusBar = 
         <div className={'status-bar-container'}>
           {statusBar.map((item, index) => (
             // Each item in the status bar should have its own container for styling (e.g., margins)
-            <div key={`statusbar-item-${item}-${index}`} className={`status-bar-item item-${item.split('_')[0]}`}>
+            <div key={`statusbar-item-${item}-${index}` className={`status-bar-item item-${item.split('_')[0]}`}>
               {renderStatusBarItem(item, index)}
             </div>
           ))}

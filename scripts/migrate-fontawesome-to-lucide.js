@@ -17,7 +17,7 @@ const iconMappings = {
   // Import mappings
   "  "  "  "  "  
   // Icon usage mappings
-  'LucideIcon': 'LucideIcon',
+  '': '',
   'icon={Edit}': 'icon={Edit}',
   'icon={X}': 'icon={X}',
   'icon={Trash2}': 'icon={Trash2}',
@@ -56,16 +56,16 @@ const iconMappings = {
   'icon={Monitor}': 'icon={Monitor}',
   
   // Component usage patterns
-  '<LucideIcon icon={': '<',
+  '<<': '<',
   '': '',
   ' className=': ' className=',
   ' className=': ' className=',
   '': '',
   '': '',
-  'LucideIcon,': 'LucideIcon,',
-  'LucideIcon': 'LucideIcon',
-  'LucideIcon': 'LucideIcon',
-};
+  ',': ',',
+  '': '',
+  '': '',
+ className="w-4 h-4" />;
 
 // Lucide imports to add
 const lucideImports = [
@@ -138,9 +138,9 @@ class FontAwesomeMigrator {
       }
       
       // Replace FontAwesome component usage patterns
-      content = content.replace(/<LucideIcon\s+icon=\{([^}]+)\}[^>]*\/>/g, (match, iconName) => {
-        const cleanIconName = iconName.replace(/\s+as\s+LucideIcon/, '').trim();
-        return `<${cleanIconName} className="w-4 h-4" />`;
+      content = content.replace(/<\s+icon=\{([^}]+)\}[^>]*\/>/g, (match, iconName) => {
+        const cleanIconName = iconName.replace(/\s+as\s+/, '').trim();
+        return `<${cleanIconName className="w-4 h-4" />`;
       });
       
       // Clean up empty lines and formatting

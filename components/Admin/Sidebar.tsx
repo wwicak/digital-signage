@@ -9,7 +9,7 @@ import {
   Images,
   LogOut,
   ChevronDown,
-  type LucideIcon
+  type 
 } from 'lucide-react'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -34,7 +34,7 @@ interface IMenuItem {
   id: string;
   name: string;
   path: string;
-  icon: LucideIcon;
+  icon: ;
 }
 
 export interface ISidebarProps {

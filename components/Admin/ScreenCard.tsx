@@ -114,7 +114,7 @@ const ScreenCard: React.FC<IScreenCardProps> = ({ value, refresh = () => {} }) =
 
   return (
     <Card className="group my-6 transition-all duration-200 hover:shadow-lg cursor-pointer">
-      <Link href={`/layout?display=${value?._id || ''}`} className="block">
+      <Link href={`/layout?display=${value?._id || ''}` className="block">
         <CardContent className="p-6">
           <div className="flex items-center space-x-4">
             {/* Display Icon */}

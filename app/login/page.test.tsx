@@ -2,7 +2,6 @@ import React from 'react'
 import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import '@testing-library/jest-dom'
 import LoginPage from './page' // Import the component to test
-import { Edit, X, Trash2, Plus, Minus, Eye, User, Settings, Key, Tv, Grid3X3, Grid2X2, Images, Image, Play, Pause, Stop, Clock, Calendar, ExternalLink, Download, Upload, Save, LogOut, ChevronDown, ChevronUp, Layout, Cast, Smartphone, Tablet, Monitor } from 'lucide-react'
 
 // --- Mock Dependencies ---
 
@@ -33,7 +32,7 @@ jest.mock('../../components/Admin/Frame', () => {
 
 // Mock @fortawesome/react-fontawesome
 jest.mock('@fortawesome/react-fontawesome', () => ({
-  LucideIcon: jest.fn((props) => <i data-testid='mock-fa-icon' data-icon={props.icon.iconName}></i>),
+  : jest.fn((props) => <i data-testid='mock-fa-icon' data-icon={props.icon.iconName}></i>),
 }))
 
 // --- Test Suite ---

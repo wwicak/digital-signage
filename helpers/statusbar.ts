@@ -1,4 +1,3 @@
-import { Edit, X, Trash2, Plus, Minus, Eye, User, Settings, Key, Tv, Grid3X3, Grid2X2, Images, Image, Play, Pause, Stop, Clock, Calendar, ExternalLink, Download, Upload, Save, LogOut, ChevronDown, ChevronUp, Layout, Cast, Smartphone, Tablet, Monitor } from 'lucide-react'
 import {
   faRss,
   faGripVertical,
@@ -18,7 +17,7 @@ library.add(faRss, faGripVertical, faClock, faCalendarAlt)
 export interface IStatusBarElementDefinition {
   // 'type' field is implicit as it's the key in StatusBarElementTypes record
   name: string; // Display name for UI, e.g., in a selection dropdown
-  icon: LucideIcon; // FontAwesome icon to represent this element type
+  icon: ; // FontAwesome icon to represent this element type
   /*
    * Potentially add other properties if needed in the future,
    * e.g., a default component for rendering, or specific configuration options.
@@ -66,7 +65,7 @@ export const StatusBarElementTypes: Record<string, IStatusBarElementDefinition> 
 export interface IStatusBarElementChoice {
   id: string; // The type key, e.g., "time"
   label: string; // The display name, e.g., "Time"
-  icon: LucideIcon;
+  icon: ;
 }
 
 export const statusBarElementChoices: IStatusBarElementChoice[] = Object.keys(StatusBarElementTypes).map(typeKey => ({

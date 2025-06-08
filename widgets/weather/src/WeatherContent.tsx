@@ -4,7 +4,6 @@ import axios, { AxiosResponse } from 'axios'
 import WeatherIcon from './WeatherIcon'
 import { TWeatherUnit } from '../index'
 import * as z from 'zod'
-import { Edit, X, Trash2, Plus, Minus, Eye, User, Settings, Key, Tv, Grid3X3, Grid2X2, Images, Image, Play, Pause, Stop, Clock, Calendar, ExternalLink, Download, Upload, Save, LogOut, ChevronDown, ChevronUp, Layout, Cast, Smartphone, Tablet, Monitor } from 'lucide-react'
 
 // Zod schema for TWeatherUnit
 export const TWeatherUnitSchema = z.enum(['metric', 'imperial'])
@@ -180,9 +179,9 @@ const WeatherContent: React.FC<IWeatherContentProps> = React.memo(({ data, isPre
         <div className='desc'>{description}</div>
         <div className='location-info'>
           <div className='marker-icon'>
-            <LucideIcon icon={faMapMarkerAlt  className='xs' fixedWidth />
+            <<faMapMarkerAlt  className='xs' fixedWidth />
           </div>
-          <div className='name-text'>{locationName}</div>
+          <div className='name-text'>{locationName className="w-4 h-4" /></div>
         </div>
       </div>
       {iconCode && <div className='main-icon'>

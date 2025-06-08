@@ -4,7 +4,6 @@ import React, { Component, CSSProperties } from 'react'
 import AutoScroll from '../../../components/AutoScroll' // Assuming .js or .tsx
 // Import IListItem from widget index
 import * as z from 'zod'
-import { Edit, X, Trash2, Plus, Minus, Eye, User, Settings, Key, Tv, Grid3X3, Grid2X2, Images, Image, Play, Pause, Stop, Clock, Calendar, ExternalLink, Download, Upload, Save, LogOut, ChevronDown, ChevronUp, Layout, Cast, Smartphone, Tablet, Monitor } from 'lucide-react'
 
 // Zod schema for IListItem
 export const ListItemSchema = z.object({
@@ -75,7 +74,7 @@ class ListContent extends Component<IListContentProps> {
           >
             <ListTag className={`list-tag ${ordered ? 'ordered' : 'unordered'}`}>
               {list.map((item, index) => (
-                <li key={`list-item-${index}-${item.text.slice(0,10)}`} className='list-element' style={itemStyle}> {/* Renamed class */}
+                <li key={`list-item-${index}-${item.text.slice(0,10)}` className='list-element' style={itemStyle}> {/* Renamed class */}
                   <span className='text-content'>{item.text || 'Insert some text ...'}</span> {/* Renamed class */}
                   {item.label && <div className='label-tag'>{item.label}</div>} {/* Renamed class */}
                 </li>

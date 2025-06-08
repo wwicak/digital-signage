@@ -2,7 +2,6 @@ import React from 'react'
 
 import AutoScroll from '../../../components/AutoScroll'
 import * as z from 'zod'
-import { Edit, X, Trash2, Plus, Minus, Eye, User, Settings, Key, Tv, Grid3X3, Grid2X2, Images, Image, Play, Pause, Stop, Clock, Calendar, ExternalLink, Download, Upload, Save, LogOut, ChevronDown, ChevronUp, Layout, Cast, Smartphone, Tablet, Monitor } from 'lucide-react'
 
 // Zod schema for the announcement widget's content data, matching the component's internal usage
 export const AnnouncementWidgetContentDataSchema = z.object({
@@ -39,7 +38,7 @@ const AnnouncementContent: React.FC<IAnnouncementContentProps> = React.memo(({ d
     <div className='announce-widget-content'>
       <div className='title-bar'>
         <div className='icon'>
-          <LucideIcon icon={faExclamationTriangle } style={{ fontSize: '0.9em' } className={accentColor} />
+          <<faExclamationTriangle  className="w-4 h-4" /> style={{ fontSize: '0.9em'  className={accentColor} />
         </div>
         <span>Announcement</span>
       </div>

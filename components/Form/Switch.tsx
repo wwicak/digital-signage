@@ -1,6 +1,5 @@
 import React, { SyntheticEvent } from 'react'
 import ReactSwitch, { ReactSwitchProps } from 'react-switch'
-import { Edit, X, Trash2, Plus, Minus, Eye, User, Settings, Key, Tv, Grid3X3, Grid2X2, Images, Image, Play, Pause, Stop, Clock, Calendar, ExternalLink, Download, Upload, Save, LogOut, ChevronDown, ChevronUp, Layout, Cast, Smartphone, Tablet, Monitor } from 'lucide-react'
 
 /*
  * Props for the Switch component
@@ -14,8 +13,8 @@ export interface ISwitchProps {
   label?: string; // Optional main label for the switch group
   checkedLabel?: string; // Label for the 'checked' state side
   uncheckedLabel?: string; // Label for the 'unchecked' state side
-  checkedIcon?: LucideIcon; // Icon for the 'checked' state label
-  uncheckedIcon?: LucideIcon; // Icon for the 'unchecked' state label
+  checkedIcon?: ; // Icon for the 'checked' state label
+  uncheckedIcon?: ; // Icon for the 'unchecked' state label
   
   disabled?: boolean;
   color?: string; // Corresponds to onColor in ReactSwitch
@@ -97,12 +96,12 @@ const Switch: React.FC<ISwitchProps> = ({
       )}
       <div className="flex items-center">
           {uncheckedLabel && (
-          <label htmlFor={name} className="text-gray-500 font-sans flex items-center cursor-pointer text-sm">
+          <label htmlFor={name className="text-gray-500 font-sans flex items-center cursor-pointer text-sm">
               {uncheckedIcon && (
               <span className="mx-1 inline-flex items-center">
-                  <LucideIcon icon={uncheckedIcon color='#828282' />
+                  <<uncheckedIcon color='#828282' />
               </span>
-              )}
+              ) className="w-4 h-4" />
               {uncheckedLabel}
           </label>
           )}
@@ -110,12 +109,12 @@ const Switch: React.FC<ISwitchProps> = ({
               <ReactSwitch {...reactSwitchProps} id={name} />
           </div>
           {checkedLabel && (
-          <label htmlFor={name} className="text-gray-500 font-sans flex items-center cursor-pointer text-sm">
+          <label htmlFor={name className="text-gray-500 font-sans flex items-center cursor-pointer text-sm">
               {checkedIcon && (
               <span className="mx-1 inline-flex items-center">
-                  <LucideIcon icon={checkedIcon color='#828282' />
+                  <<checkedIcon color='#828282' />
               </span>
-              )}
+              ) className="w-4 h-4" />
               {checkedLabel}
           </label>
           )}

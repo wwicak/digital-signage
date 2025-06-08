@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import useUsers, { User, CreateUserData, UpdateUserData } from '@/hooks/useUsers';
 import { useDisplays } from '@/hooks/useDisplays';
 import { UserRoleName } from '@/lib/models/User';
-import { Edit, X, Trash2, Plus, Minus, Eye, User, Settings, Key, Tv, Grid3X3, Grid2X2, Images, Image, Play, Pause, Stop, Clock, Calendar, ExternalLink, Download, Upload, Save, LogOut, ChevronDown, ChevronUp, Layout, Cast, Smartphone, Tablet, Monitor } from 'lucide-react'
 
 interface UserEditDialogProps {
   user: User | null;
@@ -139,7 +138,7 @@ const UserEditDialog: React.FC<UserEditDialogProps> = ({
             className="text-gray-500 hover:text-gray-700 p-1"
             onClick={onClose}
           >
-            <LucideIcon icon={X} />
+            <<X className="w-4 h-4" /> />
           </button>
         </div>
 

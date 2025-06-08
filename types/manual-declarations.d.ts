@@ -1,4 +1,3 @@
-import { Edit, X, Trash2, Plus, Minus, Eye, User, Settings, Key, Tv, Grid3X3, Grid2X2, Images, Image, Play, Pause, Stop, Clock, Calendar, ExternalLink, Download, Upload, Save, LogOut, ChevronDown, ChevronUp, Layout, Cast, Smartphone, Tablet, Monitor } from 'lucide-react'
 // types/manual-declarations.d.ts
 declare module 'dotenv';
 declare module 'next';
@@ -196,10 +195,10 @@ declare module 'ts-jest' {
 // Fix for FontAwesome icon type conflicts
 declare module '@fortawesome/react-fontawesome' {
   
-  export type LucideIcon = LucideIcon | string;
+  export type  =  | string;
 
-  export interface LucideLucideIcons {
-    icon: LucideIcon;
+  export interface Lucides {
+    icon: ;
     size?:
       | 'xs'
       | 'sm'
@@ -220,18 +219,18 @@ declare module '@fortawesome/react-fontawesome' {
     style?: React.CSSProperties;
   }
 
-  export function LucideIcon(
-    props: LucideLucideIcons
+  export function (
+    props: Lucides
   ): React.ReactElement;
 }
 
 declare module '@fortawesome/fontawesome-svg-core' {
   
-  export type LucideIcon = LucideIcon | string;
+  export type  =  | string;
   export type IconPrefix = string;
 
-  // Re-export LucideIcon for convenience
-  export { LucideIcon }
+  // Re-export  for convenience
+  export {  }
 
   export interface Config {
     autoAddCss: boolean;
@@ -246,7 +245,7 @@ declare module '@fortawesome/fontawesome-svg-core' {
   }
 
   export interface Library {
-    add(...icons: (LucideIcon | Record<string, LucideIcon>)[]): void;
+    add(...icons: ( | Record<string, >)[]): void;
   }
 
   export const library: Library
@@ -259,78 +258,78 @@ declare module '@fortawesome/fontawesome-svg-core' {
  */
 declare module '@fortawesome/free-solid-svg-icons' {
   
-  export const faClock: LucideIcon
-  export const faEdit: LucideIcon
-  export const faTrash: LucideIcon
-  export const faTimes: LucideIcon
-  export const faPencilAlt: LucideIcon
-  export const faTh: LucideIcon
-  export const faThLarge: LucideIcon
-  export const faRss: LucideIcon
-  export const faGripVertical: LucideIcon
-  export const faCalendarAlt: LucideIcon
-  export const faSun: LucideIcon
-  export const faCloudSun: LucideIcon
-  export const faCloudMoon: LucideIcon
-  export const faCloud: LucideIcon
-  export const faCloudRain: LucideIcon
-  export const faCloudMoonRain: LucideIcon
-  export const faBolt: LucideIcon
-  export const faSnowflake: LucideIcon
-  export const faSmog: LucideIcon
-  export const faWifi: LucideIcon
-  export const faMapMarkerAlt: LucideIcon
-  export const faExclamationTriangle: LucideIcon
-  export const faPlay: LucideIcon
-  export const faGlobe: LucideIcon
-  export const faFileImage: LucideIcon
-  export const faFileVideo: LucideIcon
-  export const faFileAlt: LucideIcon
-  export const faTv: LucideIcon
-  export const faCheck: LucideIcon
-  export const faAngleLeft: LucideIcon
-  export const faFont: LucideIcon
-  export const faList: LucideIcon
-  export const faMousePointer: LucideIcon
-  export const faCalendar: LucideIcon
-  export const faCog: LucideIcon
-  export const faEye: LucideIcon
-  export const faLink: LucideIcon
-  export const faKey: LucideIcon
-  export const faImages: LucideIcon
-  export const faSignOutAlt: LucideIcon
-  export const faCaretDown: LucideIcon
-  export const faGifts: LucideIcon
-  export const faImage: LucideIcon
-  export const faListUl: LucideIcon
+  export const faClock: 
+  export const faEdit: 
+  export const faTrash: 
+  export const faTimes: 
+  export const faPencilAlt: 
+  export const faTh: 
+  export const faThLarge: 
+  export const faRss: 
+  export const faGripVertical: 
+  export const faCalendarAlt: 
+  export const faSun: 
+  export const faCloudSun: 
+  export const faCloudMoon: 
+  export const faCloud: 
+  export const faCloudRain: 
+  export const faCloudMoonRain: 
+  export const faBolt: 
+  export const faSnowflake: 
+  export const faSmog: 
+  export const faWifi: 
+  export const faMapMarkerAlt: 
+  export const faExclamationTriangle: 
+  export const faPlay: 
+  export const faGlobe: 
+  export const faFileImage: 
+  export const faFileVideo: 
+  export const faFileAlt: 
+  export const faTv: 
+  export const faCheck: 
+  export const faAngleLeft: 
+  export const faFont: 
+  export const faList: 
+  export const faMousePointer: 
+  export const faCalendar: 
+  export const faCog: 
+  export const faEye: 
+  export const faLink: 
+  export const faKey: 
+  export const faImages: 
+  export const faSignOutAlt: 
+  export const faCaretDown: 
+  export const faGifts: 
+  export const faImage: 
+  export const faListUl: 
 
-  // Re-export LucideIcon for convenience
-  export { LucideIcon }
+  // Re-export  for convenience
+  export {  }
 
   // Export icon pack
-  export const fas: Record<string, LucideIcon>
+  export const fas: Record<string, >
 
-  // Export all other icons as LucideIcon
-  const icons: Record<string, LucideIcon>
+  // Export all other icons as 
+  const icons: Record<string, >
   export = icons;
 }
 declare module '@fortawesome/free-brands-svg-icons' {
   
-  export const faChromecast: LucideIcon
-  export const faYoutube: LucideIcon
+  export const faChromecast: 
+  export const faYoutube: 
 
-  export const fab: Record<string, LucideIcon>
+  export const fab: Record<string, >
 
-  const icons: Record<string, LucideIcon>
+  const icons: Record<string, >
   export = icons;
 }
 
 declare module '@fortawesome/free-regular-svg-icons' {
   
-  export const faClock: LucideIcon
-  export const faWindowRestore: LucideIcon
-  export const faImages: LucideIcon
+  export const faClock: 
+  export const faWindowRestore: 
+  export const faImages: 
 
-  const icons: Record<string, LucideIcon>
+  const icons: Record<string, >
   export = icons;
 }

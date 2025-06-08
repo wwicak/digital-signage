@@ -11,7 +11,6 @@ import Dialog from '../components/Dialog'
 import { getSlideshow, updateSlideshow, ISlideshowData } from '../actions/slideshow'
 import { protect, IProtectedPageProps } from '../helpers/auth'
 import { useDisplayContext } from '../contexts/DisplayContext'
-import { Edit, X, Trash2, Plus, Minus, Eye, User, Settings, Key, Tv, Grid3X3, Grid2X2, Images, Image, Play, Pause, Stop, Clock, Calendar, ExternalLink, Download, Upload, Save, LogOut, ChevronDown, ChevronUp, Layout, Cast, Smartphone, Tablet, Monitor } from 'lucide-react'
 
 // Define the structure of a slideshow object
 interface SlideshowData extends ISlideshowData {
@@ -91,11 +90,11 @@ const SlideshowPageComponent = memo(function SlideshowPageComponent({ slideshow:
           size={(slideshow && slideshow.name && slideshow.name.length) || 20}
         />
         <div className='icon'>
-          <LucideIcon icon={faPencilAlt as LucideIcon color='#828282' />
+          <<faPencilAlt as  color='#828282' />
         </div>
       </div>
       <div className='wrapper'>
-        <Upload slideshowId={slideshow && slideshow._id || ''} refresh={refresh} />
+        <Upload slideshowId={slideshow && slideshow._id || '' className="w-4 h-4" /> refresh={refresh} />
         <SlideEditDialogComponent
           slideshowId={slideshow && slideshow._id || ''}
           refresh={refresh}
