@@ -1,6 +1,5 @@
-"use client";
-
 import React, { useState } from "react";
+import type { GetServerSideProps } from "next";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -23,16 +22,22 @@ import {
   useUpdateFeatureFlag, 
   useDeleteFeatureFlag 
 } from "@/hooks/useFeatureFlags";
-import {
-  IFeatureFlag,
-  FeatureFlagType,
-  FeatureFlagName
+import { 
+  IFeatureFlag, 
+  FeatureFlagType, 
+  FeatureFlagName 
 } from "@/lib/types/feature-flags";
 import { UserRoleName } from "@/lib/models/User";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+import { requireAuth } from "@/lib/helpers/auth_helper";
+import { canReadFeatureFlags } from "@/lib/helpers/rbac_helper";
 
-const FeatureFlagsPage: React.FC = () => {
+interface FeatureFlagsPageProps {
+  user: any;
+}
+
+const FeatureFlagsPage: React.FC<FeatureFlagsPageProps> = ({ user }) => {
   const [selectedType, setSelectedType] = useState<FeatureFlagType | "all">("all");
   
   const { data: featureFlags, isLoading, error } = useFeatureFlags();
@@ -260,6 +265,36 @@ const FeatureFlagsPage: React.FC = () => {
       </Tabs>
     </div>
   );
+};
+
+export const getServerSideProps: GetServerSideProps = async (context) => {
+  try {
+    const user = await requireAuth(context.req as any);
+    
+    // Check if user can read feature flags
+    const canRead = await canReadFeatureFlags(user);
+    if (!canRead) {
+      return {
+        redirect: {
+          destination: '/dashboard',
+          permanent: false,
+        },
+      };
+    }
+
+    return {
+      props: {
+        user: JSON.parse(JSON.stringify(user)),
+      },
+    };
+  } catch (error) {
+    return {
+      redirect: {
+        destination: '/login',
+        permanent: false,
+      },
+    };
+  }
 };
 
 export default FeatureFlagsPage;

@@ -1,29 +1,29 @@
-import { NextRequest, NextResponse } from "next/server";
+import type { NextApiRequest, NextApiResponse } from "next";
 import dbConnect from "@/lib/mongodb";
 import { requireAuth } from "@/lib/helpers/auth_helper";
 import { initializeDefaultFeatureFlags } from "@/lib/helpers/feature_flag_helper";
 import { UserRoleName } from "@/lib/models/User";
 
-// Force dynamic rendering
-export const dynamic = "force-dynamic";
+export default async function handler(req: any, res: any) {
+  if (req.method !== 'POST') {
+    return res.status(405).json({ message: 'Method not allowed' });
+  }
 
-export async function POST(request: NextRequest) {
   try {
     await dbConnect();
-    const user = await requireAuth(request);
+    const user = await requireAuth(req);
 
     // Only super admins can initialize feature flags
     if (user.role.name !== UserRoleName.SUPER_ADMIN) {
-      return NextResponse.json(
-        { message: "Access denied: Only super admins can initialize feature flags" },
-        { status: 403 }
-      );
+      return res.status(403).json({ 
+        message: "Access denied: Only super admins can initialize feature flags" 
+      });
     }
 
     // Initialize default feature flags
     await initializeDefaultFeatureFlags(user._id.toString());
 
-    return NextResponse.json({
+    return res.status(200).json({
       message: "Feature flags initialized successfully",
       initializedBy: user.email,
       timestamp: new Date().toISOString(),
@@ -32,15 +32,12 @@ export async function POST(request: NextRequest) {
     console.error("Error initializing feature flags:", error);
     
     if (error.message === "Authentication required") {
-      return NextResponse.json(
-        { message: "Authentication required" },
-        { status: 401 }
-      );
+      return res.status(401).json({ message: "Authentication required" });
     }
 
-    return NextResponse.json(
-      { message: "Failed to initialize feature flags", error: error.message },
-      { status: 500 }
-    );
+    return res.status(500).json({
+      message: "Failed to initialize feature flags", 
+      error: error.message 
+    });
   }
 }
