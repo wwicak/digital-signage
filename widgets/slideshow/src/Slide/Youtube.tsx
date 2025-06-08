@@ -4,11 +4,11 @@
  */
 
 import React from 'react'
-import GenericSlide, { IGenericSlideProps } from './Generic'
+import GenericSlide, { GenericSlideProps } from './Generic'
 import getVideoId from 'get-video-id'
 import YouTube from 'react-youtube'
 
-interface IYoutubeSlideProps extends IGenericSlideProps {
+interface IYoutubeSlideProps extends GenericSlideProps {
   // Youtube slide specific props can be added here if needed
 }
 
@@ -23,7 +23,7 @@ interface YouTubeEvent {
   target: YouTubePlayer
 }
 
-class YoutubeSlide extends GenericSlide<IYoutubeSlideProps> {
+class YoutubeSlide extends GenericSlide {
   private youtube: YouTubePlayer | null = null
 
   constructor(props: IYoutubeSlideProps) {
@@ -32,9 +32,11 @@ class YoutubeSlide extends GenericSlide<IYoutubeSlideProps> {
   }
 
   handleYoutubeLoaded = (): void => {
-    this.state.loading.resolve
-      ? this.state.loading.resolve()
-      : this.setState({ loading: { promise: Promise.resolve() } })
+    if (this.state.loading.resolve) {
+      this.state.loading.resolve()
+    } else {
+      this.setState({ loaded: true })
+    }
   }
 
   onYoutubeReady = (event: YouTubeEvent): void => {

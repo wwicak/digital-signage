@@ -4,19 +4,21 @@
  */
 
 import React from 'react'
-import GenericSlide, { IGenericSlideProps } from './Generic'
+import GenericSlide, { GenericSlideProps } from './Generic'
 
-interface IWebSlideProps extends IGenericSlideProps {
+interface IWebSlideProps extends GenericSlideProps {
   // Web slide specific props can be added here if needed
 }
 
-class WebSlide extends GenericSlide<IWebSlideProps> {
+class WebSlide extends GenericSlide {
   constructor(props: IWebSlideProps) {
     super(props)
   }
 
   componentDidMount(): void {
-    this.state.loading.resolve()
+    if (this.state.loading.resolve) {
+      this.state.loading.resolve()
+    }
   }
 
   /**

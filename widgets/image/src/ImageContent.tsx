@@ -3,7 +3,7 @@ import React, { Component, CSSProperties } from 'react'
 import * as z from 'zod'
 
 import { TImageFit } from '../index' // Import TImageFit from the widget index
-import { Edit, X, Trash2, Plus, Minus, Eye, User, Settings, Key, Tv, Grid3X3, Grid2X2, Images, Image, Play, Pause, Stop, Clock, Calendar, ExternalLink, Download, Upload, Save, LogOut, ChevronDown, ChevronUp, Layout, Cast, Smartphone, Tablet, Monitor } from 'lucide-react'
+
 
 // Zod schema for TImageFit (based on its definition in ../index.ts)
 export const TImageFitSchema = z.enum(['contain', 'cover', 'fill', 'none', 'scale-down'])
