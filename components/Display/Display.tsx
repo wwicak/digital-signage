@@ -101,8 +101,8 @@ const Display: React.FC<IDisplayComponentProps> = React.memo(({ display }) => {
     ? "portrait-display"
     : "landscape-display";
 
-  // Adjust grid columns based on orientation for better layout
-  const gridCols = isPortrait ? 4 : 6; // Fewer columns in portrait for better widget sizing
+  // Adjust grid columns based on aspect ratio (16:9 landscape, 9:16 portrait)
+  const gridCols = isPortrait ? 9 : 16; // Portrait: 9 cols (9:16), Landscape: 16 cols (16:9)
 
   // Memoize layout for react-grid-layout to prevent unnecessary re-renders
   const rglWidgetLayout: RglLayout[] = useMemo(

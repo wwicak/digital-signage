@@ -77,18 +77,33 @@ const LayoutAdminContent = memo(function LayoutAdminContent() {
         .catch(error => console.error('Failed to delete widget:', error))
   }
 
-  const handleLayoutChange = (layout: RglLayout[]): void => {
-    for (const widgetLayout of layout) {
-      const widgetData: IUpdateWidgetData = {
-        x: widgetLayout.x,
-        y: widgetLayout.y,
-        w: widgetLayout.w,
-        h: widgetLayout.h,
+  // Debounced layout change handler for better performance
+  const debouncedLayoutUpdate = useCallback(
+    (() => {
+      let timeoutId: NodeJS.Timeout
+      return (layout: RglLayout[]) => {
+        clearTimeout(timeoutId)
+        timeoutId = setTimeout(() => {
+          console.log('[DEBUG] Batch updating layout changes')
+          for (const widgetLayout of layout) {
+            const widgetData: IUpdateWidgetData = {
+              x: widgetLayout.x,
+              y: widgetLayout.y,
+              w: widgetLayout.w,
+              h: widgetLayout.h,
+            }
+            updateWidget(widgetLayout.i, widgetData)
+              .catch(error => console.error(`Failed to update widget ${widgetLayout.i} layout:`, error))
+          }
+        }, 300) // 300ms debounce delay
       }
-      updateWidget(widgetLayout.i, widgetData)
-        .catch(error => console.error(`Failed to update widget ${widgetLayout.i} layout:`, error))
-    }
-  }
+    })(),
+    []
+  )
+
+  const handleLayoutChange = useCallback((layout: RglLayout[]): void => {
+    debouncedLayoutUpdate(layout)
+  }, [debouncedLayoutUpdate])
 
   const handleDragEnd = (result: DropResult): void => {
     if (!result.destination || !context.state.id) {
@@ -223,20 +238,30 @@ const LayoutAdminContent = memo(function LayoutAdminContent() {
         </Form>
       </div>
 
-      <div className="bg-gray-300" style={{
+      <div className="bg-gray-300 relative" style={{
         borderRadius: context.state.layout === 'spaced' ? '8px' : '0px',
         aspectRatio: context.state.orientation === 'portrait' ? '9/16' : '16/9',
         maxWidth: context.state.orientation === 'portrait' ? '600px' : '100%',
+        minHeight: context.state.orientation === 'portrait' ? '800px' : '450px',
         margin: context.state.orientation === 'portrait' ? '0 auto' : '0'
       }}>
+        {/* Aspect ratio indicator */}
+        <div className="absolute top-2 left-2 bg-black/20 text-white text-xs px-2 py-1 rounded backdrop-blur-sm z-10">
+          {context.state.orientation === 'portrait' ? '9:16' : '16:9'} • {context.state.orientation === 'portrait' ? '9×16' : '16×9'}
+        </div>
         <GridLayoutWithWidth
           layout={rglLayout}
-          cols={context.state.orientation === 'portrait' ? 4 : 6}
+          cols={context.state.orientation === 'portrait' ? 9 : 16}
           onLayoutChange={handleLayoutChange}
-          draggableCancel={'.ReactModalPortal,.controls'}
-          margin={context.state.layout === 'spaced' ? [12, 12] : [4, 4]}
-          rowHeight={100}
+          draggableCancel={'.ReactModalPortal,.controls,button'}
+          margin={context.state.layout === 'spaced' ? [12, 12] : [6, 6]}
+          rowHeight={context.state.orientation === 'portrait' ? 40 : 60}
           isBounded={true}
+          useCSSTransforms={true}
+          transformScale={1}
+          preventCollision={true}
+          compactType="vertical"
+          maxRows={context.state.orientation === 'portrait' ? 16 : 9}
         >
           {widgets.map(widget => (
             <div key={widget._id}>

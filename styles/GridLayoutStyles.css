@@ -2,54 +2,213 @@
   position: relative;
   transition: height 200ms ease;
 }
+
 .react-grid-item {
-  transition: all 200ms ease;
-  transition-property: left, top;
+  transition: all 150ms cubic-bezier(0.2, 0, 0.2, 1);
+  transition-property: left, top, width, height;
+  will-change: auto;
 }
+
 .react-grid-item.cssTransforms {
-  transition-property: transform;
+  transition-property: transform, width, height;
+  transition-timing-function: cubic-bezier(0.2, 0, 0.2, 1);
 }
+
 .react-grid-item.resizing {
   z-index: 1;
-  will-change: width, height;
+  will-change: width, height, transform;
+  transition: none;
 }
 
 .react-grid-item.react-draggable-dragging {
   transition: none;
   z-index: 3;
   will-change: transform;
+  transform-origin: center;
+}
+
+/* Improved performance for dragging */
+.react-grid-item.react-draggable-dragging * {
+  pointer-events: none;
+  user-select: none;
+}
+
+/* Smooth transitions when not dragging */
+.react-grid-item:not(.react-draggable-dragging):not(.resizing) {
+  transition: transform 150ms cubic-bezier(0.2, 0, 0.2, 1);
 }
 
 .react-grid-item.react-grid-placeholder {
-  background: rgba(0, 0, 0, 0.6);
-  border-radius: 6px;
-  opacity: 0.2;
-  transition-duration: 100ms;
+  background: linear-gradient(135deg, rgba(123, 192, 67, 0.3), rgba(123, 192, 67, 0.1));
+  border: 2px dashed rgba(123, 192, 67, 0.5);
+  border-radius: 8px;
+  opacity: 0.8;
+  transition: all 100ms cubic-bezier(0.2, 0, 0.2, 1);
   z-index: 2;
   -webkit-user-select: none;
   -moz-user-select: none;
   -ms-user-select: none;
   -o-user-select: none;
   user-select: none;
+  backdrop-filter: blur(2px);
 }
 
 .react-grid-item > .react-resizable-handle {
   position: absolute;
-  width: 20px;
-  height: 20px;
+  width: 24px;
+  height: 24px;
   bottom: 0;
   right: 0;
   cursor: se-resize;
   background: none;
+  opacity: 0;
+  transition: opacity 200ms ease;
+  z-index: 10;
+}
+
+.react-grid-item:hover > .react-resizable-handle {
+  opacity: 1;
 }
 
 .react-grid-item > .react-resizable-handle::after {
   content: '';
   position: absolute;
-  right: 8px;
-  bottom: 8px;
-  width: 6px;
-  height: 6px;
-  border-right: 2px solid rgba(255, 255, 255, 0.8);
-  border-bottom: 2px solid rgba(255, 255, 255, 0.8);
+  right: 6px;
+  bottom: 6px;
+  width: 8px;
+  height: 8px;
+  border-right: 3px solid rgba(123, 192, 67, 0.8);
+  border-bottom: 3px solid rgba(123, 192, 67, 0.8);
+  border-radius: 0 0 2px 0;
+}
+
+.react-grid-item.resizing > .react-resizable-handle::after {
+  border-right-color: rgba(123, 192, 67, 1);
+  border-bottom-color: rgba(123, 192, 67, 1);
+}
+
+/* Performance optimizations */
+.react-grid-layout * {
+  box-sizing: border-box;
+}
+
+/* Disable text selection during drag */
+.react-grid-layout.dragging {
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+}
+
+/* GPU acceleration for better performance */
+.react-grid-item {
+  transform: translateZ(0);
+  backface-visibility: hidden;
+  perspective: 1000px;
+}
+
+/* Touch device optimizations */
+@media (hover: none) and (pointer: coarse) {
+  .react-grid-item > .react-resizable-handle {
+    width: 32px;
+    height: 32px;
+    opacity: 0.7;
+  }
+
+  .react-grid-item > .react-resizable-handle::after {
+    width: 12px;
+    height: 12px;
+    border-width: 4px;
+  }
+
+  .react-grid-item {
+    touch-action: none;
+  }
+
+  /* Show controls on touch devices */
+  .touch\:opacity-100 {
+    opacity: 1 !important;
+  }
+
+  /* Larger touch targets */
+  .controls button {
+    min-width: 44px;
+    min-height: 44px;
+  }
+}
+
+/* Reduce motion for users who prefer it */
+@media (prefers-reduced-motion: reduce) {
+  .react-grid-item {
+    transition: none !important;
+  }
+
+  .react-grid-item.react-grid-placeholder {
+    transition: none !important;
+  }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .react-grid-item.react-grid-placeholder {
+    border-color: currentColor;
+    background: transparent;
+  }
+
+  .react-grid-item > .react-resizable-handle::after {
+    border-color: currentColor;
+  }
+}
+
+/* Dark mode optimizations */
+@media (prefers-color-scheme: dark) {
+  .react-grid-item.react-grid-placeholder {
+    background: linear-gradient(135deg, rgba(123, 192, 67, 0.2), rgba(123, 192, 67, 0.05));
+    border-color: rgba(123, 192, 67, 0.4);
+  }
+}
+
+/* Boundary indicators */
+.react-grid-item.at-boundary {
+  box-shadow: 0 0 0 2px rgba(123, 192, 67, 0.3);
+}
+
+.react-grid-item.boundary-violation {
+  box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.5);
+  animation: boundary-pulse 1s ease-in-out infinite;
+}
+
+@keyframes boundary-pulse {
+  0%, 100% {
+    box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.5);
+  }
+  50% {
+    box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.3);
+  }
+}
+
+/* Improved drag feedback */
+.react-grid-item.react-draggable-dragging {
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+  transform: rotate(2deg) scale(1.02);
+}
+
+.react-grid-item.resizing {
+  box-shadow: 0 4px 15px rgba(123, 192, 67, 0.3);
+}
+
+/* Auto-arrange animation */
+.react-grid-layout.auto-arranging .react-grid-item {
+  transition: all 500ms cubic-bezier(0.2, 0, 0.2, 1) !important;
+}
+
+/* Widget controls visibility */
+.react-grid-item .controls {
+  opacity: 0;
+  transition: opacity 200ms ease;
+}
+
+.react-grid-item:hover .controls,
+.react-grid-item:focus-within .controls {
+  opacity: 1;
 }

@@ -1,9 +1,10 @@
-import React, { useRef, useState } from "react";
+import React, { useRef, useState, memo, useCallback } from "react";
 import { Settings, X } from "lucide-react";
 
 import Widgets from "../../widgets";
 import { IBaseWidget } from "../../widgets/base_widget";
 import WidgetEditDialog from "./WidgetEditDialog";
+import DeleteWidgetModal from "./DeleteWidgetModal";
 import * as z from "zod";
 import { WidgetType, WidgetTypeZod } from "@/lib/models/Widget"; // Import enum and its Zod schema
 
@@ -11,7 +12,7 @@ import { WidgetType, WidgetTypeZod } from "@/lib/models/Widget"; // Import enum 
 export const EditableWidgetPropsSchema = z.object({
   id: z.string(),
   type: WidgetTypeZod.default(WidgetType.SLIDESHOW), // Default to slideshow type
-  onDelete: z.function(z.tuple([]), z.void()), // Function with no args, returns void
+  onDelete: z.function(z.tuple([]), z.union([z.void(), z.promise(z.void())])), // Function with no args, returns void or Promise<void>
   layout: z.enum(["spaced", "compact"]).default("spaced"), // Default to spaced layout
   /*
    * react-grid-layout props like 'style', 'className', 'data-grid' are omitted
@@ -22,7 +23,7 @@ export const EditableWidgetPropsSchema = z.object({
 // Derive TypeScript type from Zod schema
 export type IEditableWidgetProps = z.infer<typeof EditableWidgetPropsSchema>;
 
-const EditableWidget: React.FC<IEditableWidgetProps> = ({
+const EditableWidget: React.FC<IEditableWidgetProps> = memo(({
   id,
   type = WidgetType.SLIDESHOW,
   onDelete,
@@ -32,26 +33,23 @@ const EditableWidget: React.FC<IEditableWidgetProps> = ({
   const dialogRef = useRef<WidgetEditDialog>(null);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
-  const openDialog = (e?: React.MouseEvent): void => {
-    if (e) e.stopPropagation();
+  const openDialog = useCallback((e?: React.MouseEvent): void => {
+    if (e) {
+      e.stopPropagation();
+      e.preventDefault();
+    }
     dialogRef.current?.open();
-  };
+  }, []);
 
-  const handleDeleteClick = (e?: React.MouseEvent): void => {
-    if (e) e.stopPropagation();
+  const handleDeleteClick = useCallback((e?: React.MouseEvent): void => {
+    if (e) {
+      e.stopPropagation();
+      e.preventDefault();
+    }
     setShowDeleteConfirm(true);
-  };
+  }, []);
 
-  const confirmDelete = (e?: React.MouseEvent): void => {
-    if (e) e.stopPropagation();
-    setShowDeleteConfirm(false);
-    onDelete(); // Call the onDelete prop passed from parent
-  };
 
-  const cancelDelete = (e?: React.MouseEvent): void => {
-    if (e) e.stopPropagation();
-    setShowDeleteConfirm(false);
-  };
 
   // Retrieve widget definition from the global Widgets object
   const widgetDefinition: IBaseWidget | undefined = Widgets[type];
@@ -61,24 +59,28 @@ const EditableWidget: React.FC<IEditableWidgetProps> = ({
 
   return (
     <>
-      <div className="relative bg-white border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
-        <div className="absolute top-2 right-2 flex space-x-1">
+      <div className="group relative bg-white border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow h-full">
+        <div className="absolute top-2 right-2 flex space-x-1 controls z-10">
           <button
-            className="p-1 rounded hover:bg-gray-100 transition-colors"
+            className="p-2 rounded hover:bg-gray-100 transition-colors opacity-0 group-hover:opacity-100 md:opacity-0 touch:opacity-100 bg-white/90 backdrop-blur-sm shadow-sm"
             onClick={openDialog}
             aria-label="Edit widget"
+            onMouseDown={(e) => e.stopPropagation()}
+            onTouchStart={(e) => e.stopPropagation()}
           >
             <Settings className="w-4 h-4 text-gray-500" />
           </button>
           <button
-            className="p-1 rounded hover:bg-gray-100 transition-colors"
+            className="p-2 rounded hover:bg-gray-100 transition-colors opacity-0 group-hover:opacity-100 md:opacity-0 touch:opacity-100 bg-white/90 backdrop-blur-sm shadow-sm hover:bg-red-50 hover:text-red-600"
             onClick={handleDeleteClick}
             aria-label="Delete widget"
+            onMouseDown={(e) => e.stopPropagation()}
+            onTouchStart={(e) => e.stopPropagation()}
           >
             <X className="w-4 h-4 text-gray-500" />
           </button>
         </div>
-        <div className="flex flex-col items-center justify-center h-full min-h-24">
+        <div className="flex flex-col items-center justify-center h-full min-h-24 pointer-events-none">
           <div className="mb-2">
             <WidgetIcon className="w-8 h-8 text-primary" />
           </div>
@@ -95,32 +97,15 @@ const EditableWidget: React.FC<IEditableWidgetProps> = ({
       </div>
 
       {/* Delete Confirmation Modal */}
-      {showDeleteConfirm && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 max-w-sm w-full mx-4">
-            <h3 className="text-lg font-semibold mb-2">Delete Widget</h3>
-            <p className="text-gray-600 mb-6">
-              Are you sure you want to delete this {widgetName}? This action cannot be undone.
-            </p>
-            <div className="flex justify-end space-x-3">
-              <button
-                onClick={cancelDelete}
-                className="px-4 py-2 text-gray-600 hover:text-gray-800 transition-colors"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={confirmDelete}
-                className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 transition-colors"
-              >
-                Delete
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      <DeleteWidgetModal
+        isOpen={showDeleteConfirm}
+        onClose={() => setShowDeleteConfirm(false)}
+        onConfirm={onDelete}
+        widgetName={widgetName}
+        widgetType={type}
+      />
     </>
   );
-};
+});
 
 export default EditableWidget;

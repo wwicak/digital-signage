@@ -92,7 +92,7 @@ export default function WidthProvider<P extends object>(
         <ComposedComponent
           {...(rest as P)}
           width={width}
-          rowHeight={Math.max(width / validCols - 10, 60)} // Ensure minimum row height
+          rowHeight={rest.rowHeight || Math.max(width / validCols - 10, 60)} // Use provided rowHeight or calculate
         />
       </div>
     );
