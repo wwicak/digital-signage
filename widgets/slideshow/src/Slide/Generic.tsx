@@ -71,20 +71,9 @@ class GenericSlide extends Component<GenericSlideProps, GenericSlideState> {
    */
   renderSlideContent(data: string): React.ReactElement {
     return (
-      <div className='slide-content unknown'>
+      <div className="w-full h-full text-center flex items-center justify-center">
         {`Unknown slide type with data: ${data}`}
-        <style jsx>{`
-          .slide-content.unknown {
-            width: 100%;
-            height: 100%;
-            background: #ebebeb;
-            color: #333;
-            text-align: center;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-          }
-        `}</style>
+        
       </div>
     )
   }
@@ -152,58 +141,15 @@ class GenericSlide extends Component<GenericSlideProps, GenericSlideState> {
     const { data, title, description } = slide
     const { loaded } = this.state
     return (
-      <div className='slide'>
+      <div className="inline-block h-full w-full absolute">
         {this.renderSlideContent(data)}
         {(title || description) && (
-          <div className='info'>
+          <div className="w-full absolute p-3 box-border pt-10">
             {title && <h1>{title}</h1>}
             {description && <p>{description}</p>}
           </div>
         )}
-        <style jsx>{`
-          .info {
-            width: 100%;
-            position: absolute;
-            bottom: 0;
-            padding: 10px;
-            background-image: linear-gradient(
-              -180deg,
-              rgba(0, 0, 0, 0) 0%,
-              rgba(0, 0, 0, 0.5) 100%
-            );
-            box-sizing: border-box;
-            padding-top: 40px;
-            pointer-events: none;
-          }
-          .info h1 {
-            margin: 0;
-            margin-bottom: 10px;
-            color: #ffffff;
-            font-family: Open Sans, sans-serif;
-            font-weight: 700;
-            font-size: 22px;
-            text-shadow: 0px 0px 16px rgba(0, 0, 0, 0.5);
-          }
-          .info p {
-            margin: 0;
-            margin-bottom: 10px;
-            color: #ffffff;
-            font-family: Open Sans, sans-serif;
-            font-weight: 400;
-            font-size: 16px;
-            flex: 1;
-            text-shadow: 0px 0px 16px rgba(0, 0, 0, 0.5);
-          }
-          .slide {
-            display: inline-block;
-            height: 100%;
-            width: 100%;
-            position: absolute;
-            opacity: ${show ? 1 : 0};
-            filter: ${loaded ? 'none' : 'blur(40px)'};
-            transition: all 0.4s;
-          }
-        `}</style>
+        
       </div>
     )
   }

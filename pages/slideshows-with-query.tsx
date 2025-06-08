@@ -34,7 +34,7 @@ const SlideshowsWithQuery: React.FC<SlideshowsWithQueryProps> = ({ loggedIn, dis
   return (
     <Frame loggedIn={loggedIn}>
       <h1>Slideshows (with TanStack Query)</h1>
-      <div className='wrapper'>
+      <div className="max-w-2xl">
         <SlideshowListWithQuery />
         <Dialog><div></div></Dialog>
         <Button
@@ -45,20 +45,7 @@ const SlideshowsWithQuery: React.FC<SlideshowsWithQueryProps> = ({ loggedIn, dis
           style={{ marginLeft: 0, width: '100%' }}
         />
       </div>
-      <style jsx>
-        {`
-          h1 {
-            font-family: 'Open Sans', sans-serif;
-            font-size: 24px;
-            color: #4f4f4f;
-            margin: 0px;
-          }
-          .wrapper {
-            margin: 40px auto;
-            max-width: 640px;
-          }
-        `}
-      </style>
+      
     </Frame>
   )
 }

@@ -43,7 +43,7 @@ class CongratsContent extends Component<ICongratsContentProps> {
     }
 
     return (
-      <div className='congrats-widget-content'>
+      <div className="relative box-border h-full w-full">
         {animationData && (
           <div className='background-animation'>
             <Lottie options={lottieOptions} height={'100%'} width={'100%'} />
@@ -56,46 +56,7 @@ class CongratsContent extends Component<ICongratsContentProps> {
             ))}
           </div>
         </AutoScroll>
-        <style jsx>
-          {`
-            .congrats-widget-content {
-              position: relative;
-              box-sizing: border-box;
-              height: 100%;
-              width: 100%;
-              background: ${color};
-              color: ${textColor};
-              flex: 1;
-              font-family: 'Open Sans', sans-serif;
-              display: flex;
-              justify-content: center;
-              align-items: center;
-              overflow: hidden;
-            }
-            .congrats-widget-content .background-animation {
-              width: 100%;
-              height: 100%;
-              position: absolute;
-              top: 0;
-              left: 0;
-              z-index: 0;
-            }
-            .congrats-widget-content .text-content {
-              font-family: 'Open Sans', sans-serif;
-              padding: 16px;
-              font-weight: 600;
-              text-align: center;
-              z-index: 1;
-              word-break: break-word;
-              min-height: 100%;
-              display: flex;
-              flex-direction: column;
-              justify-content: center;
-              box-sizing: border-box;
-              width: 100%;
-            }
-          `}
-        </style>
+        
       </div>
     )
   }

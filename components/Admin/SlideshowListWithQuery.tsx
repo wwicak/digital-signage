@@ -16,7 +16,7 @@ const SlideshowListWithQuery: React.FC<ISlideshowListWithQueryProps> = () => {
   // Handle error state
   if (error) {
     return (
-      <div className='error-message'>
+      <div className="text-center p-5 font-sans">
         Failed to load slideshows. Please try again later.
         <button onClick={() => refetch()} style={{ marginLeft: '10px' }}>
           Retry
@@ -53,21 +53,7 @@ const SlideshowListWithQuery: React.FC<ISlideshowListWithQueryProps> = () => {
                 <rect x='600' y='25' rx='3' ry='3' width='20' height='20' />
               </ContentLoader>
             ))}
-      <style jsx>
-        {`
-          .slideshow-list {
-            position: relative;
-            max-width: 640px;
-            margin: 0 auto;
-          }
-          .error-message {
-            color: red;
-            text-align: center;
-            padding: 20px;
-            font-family: 'Open Sans', sans-serif;
-          }
-        `}
-      </style>
+      
     </div>
   )
 }

@@ -19,26 +19,7 @@ const DisplayPage = memo(function DisplayPage({ params }: DisplayPageProps) {
       ) : (
         <div>Loading display information or Display ID not provided...</div>
       )}
-      <style jsx>
-        {`
-          .container {
-            display: flex;
-            width: 100vw;
-            height: 100vh;
-          }
-        `}
-      </style>
-      <style jsx global>
-        {`
-          * {
-            -ms-overflow-style: none; /* IE and Edge */
-            scrollbar-width: none; /* Firefox */
-          }
-          *::-webkit-scrollbar {
-            display: none; /* Safari and Chrome */
-          }
-        `}
-      </style>
+
     </div>
   )
 })

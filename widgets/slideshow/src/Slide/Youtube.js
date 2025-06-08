@@ -67,15 +67,7 @@ class YoutubeSlide extends GenericSlide {
                 }
               `}
         </style>
-        <style jsx>
-          {`
-            .youtube-container {
-              width: 100%;
-              height: 100%;
-              min-height: 100%;
-            }
-          `}
-        </style>
+        
       </div>
     )
   }

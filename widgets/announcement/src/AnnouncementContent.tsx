@@ -35,7 +35,7 @@ const AnnouncementContent: React.FC<IAnnouncementContentProps> = React.memo(({ d
   const accentColor = data.accentColor ?? DEFAULT_ACCENT_COLOR
 
   return (
-    <div className='announce-widget-content'>
+    <div className="relative box-border h-full w-full">
       <div className='title-bar'>
         <div className='icon'>
           <<faExclamationTriangle  className="w-4 h-4" /> style={{ fontSize: '0.9em'  className={accentColor} />
@@ -49,61 +49,7 @@ const AnnouncementContent: React.FC<IAnnouncementContentProps> = React.memo(({ d
           ))}
         </div>
       </AutoScroll>
-      <style jsx>
-        {`
-          .announce-widget-content {
-            position: relative;
-            box-sizing: border-box;
-            height: 100%;
-            width: 100%;
-            background: ${color};
-            color: ${textColor};
-            flex: 1;
-            padding: 12px;
-            font-family: 'Open Sans', sans-serif;
-            display: flex;
-            flex-direction: column;
-            justify-content: flex-start;
-            align-items: center;
-            overflow: hidden;
-          }
-          .announce-widget-content .text-content {
-            font-family: 'Open Sans', sans-serif;
-            font-size: 16px;
-            font-weight: 600;
-            text-align: center;
-            z-index: 1;
-            word-break: break-word;
-            min-height: 100%;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            box-sizing: border-box;
-            width: 100%;
-          }
-          .announce-widget-content .icon {
-            margin-right: 8px;
-            display: flex;
-            align-items: center;
-          }
-          .announce-widget-content .title-bar {
-            color: ${titleTextColor};
-            font-family: 'Open Sans', sans-serif;
-            font-size: 16px;
-            font-weight: 600;
-            text-align: left;
-            padding: 4px 8px;
-            z-index: 1;
-            border-left: 4px solid ${accentColor};
-            display: flex;
-            flex-direction: row;
-            align-items: center;
-            width: 100%;
-            margin-bottom: 8px;
-            box-sizing: border-box;
-          }
-        `}
-      </style>
+      
     </div>
   )
 })

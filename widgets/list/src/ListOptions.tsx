@@ -191,9 +191,9 @@ class ListOptions extends Component<IListOptionsProps, IListOptionsState> {
                 onChange={(name, value) => this.handleChange('ordered', value === 'ordered')}
             />
           </InlineInputGroup>
-          <hr className='separator' />
-          <span className='subheader'>List Items</span>
-          <div className='list-items-editor'> {/* Renamed class */}
+          <hr className="border-0 w-full mt-4" />
+          <span className="font-sans font-semibold block pb-2">List Items</span>
+          <div className="flex-col"> {/* Renamed class */}
             {list.map((item, index) => (
               <InlineInputGroup key={`list-item-edit-${index}`}>
                 <Input
@@ -237,66 +237,7 @@ class ListOptions extends Component<IListOptionsProps, IListOptionsState> {
             <ListContent data={previewData} />
           </div>
         </div>
-        <style jsx>
-          {`
-            h3,
-            p {
-              font-family: 'Open Sans', sans-serif;
-            }
-            .options-container {
-              display: flex;
-              flex-direction: row;
-              width: 100%;
-            }
-            .options-container > :global(form) {
-                flex: 1;
-                padding-right: 16px;
-            }
-            .preview-box {
-              display: block;
-              width: 240px;
-              height: 240px;
-              border-radius: 6px;
-              overflow: hidden;
-              border: 1px solid #ccc;
-            }
-            .preview-section-container {
-              margin-left: 16px;
-              width: 240px;
-              flex-shrink: 0;
-            }
-            .deleteBtn {
-              padding: 8px;
-              display: flex;
-              /* flex-direction: column; */ /* Not needed for single icon */
-              /* min-height: 40px; */ /* Not needed */
-              justify-content: center;
-              align-items: center;
-              cursor: pointer;
-              margin-left: 8px; /* Space from input */
-            }
-            .separator {
-              border: none;
-              border-bottom: 1px solid #ededed;
-              width: 100%;
-              margin-top: 16px; /* Space above separator */
-            }
-            .subheader {
-              /* margin-right: 16px; */ /* Not needed if full width */
-              color: #666666;
-              font-family: 'Open Sans', sans-serif;
-              font-weight: 600;
-              display: block; /* Make it block for full width */
-              padding-top: 16px;
-              padding-bottom: 8px; /* Reduced bottom padding */
-            }
-            .list-items-editor { /* Renamed */
-                display: flex;
-                flex-direction: column;
-                gap: 8px; /* Space between item rows */
-            }
-          `}
-        </style>
+        
       </div>
     )
   }

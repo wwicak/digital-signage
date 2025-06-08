@@ -89,10 +89,10 @@ const WebContent: React.FC<IWebContentProps> = React.memo(({ data, isPreview }) 
   , [allowInteraction])
 
   return (
-    <div className='web-widget-content' style={{ background: color }}>
+    <div className="relative box-border h-full w-full flex-1 font-sans flex flex-col text-white" style={{ background: color }}>
       {title && (
-        <div className='title-container'>
-          <div className='title-text'>{title}</div>
+        <div className="p-3">
+          <div className="font-sans text-base pl-3 font-semibold uppercase">{title}</div>
         </div>
       )}
       <div className='iframe-area' style={iframeContainerStyle}>
@@ -105,37 +105,7 @@ const WebContent: React.FC<IWebContentProps> = React.memo(({ data, isPreview }) 
           title={title || 'Web Content'}
         />
       </div>
-      <style jsx>
-        {`
-          .web-widget-content {
-            position: relative;
-            box-sizing: border-box;
-            height: 100%;
-            width: 100%;
-            flex: 1;
-            font-family: 'Open Sans', sans-serif;
-            display: flex;
-            flex-direction: column;
-            color: white;
-          }
-          .iframe-area {
-            /* Styles applied via iframeContainerStyle object */
-          }
-          .title-container {
-            padding: 12px;
-            background-color: rgba(0,0,0,0.3);
-            z-index: 1;
-          }
-          .title-text {
-            font-family: 'Open Sans', sans-serif;
-            border-left: 3px solid rgba(255, 255, 255, 0.5);
-            font-size: 16px;
-            padding-left: 12px;
-            font-weight: 600;
-            text-transform: uppercase;
-          }
-        `}
-      </style>
+      
     </div>
   )
 })

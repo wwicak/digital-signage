@@ -41,15 +41,15 @@ class PhotoSlide extends GenericSlide {
    */
   renderSlideContent(data: string): React.ReactElement {
     return (
-      <div className='slide-content'>
+      <div className="w-full h-full relative">
         <div
-          className='photocover'
+          className="absolute"
           style={{
             backgroundImage: `url(${data})`
           }}
         />
         <div
-          className='photo'
+          className="w-full h-full absolute"
           style={{
             backgroundImage: `url(${data})`
           }}
@@ -59,47 +59,13 @@ class PhotoSlide extends GenericSlide {
           alt='Slide photo'
           width={1}
           height={1}
-          className='invisible'
+          className="w-0 h-0 hidden"
           onLoad={this.handleImageLoaded.bind(this)}
           onError={this.handleImageErrored.bind(this)}
           ref={this.image}
           unoptimized={true}
         />
-        <style jsx>{`
-          .slide-content {
-            width: 100%;
-            height: 100%;
-            background-color: #212121;
-            position: relative;
-          }
-          .photocover {
-            width: 110%;
-            height: 110%;
-            background-size: cover;
-            background-repeat: no-repeat;
-            background-position: 50% 50%;
-            filter: blur(20px);
-            position: absolute;
-            top: -5%;
-            left: -5%;
-          }
-          .photo {
-            width: 100%;
-            height: 100%;
-            background-size: contain;
-            background-repeat: no-repeat;
-            background-position: 50% 50%;
-            position: absolute;
-            top: 0;
-            left: 0;
-          }
-          .invisible {
-            width: 1px;
-            height: 1px;
-            display: none;
-            visibility: hidden;
-          }
-        `}</style>
+        
       </div>
     )
   }

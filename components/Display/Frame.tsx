@@ -61,70 +61,10 @@ const Frame: React.FC<IDisplayFrameProps> = React.memo(({ children, statusBar = 
           ))}
         </div>
       )}
-      <div className='display-content'>
+      <div className="flex-1 flex flex-col overflow-hidden">
           {children}
       </div>
-      <style jsx>
-        {`
-          .display-frame {
-            display: flex;
-            flex-direction: column;
-            width: 100%;
-            height: 100%;
-            background: black;
-            font-family: 'Open Sans', sans-serif;
-            color: white;
-            transition: all 0.3s ease-in-out;
-          }
-          
-          /* Portrait orientation specific styles */
-          .display-frame.portrait-frame {
-            /* Apply any frame-level portrait adjustments here */
-          }
-          
-          /* Landscape orientation specific styles (default) */
-          .display-frame.landscape-frame {
-            /* Apply any frame-level landscape adjustments here */
-          }
-          
-          .display-content {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
-            transition: all 0.3s ease-in-out;
-          }
-          
-          .status-bar-container {
-            padding: ${isPortrait ? '10px 20px' : '15px 30px'};
-            display: flex;
-            flex-direction: row;
-            justify-content: flex-start;
-            align-items: center;
-            background-color: rgba(0,0,0,0.2);
-            min-height: ${isPortrait ? '40px' : '50px'};
-            transition: all 0.3s ease-in-out;
-          }
-          
-          .status-bar-item {
-            display: flex;
-            align-items: center;
-          }
-          
-          .status-bar-item:not(:first-child) {
-            margin-left: ${isPortrait ? '12px' : '16px'};
-          }
-          
-          .status-bar-item.item-connection .wifi-icon {
-            color: #baff23;
-          }
-          
-          .status-bar-item.item-date,
-          .status-bar-item.item-time {
-            font-size: ${isPortrait ? '0.9em' : '1em'};
-          }
-        `}
-      </style>
+      
     </div>
   )
 })

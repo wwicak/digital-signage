@@ -174,20 +174,7 @@ class ImageOptions extends Component<IImageOptionsProps, IImageOptionsState> {
         </Form>
         {/* No preview was in the original JS for ImageOptions, so not adding one here.
             If a preview is desired, ImageContent component could be used. */}
-        <style jsx>
-          {`
-            h3,
-            p {
-              font-family: 'Open Sans', sans-serif;
-            }
-            .options-container {
-              display: flex;
-              flex-direction: column; /* Changed from row to stack elements vertically */
-              width: 100%;
-            }
-            /* Styles for Form, InlineInputGroup, Input are assumed to be global or handled by those components */
-          `}
-        </style>
+        
       </div>
     )
   }

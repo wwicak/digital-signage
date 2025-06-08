@@ -87,7 +87,6 @@ class SlideshowOptions extends Component<ISlideshowWidgetOptionsProps, ISlidesho
         random_order = false,
     } = currentWidgetData || {}
 
-
     if (loadingError) {
       return <div style={{ color: 'red' }}>Error: {loadingError}</div>
     }
@@ -131,15 +130,7 @@ class SlideshowOptions extends Component<ISlideshowWidgetOptionsProps, ISlidesho
                 onChange={(name, checked) => this.handleChange(name as keyof ISlideshowWidgetDefaultData, checked)}
             />
         </InlineInputGroup>
-        <style jsx>
-          {`
-            h3,
-            p {
-              font-family: 'Open Sans', sans-serif;
-            }
-            /* Form, Input, InlineInputGroup styles are assumed to be global or handled by those components */
-          `}
-        </style>
+        
       </Form>
     )
   }

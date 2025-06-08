@@ -35,7 +35,7 @@ const ScreenList = forwardRef<IScreenListRef, IScreenListProps>((props, ref) => 
     }
   }))
   if (error) {
-    return <div className='error-message'>Failed to load screens. Please try again later.</div>
+    return <div className="text-center p-5 font-sans">Failed to load screens. Please try again later.</div>
   }
 
   return (
@@ -82,26 +82,10 @@ const ScreenList = forwardRef<IScreenListRef, IScreenListProps>((props, ref) => 
         />
       )}
 
-      <style jsx>
-        {`
-          .list {
-            position: relative;
-            max-width: 640px; /* Example max-width, adjust as needed */
-            margin: 0 auto; /* Center the list */
-          }
-          .error-message {
-            color: red;
-            text-align: center;
-            padding: 20px;
-            font-family: 'Open Sans', sans-serif;
-          }
-        `}
-      </style>
     </div>
   )
 })
 
 export default ScreenList
-
 
 ScreenList.displayName = 'ScreenList'

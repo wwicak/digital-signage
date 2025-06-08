@@ -51,9 +51,9 @@ export default async function HomePage() {
   }
 
   return (
-    <div className='home'>
+    <div className="font-sans p-10 m-auto text-center">
       <p>The Digital Signage server is running in the background.</p>
-      <div className='btn-group'>
+      <div className="flex flex-row justify-center items-center">
         <Link href='/layout' style={{ margin: 20 }}>
           <div className='btn admin'>Admin Home</div>
         </Link>
@@ -67,39 +67,7 @@ export default async function HomePage() {
           />
         </div>
       </div>
-      <style jsx>
-        {`
-          .home {
-            font-family: 'Open Sans', sans-serif;
-            padding: 40px;
-            max-width: 960px;
-            margin: auto;
-            text-align: center;
-          }
-          .home p {
-            margin-bottom: 20px;
-          }
-          .btn-group {
-            display: flex;
-            flex-direction: row;
-            justify-content: center;
-            align-items: center;
-          }
-          .btn {
-            background: lightgray;
-            padding: 20px;
-            text-decoration: none;
-            text-transform: uppercase;
-            color: white;
-            border-radius: 4px;
-            margin: 20px;
-            font-size: 16px;
-          }
-          .btn.admin {
-            background: #03a9f4;
-          }
-        `}
-      </style>
+      
     </div>
   )
 }

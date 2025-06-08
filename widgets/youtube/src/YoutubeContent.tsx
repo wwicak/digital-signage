@@ -115,13 +115,13 @@ class YoutubeContent extends Component<IYoutubeContentProps> {
      */
 
     return (
-      <div className='youtube-widget-content'>
+      <div className="relative box-border h-full w-full overflow-hidden">
         {/* Optional: Title bar if needed, similar to other widgets */}
-        {/* {data.title && <div className='widget-title'>{data.title}</div>} */}
+        {/* {data.title && <div className="p-3 font-sans text-base font-semibold text-white uppercase">{data.title}</div>} */}
 
-        <div className='youtube-iframe-container'> {/* Renamed class */}
+        <div className="overflow-hidden"> {/* Renamed class */}
           {!currentVideoId ? (
-            <div className='youtube-error-message'>Invalid or missing YouTube Video ID.</div>
+            <div className="flex items-center justify-center h-full text-white font-sans p-5 text-center">Invalid or missing YouTube Video ID.</div>
           ) : (
             <YouTube
               videoId={currentVideoId}
@@ -135,57 +135,7 @@ class YoutubeContent extends Component<IYoutubeContentProps> {
           )}
         </div>
         {/* Global styles for react-youtube might be needed if its defaults are too restrictive */}
-        <style jsx global>{`
-          .youtube-player-container, 
-          .youtube-player-iframe {
-            width: 100%;
-            height: 100%;
-          }
-        `}</style>
-        <style jsx>
-          {`
-            .youtube-widget-content {
-              position: relative;
-              box-sizing: border-box;
-              height: 100%;
-              width: 100%;
-              background: #000000; /* Black background for cinematic feel */
-              flex: 1; /* Fill parent if flex item */
-              display: flex; /* Use flex to manage layout if title bar is added */
-              flex-direction: column;
-              overflow: hidden; /* Prevent content spill */
-            }
-            .youtube-iframe-container { /* Renamed */
-              flex: 1; /* Take available space */
-              border: none;
-              overflow: hidden; /* Ensure no scrollbars from iframe itself */
-              min-height: 0; /* Important for flex children that need to scroll/be constrained */
-            }
-            .youtube-error-message {
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                height: 100%;
-                color: white;
-                font-family: 'Open Sans', sans-serif;
-                padding: 20px;
-                text-align: center;
-            }
-            /* Example for a title bar if added: */
-            /*
-            .widget-title {
-              padding: 12px;
-              font-family: 'Open Sans', sans-serif;
-              font-size: 16px;
-              font-weight: 600;
-              color: white;
-              background-color: rgba(0,0,0,0.5);
-              text-transform: uppercase;
-              z-index: 1;
-            }
-            */
-          `}
-        </style>
+
       </div>
     )
   }

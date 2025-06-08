@@ -138,7 +138,7 @@ const LayoutAdminContent = memo(function LayoutAdminContent() {
     <Frame loggedIn={true}>
       <div className={'head'}>
         <h1>Layout</h1>
-        <div className='editable-title'>
+        <div className="inline-block relative ml-4 mr-4 border-b-2 border-gray-400">
           <input
             className='input'
             placeholder='Unnamed display'
@@ -153,7 +153,7 @@ const LayoutAdminContent = memo(function LayoutAdminContent() {
         </div>
       </div>
 
-      <div className='settings'>
+      <div className="flex flex-row items-center justify-between mb-4">
         <DropdownButton
           icon={Edit}
           text='Add Status Bar Item'
@@ -163,7 +163,7 @@ const LayoutAdminContent = memo(function LayoutAdminContent() {
       </div>
 
       {context.state.statusBar && context.state.statusBar.elements && context.state.statusBar.elements.length > 0 && (
-          <div className='statusbar'>
+          <div className="bg-gray-300 rounded-lg flex-1 mb-4 h-16 min-h-16">
               <DragDropContext onDragEnd={handleDragEnd}>
               <Droppable droppableId='droppable-statusbar' direction='horizontal'>
                   {(provided) => (
@@ -197,7 +197,7 @@ const LayoutAdminContent = memo(function LayoutAdminContent() {
           </div>
       )}
 
-      <div className='settings'>
+      <div className="flex flex-row items-center justify-between mb-4">
         <DropdownButton
           icon={Edit}
           text='Add Widget'
@@ -226,7 +226,7 @@ const LayoutAdminContent = memo(function LayoutAdminContent() {
         </Form>
       </div>
 
-      <div className='layout' style={{
+      <div className="bg-gray-300" style={{
         borderRadius: context.state.layout === 'spaced' ? '8px' : '0px',
         aspectRatio: context.state.orientation === 'portrait' ? '9/16' : '16/9',
         maxWidth: context.state.orientation === 'portrait' ? '600px' : '100%',
@@ -253,66 +253,7 @@ const LayoutAdminContent = memo(function LayoutAdminContent() {
           ))}
         </GridLayoutWithWidth>
       </div>
-      <style jsx>
-        {`
-          h1 {
-            font-family: 'Open Sans', sans-serif;
-            font-size: 24px;
-            color: #4f4f4f;
-            margin: 0px;
-            display: inline-block;
-            margin-right: 16px;
-          }
-          .head {
-            margin-bottom: 24px;
-            display: flex;
-            flex-direction: row;
-            align-items: center;
-          }
-          .layout {
-            background: #dfdfdf;
-          }
-          .statusbar {
-            background: #dfdfdf;
-            border-radius: 8px;
-            flex: 1;
-            margin-bottom: 16px;
-            height: 64px;
-            min-height: 64px;
-          }
-          .settings {
-            display: flex;
-            flex-direction: row;
-            align-items: center;
-            justify-content: space-between;
-            margin-bottom: 16px;
-          }
-          .editable-title {
-            display: inline-block;
-            position: relative;
-            margin-left: 16px;
-            margin-right: 16px;
-            border-bottom: 3px solid #aaa;
-          }
-          .editable-title .input {
-            font-family: 'Open Sans', sans-serif;
-            color: #666;
-            background-color: transparent;
-            min-height: 40px;
-            border: none;
-            outline: none;
-            margin-right: 24px;
-            font-size: 24px;
-            font-weight: 600;
-          }
-          .editable-title .icon {
-            position: absolute;
-            right: 8px;
-            top: 50%;
-            margin-top: -8px;
-          }
-        `}
-      </style>
+      
     </Frame>
   )
 })

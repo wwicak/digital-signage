@@ -135,15 +135,7 @@ class WeatherOptions extends Component<IWeatherOptionsProps, IWeatherOptionsStat
             onChange={this.handleChange}
             helpText='Overrides auto-detected name from API.'
         />
-        <style jsx>
-          {`
-            h3,
-            p {
-              font-family: 'Open Sans', sans-serif;
-            }
-            /* Form, Input, InlineInputGroup styles are assumed to be global or handled by those components */
-          `}
-        </style>
+        
       </Form>
     )
   }

@@ -152,36 +152,7 @@ class CongratsOptions extends Component<ICongratsOptionsProps, ICongratsOptionsS
             <CongratsContent data={previewData} />
           </div>
         </div>
-        <style jsx>
-          {`
-            h3,
-            p {
-              font-family: 'Open Sans', sans-serif;
-            }
-            .options-container {
-              display: flex;
-              flex-direction: row;
-              width: 100%;
-            }
-            .options-container > :global(form) { /* Target Form component */
-                flex: 1;
-                padding-right: 16px;
-            }
-            .preview-box {
-              display: block;
-              width: 240px;
-              height: 240px;
-              border-radius: 6px;
-              overflow: hidden;
-              border: 1px solid #ccc;
-            }
-            .preview-section-container {
-              margin-left: 16px;
-              width: 240px;
-              flex-shrink: 0;
-            }
-          `}
-        </style>
+        
       </div>
     )
   }

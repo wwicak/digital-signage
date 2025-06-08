@@ -186,53 +186,11 @@ class YoutubeOptions extends Component<IYoutubeOptionsProps, IYoutubeOptionsComp
                 {video_id ? (
                     <YoutubeContent data={previewData} isPreview={true} />
                 ) : (
-                    <div className='no-video-preview'>Enter a valid YouTube URL or Video ID</div>
+                    <div className="flex items-center justify-center h-full text-center">Enter a valid YouTube URL or Video ID</div>
                 )}
             </div>
         </div>
-        <style jsx>
-          {`
-            h3,
-            p {
-              font-family: 'Open Sans', sans-serif;
-            }
-            .options-container {
-              display: flex;
-              flex-direction: row;
-              width: 100%;
-            }
-            .options-container > :global(form) {
-                flex: 1;
-                padding-right: 16px;
-            }
-            .preview-section-container {
-              margin-left: 16px;
-              width: 320px;
-              flex-shrink: 0;
-            }
-            .preview-box {
-              display: block;
-              width: 100%;
-              height: 180px; /* Aspect ratio for video preview */
-              border-radius: 6px;
-              overflow: hidden;
-              border: 1px solid #ccc;
-              background-color: #000; /* Black background for player */
-            }
-            .youtube-preview-box {
-                position: relative;
-            }
-            .no-video-preview {
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                height: 100%;
-                color: #555;
-                text-align: center;
-                background-color: #f0f0f0;
-            }
-          `}
-        </style>
+        
       </div>
     )
   }

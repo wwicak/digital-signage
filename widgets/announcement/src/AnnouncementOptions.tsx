@@ -149,37 +149,7 @@ class AnnouncementOptions extends Component<IAnnouncementOptionsProps, IAnnounce
             <AnnouncementContent data={previewData} />
           </div>
         </div>
-        <style jsx>
-          {`
-            h3,
-            p {
-              font-family: 'Open Sans', sans-serif;
-            }
-            .options-container { /* Renamed */
-              display: flex;
-              flex-direction: row;
-              width: 100%; /* Ensure it takes available width */
-            }
-            /* Form takes up available space, Preview has fixed width */
-            .options-container > :global(form) { /* Target Form component */
-                flex: 1;
-                padding-right: 16px; /* Space before preview */
-            }
-            .preview-box { /* Renamed */
-              display: block; /* Was flex, block might be simpler for fixed size */
-              width: 240px;
-              height: 240px; /* Fixed height for preview */
-              border-radius: 6px;
-              overflow: hidden;
-              border: 1px solid #ccc; /* Added border for better visibility */
-            }
-            .preview-section-container { /* Renamed */
-              margin-left: 16px;
-              width: 240px; /* Fixed width for the preview section */
-              flex-shrink: 0; /* Prevent preview from shrinking */
-            }
-          `}
-        </style>
+        
       </div>
     )
   }

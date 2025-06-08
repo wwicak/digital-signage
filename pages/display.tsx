@@ -23,39 +23,10 @@ const DisplayPageComponent = memo(function DisplayPageComponent({ host, displayI
       ) : (
         <div>Loading display information or Display ID not provided...</div>
       )}
-      <style jsx>
-        {`
-          .container {
-            display: flex;
-            width: 100vw;
-            height: 100vh;
-            overflow: hidden;
-            position: relative;
-          }
-        `}
-      </style>
+      
       {/* Global styles are typically placed in _app.tsx or a global CSS file.
           Placing them here makes them specific to this page when it's rendered. */}
-      <style jsx global>
-        {`
-          * {
-            -ms-overflow-style: none; /* IE and Edge */
-            scrollbar-width: none; /* Firefox */
-          }
-          *::-webkit-scrollbar {
-            display: none; /* Safari and Chrome */
-          }
-          
-          /* Global orientation styles for the display */
-          .portrait-display {
-            /* Portrait mode transformations will be handled at the component level */
-          }
-          
-          .landscape-display {
-            /* Landscape mode is the default */
-          }
-        `}
-      </style>
+      
     </div>
   )
 })

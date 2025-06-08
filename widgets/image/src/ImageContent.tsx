@@ -75,7 +75,7 @@ class ImageContent extends Component<IImageContentProps> {
      */
 
     return (
-      <div className='image-widget-content' aria-label={altText || title || 'Image widget'}> {/* Renamed class */}
+      <div className="box-border h-full w-full" aria-label={altText || title || 'Image widget'}> {/* Renamed class */}
         {title && (
           <div className='title-container'> {/* Renamed class */}
             <div className='title-text'>{title}</div> {/* Renamed class */}
@@ -83,82 +83,15 @@ class ImageContent extends Component<IImageContentProps> {
         )}
         {url ? (
           <div className='content-area' style={contentStyle}> {/* Renamed class */}
-            <div className='photocover-bg' style={photoCoverStyle} /> {/* Renamed class */}
-            <div className='photo-main' style={photoStyle} /> {/* Renamed class */}
+            <div className="absolute" style={photoCoverStyle} /> {/* Renamed class */}
+            <div className="h-full absolute" style={photoStyle} /> {/* Renamed class */}
           </div>
         ) : (
           <div className='content-area placeholder-content' style={contentStyle}> {/* Placeholder if no URL */}
             <span>No Image URL Provided</span>
           </div>
         )}
-        <style jsx>
-          {`
-            .image-widget-content { /* Renamed */
-              position: relative;
-              box-sizing: border-box;
-              height: 100%;
-              width: 100%;
-              background: ${color}; /* This might be redundant if content-area also sets it */
-              flex: 1; /* Fill parent if flex item */
-              font-family: 'Open Sans', sans-serif;
-              display: flex;
-              flex-direction: column;
-              overflow: hidden; /* Prevent blur from spilling out */
-              color: white; /* Default text color for title */
-            }
-            .image-widget-content .content-area { /* Renamed */
-              flex: 1;
-              border: none;
-              overflow: hidden;
-              position: relative; /* For positioning photo and photocover */
-            }
-            .image-widget-content .placeholder-content {
-              display: flex;
-              align-items: center;
-              justify-content: center;
-              color: #ccc; /* Light grey text for placeholder */
-              font-size: 1.2em;
-            }
-            .image-widget-content .title-container { /* Renamed */
-              padding: 12px;
-              background-color: rgba(0,0,0,0.3); /* Slight dark background for title readability */
-              z-index: 2; /* Ensure title is above photocover */
-              position: relative; /* Needed for z-index to work against absolute children of content-area */
-            }
-            .image-widget-content .title-text { /* Renamed */
-              font-family: 'Open Sans', sans-serif;
-              border-left: 3px solid rgba(255, 255, 255, 0.5);
-              font-size: 16px;
-              padding-left: 12px;
-              font-weight: 600;
-              text-transform: uppercase;
-            }
-            .photocover-bg { /* Renamed */
-              width: 110%; /* To allow blur to extend beyond edges */
-              height: 110%;
-              background-size: cover; /* Always cover for the blur effect */
-              background-repeat: no-repeat;
-              background-position: 50% 50%;
-              filter: blur(20px);
-              position: absolute;
-              top: -5%; /* Center the blurred overflow */
-              left: -5%;
-              z-index: 0; /* Behind the main photo */
-            }
-            .photo-main { /* Renamed */
-              width: 100%;
-              height: 100%;
-              /* background-size is set via inline style (fit) */
-              background-repeat: no-repeat;
-              background-position: 50% 50%;
-              position: absolute;
-              top: 0;
-              left: 0;
-              z-index: 1; /* Above the blurred background */
-            }
-            /* .invisible class was unused, removed */
-          `}
-        </style>
+        
       </div>
     )
   }

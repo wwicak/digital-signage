@@ -70,7 +70,6 @@ class WebOptions extends Component<IWebOptionsProps, IWebOptionsState> {
       }
     }
 
-
     this.setState(
       { [name]: processedValue } as Pick<IWebOptionsState, keyof IWebOptionsState>,
       () => {
@@ -93,7 +92,6 @@ class WebOptions extends Component<IWebOptionsProps, IWebOptionsState> {
     } = this.state
     
     const previewData: IWebDefaultData = { title, url, color, refreshInterval, scale, allowInteraction }
-
 
     return (
       <div className={'options-container'}>
@@ -164,41 +162,7 @@ class WebOptions extends Component<IWebOptionsProps, IWebOptionsState> {
                 <WebContent data={previewData} isPreview={true} />
             </div>
         </div>
-        <style jsx>
-          {`
-            h3,
-            p {
-              font-family: 'Open Sans', sans-serif;
-            }
-            .options-container {
-              display: flex;
-              flex-direction: row; /* Form on left, preview on right */
-              width: 100%;
-            }
-            .options-container > :global(form) {
-                flex: 1; /* Form takes available space */
-                padding-right: 16px;
-            }
-            .preview-section-container {
-              margin-left: 16px;
-              width: 320px; /* Wider preview for web content */
-              flex-shrink: 0;
-            }
-            .preview-box {
-              display: block;
-              width: 100%; /* Full width of its container */
-              height: 240px; /* Fixed height for consistency */
-              border-radius: 6px;
-              overflow: hidden;
-              border: 1px solid #ccc;
-              background-color: #f0f0f0; /* Background for the preview area itself */
-            }
-            .iframe-preview-box {
-                /* Specific styles if needed to ensure iframe behaves well in small preview */
-                position: relative; /* For potential absolute positioned elements inside WebContent preview */
-            }
-          `}
-        </style>
+        
       </div>
     )
   }

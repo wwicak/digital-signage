@@ -79,8 +79,8 @@ const SlideshowPageComponent = memo(function SlideshowPageComponent({ slideshow:
 
   return (
     <Frame loggedIn={loggedIn}>
-      <h1 className='title'>Slideshow: </h1>{' '}
-      <div className='editable-title'>
+      <h1 className="inline-block">Slideshow: </h1>{' '}
+      <div className="inline-block relative ml-4 mr-4 border-b-2 border-gray-400">
         <input
           className='input'
           placeholder='Untitled Slideshow'
@@ -93,7 +93,7 @@ const SlideshowPageComponent = memo(function SlideshowPageComponent({ slideshow:
           <<faPencilAlt as  color='#828282' />
         </div>
       </div>
-      <div className='wrapper'>
+      <div className="max-w-2xl">
         <Upload slideshowId={slideshow && slideshow._id || '' className="w-4 h-4" /> refresh={refresh} />
         <SlideEditDialogComponent
           slideshowId={slideshow && slideshow._id || ''}
@@ -109,47 +109,7 @@ const SlideshowPageComponent = memo(function SlideshowPageComponent({ slideshow:
         <SlideListComponent ref={slideListRef} slideshowId={slideshow && slideshow._id || ''} />
         <Dialog><div></div></Dialog>
       </div>
-      <style jsx>
-        {`
-          h1 {
-            font-family: 'Open Sans', sans-serif;
-            font-size: 24px;
-            color: #4f4f4f;
-            margin: 0px;
-          }
-          .title {
-            display: inline-block;
-          }
-          .editable-title {
-            display: inline-block;
-            position: relative;
-            margin-left: 16px;
-            margin-right: 16px;
-            border-bottom: 3px solid #aaa;
-          }
-          .editable-title .input {
-            font-family: 'Open Sans', sans-serif;
-            color: #666;
-            background-color: transparent;
-            min-height: 40px;
-            border: none;
-            outline: none;
-            margin-right: 24px;
-            font-size: 24px;
-            font-weight: 600;
-          }
-          .editable-title .icon {
-            position: absolute;
-            right: 8px;
-            top: 50%;
-            margin-top: -8px;
-          }
-          .wrapper {
-            margin: 40px auto;
-            max-width: 640px;
-          }
-        `}
-      </style>
+      
     </Frame>
   )
 })

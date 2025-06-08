@@ -47,15 +47,7 @@ const Form: React.FC<IFormProps> = ({
       {...restFormProps} // Pass through other form attributes like 'method', 'action', etc.
     >
       {children}
-      <style jsx>{`
-        .custom-form-wrapper { /* Renamed class to avoid conflict with generic 'form' if used elsewhere */
-          display: flex;
-          flex-direction: column;
-          /* Add any other base styling for the form wrapper here */
-          /* For example, gap between form elements: */
-          /* gap: 16px; */
-        }
-      `}</style>
+      
     </form>
   )
 }

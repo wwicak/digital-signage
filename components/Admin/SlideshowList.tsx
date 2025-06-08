@@ -50,7 +50,7 @@ class SlideshowList extends Component<ISlideshowListProps, ISlideshowListState> 
     const { slideshows, error } = this.state
 
     if (error) {
-      return <div className='error-message'>{error}</div>
+      return <div className="text-center p-5 font-sans">{error}</div>
     }
 
     return (
@@ -83,21 +83,7 @@ class SlideshowList extends Component<ISlideshowListProps, ISlideshowListState> 
                   <rect x='600' y='25' rx='3' ry='3' width='20' height='20' /> {/* Delete Icon */}
                 </ContentLoader>
               ))}
-        <style jsx>
-          {`
-            .slideshow-list { /* Renamed */
-              position: relative;
-              max-width: 640px; /* Example max-width */
-              margin: 0 auto; /* Center the list */
-            }
-            .error-message {
-              color: red;
-              text-align: center;
-              padding: 20px;
-              font-family: 'Open Sans', sans-serif;
-            }
-          `}
-        </style>
+        
       </div>
     )
   }

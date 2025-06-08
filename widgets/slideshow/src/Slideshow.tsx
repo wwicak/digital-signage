@@ -253,10 +253,9 @@ class Slideshow extends Component<ISlideshowWidgetContentProps, ISlideshowWidget
         return <div className='slideshow-notice'>This slideshow has no slides.</div>
     }
 
-
     return (
-      <div className='slideshow-widget-content'> {/* Renamed class */}
-        <div className='slideshow-wrapper'>
+      <div className="flex-1 w-full h-full"> {/* Renamed class */}
+        <div className="relative w-full h-full overflow-hidden">
           {this.orderedSlides.map((slide, index) => this.renderSlide(slide, index))}
         </div>
         {this.props.data?.show_progressbar !== false && currentSlideIndex !== null && (
@@ -268,38 +267,7 @@ class Slideshow extends Component<ISlideshowWidgetContentProps, ISlideshowWidget
             ready={isCurrentSlideReady}
           />
         )}
-        <style jsx>
-          {`
-            .slideshow-widget-content { /* Renamed */
-              display: block; /* Was flex, but block is fine for stacking wrapper and progress */
-              position: relative;
-              flex: 1; /* Fill parent if flex item */
-              overflow: hidden;
-              width: 100%;
-              height: 100%;
-              background-color: #000; /* Default background for slideshow area */
-            }
-            .slideshow-wrapper {
-              position: relative;
-              width: 100%;
-              height: 100%;
-              overflow: hidden;
-            }
-            .slideshow-loading, .slideshow-error, .slideshow-notice {
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                height: 100%;
-                width: 100%;
-                color: white;
-                font-family: 'Open Sans', sans-serif;
-                font-size: 1.2em;
-            }
-            .slideshow-error {
-                color: red;
-            }
-          `}
-        </style>
+        
       </div>
     )
   }

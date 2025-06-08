@@ -170,106 +170,24 @@ const WeatherContent: React.FC<IWeatherContentProps> = React.memo(({ data, isPre
   }
 
   return (
-    <div className='weather-widget-content'>
-      {iconCode && <div className='background-icon'>
+    <div className="relative box-border h-full w-full text-white flex-1 p-4 font-sans flex flex-row justify-between overflow-hidden">
+      {iconCode && <div className="absolute -5 -0">
         <WeatherIcon icon={iconCode} />
       </div>}
-      <div className='info-panel'>
+      <div className="flex flex-col justify-end">
         <div className='temp'>{Math.round(temperature || 0)}°</div>
         <div className='desc'>{description}</div>
-        <div className='location-info'>
+        <div className="flex flex-row items-center">
           <div className='marker-icon'>
             <<faMapMarkerAlt  className='xs' fixedWidth />
           </div>
           <div className='name-text'>{locationName className="w-4 h-4" /></div>
         </div>
       </div>
-      {iconCode && <div className='main-icon'>
+      {iconCode && <div className="flex flex-col justify-start scale-200">
         <WeatherIcon icon={iconCode} />
       </div>}
-      <style jsx>
-        {`
-          .weather-widget-content {
-            position: relative;
-            box-sizing: border-box;
-            height: 100%;
-            width: 100%;
-            background: #358aed;
-            color: white;
-            flex: 1;
-            padding: 16px;
-            font-family: 'Open Sans', sans-serif;
-            display: flex;
-            flex-direction: row;
-            justify-content: space-between;
-            overflow: hidden;
-          }
-          .info-panel {
-            display: flex;
-            flex-direction: column;
-            justify-content: flex-end;
-            z-index: 1;
-          }
-          .main-icon {
-            display: flex;
-            flex-direction: column;
-            justify-content: flex-start;
-            transform: scale(2);
-            transform-origin: top right;
-            z-index: 1;
-          }
-          .info-panel .temp {
-            font-family: 'Open Sans', sans-serif;
-            font-size: 48px;
-            line-height: 1;
-            margin-bottom: 4px;
-          }
-          .info-panel .desc {
-            font-family: 'Open Sans', sans-serif;
-            font-size: 14px;
-            text-transform: capitalize;
-            margin-bottom: 4px;
-          }
-          .background-icon {
-            position: absolute;
-            right: 20px;
-            top: 0px;
-            transform: scale(5) rotate(-5deg);
-            opacity: 0.2;
-            z-index: 0;
-          }
-          .location-info {
-            display: flex;
-            flex-direction: row;
-            align-items: center;
-          }
-          .location-info .name-text {
-            font-family: 'Open Sans', sans-serif;
-            font-size: 12px;
-            text-transform: capitalize;
-          }
-          .location-info .marker-icon {
-            margin-right: 4px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-          }
-          .weather-loading, .weather-error, .weather-nodata {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            height: 100%;
-            width: 100%;
-            color: white;
-            font-family: 'Open Sans', sans-serif;
-            font-size: 1.2em;
-            background: #358aed;
-          }
-          .weather-error {
-            color: #ffdddd;
-          }
-        `}
-      </style>
+      
     </div>
   )
 })

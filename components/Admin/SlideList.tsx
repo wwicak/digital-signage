@@ -91,24 +91,7 @@ const SortableList = memo(function SortableList({ items, refresh, onDragEnd }: S
             />
           ))}
         </SortableContext>
-        <style jsx>
-          {`
-            .slide-list-container {
-              position: relative;
-            }
-            .timeline-decorator {
-              width: 4px;
-              height: calc(100% - 20px);
-              border-radius: 2px;
-              position: absolute;
-              left: 50%;
-              top: 10px;
-              margin-left: -2px;
-              background: #cccccc;
-              z-index: 0;
-            }
-          `}
-        </style>
+        
       </div>
     </DndContext>
   )

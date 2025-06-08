@@ -43,22 +43,22 @@ const LoginContent = memo(function LoginContent() {
 
   return (
     <Frame loggedIn={false}>
-      <h1>Login</h1>
-      <div className='formContainer'>
-        <div className='logo'>
-          <div className='icon'>
+      <h1 className="font-sans text-2xl text-gray-600 m-0">Login</h1>
+      <div className="max-w-2xl m-auto flex flex-col">
+        <div className="flex flex-row mt-5 mb-5 pr-2.5 pl-2.5 self-center">
+          <div className="min-w-12 min-h-12 p-5 flex justify-center items-center scale-200">
             <Tv className="w-8 h-8 text-primary" />
           </div>
         </div>
-        <form className='form' onSubmit={handleSubmit}>
+        <form className="bg-white rounded-lg flex flex-col p-6 font-sans" onSubmit={handleSubmit}>
           {alert && (
-            <div className={`alert-${alert}`}>
+            <div className={`${alert === 'error' ? 'bg-red-500' : alert === 'success' ? 'bg-primary' : 'bg-blue-500'} rounded-md mb-4 p-4 flex items-center`}>
               {alert === 'success' ? (
-                <Check className="w-4 h-4 text-white" />
+                <Check className="w-4 h-4 text-white mr-2" />
               ) : (
-                <X className="w-4 h-4 text-white" />
+                <X className="w-4 h-4 text-white mr-2" />
               )}
-              <span className={'alert-text'}>
+              <span className="text-white">
                 {alert === 'success'
                   ? 'Successfully logged in to your account.'
                   : alert === 'error'
@@ -68,147 +68,39 @@ const LoginContent = memo(function LoginContent() {
             </div>
           )}
           {!alert && (
-             <div className={'alert-info'}>
-                <span className={'alert-text'}>
+             <div className="bg-blue-500 rounded-md mb-4 p-4">
+                <span className="text-white">
                 Use the username &quot;demo&quot; and password &quot;demo&quot;
                 </span>
             </div>
           )}
-          <label htmlFor='email'>Email</label>
+          <label htmlFor='email' className="pb-4 font-sans">Email</label>
           <input
             type='email'
-            className='email'
+            className="outline-none bg-gray-200 rounded-lg font-sans font-normal text-base text-gray-500 border-0 p-2 h-8 min-w-64 align-middle appearance-none mb-4"
             id='email'
             placeholder='Enter your email...'
             value={email}
             onChange={(e) => setEmail(e.target.value)}
           />
-          <label htmlFor='password'>Password</label>
+          <label htmlFor='password' className="pb-4 font-sans">Password</label>
           <input
             type='password'
-            className='password'
+            className="outline-none bg-gray-200 rounded-lg font-sans font-normal text-base text-gray-500 border-0 p-2 h-8 min-w-64 align-middle appearance-none mb-4"
             id='password'
             placeholder='Enter your password...'
             value={password}
             onChange={(e) => setPassword(e.target.value)}
           />
-          <button type='submit'>Log In.</button>
+          <button type='submit' className="outline-none bg-primary rounded-lg font-sans font-semibold text-lg text-white text-center border-0 p-1 h-12 align-middle pl-4 pr-4 appearance-none hover:bg-green-600 transition-colors">Log In.</button>
         </form>
         <Link href='/'>
-          <span className='back'>
+          <span className="inline-block m-4 font-sans text-gray-500 text-sm cursor-pointer">
             <ChevronLeft className="w-4 h-4 inline mr-1" /> Back to the home page
           </span>
         </Link>
       </div>
-      <style jsx>
-        {`
-          h1 {
-            font-family: 'Open Sans', sans-serif;
-            font-size: 24px;
-            color: #4f4f4f;
-            margin: 0px;
-          }
-          .logo {
-            display: flex;
-            flex-direction: row;
-            margin-top: 20px;
-            margin-bottom: 20px;
-            padding-right: 10px;
-            padding-left: 10px;
-            align-self: center;
-          }
-          .logo .icon {
-            min-width: 3em;
-            min-height: 3em;
-            padding: 20px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            transform: scale(2);
-          }
-          .form {
-            background: white;
-            border-radius: 8px;
-            display: flex;
-            flex-direction: column;
-            padding: 24px;
-            font-family: 'Open Sans', sans-serif;
-          }
-          .formContainer {
-            max-width: 640px;
-            margin: auto;
-            display: flex;
-            flex-direction: column;
-          }
-          .form input[type='email'],
-          .form input[type='password'] {
-            outline: none;
-            background: #ededed;
-            border-radius: 8px;
-            font-family: 'Open Sans', sans-serif;
-            font-weight: 400;
-            font-size: 16px;
-            color: #928f8f;
-            border: none;
-            padding: 8px;
-            height: 32px;
-            min-width: 256px;
-            vertical-align: middle;
-            -webkit-appearance: none;
-            margin-bottom: 16px;
-          }
-          .form button {
-            outline: none;
-            background: #7bc043;
-            border-radius: 8px;
-            font-family: 'Open Sans', sans-serif;
-            font-weight: 600;
-            font-size: 18px;
-            color: #ffffff;
-            text-align: center;
-            border: none;
-            padding: 4px;
-            height: 48px;
-            vertical-align: middle;
-            padding-left: 16px;
-            padding-right: 16px;
-            -webkit-appearance: none;
-          }
-          .form label {
-            padding-bottom: 16px;
-          }
-          .back {
-            display: inline-block;
-            margin: 16px;
-            font-family: 'Open Sans', sans-serif;
-            color: #6f6e6e;
-            font-size: 14px;
-            cursor: pointer;
-          }
-          .alert-error {
-            background: #e74c3c;
-            border-radius: 6px;
-            margin-bottom: 16px;
-            padding: 16px;
-          }
-          .alert-info {
-            background: #3ca9e7;
-            border-radius: 6px;
-            margin-bottom: 16px;
-            padding: 16px;
-          }
-          .alert-success {
-            background: #7bc043;
-            border-radius: 6px;
-            margin-bottom: 16px;
-            padding: 16px;
-          }
-          .alert-text {
-            color: white;
-            margin-left: 8px;
-          }
-        `}
-      </style>
+      
     </Frame>
   )
 })
