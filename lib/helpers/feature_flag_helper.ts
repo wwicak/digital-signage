@@ -1,8 +1,9 @@
-import FeatureFlag, { 
-  IFeatureFlag, 
-  FeatureFlagName, 
-  FeatureFlagType 
-} from "../models/FeatureFlag";
+import FeatureFlag from "../models/FeatureFlag";
+import {
+  IFeatureFlag,
+  FeatureFlagName,
+  FeatureFlagType
+} from "../types/feature-flags";
 import { AuthenticatedUser } from "../auth";
 import { UserRoleName } from "../models/User";
 import dbConnect from "../mongodb";
@@ -231,7 +232,7 @@ export async function refreshFeatureFlagCache(): Promise<void> {
   featureFlagCache.clear();
   
   for (const flag of flags) {
-    featureFlagCache.set(flag.name, flag);
+    featureFlagCache.set(flag.name, flag as any);
   }
   
   cacheLastUpdated = new Date();
@@ -283,7 +284,7 @@ export async function hasFeatureFlagAccess(
 export async function getUserAccessibleFeatureFlags(
   user: AuthenticatedUser,
   type?: FeatureFlagType
-): Promise<IFeatureFlag[]> {
+): Promise<any[]> {
   await dbConnect();
   
   // Super admins can see all flags

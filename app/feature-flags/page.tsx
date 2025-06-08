@@ -23,11 +23,11 @@ import {
   useUpdateFeatureFlag, 
   useDeleteFeatureFlag 
 } from "@/hooks/useFeatureFlags";
-import { 
-  IFeatureFlag, 
-  FeatureFlagType, 
-  FeatureFlagName 
-} from "@/lib/models/FeatureFlag";
+import {
+  IFeatureFlag,
+  FeatureFlagType,
+  FeatureFlagName
+} from "@/lib/types/feature-flags";
 import { UserRoleName } from "@/lib/models/User";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
@@ -170,7 +170,7 @@ const FeatureFlagsPage: React.FC = () => {
         </Button>
       </div>
 
-      <Tabs value={selectedType} onValueChange={(value) => setSelectedType(value as FeatureFlagType | "all")}>
+      <Tabs value={selectedType} onValueChange={(value: string) => setSelectedType(value as FeatureFlagType | "all")}>
         <TabsList className="grid w-full grid-cols-4">
           <TabsTrigger value="all">All ({featureFlags?.length || 0})</TabsTrigger>
           <TabsTrigger value={FeatureFlagType.MENU_ITEM}>

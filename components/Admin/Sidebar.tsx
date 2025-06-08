@@ -30,7 +30,7 @@ import { useDisplayContext } from "../../contexts/DisplayContext";
 import { useDisplays } from "../../hooks/useDisplays";
 import { useDisplayStatus } from "../../hooks/useDisplayStatus";
 import { useFeatureFlagAccess } from "../../hooks/useFeatureFlags";
-import { FeatureFlagName } from "@/lib/models/FeatureFlag";
+import { FeatureFlagName } from "@/lib/types/feature-flags";
 
 // Simplified display data for local state
 interface ISimpleDisplay {
@@ -305,11 +305,11 @@ const DisplayStatusIndicator: React.FC<{ displayId?: string }> = ({
 // Component to handle feature flag checking for individual menu items
 const MenuItemWithFeatureFlag: React.FC<{
   item: IMenuItem;
-  pathname: string;
+  pathname: string | null;
   collapsed: boolean;
 }> = ({ item, pathname, collapsed }) => {
   const { hasAccess, isLoading } = useFeatureFlagAccess(
-    item.featureFlag || FeatureFlagName.MENU_DASHBOARD
+    item.featureFlag ?? FeatureFlagName.MENU_DASHBOARD
   );
 
   // If item has a feature flag and user doesn't have access, don't render
@@ -327,7 +327,7 @@ const MenuItemWithFeatureFlag: React.FC<{
     );
   }
 
-  const isActive = pathname === item.path || (pathname && pathname.startsWith(item.path.split('?')[0]));
+  const isActive = pathname === item.path || (pathname ? pathname.startsWith(item.path.split('?')[0]) : false);
 
   return (
     <Link href={item.path}>

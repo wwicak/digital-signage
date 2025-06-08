@@ -1,12 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import dbConnect from "@/lib/mongodb";
 import { requireAuth } from "@/lib/helpers/auth_helper";
-import FeatureFlag, { 
-  IFeatureFlag, 
-  FeatureFlagSchemaZod,
+import FeatureFlag, { FeatureFlagSchemaZodServer } from "@/lib/models/FeatureFlag";
+import {
+  IFeatureFlag,
   FeatureFlagName,
-  FeatureFlagType 
-} from "@/lib/models/FeatureFlag";
+  FeatureFlagType
+} from "@/lib/types/feature-flags";
 import { canManageFeatureFlags, canReadFeatureFlags } from "@/lib/helpers/rbac_helper";
 import { clearFeatureFlagCache } from "@/lib/helpers/feature_flag_helper";
 
@@ -77,7 +77,7 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     
     // Validate the request body
-    const parseResult = FeatureFlagSchemaZod.safeParse({
+    const parseResult = FeatureFlagSchemaZodServer.safeParse({
       ...body,
       createdBy: user._id,
     });

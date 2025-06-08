@@ -1,48 +1,22 @@
 import mongoose, { Schema, Model, Document } from "mongoose";
 import * as z from "zod";
 import { UserRoleName } from "./User";
+import {
+  FeatureFlagType,
+  FeatureFlagName,
+  FeatureFlagTypeZod,
+  FeatureFlagNameZod,
+  FeatureFlagSchemaZod,
+  IFeatureFlagData
+} from "../types/feature-flags";
 
-// Enum for feature flag types
-export enum FeatureFlagType {
-  MENU_ITEM = "menu_item",
-  WIDGET = "widget",
-  FEATURE = "feature",
-}
+// Re-export types for backward compatibility
+export { FeatureFlagType, FeatureFlagName };
+export type { IFeatureFlagData };
+export { FeatureFlagTypeZod, FeatureFlagNameZod, FeatureFlagSchemaZod };
 
-// Enum for predefined feature flags
-export enum FeatureFlagName {
-  // Menu items
-  MENU_BUILDINGS = "menu_buildings",
-  MENU_ROOMS = "menu_rooms", 
-  MENU_RESERVATIONS = "menu_reservations",
-  MENU_CALENDAR_INTEGRATION = "menu_calendar_integration",
-  MENU_USERS = "menu_users",
-  MENU_DASHBOARD = "menu_dashboard",
-  MENU_SCREENS = "menu_screens",
-  MENU_LAYOUT = "menu_layout",
-  MENU_PREVIEW = "menu_preview",
-  MENU_SLIDESHOWS = "menu_slideshows",
-  
-  // Widgets
-  WIDGET_MEETING_ROOM = "widget_meeting_room",
-  WIDGET_ANNOUNCEMENT = "widget_announcement",
-  WIDGET_CONGRATS = "widget_congrats",
-  WIDGET_IMAGE = "widget_image",
-  WIDGET_LIST = "widget_list",
-  WIDGET_SLIDESHOW = "widget_slideshow",
-  WIDGET_WEATHER = "widget_weather",
-  WIDGET_WEB = "widget_web",
-  WIDGET_YOUTUBE = "widget_youtube",
-  WIDGET_MEDIA_PLAYER = "widget_media_player",
-  
-  // Features
-  FEATURE_MEETING_ROOMS = "feature_meeting_rooms",
-  FEATURE_CALENDAR_SYNC = "feature_calendar_sync",
-  FEATURE_USER_MANAGEMENT = "feature_user_management",
-}
-
-// Interface for the FeatureFlag document
-export interface IFeatureFlag extends Document {
+// Interface for the FeatureFlag document (server-side with Mongoose Document)
+export interface IFeatureFlagDocument extends Document {
   name: FeatureFlagName;
   displayName: string;
   description?: string;
@@ -54,7 +28,7 @@ export interface IFeatureFlag extends Document {
   updatedAt: Date;
 }
 
-const FeatureFlagSchema = new Schema<IFeatureFlag>(
+const FeatureFlagSchema = new Schema<IFeatureFlagDocument>(
   {
     name: {
       type: String,
@@ -93,33 +67,36 @@ const FeatureFlagSchema = new Schema<IFeatureFlag>(
   }
 );
 
-// Index for efficient queries
-FeatureFlagSchema.index({ name: 1 });
-FeatureFlagSchema.index({ type: 1 });
-FeatureFlagSchema.index({ enabled: 1 });
+// Index for efficient queries (only on server side)
+// Note: name index is already created by unique: true
+if (typeof window === 'undefined') {
+  FeatureFlagSchema.index({ type: 1 });
+  FeatureFlagSchema.index({ enabled: 1 });
+  FeatureFlagSchema.index({ type: 1, enabled: 1 }); // Compound index for common queries
+}
 
-const FeatureFlagModel: Model<IFeatureFlag> =
-  (mongoose.models?.FeatureFlag as Model<IFeatureFlag>) ||
-  mongoose.model<IFeatureFlag>("FeatureFlag", FeatureFlagSchema);
+let FeatureFlagModel: Model<IFeatureFlagDocument>;
 
-// Zod schemas for validation
-export const FeatureFlagTypeZod = z.nativeEnum(FeatureFlagType);
-export const FeatureFlagNameZod = z.nativeEnum(FeatureFlagName);
-export const UserRoleNameZod = z.nativeEnum(UserRoleName);
+// Only create the model on the server side
+if (typeof window === 'undefined') {
+  try {
+    FeatureFlagModel = mongoose.models?.FeatureFlag as Model<IFeatureFlagDocument> ||
+      mongoose.model<IFeatureFlagDocument>("FeatureFlag", FeatureFlagSchema);
+  } catch (error) {
+    console.error('Error creating FeatureFlag model:', error);
+    throw error;
+  }
+} else {
+  // On client side, export a placeholder
+  FeatureFlagModel = {} as Model<IFeatureFlagDocument>;
+}
 
-export const FeatureFlagSchemaZod = z.object({
+// Server-side Zod schema with mongoose ObjectId support
+export const FeatureFlagSchemaZodServer = FeatureFlagSchemaZod.extend({
   _id: z.instanceof(mongoose.Types.ObjectId).optional(),
-  name: FeatureFlagNameZod,
-  displayName: z.string().min(1),
-  description: z.string().optional(),
-  type: FeatureFlagTypeZod,
-  enabled: z.boolean().default(true),
-  allowedRoles: z.array(UserRoleNameZod).default([]),
   createdBy: z.instanceof(mongoose.Types.ObjectId),
-  createdAt: z.date().optional(),
-  updatedAt: z.date().optional(),
 });
 
-export type IFeatureFlagData = z.infer<typeof FeatureFlagSchemaZod>;
+export type IFeatureFlagServerData = z.infer<typeof FeatureFlagSchemaZodServer>;
 
 export default FeatureFlagModel;

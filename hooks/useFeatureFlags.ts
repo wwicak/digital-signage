@@ -1,10 +1,10 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import axios from "axios";
-import { 
-  IFeatureFlag, 
-  FeatureFlagType, 
-  FeatureFlagName 
-} from "@/lib/models/FeatureFlag";
+import {
+  IFeatureFlag,
+  FeatureFlagType,
+  FeatureFlagName
+} from "@/lib/types/feature-flags";
 
 // Types for API responses
 interface FeatureFlagCreateData {

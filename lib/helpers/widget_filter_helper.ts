@@ -1,5 +1,5 @@
 import { IBaseWidget } from "../../widgets/base_widget";
-import { FeatureFlagName } from "../models/FeatureFlag";
+import { FeatureFlagName } from "../types/feature-flags";
 import { hasFeatureFlagAccess } from "./feature_flag_helper";
 import { AuthenticatedUser } from "../auth";
 

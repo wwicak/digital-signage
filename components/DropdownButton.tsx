@@ -18,6 +18,7 @@ export interface IDropdownButtonProps {
   style?: CSSProperties;
   menuStyle?: CSSProperties;
   children?: ReactNode; // If children are provided, they act as the button
+  disabled?: boolean; // Whether the dropdown is disabled
 }
 
 interface IDropdownButtonState {
@@ -104,6 +105,7 @@ class DropdownButton extends Component<
       style = {},
       menuStyle = {},
       children,
+      disabled = false,
     } = this.props;
 
     return (
@@ -111,21 +113,25 @@ class DropdownButton extends Component<
         {children ? (
           <div
             style={style}
-            onClick={this.showMenu}
+            onClick={disabled ? undefined : this.showMenu}
             role="button"
-            tabIndex={0}
-            onKeyPress={(e) => {
+            tabIndex={disabled ? -1 : 0}
+            onKeyPress={disabled ? undefined : (e) => {
               if (e.key === "Enter" || e.key === " ") this.showMenu(e);
             }}
+            className={disabled ? "opacity-50 cursor-not-allowed" : "cursor-pointer"}
           >
             {children}
           </div>
         ) : (
           <button
             type="button"
-            className="font-sans bg-green-500 hover:bg-green-600 text-white text-sm uppercase rounded border-none inline-block px-6 py-4 outline-none cursor-pointer transition-colors duration-200"
-            onClick={this.showMenu}
+            className={`font-sans bg-green-500 hover:bg-green-600 text-white text-sm uppercase rounded border-none inline-block px-6 py-4 outline-none transition-colors duration-200 ${
+              disabled ? "opacity-50 cursor-not-allowed" : "cursor-pointer"
+            }`}
+            onClick={disabled ? undefined : this.showMenu}
             style={style}
+            disabled={disabled}
           >
             {icon && <div className="mr-4 inline">{this.renderIcon(icon)}</div>}
             {text}

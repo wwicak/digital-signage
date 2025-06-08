@@ -1,6 +1,7 @@
 import { AuthenticatedUser } from "../auth";
 import { UserRoleName } from "../models/User";
-import { hasFeatureFlagAccess, FeatureFlagName } from "./feature_flag_helper";
+import { hasFeatureFlagAccess } from "./feature_flag_helper";
+import { FeatureFlagName } from "../types/feature-flags";
 import mongoose from "mongoose";
 
 /**

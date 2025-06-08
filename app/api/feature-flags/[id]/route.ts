@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import dbConnect from "@/lib/mongodb";
 import { requireAuth } from "@/lib/helpers/auth_helper";
-import FeatureFlag, { FeatureFlagSchemaZod } from "@/lib/models/FeatureFlag";
+import FeatureFlag, { FeatureFlagSchemaZodServer } from "@/lib/models/FeatureFlag";
 import { canManageFeatureFlags, canReadFeatureFlags } from "@/lib/helpers/rbac_helper";
 import { clearFeatureFlagCache } from "@/lib/helpers/feature_flag_helper";
 import mongoose from "mongoose";
@@ -105,7 +105,7 @@ export async function PUT(
       name: existingFlag.name, // Don't allow name changes
     };
 
-    const parseResult = FeatureFlagSchemaZod.partial().safeParse(updateData);
+    const parseResult = FeatureFlagSchemaZodServer.partial().safeParse(updateData);
 
     if (!parseResult.success) {
       return NextResponse.json(
