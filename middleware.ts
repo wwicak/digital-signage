@@ -20,16 +20,31 @@ export function middleware(request: NextRequest) {
   }
 
   // Check authentication for protected routes
-  const protectedPaths = ['/layout-admin', '/screens', '/slideshows']
+  const protectedPaths = [
+    '/layout-admin',
+    '/layout',
+    '/screens',
+    '/slideshows',
+    '/slideshows-with-query',
+    '/slideshow',
+    '/preview',
+    '/users'
+  ]
   const isProtectedPath = protectedPaths.some((path) =>
     request.nextUrl.pathname.startsWith(path)
   )
 
   if (isProtectedPath) {
-    // Check for authentication cookie or session
-    const sessionCookie = request.cookies.get('sessionId')
+    // Check for authentication cookies from both auth systems
+    const loggedInCookie = request.cookies.get('loggedIn')
+    const authTokenCookie = request.cookies.get('auth-token')
 
-    if (!sessionCookie) {
+    // User is authenticated if either cookie exists and is valid
+    const isAuthenticated =
+      (loggedInCookie && loggedInCookie.value === 'true') ||
+      (authTokenCookie && authTokenCookie.value)
+
+    if (!isAuthenticated) {
       // Redirect to login if not authenticated
       const loginUrl = new URL('/login', request.url)
       loginUrl.searchParams.set('redirect', request.nextUrl.pathname)
