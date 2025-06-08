@@ -1,7 +1,7 @@
-import React, { ReactNode, CSSProperties, HTMLAttributes } from 'react'
+import React, { ReactNode, CSSProperties, HTMLAttributes } from "react";
 
 // Define allowed alignment values
-export type TButtonGroupAlignment = 'left' | 'center' | 'right';
+export type TButtonGroupAlignment = "left" | "center" | "right";
 
 // Props for the ButtonGroup component
 export interface IButtonGroupProps extends HTMLAttributes<HTMLDivElement> {
@@ -14,15 +14,19 @@ export interface IButtonGroupProps extends HTMLAttributes<HTMLDivElement> {
 
 const ButtonGroup: React.FC<IButtonGroupProps> = ({
   children,
-  align = 'right', // Default alignment
+  align = "right", // Default alignment
   vertical = false, // Default to horizontal
   style = {},
-  className = '', // Default className to empty string
+  className = "", // Default className to empty string
   ...restDivProps // Capture other standard div attributes
 }) => {
   // Determine justifyContent based on align prop
   const justifyContent =
-    align === 'center' ? 'center' : align === 'left' ? 'flex-start' : 'flex-end'
+    align === "center"
+      ? "center"
+      : align === "left"
+        ? "flex-start"
+        : "flex-end";
 
   /*
    * Base styles are applied via JSX style tag for dynamic properties like justifyContent.
@@ -33,12 +37,21 @@ const ButtonGroup: React.FC<IButtonGroupProps> = ({
    */
 
   // Create dynamic classes based on props
-  const flexDirection = vertical ? 'flex-col' : 'flex-row'
-  const justifyClass = align === 'center' ? 'justify-center' : align === 'left' ? 'justify-start' : 'justify-end'
+  const flexDirection = vertical ? "flex-col" : "flex-row";
+  const justifyClass =
+    align === "center"
+      ? "justify-center"
+      : align === "left"
+        ? "justify-start"
+        : "justify-end";
   const alignItems = vertical
-    ? (align === 'left' ? 'items-start' : align === 'right' ? 'items-end' : 'items-stretch')
-    : 'items-center'
-  const width = vertical ? 'w-auto' : 'w-full'
+    ? align === "left"
+      ? "items-start"
+      : align === "right"
+        ? "items-end"
+        : "items-stretch"
+    : "items-center";
+  const width = vertical ? "w-auto" : "w-full";
 
   return (
     <div
@@ -48,7 +61,7 @@ const ButtonGroup: React.FC<IButtonGroupProps> = ({
     >
       {children}
     </div>
-  )
-}
+  );
+};
 
-export default ButtonGroup
+export default ButtonGroup;

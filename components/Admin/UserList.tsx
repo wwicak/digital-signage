@@ -1,8 +1,8 @@
-import React, { useState, forwardRef, useImperativeHandle } from 'react';
-import { Edit, Trash2, User, Shield, Crown } from 'lucide-react'
-import useUsers, { User as UserType } from '@/hooks/useUsers';
-import { UserRoleName } from '@/lib/models/User';
-import UserEditDialog from './UserEditDialog';
+import React, { useState, forwardRef, useImperativeHandle } from "react";
+import { Edit, Trash2, User, Shield, Crown } from "lucide-react";
+import useUsers, { User as UserType } from "@/hooks/useUsers";
+import { UserRoleName } from "@/lib/models/User";
+import UserEditDialog from "./UserEditDialog";
 
 export interface IUserListRef {
   refresh: () => void;
@@ -34,37 +34,43 @@ const UserCard: React.FC<UserCardProps> = ({ user, onEdit, onDelete }) => {
   const getRoleColor = (roleName: UserRoleName) => {
     switch (roleName) {
       case UserRoleName.SUPER_ADMIN:
-        return 'bg-red-500';
+        return "bg-red-500";
       case UserRoleName.RESOURCE_MANAGER:
-        return 'bg-orange-500';
+        return "bg-orange-500";
       case UserRoleName.DISPLAY_MANAGER:
-        return 'bg-blue-500';
+        return "bg-blue-500";
       case UserRoleName.VIEWER:
-        return 'bg-gray-500';
+        return "bg-gray-500";
       default:
-        return 'bg-gray-500';
+        return "bg-gray-500";
     }
   };
 
   const formatDate = (dateString?: string) => {
-    if (!dateString) return 'N/A';
+    if (!dateString) return "N/A";
     return new Date(dateString).toLocaleDateString();
   };
 
   return (
     <div className="p-3 font-sans rounded bg-white my-3 flex flex-row items-center relative z-10 shadow-sm hover:shadow-md transition-shadow duration-200">
       <div className="flex justify-center items-center pr-3">
-        <div className={`h-12 w-12 rounded flex justify-center items-center ${getRoleColor(user.role.name)}`}>
-          {React.createElement(getRoleIcon(user.role.name), { className: "w-6 h-6 text-white" })}
+        <div
+          className={`h-12 w-12 rounded flex justify-center items-center ${getRoleColor(user.role.name)}`}
+        >
+          {React.createElement(getRoleIcon(user.role.name), {
+            className: "w-6 h-6 text-white",
+          })}
         </div>
       </div>
       <div className="font-sans flex flex-col justify-center pr-2 flex-1 min-w-0">
         <div className="font-sans text-base overflow-hidden whitespace-nowrap text-ellipsis text-gray-600 mb-1">
-          {user.name || 'Unnamed User'}
+          {user.name || "Unnamed User"}
         </div>
         <div className="font-sans text-sm text-gray-500 flex items-center flex-wrap gap-4">
           <span>{user.email}</span>
-          <span className={`inline-block px-2 py-1 rounded text-xs font-medium text-white ${getRoleColor(user.role.name)}`}>
+          <span
+            className={`inline-block px-2 py-1 rounded text-xs font-medium text-white ${getRoleColor(user.role.name)}`}
+          >
             {user.role.name}
           </span>
           <span>Created: {formatDate(user.createdAt)}</span>
@@ -74,20 +80,24 @@ const UserCard: React.FC<UserCardProps> = ({ user, onEdit, onDelete }) => {
         <div
           className="ml-2 p-2 rounded-full cursor-pointer transition-colors duration-200 hover:bg-gray-100"
           onClick={() => onEdit(user)}
-          role='button'
+          role="button"
           tabIndex={0}
-          onKeyPress={(e) => {if(e.key === 'Enter' || e.key === ' ') onEdit(user)}}
-          aria-label='Edit user'
+          onKeyPress={(e) => {
+            if (e.key === "Enter" || e.key === " ") onEdit(user);
+          }}
+          aria-label="Edit user"
         >
           <Edit className="w-4 h-4 text-gray-500" />
         </div>
         <div
           className="ml-2 p-2 rounded-full cursor-pointer transition-colors duration-200 hover:bg-gray-100"
           onClick={() => onDelete(user)}
-          role='button'
+          role="button"
           tabIndex={0}
-          onKeyPress={(e) => {if(e.key === 'Enter' || e.key === ' ') onDelete(user)}}
-          aria-label='Delete user'
+          onKeyPress={(e) => {
+            if (e.key === "Enter" || e.key === " ") onDelete(user);
+          }}
+          aria-label="Delete user"
         >
           <Trash2 className="w-4 h-4 text-gray-500" />
         </div>
@@ -97,7 +107,8 @@ const UserCard: React.FC<UserCardProps> = ({ user, onEdit, onDelete }) => {
 };
 
 const UserList = forwardRef<IUserListRef>((props, ref) => {
-  const { users, loading, error, pagination, fetchUsers, deleteUser } = useUsers();
+  const { users, loading, error, pagination, fetchUsers, deleteUser } =
+    useUsers();
   const [selectedUser, setSelectedUser] = useState<UserType | null>(null);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isCreateMode, setIsCreateMode] = useState(false);
@@ -108,7 +119,7 @@ const UserList = forwardRef<IUserListRef>((props, ref) => {
     },
     openCreateDialog: () => {
       handleCreateUser();
-    }
+    },
   }));
 
   const handleEditUser = (user: UserType) => {
@@ -124,11 +135,17 @@ const UserList = forwardRef<IUserListRef>((props, ref) => {
   };
 
   const handleDeleteUser = async (user: UserType) => {
-    if (window.confirm(`Are you sure you want to delete user "${user.name || user.email}"?`)) {
+    if (
+      window.confirm(
+        `Are you sure you want to delete user "${user.name || user.email}"?`,
+      )
+    ) {
       try {
         await deleteUser(user._id);
       } catch (error) {
-        alert(`Failed to delete user: ${error instanceof Error ? error.message : 'Unknown error'}`);
+        alert(
+          `Failed to delete user: ${error instanceof Error ? error.message : "Unknown error"}`,
+        );
       }
     }
   };
@@ -166,19 +183,21 @@ const UserList = forwardRef<IUserListRef>((props, ref) => {
       {/* Pagination */}
       {pagination.pages > 1 && (
         <div className="flex justify-center gap-2 mt-6">
-          {Array.from({ length: pagination.pages }, (_, i) => i + 1).map((page) => (
-            <button
-              key={page}
-              className={`px-3 py-2 rounded border transition-colors font-sans ${
-                page === pagination.page
-                  ? 'bg-green-500 text-white border-green-500'
-                  : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
-              }`}
-              onClick={() => handlePageChange(page)}
-            >
-              {page}
-            </button>
-          ))}
+          {Array.from({ length: pagination.pages }, (_, i) => i + 1).map(
+            (page) => (
+              <button
+                key={page}
+                className={`px-3 py-2 rounded border transition-colors font-sans ${
+                  page === pagination.page
+                    ? "bg-green-500 text-white border-green-500"
+                    : "bg-white text-gray-700 border-gray-300 hover:bg-gray-50"
+                }`}
+                onClick={() => handlePageChange(page)}
+              >
+                {page}
+              </button>
+            ),
+          )}
         </div>
       )}
 

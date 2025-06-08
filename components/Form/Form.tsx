@@ -1,4 +1,4 @@
-import React, { ReactNode, FormHTMLAttributes, FormEvent } from 'react'
+import React, { ReactNode, FormHTMLAttributes, FormEvent } from "react";
 
 /*
  * Props for the Form component
@@ -17,11 +17,10 @@ export interface IFormProps extends FormHTMLAttributes<HTMLFormElement> {
 
 const Form: React.FC<IFormProps> = ({
   children,
-  className = '', // Default className to empty string
+  className = "", // Default className to empty string
   onSubmit, // Native onSubmit handler
   ...restFormProps // Capture other standard form attributes
 }) => {
-  
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     /*
      * If the original component had custom logic to prevent default or process data,
@@ -30,14 +29,14 @@ const Form: React.FC<IFormProps> = ({
      * in its own onSubmit handler passed to this component.
      */
     if (onSubmit) {
-      onSubmit(event) // Call the passed onSubmit handler
+      onSubmit(event); // Call the passed onSubmit handler
     } else {
       /*
        * Default behavior if no onSubmit is provided (though typically one would be for React forms)
        * event.preventDefault(); // Example: could prevent default if that's desired behavior
        */
     }
-  }
+  };
 
   return (
     // Render an actual <form> element instead of a div
@@ -47,9 +46,8 @@ const Form: React.FC<IFormProps> = ({
       {...restFormProps} // Pass through other form attributes like 'method', 'action', etc.
     >
       {children}
-      
     </form>
-  )
-}
+  );
+};
 
-export default Form
+export default Form;

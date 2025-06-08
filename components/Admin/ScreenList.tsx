@@ -1,10 +1,10 @@
-import React, { forwardRef, useImperativeHandle, useState } from 'react'
-import ContentLoader from 'react-content-loader'
+import React, { forwardRef, useImperativeHandle, useState } from "react";
+import ContentLoader from "react-content-loader";
 
-import ScreenCard from './ScreenCard' // Assuming ScreenCard.tsx and its props
-import DisplayEditDialog from './DisplayEditDialog'
-import { useDisplays } from '../../hooks/useDisplays'
-import { useGlobalDisplaySSE } from '../../hooks/useGlobalDisplaySSE'
+import ScreenCard from "./ScreenCard"; // Assuming ScreenCard.tsx and its props
+import DisplayEditDialog from "./DisplayEditDialog";
+import { useDisplays } from "../../hooks/useDisplays";
+import { useGlobalDisplaySSE } from "../../hooks/useGlobalDisplaySSE";
 
 // This component doesn't seem to receive any specific props from its parent in the current usage.
 export interface IScreenListProps {
@@ -18,74 +18,132 @@ export interface IScreenListRef {
   refresh: () => void;
   openCreateDialog: () => void;
 }
-const ScreenList = forwardRef<IScreenListRef, IScreenListProps>((props, ref) => {
-  const { data: screens, isLoading, error, refetch } = useDisplays()
-  const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false)
+const ScreenList = forwardRef<IScreenListRef, IScreenListProps>(
+  (props, ref) => {
+    const { data: screens, isLoading, error, refetch } = useDisplays();
+    const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
 
-  // Enable global SSE for real-time client connection updates
-  const { isConnected: sseConnected } = useGlobalDisplaySSE(true)
+    // Enable global SSE for real-time client connection updates
+    const { isConnected: sseConnected } = useGlobalDisplaySSE(true);
 
-  // Expose refresh method via ref
-  useImperativeHandle(ref, () => ({
-    refresh: () => {
-      refetch()
-    },
-    openCreateDialog: () => {
-      setIsCreateDialogOpen(true)
+    // Expose refresh method via ref
+    useImperativeHandle(ref, () => ({
+      refresh: () => {
+        refetch();
+      },
+      openCreateDialog: () => {
+        setIsCreateDialogOpen(true);
+      },
+    }));
+    if (error) {
+      return (
+        <div className="text-center p-5 font-sans">
+          Failed to load screens. Please try again later.
+        </div>
+      );
     }
-  }))
-  if (error) {
-    return <div className="text-center p-5 font-sans">Failed to load screens. Please try again later.</div>
-  }
 
-  return (
-    <div className={'list'}>
-      {!isLoading && screens
-        ? screens.map((screen, index) => (
-            <ScreenCard
-              key={screen._id || `item-${index}`} // Use screen._id for key if available
-              value={screen}
-              refresh={refetch}
-            />
-          ))
-        : Array(4) // Show 4 loaders while data is being fetched
-            .fill(0) // Pass a value to fill to satisfy map's need for an array with actual elements
-            .map((_, index) => ( // Use index for key of loaders
-              <ContentLoader
-                key={`loader-${index}`}
-                height={120} // Height of one card placeholder
-                width={640}  // Max width of card or list area
-                speed={2}
-                backgroundColor='#f3f3f3'
-                foregroundColor='#ecebeb'
-              >
-                {/* Placeholder for ScreenCard structure */}
-                <rect x='0' y='10' rx='4' ry='4' width='60' height='60' /> {/* Thumbnail */}
-                <rect x='70' y='10' rx='3' ry='3' width='300' height='15' /> {/* Title */}
-                <rect x='70' y='35' rx='3' ry='3' width='100' height='10' /> {/* Widget Num */}
-                <rect x='180' y='35' rx='3' ry='3' width='80' height='10' /> {/* Client Num */}
-                <rect x='270' y='35' rx='3' ry='3' width='50' height='10' /> {/* Online Status */}
-                <rect x='0' y='80' rx='5' ry='5' width='100%' height='1' /> {/* Separator if any, or just part of overall height */}
-              </ContentLoader>
-            ))}
+    return (
+      <div className={"list"}>
+        {!isLoading && screens
+          ? screens.map((screen, index) => (
+              <ScreenCard
+                key={screen._id || `item-${index}`} // Use screen._id for key if available
+                value={screen}
+                refresh={refetch}
+              />
+            ))
+          : Array(4) // Show 4 loaders while data is being fetched
+              .fill(0) // Pass a value to fill to satisfy map's need for an array with actual elements
+              .map(
+                (
+                  _,
+                  index, // Use index for key of loaders
+                ) => (
+                  <ContentLoader
+                    key={`loader-${index}`}
+                    height={120} // Height of one card placeholder
+                    width={640} // Max width of card or list area
+                    speed={2}
+                    backgroundColor="#f3f3f3"
+                    foregroundColor="#ecebeb"
+                  >
+                    {/* Placeholder for ScreenCard structure */}
+                    <rect
+                      x="0"
+                      y="10"
+                      rx="4"
+                      ry="4"
+                      width="60"
+                      height="60"
+                    />{" "}
+                    {/* Thumbnail */}
+                    <rect
+                      x="70"
+                      y="10"
+                      rx="3"
+                      ry="3"
+                      width="300"
+                      height="15"
+                    />{" "}
+                    {/* Title */}
+                    <rect
+                      x="70"
+                      y="35"
+                      rx="3"
+                      ry="3"
+                      width="100"
+                      height="10"
+                    />{" "}
+                    {/* Widget Num */}
+                    <rect
+                      x="180"
+                      y="35"
+                      rx="3"
+                      ry="3"
+                      width="80"
+                      height="10"
+                    />{" "}
+                    {/* Client Num */}
+                    <rect
+                      x="270"
+                      y="35"
+                      rx="3"
+                      ry="3"
+                      width="50"
+                      height="10"
+                    />{" "}
+                    {/* Online Status */}
+                    <rect
+                      x="0"
+                      y="80"
+                      rx="5"
+                      ry="5"
+                      width="100%"
+                      height="1"
+                    />{" "}
+                    {/* Separator if any, or just part of overall height */}
+                  </ContentLoader>
+                ),
+              )}
 
-      {/* Create Dialog */}
-      {isCreateDialogOpen && (
-        <DisplayEditDialog
-          display={null}
-          isCreateMode={true}
-          onClose={() => setIsCreateDialogOpen(false)}
-          onSave={() => {
-            setIsCreateDialogOpen(false);
-            refetch();
-          }}
-        />
-      )}
+        {/* Create Dialog */}
+        {isCreateDialogOpen && (
+          <DisplayEditDialog
+            display={null}
+            isCreateMode={true}
+            onClose={() => setIsCreateDialogOpen(false)}
+            onSave={() => {
+              setIsCreateDialogOpen(false);
+              refetch();
+            }}
+          />
+        )}
+      </div>
+    );
+  },
+);
 
-    </div>
-  )
-})
+export default ScreenList;
 
-export default ScreenList
-
-ScreenList.displayName = 'ScreenList'
+ScreenList.displayName = "ScreenList";

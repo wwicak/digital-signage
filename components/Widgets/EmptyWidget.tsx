@@ -1,4 +1,4 @@
-import React from 'react'
+import React from "react";
 
 // Define prop types, even if empty, for clarity and future use
 interface EmptyWidgetProps {}
@@ -12,15 +12,15 @@ class EmptyWidget extends React.Component<EmptyWidgetProps, EmptyWidgetState> {
       <div className="bg-gray-600 w-full h-full flex flex-col justify-center rounded-lg shadow-md">
         <div className="flex flex-col justify-center items-center text-white">
           <div className="text-white mb-4">
-            <faTimes  />
+            <faTimes />
           </div>
           <span className="text-white font-sans uppercase text-base mb-4 tracking-wide">
             BROKEN WIDGET
           </span>
         </div>
       </div>
-    )
+    );
   }
 }
 
-export default EmptyWidget
+export default EmptyWidget;

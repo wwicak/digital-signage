@@ -1,70 +1,84 @@
-import React from 'react'
-import { Clock, Images, Trash2, Play } from 'lucide-react'
-import Link from 'next/link'
-import * as z from 'zod'
-import { Card, CardContent } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
-import { cn } from '@/lib/utils'
+import React from "react";
+import { Clock, Images, Trash2, Play } from "lucide-react";
+import Link from "next/link";
+import * as z from "zod";
+import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 
-import { deleteSlideshow, SlideshowActionDataSchema } from '../../actions/slideshow'
-import { ISlideData } from '../../actions/slide' // This is z.infer<typeof SlideActionDataSchema>
-import { useDisplayContext } from '../../contexts/DisplayContext'
+import {
+  deleteSlideshow,
+  SlideshowActionDataSchema,
+} from "../../actions/slideshow";
+import { ISlideData } from "../../actions/slide"; // This is z.infer<typeof SlideActionDataSchema>
+import { useDisplayContext } from "../../contexts/DisplayContext";
 
 // Zod schema for SlideshowCard props
 export const SlideshowCardPropsSchema = z.object({
   value: SlideshowActionDataSchema, // Use the Zod schema for slideshow data
   refresh: z.function(z.tuple([]), z.void()).optional(), // Function with no args, returns void, optional
-})
+});
 
 // Derive TypeScript type from Zod schema
 export type ISlideshowCardProps = z.infer<typeof SlideshowCardPropsSchema>;
 
-const SlideshowCard: React.FC<ISlideshowCardProps> = ({ value, refresh = () => {} }) => {
-  const { state: displayState } = useDisplayContext()
+const SlideshowCard: React.FC<ISlideshowCardProps> = ({
+  value,
+  refresh = () => {},
+}) => {
+  const { state: displayState } = useDisplayContext();
   const handleDelete = (event: React.MouseEvent): void => {
-    event.preventDefault() // Prevent Link navigation when clicking delete icon
-    event.stopPropagation() // Stop event from bubbling further
+    event.preventDefault(); // Prevent Link navigation when clicking delete icon
+    event.stopPropagation(); // Stop event from bubbling further
 
     if (value && value._id) {
       deleteSlideshow(value._id)
         .then(() => {
-          refresh()
+          refresh();
         })
-        .catch(error => {
-          console.error('Failed to delete slideshow:', error)
+        .catch((error) => {
+          console.error("Failed to delete slideshow:", error);
           // Optionally, provide user feedback here
-        })
+        });
     }
-  }
+  };
 
   const calculateTotalDuration = (): number => {
     if (value && value.slides && value.slides.length > 0) {
       // Check if slides are populated (ISlideData) or just IDs (string)
-      if (typeof value.slides[0] === 'object') {
+      if (typeof value.slides[0] === "object") {
         // Slides are populated ISlideData objects
-        return (value.slides as ISlideData[]).reduce((acc, slide) => acc + (slide.duration || 0), 0)
+        return (value.slides as ISlideData[]).reduce(
+          (acc, slide) => acc + (slide.duration || 0),
+          0,
+        );
       }
       /*
        * If slides are just string IDs, we cannot calculate duration here without fetching them.
        * For now, return 0 or indicate 'unknown'.
        * This might require fetching populated slides if duration is critical.
        */
-      console.warn('SlideshowCard: Slides are not populated, cannot calculate total duration.')
-      return 0
+      console.warn(
+        "SlideshowCard: Slides are not populated, cannot calculate total duration.",
+      );
+      return 0;
     }
-    return 0
-  }
+    return 0;
+  };
 
-  const totalDuration = calculateTotalDuration()
-  const slideCount = value.slides ? value.slides.length : 0
-  const displayId = displayState.id || '' // Fallback if displayState.id is null
+  const totalDuration = calculateTotalDuration();
+  const slideCount = value.slides ? value.slides.length : 0;
+  const displayId = displayState.id || ""; // Fallback if displayState.id is null
 
   // Original JS used value.title, ISlideshowData uses value.name
-  const slideshowTitle = value.name || 'Untitled Slideshow'
+  const slideshowTitle = value.name || "Untitled Slideshow";
 
   return (
     <Card className="group my-4 transition-all duration-200 hover:shadow-lg cursor-pointer">
-      <Link href={`/slideshow/${value._id}?display=${displayId}`} className="block">
+      <Link
+        href={`/slideshow/${value._id}?display=${displayId}`}
+        className="block"
+      >
         <CardContent className="p-4">
           <div className="flex items-center space-x-4">
             {/* Slideshow Thumbnail */}
@@ -98,9 +112,9 @@ const SlideshowCard: React.FC<ISlideshowCardProps> = ({ value, refresh = () => {
                 variant="ghost"
                 size="icon"
                 onClick={(e) => {
-                  e.preventDefault()
-                  e.stopPropagation()
-                  handleDelete(e as any)
+                  e.preventDefault();
+                  e.stopPropagation();
+                  handleDelete(e as any);
                 }}
                 aria-label="Delete Slideshow"
                 className="h-8 w-8 text-destructive hover:text-destructive"
@@ -112,8 +126,7 @@ const SlideshowCard: React.FC<ISlideshowCardProps> = ({ value, refresh = () => {
         </CardContent>
       </Link>
     </Card>
+  );
+};
 
-  )
-}
-
-export default SlideshowCard
+export default SlideshowCard;

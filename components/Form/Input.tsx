@@ -234,7 +234,7 @@ class Input extends Component<IInputProps> {
             accept={photoProps.accept || 'image/*'}
           >
             {({ getRootProps, getInputProps, isDragActive }) => (
-              <div {...getRootProps() className={`flex flex-col items-center justify-center cursor-pointer outline-none border-2 border-dashed border-gray-300 bg-gray-50 text-center min-h-[80px] p-4 rounded transition-colors duration-200 ${isDragActive ? 'border-blue-500 bg-blue-50' : ''} ${hasError ? 'border-red-500' : ''}`}>
+              <div {...getRootProps()} className={`flex flex-col items-center justify-center cursor-pointer outline-none border-2 border-dashed border-gray-300 bg-gray-50 text-center min-h-[80px] p-4 rounded transition-colors duration-200 ${isDragActive ? 'border-blue-500 bg-blue-50' : ''} ${hasError ? 'border-red-500' : ''}`}>
                 <input {...getInputProps()} />
                 {isDragActive ? (
                   <div className="font-sans text-gray-600">Drop the photo here...</div>

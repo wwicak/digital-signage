@@ -1,46 +1,51 @@
-import React, { useRef } from 'react'
-import { Settings, X } from 'lucide-react'
+import React, { useRef } from "react";
+import { Settings, X } from "lucide-react";
 
-import Widgets from '../../widgets'
-import { IBaseWidget } from '../../widgets/base_widget'
-import WidgetEditDialog from './WidgetEditDialog'
-import * as z from 'zod'
-import { WidgetType, WidgetTypeZod } from '@/lib/models/Widget' // Import enum and its Zod schema
+import Widgets from "../../widgets";
+import { IBaseWidget } from "../../widgets/base_widget";
+import WidgetEditDialog from "./WidgetEditDialog";
+import * as z from "zod";
+import { WidgetType, WidgetTypeZod } from "@/lib/models/Widget"; // Import enum and its Zod schema
 
 // Zod schema for EditableWidget props
 export const EditableWidgetPropsSchema = z.object({
   id: z.string(),
   type: WidgetTypeZod.default(WidgetType.SLIDESHOW), // Default to slideshow type
   onDelete: z.function(z.tuple([]), z.void()), // Function with no args, returns void
-  layout: z.enum(['spaced', 'compact']).default('spaced'), // Default to spaced layout
+  layout: z.enum(["spaced", "compact"]).default("spaced"), // Default to spaced layout
   /*
    * react-grid-layout props like 'style', 'className', 'data-grid' are omitted
    * as they are typically handled by RGL and not directly used by this component's logic.
    */
-})
+});
 
 // Derive TypeScript type from Zod schema
 export type IEditableWidgetProps = z.infer<typeof EditableWidgetPropsSchema>;
 
-const EditableWidget: React.FC<IEditableWidgetProps> = ({ id, type = WidgetType.SLIDESHOW, onDelete, layout = 'spaced' }) => {
+const EditableWidget: React.FC<IEditableWidgetProps> = ({
+  id,
+  type = WidgetType.SLIDESHOW,
+  onDelete,
+  layout = "spaced",
+}) => {
   // Using useRef hook instead of createRef
-  const dialogRef = useRef<WidgetEditDialog>(null)
+  const dialogRef = useRef<WidgetEditDialog>(null);
 
   const openDialog = (e?: React.MouseEvent): void => {
-    if (e) e.stopPropagation()
-    dialogRef.current?.open()
-  }
+    if (e) e.stopPropagation();
+    dialogRef.current?.open();
+  };
 
   const handleDeleteClick = (e?: React.MouseEvent): void => {
-    if (e) e.stopPropagation()
-    onDelete() // Call the onDelete prop passed from parent
-  }
+    if (e) e.stopPropagation();
+    onDelete(); // Call the onDelete prop passed from parent
+  };
 
   // Retrieve widget definition from the global Widgets object
-  const widgetDefinition: IBaseWidget | undefined = Widgets[type]
+  const widgetDefinition: IBaseWidget | undefined = Widgets[type];
 
-  const widgetName = widgetDefinition?.name || 'Broken Widget'
-  const WidgetIcon = widgetDefinition?.icon || X // Default icon if not found
+  const widgetName = widgetDefinition?.name || "Broken Widget";
+  const WidgetIcon = widgetDefinition?.icon || X; // Default icon if not found
 
   return (
     <div className="relative bg-white border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
@@ -64,7 +69,9 @@ const EditableWidget: React.FC<IEditableWidgetProps> = ({ id, type = WidgetType.
         <div className="mb-2">
           <WidgetIcon className="w-8 h-8 text-primary" />
         </div>
-        <span className="text-sm font-medium text-gray-600 text-center">{widgetName}</span>
+        <span className="text-sm font-medium text-gray-600 text-center">
+          {widgetName}
+        </span>
       </div>
       <WidgetEditDialog
         ref={dialogRef}
@@ -72,9 +79,8 @@ const EditableWidget: React.FC<IEditableWidgetProps> = ({ id, type = WidgetType.
         widgetId={id} // Pass widgetId instead of id if that's what WidgetEditDialog expects
         widgetType={type} // Pass widgetType for context in dialog
       />
-      
     </div>
-  )
-}
+  );
+};
 
-export default EditableWidget
+export default EditableWidget;

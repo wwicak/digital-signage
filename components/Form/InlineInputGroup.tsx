@@ -1,4 +1,4 @@
-import React, { ReactNode, HTMLAttributes, Children } from 'react'
+import React, { ReactNode, HTMLAttributes, Children } from "react";
 
 // Props for the InlineInputGroup component
 export interface IInlineInputGroupProps extends HTMLAttributes<HTMLDivElement> {
@@ -9,13 +9,13 @@ export interface IInlineInputGroupProps extends HTMLAttributes<HTMLDivElement> {
 
 const InlineInputGroup: React.FC<IInlineInputGroupProps> = ({
   children,
-  spacing = '16px', // Default spacing
-  className = '',
+  spacing = "16px", // Default spacing
+  className = "",
   style, // Allow passing custom style object
   ...restDivProps
 }) => {
-  const childArray = Children.toArray(children)
-  const numChildren = childArray.length
+  const childArray = Children.toArray(children);
+  const numChildren = childArray.length;
 
   return (
     <div
@@ -28,8 +28,8 @@ const InlineInputGroup: React.FC<IInlineInputGroupProps> = ({
          * We need to wrap each child to apply margin, unless child can accept it directly
          * or if we use CSS gap. For direct migration of margin logic:
          */
-        const isLastChild = index === numChildren - 1
-        
+        const isLastChild = index === numChildren - 1;
+
         /*
          * If the child is an Input component that has an 'expand' prop,
          * we might want to apply flex: 1 to its wrapper.
@@ -37,7 +37,7 @@ const InlineInputGroup: React.FC<IInlineInputGroupProps> = ({
          * For now, a simpler approach is to let Input components manage their own expand behavior.
          * The original JS logic for 'expand' was on the Input itself, not handled by group.
          */
-        
+
         /*
          * Create a wrapper for each child to apply margin
          * The key should be on the outermost element returned by map
@@ -45,16 +45,15 @@ const InlineInputGroup: React.FC<IInlineInputGroupProps> = ({
         return (
           <div
             key={`input-group-child-${index}`}
-            className='input-group-item-wrapper'
+            className="input-group-item-wrapper"
             style={{ marginRight: isLastChild ? 0 : spacing }}
           >
             {child}
           </div>
-        )
+        );
       })}
-      
     </div>
-  )
-}
+  );
+};
 
-export default InlineInputGroup
+export default InlineInputGroup;

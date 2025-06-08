@@ -1,17 +1,17 @@
-'use client'
+"use client";
 
-import React, { Component, ReactNode, CSSProperties } from 'react'
-import {  } from 'lucide-react'
-import { getIcon, type IconComponent } from '@/lib/icons'
+import React, { Component, ReactNode, CSSProperties } from "react";
+import {} from "lucide-react";
+import { getIcon, type IconComponent } from "@/lib/icons";
 
 export interface IDropdownChoice {
   key: string; // Used as the value for onSelect
   name: string; // Display text for the choice
-  icon?:  | string; // Lucide icon component or icon name
+  icon?: string; // Lucide icon component or icon name
 }
 
 export interface IDropdownButtonProps {
-  icon?:  | string; // Lucide icon component or icon name
+  icon?: string; // Lucide icon component or icon name
   text?: string;
   choices?: IDropdownChoice[];
   onSelect?: (key: string) => void;
@@ -24,89 +24,105 @@ interface IDropdownButtonState {
   showMenu: boolean;
 }
 
-class DropdownButton extends Component<IDropdownButtonProps, IDropdownButtonState> {
-  private dropdownMenu: HTMLDivElement | null = null
+class DropdownButton extends Component<
+  IDropdownButtonProps,
+  IDropdownButtonState
+> {
+  private dropdownMenu: HTMLDivElement | null = null;
 
   constructor(props: IDropdownButtonProps) {
-    super(props)
+    super(props);
 
     this.state = {
       showMenu: false,
-    }
+    };
 
     /*
      * Binding in constructor is generally preferred over arrow functions for class methods
      * if not using experimental class properties syntax.
      */
-    this.showMenu = this.showMenu.bind(this)
-    this.closeMenu = this.closeMenu.bind(this)
+    this.showMenu = this.showMenu.bind(this);
+    this.closeMenu = this.closeMenu.bind(this);
   }
 
   showMenu(event: React.MouseEvent | React.KeyboardEvent): void {
-    event.preventDefault()
-    event.stopPropagation() // Prevent event from immediately triggering closeMenu if it bubbles to document
+    event.preventDefault();
+    event.stopPropagation(); // Prevent event from immediately triggering closeMenu if it bubbles to document
 
     this.setState({ showMenu: true }, () => {
-      document.addEventListener('click', this.closeMenu)
-      document.addEventListener('touchend', this.closeMenu) // For touch devices
-    })
+      document.addEventListener("click", this.closeMenu);
+      document.addEventListener("touchend", this.closeMenu); // For touch devices
+    });
   }
 
   closeMenu(event?: MouseEvent | TouchEvent, force: boolean = false): void {
     // Check if the click is outside the dropdown menu
-    if (force || (this.dropdownMenu && event && !this.dropdownMenu.contains(event.target as Node))) {
+    if (
+      force ||
+      (this.dropdownMenu &&
+        event &&
+        !this.dropdownMenu.contains(event.target as Node))
+    ) {
       this.setState({ showMenu: false }, () => {
-        document.removeEventListener('click', this.closeMenu)
-        document.removeEventListener('touchend', this.closeMenu)
-      })
+        document.removeEventListener("click", this.closeMenu);
+        document.removeEventListener("touchend", this.closeMenu);
+      });
     }
   }
 
   componentWillUnmount() {
     // Clean up event listeners when the component is unmounted
-    document.removeEventListener('click', this.closeMenu)
-    document.removeEventListener('touchend', this.closeMenu)
+    document.removeEventListener("click", this.closeMenu);
+    document.removeEventListener("touchend", this.closeMenu);
   }
 
   handleChoiceClick = (key: string): void => {
-    this.closeMenu(undefined, true /* force close */)
+    this.closeMenu(undefined, true /* force close */);
     if (this.props.onSelect) {
-      this.props.onSelect(key)
+      this.props.onSelect(key);
     }
-  }
+  };
 
-  renderIcon = (icon:  | string, className: string = "w-4 h-4") => {
-    if (typeof icon === 'string') {
+  renderIcon = (icon: string, className: string = "w-4 h-4") => {
+    if (typeof icon === "string") {
       // Icon name - get from mapping
-      const IconComponent = getIcon(icon)
-      return <IconComponent className={className} />
-    } else if (typeof icon === 'function') {
+      const IconComponent = getIcon(icon);
+      return <IconComponent className={className} />;
+    } else if (typeof icon === "function") {
       // Direct Lucide icon component
-      const IconComponent = icon as LucideIcon
-      return <IconComponent className={className} />
+      const IconComponent = icon as LucideIcon;
+      return <IconComponent className={className} />;
     }
-    return null
-  }
+    return null;
+  };
 
   render() {
     const {
       icon,
-      text = 'Show menu',
+      text = "Show menu",
       choices = [],
       style = {},
       menuStyle = {},
       children,
-    } = this.props
+    } = this.props;
 
     return (
       <div className="inline-block align-middle relative">
         {children ? (
-          <div style={style} onClick={this.showMenu} role='button' tabIndex={0} onKeyPress={(e) => { if (e.key === 'Enter' || e.key === ' ') this.showMenu(e) }}>
+          <div
+            style={style}
+            onClick={this.showMenu}
+            role="button"
+            tabIndex={0}
+            onKeyPress={(e) => {
+              if (e.key === "Enter" || e.key === " ") this.showMenu(e);
+            }}
+          >
             {children}
           </div>
         ) : (
           <button
-            type='button'
+            type="button"
             className="font-sans bg-green-500 hover:bg-green-600 text-white text-sm uppercase rounded border-none inline-block px-6 py-4 outline-none cursor-pointer transition-colors duration-200"
             onClick={this.showMenu}
             style={style}
@@ -119,14 +135,14 @@ class DropdownButton extends Component<IDropdownButtonProps, IDropdownButtonStat
         {this.state.showMenu && (
           <div
             className="absolute top-full left-0 mt-2 flex flex-col z-10 bg-white shadow-lg rounded overflow-hidden min-w-full"
-            ref={element => {
-              this.dropdownMenu = element
+            ref={(element) => {
+              this.dropdownMenu = element;
             }}
             style={menuStyle}
           >
-            {choices.map(choice => (
+            {choices.map((choice) => (
               <button
-                type='button'
+                type="button"
                 key={choice.key}
                 className="font-sans bg-white hover:bg-gray-50 text-gray-800 min-w-[200px] text-sm uppercase border-none border-b border-gray-100 last:border-b-0 flex px-6 py-4 text-left outline-none cursor-pointer flex-row items-center transition-colors duration-200"
                 onClick={() => this.handleChoiceClick(choice.key)}
@@ -141,10 +157,9 @@ class DropdownButton extends Component<IDropdownButtonProps, IDropdownButtonStat
             ))}
           </div>
         )}
-
       </div>
-    )
+    );
   }
 }
 
-export default DropdownButton
+export default DropdownButton;

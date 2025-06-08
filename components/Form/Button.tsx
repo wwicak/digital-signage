@@ -1,7 +1,12 @@
-import React, { useState, ButtonHTMLAttributes, ReactNode, CSSProperties } from 'react'
-import { Button as ShadcnButton } from '../ui/button'
-import { cn } from '@/lib/utils'
-import { Loader2 } from 'lucide-react'
+import React, {
+  useState,
+  ButtonHTMLAttributes,
+  ReactNode,
+  CSSProperties,
+} from "react";
+import { Button as ShadcnButton } from "../ui/button";
+import { cn } from "@/lib/utils";
+import { Loader2 } from "lucide-react";
 
 /*
  * Props for the Button component
@@ -14,56 +19,65 @@ export interface IButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   onClick?: (event: React.MouseEvent<HTMLButtonElement>) => Promise<any> | void; // onClick can be async
   children?: ReactNode; // Allow children to override text prop if needed
   isLoading?: boolean; // Allow parent to control loading state externally (optional)
-  variant?: 'default' | 'destructive' | 'outline' | 'secondary' | 'ghost' | 'link'; // Shadcn/UI variants
-  size?: 'default' | 'sm' | 'lg' | 'icon'; // Shadcn/UI sizes
+  variant?:
+    | "default"
+    | "destructive"
+    | "outline"
+    | "secondary"
+    | "ghost"
+    | "link"; // Shadcn/UI variants
+  size?: "default" | "sm" | "lg" | "icon"; // Shadcn/UI sizes
 }
 
 const Button: React.FC<IButtonProps> = ({
-  text = 'Submit',
+  text = "Submit",
   color,
   style,
   onClick,
   children,
   isLoading: parentIsLoading,
   disabled: parentDisabled,
-  variant = 'default',
-  size = 'default',
+  variant = "default",
+  size = "default",
   className,
   ...restButtonProps
 }) => {
-  const [internalLoading, setInternalLoading] = useState(false)
+  const [internalLoading, setInternalLoading] = useState(false);
 
   // Wrapper for the onClick prop to handle loading state
-  const onClickWrapper = async (event: React.MouseEvent<HTMLButtonElement>): Promise<void> => {
+  const onClickWrapper = async (
+    event: React.MouseEvent<HTMLButtonElement>,
+  ): Promise<void> => {
     if (onClick) {
       // Only set internal loading state if not controlled by parent
       if (parentIsLoading === undefined) {
-        setInternalLoading(true)
+        setInternalLoading(true);
       }
       try {
-        await onClick(event) // Await the promise from the onClick prop
+        await onClick(event); // Await the promise from the onClick prop
       } catch (error) {
-        console.error('Button onClick handler error:', error)
+        console.error("Button onClick handler error:", error);
         // Optionally handle error state here
       } finally {
         // Only set internal loading state if not controlled by parent
         if (parentIsLoading === undefined) {
-          setInternalLoading(false)
+          setInternalLoading(false);
         }
       }
     }
-  }
+  };
 
   // Determine final loading state: parent prop takes precedence
-  const isLoading = parentIsLoading !== undefined ? parentIsLoading : internalLoading
+  const isLoading =
+    parentIsLoading !== undefined ? parentIsLoading : internalLoading;
   // Determine final disabled state
-  const isDisabled = parentDisabled || isLoading
+  const isDisabled = parentDisabled || isLoading;
 
   // Handle legacy color prop by converting to CSS custom properties or inline styles
   const legacyStyle: CSSProperties = {
     ...style,
     ...(color && { backgroundColor: color }),
-  }
+  };
 
   return (
     <ShadcnButton
@@ -78,7 +92,7 @@ const Button: React.FC<IButtonProps> = ({
       {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
       {children || text}
     </ShadcnButton>
-  )
-}
+  );
+};
 
-export default Button
+export default Button;

@@ -1,15 +1,21 @@
-import * as React from 'react'
-import { Button, ButtonProps } from './button'
-import { Loader2 } from 'lucide-react'
-import { cn } from '@/lib/utils'
+import * as React from "react";
+import { Button, ButtonProps } from "./button";
+import { Loader2 } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 export interface ButtonWithLoadingProps extends ButtonProps {
-  isLoading?: boolean
-  loadingText?: string
+  isLoading?: boolean;
+  loadingText?: string;
 }
 
-const ButtonWithLoading = React.forwardRef<HTMLButtonElement, ButtonWithLoadingProps>(
-  ({ className, children, isLoading, loadingText, disabled, ...props }, ref) => {
+const ButtonWithLoading = React.forwardRef<
+  HTMLButtonElement,
+  ButtonWithLoadingProps
+>(
+  (
+    { className, children, isLoading, loadingText, disabled, ...props },
+    ref,
+  ) => {
     return (
       <Button
         className={cn(className)}
@@ -17,12 +23,12 @@ const ButtonWithLoading = React.forwardRef<HTMLButtonElement, ButtonWithLoadingP
         ref={ref}
         {...props}
       >
-        {isLoading && <Loader2 className='mr-2 h-4 w-4 animate-spin' />}
-        {isLoading ? loadingText || 'Loading...' : children}
+        {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+        {isLoading ? loadingText || "Loading..." : children}
       </Button>
-    )
-  }
-)
-ButtonWithLoading.displayName = 'ButtonWithLoading'
+    );
+  },
+);
+ButtonWithLoading.displayName = "ButtonWithLoading";
 
-export { ButtonWithLoading }
+export { ButtonWithLoading };
