@@ -11,7 +11,7 @@ import announcementWidget from './announcement'
 import congratsWidget from './congrats'
 import imageWidget from './image'
 import listWidget from './list'
-// import meetingRoomWidget from './meeting-room' // Temporarily disabled until API is ready
+import meetingRoomWidget from './meeting-room'
 import slideshowWidget from './slideshow'
 import weatherWidget from './weather'
 import webWidget from './web'
@@ -24,7 +24,7 @@ const widgets: Record<string, IBaseWidget> = {
   [congratsWidget.type]: congratsWidget,
   [imageWidget.type]: imageWidget,
   [listWidget.type]: listWidget,
-  // [meetingRoomWidget.type]: meetingRoomWidget, // Temporarily disabled until API is ready
+  [meetingRoomWidget.type]: meetingRoomWidget,
   [slideshowWidget.type]: slideshowWidget,
   [weatherWidget.type]: weatherWidget,
   [webWidget.type]: webWidget,
