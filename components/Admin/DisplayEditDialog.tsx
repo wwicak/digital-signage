@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { X } from "lucide-react";
 import { useDisplayMutations } from "@/hooks/useDisplayMutations";
-import OrientationPreview from "./OrientationPreview";
 
 interface DisplayEditDialogProps {
   display?: {
@@ -25,7 +24,6 @@ const DisplayEditDialog: React.FC<DisplayEditDialogProps> = ({
 
   const [formData, setFormData] = useState({
     name: "",
-    orientation: "landscape" as "landscape" | "portrait",
     layout: "spaced" as "spaced" | "compact",
   });
 
@@ -36,13 +34,11 @@ const DisplayEditDialog: React.FC<DisplayEditDialogProps> = ({
     if (display && !isCreateMode) {
       setFormData({
         name: display.name || "",
-        orientation: display.orientation || "landscape",
         layout: display.layout || "spaced",
       });
     } else {
       setFormData({
         name: "",
-        orientation: "landscape",
         layout: "spaced",
       });
     }
@@ -68,7 +64,6 @@ const DisplayEditDialog: React.FC<DisplayEditDialogProps> = ({
         await createDisplay.mutateAsync({
           data: {
             name: formData.name,
-            orientation: formData.orientation,
             layout: formData.layout,
           },
         });
@@ -77,7 +72,6 @@ const DisplayEditDialog: React.FC<DisplayEditDialogProps> = ({
           id: display._id,
           data: {
             name: formData.name,
-            orientation: formData.orientation,
             layout: formData.layout,
           },
         });
@@ -139,35 +133,7 @@ const DisplayEditDialog: React.FC<DisplayEditDialogProps> = ({
               />
             </div>
 
-            <div className="mb-6">
-              <label
-                htmlFor="orientation"
-                className="block text-sm font-medium text-gray-700 mb-2"
-              >
-                Orientation
-              </label>
-              <div className="flex items-center gap-4 mb-3">
-                <OrientationPreview orientation={formData.orientation} />
-                <span className="text-sm text-gray-600">
-                  Current:{" "}
-                  {formData.orientation.charAt(0).toUpperCase() +
-                    formData.orientation.slice(1)}
-                </span>
-              </div>
-              <select
-                id="orientation"
-                name="orientation"
-                value={formData.orientation}
-                onChange={handleInputChange}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
-              >
-                <option value="landscape">🖥️ Landscape (Horizontal)</option>
-                <option value="portrait">📱 Portrait (Vertical)</option>
-              </select>
-              <p className="text-xs text-gray-500 mt-1">
-                Choose the orientation that matches your display hardware
-              </p>
-            </div>
+
 
             <div className="mb-6">
               <label

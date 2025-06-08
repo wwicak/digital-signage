@@ -1,7 +1,7 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState, useCallback, useMemo } from 'react'
 import GridLayout, { Layout as RglLayout } from 'react-grid-layout'
 import { DragDropContext, Droppable, DropResult, DroppableProvided } from '@hello-pangea/dnd'
-import { Edit, Grid2X2, Grid3X3 } from 'lucide-react'
+import { Edit, Grid2X2, Grid3X3, Monitor, Smartphone } from 'lucide-react'
 
 import Frame from '../components/Admin/Frame' // Assuming .js or .tsx
 import EditableWidget from '../components/Admin/EditableWidget' // Assuming .js or .tsx
@@ -129,29 +129,42 @@ const LayoutPage: React.FC<ILayoutPageProps> = ({ loggedIn, displayId }) => {
         .catch(error => console.error('Failed to delete widget:', error))
   }
 
-  const handleLayoutChange = (layout: RglLayout[]): void => {
-    console.log('[DEBUG] handleLayoutChange called with layout:', layout.length)
-    for (const widgetLayout of layout) {
-      // Find the current widget to check if position actually changed
-      const currentWidget = widgets.find(w => w._id === widgetLayout.i)
-      if (currentWidget &&
-          (currentWidget.x !== widgetLayout.x ||
-           currentWidget.y !== widgetLayout.y ||
-           currentWidget.w !== widgetLayout.w ||
-           currentWidget.h !== widgetLayout.h)) {
-        console.log('[DEBUG] Widget position changed, updating:', widgetLayout.i)
-        const widgetData: IUpdateWidgetData = {
-          x: widgetLayout.x,
-          y: widgetLayout.y,
-          w: widgetLayout.w,
-          h: widgetLayout.h,
-        }
-        updateWidget(widgetLayout.i, widgetData)
-          .catch(error => console.error(`Failed to update widget ${widgetLayout.i} layout:`, error))
+  // Debounced layout change handler to prevent excessive API calls
+  const debouncedLayoutUpdate = useCallback(
+    (() => {
+      let timeoutId: NodeJS.Timeout
+      return (layout: RglLayout[]) => {
+        clearTimeout(timeoutId)
+        timeoutId = setTimeout(() => {
+          console.log('[DEBUG] handleLayoutChange called with layout:', layout.length)
+          for (const widgetLayout of layout) {
+            // Find the current widget to check if position actually changed
+            const currentWidget = widgets.find(w => w._id === widgetLayout.i)
+            if (currentWidget &&
+                (currentWidget.x !== widgetLayout.x ||
+                 currentWidget.y !== widgetLayout.y ||
+                 currentWidget.w !== widgetLayout.w ||
+                 currentWidget.h !== widgetLayout.h)) {
+              console.log('[DEBUG] Widget position changed, updating:', widgetLayout.i)
+              const widgetData: IUpdateWidgetData = {
+                x: widgetLayout.x,
+                y: widgetLayout.y,
+                w: widgetLayout.w,
+                h: widgetLayout.h,
+              }
+              updateWidget(widgetLayout.i, widgetData)
+                .catch(error => console.error(`Failed to update widget ${widgetLayout.i} layout:`, error))
+            }
+          }
+        }, 300) // 300ms debounce delay
       }
-      // Note: No refreshWidgets here to avoid jumpiness; optimistic update or server should confirm.
-    }
-  }
+    })(),
+    [widgets]
+  )
+
+  const handleLayoutChange = useCallback((layout: RglLayout[]): void => {
+    debouncedLayoutUpdate(layout)
+  }, [debouncedLayoutUpdate])
 
   const handleDragEnd = (result: DropResult): void => {
     if (!result.destination || !displayContext.state.id) {
@@ -169,14 +182,26 @@ const LayoutPage: React.FC<ILayoutPageProps> = ({ loggedIn, displayId }) => {
     displayContext.updateLayout(checked ? 'spaced' : 'compact')
   }
 
-  const rglLayout: RglLayout[] = widgets.map(widget => ({
-    i: widget._id,
-    x: widget.x || 0,
-    y: widget.y || 0,
-    w: widget.w || 1,
-    h: widget.h || 1,
-    // Add min/max W/H if needed, or isDraggable/isResizable per item
-  }))
+  const handleOrientationChange = (name: string, checked: boolean): void => {
+    displayContext.updateOrientation(checked ? 'portrait' : 'landscape')
+  }
+
+  // Memoized layout calculation to prevent unnecessary re-renders
+  const rglLayout: RglLayout[] = useMemo(() =>
+    widgets.map(widget => ({
+      i: widget._id,
+      x: widget.x || 0,
+      y: widget.y || 0,
+      w: widget.w || 1,
+      h: widget.h || 1,
+      // Add constraints based on orientation
+      minW: 1,
+      minH: 1,
+      maxW: displayContext.state.orientation === 'portrait' ? 4 : 6,
+      maxH: 8,
+    })),
+    [widgets, displayContext.state.orientation]
+  )
 
   const statusBarChoices: IDropdownChoice[] = Object.keys(StatusBarElementTypes).map(key => {
     const elType = StatusBarElementTypes[key as keyof typeof StatusBarElementTypes] as IStatusBarElementDefinition
@@ -297,6 +322,15 @@ const LayoutPage: React.FC<ILayoutPageProps> = ({ loggedIn, displayId }) => {
                     checked={displayContext.state.layout === 'spaced'}
                     onValueChange={handleLayoutTypeChange}
                   />
+                  <Switch
+                    name="orientation"
+                    checkedLabel="Portrait"
+                    uncheckedLabel="Landscape"
+                    checkedIcon={Smartphone}
+                    uncheckedIcon={Monitor}
+                    checked={displayContext.state.orientation === 'portrait'}
+                    onValueChange={handleOrientationChange}
+                  />
                 </Form>
               </div>
             </div>
@@ -312,12 +346,15 @@ const LayoutPage: React.FC<ILayoutPageProps> = ({ loggedIn, displayId }) => {
               borderRadius: displayContext.state.layout === 'spaced' ? '12px' : '8px',
               background: displayContext.state.layout === 'spaced'
                 ? 'hsl(var(--muted) / 0.3)'
-                : 'hsl(var(--muted) / 0.5)'
+                : 'hsl(var(--muted) / 0.5)',
+              aspectRatio: displayContext.state.orientation === 'portrait' ? '9/16' : '16/9',
+              maxWidth: displayContext.state.orientation === 'portrait' ? '600px' : '100%',
+              margin: displayContext.state.orientation === 'portrait' ? '0 auto' : '0'
             }}
           >
             <GridLayoutWithWidth
               layout={rglLayout}
-              cols={6}
+              cols={displayContext.state.orientation === 'portrait' ? 4 : 6}
               onLayoutChange={handleLayoutChange}
               draggableCancel={'.ReactModalPortal,.controls,button'}
               margin={displayContext.state.layout === 'spaced' ? [16, 16] : [8, 8]}

@@ -354,7 +354,7 @@ const FeatureFlagsPage: React.FC = () => {
 
       {/* Edit Feature Flag Dialog */}
       <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
-        <DialogContent className="sm:max-w-[600px]">
+        <DialogContent className="sm:max-w-[600px] max-w-[90vw] w-full bg-background border border-border shadow-lg">
           <DialogHeader>
             <DialogTitle>Edit Feature Flag</DialogTitle>
             <DialogDescription>
