@@ -32,7 +32,7 @@ const Slideshows: React.FC<SlideshowsProps> = ({ loggedIn, displayId }) => {
      * If displayId is not provided, consider the behavior of setId.
      * It might default, or you might want to explicitly clear/set a default.
      */
-  }, [displayId, displayContext])
+  }, [displayId, displayContext.setId])
 
   const add = (): Promise<void> => {
     return addSlideshow().then(() => {

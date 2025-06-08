@@ -28,7 +28,7 @@ const ScreensComponent = memo(function ScreensComponent({ loggedIn, displayId }:
        * the context will handle the default state appropriately
        */
     }
-  }, [displayId, displayContext])
+  }, [displayId, displayContext.setId])
 
   const add = (): Promise<void> => {
     return new Promise((resolve) => {

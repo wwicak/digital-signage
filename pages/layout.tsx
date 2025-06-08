@@ -31,63 +31,9 @@ interface ILayoutPageProps extends ProtectProps {
 }
 
 const LayoutPage: React.FC<ILayoutPageProps> = ({ loggedIn, displayId }) => {
-  // Must call these hooks first to check display state for early return
+  // ALL HOOKS MUST BE CALLED AT THE TOP - BEFORE ANY CONDITIONAL LOGIC
   const displayContext = useDisplayContext()
   const { data: displays, isLoading: displaysLoading } = useDisplays()
-
-  // If no display ID is available, show a display selector
-  // MOVED TO TOP to avoid hooks rule violation
-  if (!displayContext.state.id && !displayId) {
-    return (
-      <Frame loggedIn={loggedIn}>
-        <div className="flex items-center justify-center min-h-screen">
-          <div className="text-center space-y-6 max-w-md">
-            <h2 className="text-2xl font-bold">Select a Display</h2>
-            <p className="text-muted-foreground">
-              Choose a display to start designing its layout with widgets.
-            </p>
-            
-            {displaysLoading ? (
-              <div>Loading displays...</div>
-            ) : displays && displays.length > 0 ? (
-              <div className="space-y-3">
-                <h3 className="text-lg font-semibold">Available Displays:</h3>
-                <div className="grid gap-2">
-                  {displays.map((display) => (
-                    <button
-                      key={display._id}
-                      onClick={() => {
-                        console.log('[DEBUG] Selected display:', display._id)
-                        displayContext.setId(display._id)
-                      }}
-                      className="p-3 border rounded-lg hover:bg-gray-50 transition-colors text-left"
-                    >
-                      <div className="font-medium">{display.name || 'Unnamed Display'}</div>
-                      <div className="text-sm text-muted-foreground">
-                        {display.orientation} • {display.layout}
-                      </div>
-                    </button>
-                  ))}
-                </div>
-              </div>
-            ) : (
-              <div className="space-y-4">
-                <p>No displays found. Create a display first.</p>
-                <button
-                  onClick={() => window.location.href = '/screens'}
-                  className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
-                >
-                  Go to Displays
-                </button>
-              </div>
-            )}
-          </div>
-        </div>
-      </Frame>
-    )
-  }
-
-  // All other hooks come after the early return check
   const [widgets, setWidgets] = useState<IWidgetData[]>([])
   const [isDragging, setIsDragging] = useState(false)
   const [draggedWidgetId, setDraggedWidgetId] = useState<string | null>(null)
@@ -98,19 +44,19 @@ const LayoutPage: React.FC<ILayoutPageProps> = ({ loggedIn, displayId }) => {
   const pendingUpdatesRef = useRef<Map<string, IUpdateWidgetData>>(new Map())
   const { startMonitoring, stopMonitoring, startApiCall, endApiCall } = useDragPerformanceMonitoring()
 
-  // Calculate grid constraints based on aspect ratio using utility - MOVED UP TO AVOID CIRCULAR DEPENDENCY
+  // Calculate grid constraints based on aspect ratio using utility
   const gridConstraints = useMemo(() =>
     calculateGridConstraints(displayContext.state.orientation || 'landscape'),
     [displayContext.state.orientation]
   )
 
-  // Get display info for UI - MOVED UP
+  // Get display info for UI
   const displayInfo = useMemo(() =>
     getDisplayInfo(displayContext.state.orientation || 'landscape'),
     [displayContext.state.orientation]
   )
 
-  // Get container styles - MOVED UP
+  // Get container styles
   const containerStyles = useMemo(() =>
     getContainerStyles(displayContext.state.orientation || 'landscape', displayContext.state.layout || 'spaced'),
     [displayContext.state.orientation, displayContext.state.layout]
@@ -203,81 +149,6 @@ const LayoutPage: React.FC<ILayoutPageProps> = ({ loggedIn, displayId }) => {
     return arranged
   }, [gridConstraints, displayInfo.isPortrait])
 
-  useEffect(() => {
-    if (displayId && displayId !== displayContext.state.id) {
-      console.log('[DEBUG] Setting display ID from URL:', displayId)
-      displayContext.setId(displayId)
-      refreshWidgets(displayId)
-    }
-  }, [displayId, displayContext.state.id]) // Only depend on the specific state value, not the whole context
-
-  // Cleanup timeout on unmount
-  useEffect(() => {
-    return () => {
-      if (dragTimeoutRef.current) {
-        clearTimeout(dragTimeoutRef.current)
-      }
-    }
-  }, [])
-
-  // Initialize optimistic layout when widgets change
-  useEffect(() => {
-    const newLayout = widgets.map(widget => ({
-      i: widget._id,
-      x: widget.x || 0,
-      y: widget.y || 0,
-      w: widget.w || 1,
-      h: widget.h || 1,
-    }))
-    setOptimisticLayout(newLayout)
-    lastSavedLayoutRef.current = newLayout
-  }, [widgets])
-
-  const refreshWidgets = (displayId: string): Promise<void> => {
-    return getWidgets(displayId).then(widgets => {
-      setWidgets(widgets)
-    }).catch(error => {
-      console.error('Failed to refresh widgets:', error)
-      setWidgets([]) // Reset or handle error appropriately
-    })
-  }
-
-  const handleAddWidget = (type: string): void => {
-    if (!displayContext.state.id) {
-      alert('Error: No display selected. Please select a display first.')
-      return
-    }
-
-    const widgetDefinition: IWidgetDefinition | undefined = Widgets[type]
-
-    // Get optimal size for this widget type and orientation
-    const optimalSize = getOptimalWidgetSize(type, displayContext.state.orientation || 'landscape')
-
-    const newWidgetData: INewWidgetData = { // Construct data for addWidget action
-        type: type as WidgetType,
-        name: `${type} Widget`, // Provide a default name since it's required by the new API
-        data: widgetDefinition?.defaultData || {},
-        display_id: displayContext.state.id!, // Pass display ID to associate widget with display
-        w: optimalSize.w,
-        h: optimalSize.h,
-        // x, y will be auto-assigned by the auto-arrange algorithm
-    }
-
-    addWidget(newWidgetData)
-        .then(() => refreshWidgets(displayContext.state.id!))
-        .catch(error => console.error('Failed to add widget:', error))
-  }
-
-  const handleDeleteWidget = async (id: string): Promise<void> => {
-    try {
-      await deleteWidget(id)
-      await refreshWidgets(displayContext.state.id!)
-    } catch (error) {
-      console.error('Failed to delete widget:', error)
-      throw error // Re-throw to let the modal handle the error
-    }
-  }
-
   // Batch update function to handle multiple widget updates efficiently
   const batchUpdateWidgets = useCallback(async () => {
     if (pendingUpdatesRef.current.size === 0) return
@@ -308,6 +179,37 @@ const LayoutPage: React.FC<ILayoutPageProps> = ({ loggedIn, displayId }) => {
       console.error('Some widget updates failed:', error)
     }
   }, [optimisticLayout])
+
+  // useEffect hooks
+  useEffect(() => {
+    if (displayId && displayId !== displayContext.state.id) {
+      console.log('[DEBUG] Setting display ID from URL:', displayId)
+      displayContext.setId(displayId)
+      refreshWidgets(displayId)
+    }
+  }, [displayId, displayContext.state.id])
+
+  // Cleanup timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (dragTimeoutRef.current) {
+        clearTimeout(dragTimeoutRef.current)
+      }
+    }
+  }, [])
+
+  // Initialize optimistic layout when widgets change
+  useEffect(() => {
+    const newLayout = widgets.map(widget => ({
+      i: widget._id,
+      x: widget.x || 0,
+      y: widget.y || 0,
+      w: widget.w || 1,
+      h: widget.h || 1,
+    }))
+    setOptimisticLayout(newLayout)
+    lastSavedLayoutRef.current = newLayout
+  }, [widgets])
 
   // Optimized drag start handler
   const handleDragStart = useCallback((layout: RglLayout[], oldItem: RglLayout, newItem: RglLayout) => {
@@ -472,26 +374,6 @@ const LayoutPage: React.FC<ILayoutPageProps> = ({ loggedIn, displayId }) => {
     }
   }, [isDragging])
 
-  const handleDragEnd = (result: DropResult): void => {
-    if (!result.destination || !displayContext.state.id) {
-      return
-    }
-    displayContext.reorderStatusBarItems(result.source.index, result.destination.index)
-  }
-
-  const handleTitleChange = (event: React.ChangeEvent<HTMLInputElement>): void => {
-    const title = event.target.value
-    displayContext.updateName(title) // updateName is debounced in the context
-  }
-  
-  const handleLayoutTypeChange = (name: string, checked: boolean): void => {
-    displayContext.updateLayout(checked ? 'spaced' : 'compact')
-  }
-
-  const handleOrientationChange = (name: string, checked: boolean): void => {
-    displayContext.updateOrientation(checked ? 'portrait' : 'landscape')
-  }
-
   // Manual rearrange function
   const handleManualRearrange = useCallback(() => {
     console.log('[DEBUG] Manual rearrange triggered')
@@ -567,6 +449,123 @@ const LayoutPage: React.FC<ILayoutPageProps> = ({ loggedIn, displayId }) => {
       maxH: gridConstraints.maxItemHeight,
     }))
   }, [widgets, gridConstraints, autoArrangeLayout])
+
+  // Helper function
+  const refreshWidgets = (displayId: string): Promise<void> => {
+    return getWidgets(displayId).then(widgets => {
+      setWidgets(widgets)
+    }).catch(error => {
+      console.error('Failed to refresh widgets:', error)
+      setWidgets([]) // Reset or handle error appropriately
+    })
+  }
+
+  // If no display ID is available, show a display selector
+  if (!displayContext.state.id && !displayId) {
+    return (
+      <Frame loggedIn={loggedIn}>
+        <div className="flex items-center justify-center min-h-screen">
+          <div className="text-center space-y-6 max-w-md">
+            <h2 className="text-2xl font-bold">Select a Display</h2>
+            <p className="text-muted-foreground">
+              Choose a display to start designing its layout with widgets.
+            </p>
+
+            {displaysLoading ? (
+              <div>Loading displays...</div>
+            ) : displays && displays.length > 0 ? (
+              <div className="space-y-3">
+                <h3 className="text-lg font-semibold">Available Displays:</h3>
+                <div className="grid gap-2">
+                  {displays.map((display) => (
+                    <button
+                      key={display._id}
+                      onClick={() => {
+                        console.log('[DEBUG] Selected display:', display._id)
+                        displayContext.setId(display._id)
+                      }}
+                      className="p-3 border rounded-lg hover:bg-gray-50 transition-colors text-left"
+                    >
+                      <div className="font-medium">{display.name || 'Unnamed Display'}</div>
+                      <div className="text-sm text-muted-foreground">
+                        {display.orientation} • {display.layout}
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                <p>No displays found. Create a display first.</p>
+                <button
+                  onClick={() => window.location.href = '/screens'}
+                  className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+                >
+                  Go to Displays
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+      </Frame>
+    )
+  }
+
+  const handleAddWidget = (type: string): void => {
+    if (!displayContext.state.id) {
+      alert('Error: No display selected. Please select a display first.')
+      return
+    }
+
+    const widgetDefinition: IWidgetDefinition | undefined = Widgets[type]
+
+    // Get optimal size for this widget type and orientation
+    const optimalSize = getOptimalWidgetSize(type, displayContext.state.orientation || 'landscape')
+
+    const newWidgetData: INewWidgetData = { // Construct data for addWidget action
+        type: type as WidgetType,
+        name: `${type} Widget`, // Provide a default name since it's required by the new API
+        data: widgetDefinition?.defaultData || {},
+        display_id: displayContext.state.id!, // Pass display ID to associate widget with display
+        w: optimalSize.w,
+        h: optimalSize.h,
+        // x, y will be auto-assigned by the auto-arrange algorithm
+    }
+
+    addWidget(newWidgetData)
+        .then(() => refreshWidgets(displayContext.state.id!))
+        .catch(error => console.error('Failed to add widget:', error))
+  }
+
+  const handleDeleteWidget = async (id: string): Promise<void> => {
+    try {
+      await deleteWidget(id)
+      await refreshWidgets(displayContext.state.id!)
+    } catch (error) {
+      console.error('Failed to delete widget:', error)
+      throw error // Re-throw to let the modal handle the error
+    }
+  }
+
+  const handleDragEnd = (result: DropResult): void => {
+    if (!result.destination || !displayContext.state.id) {
+      return
+    }
+    displayContext.reorderStatusBarItems(result.source.index, result.destination.index)
+  }
+
+  const handleTitleChange = (event: React.ChangeEvent<HTMLInputElement>): void => {
+    const title = event.target.value
+    displayContext.updateName(title) // updateName is debounced in the context
+  }
+
+  const handleLayoutTypeChange = (name: string, checked: boolean): void => {
+    displayContext.updateLayout(checked ? 'spaced' : 'compact')
+  }
+
+  const handleOrientationChange = (name: string, checked: boolean): void => {
+    displayContext.updateOrientation(checked ? 'portrait' : 'landscape')
+  }
 
   const statusBarChoices: IDropdownChoice[] = Object.keys(StatusBarElementTypes).map(key => {
     const elType = StatusBarElementTypes[key as keyof typeof StatusBarElementTypes] as IStatusBarElementDefinition

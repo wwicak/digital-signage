@@ -43,7 +43,7 @@ const SlideshowPageComponent = memo(function SlideshowPageComponent({ slideshow:
     if (displayId && displayContext.state.id !== displayId) {
       displayContext.setId(displayId)
     }
-  }, [displayId, displayContext])
+  }, [displayId, displayContext.setId, displayContext.state.id])
 
   const refresh = async (): Promise<void> => {
     if (slideshow && slideshow._id) {
