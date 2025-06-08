@@ -1,4 +1,4 @@
-import type { NextApiRequest, NextApiResponse } from "next";
+import { NextApiRequest, NextApiResponse } from "next";
 
 /**
  * Simple proxy endpoint to help bypass X-Frame-Options restrictions
