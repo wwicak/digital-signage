@@ -1,15 +1,13 @@
 import React, { Component } from 'react'
 import {
-  faBolt,
-  faSmog,
-  faCloud,
-  faSun,
-  faCloudSun,
-  faCloudRain,
-  faCloudMoonRain,
-  faSnowflake,
-  faCloudMoon,
-} from '@fortawesome/free-solid-svg-icons'
+  Sun,
+  Cloud,
+  CloudRain,
+  CloudSnow,
+  Zap,
+  CloudDrizzle,
+  LucideIcon
+} from 'lucide-react'
 
 // Define a type for the weather icon codes for better type safety
 type WeatherIconCode =
@@ -30,44 +28,45 @@ interface Weathers {
 interface WeatherIconState {} // No state used
 
 class WeatherIcon extends Component<Weathers, WeatherIconState> {
-  convertIcon(iconCode: WeatherIconCode | undefined):  {
+  convertIcon(iconCode: WeatherIconCode | undefined): LucideIcon {
     switch (iconCode) {
       case '01d':
-        return faSun
-      case '01n': // Typically night clear, might use faMoon if available and distinct
-        return faCloudSun // Original was faCloudSun, consider faMoon if theme supports night icons
+        return Sun
+      case '01n':
+        return Sun // Use Sun for night clear as well
       case '02d':
-        return faCloudSun
+        return Cloud
       case '02n':
-        return faCloudMoon
+        return Cloud
       case '03d':
       case '03n':
       case '04d':
       case '04n':
-        return faCloud
+        return Cloud
       case '09d': // Shower rain
       case '10d': // Rain
-        return faCloudRain
+        return CloudRain
       case '09n': // Shower rain night
       case '10n': // Rain night
-        return faCloudMoonRain
+        return CloudRain
       case '11d': // Thunderstorm
       case '11n':
-        return faBolt
+        return Zap
       case '13d': // Snow
       case '13n':
-        return faSnowflake
+        return CloudSnow
       case '50d': // Mist
       case '50n':
-        return faSmog
+        return CloudDrizzle
       default:
-        return faCloud // Default icon
+        return Cloud // Default icon
     }
   }
 
   render() {
-    const { icon } = this.props // icon will be undefined if not provided, matching original default of ''
-    return <this.convertIcon(icon) className={'2x'  />
+    const { icon } = this.props
+    const IconComponent = this.convertIcon(icon)
+    return <IconComponent className="w-8 h-8" />
   }
 }
 

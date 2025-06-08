@@ -3,7 +3,7 @@ import { ComponentType } from 'react'
 import BaseWidget, { IBaseWidget, IWidgetDefinitionArgs } from '../base_widget'
 import WeatherContent from './src/WeatherContent' // Assuming .js for now
 import WeatherOptions from './src/WeatherOptions' // Assuming .js for now
-import { Edit, X, Trash2, Plus, Minus, Eye, User, Settings, Key, Tv, Grid3X3, Grid2X2, Images, Image, Play, Pause, Stop, Clock, Calendar, ExternalLink, Download, Upload, Save, LogOut, ChevronDown, ChevronUp, Layout, Cast, Smartphone, Tablet, Monitor } from 'lucide-react'
+import { Cloud } from 'lucide-react'
 
 // Define the structure for the weather widget's default data
 export type TWeatherUnit = 'metric' | 'imperial'; // Celsius/Meters/sec vs Fahrenheit/Miles/hour
@@ -21,7 +21,7 @@ const weatherDefinitionArgs: IWidgetDefinitionArgs = {
   name: 'Weather',
   type: 'weather', // Added 'type' field as it's required
   version: '0.1',
-  icon: faCloudSun , // Use the imported icon
+  icon: Cloud, // Use the imported icon
   defaultData: {
     zip: '10001', // Default to New York
     unit: 'imperial',

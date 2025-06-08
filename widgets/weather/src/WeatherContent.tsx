@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react'
 import axios, { AxiosResponse } from 'axios'
+import { MapPin } from 'lucide-react'
 
 import WeatherIcon from './WeatherIcon'
 import { TWeatherUnit } from '../index'
@@ -179,9 +180,9 @@ const WeatherContent: React.FC<IWeatherContentProps> = React.memo(({ data, isPre
         <div className='desc'>{description}</div>
         <div className="flex flex-row items-center">
           <div className='marker-icon'>
-            <faMapMarkerAlt 
+            <MapPin className="w-4 h-4 text-gray-500" />
           </div>
-          <div className='name-text'>{locationName </div>
+          <div className='name-text'>{locationName}</div>
         </div>
       </div>
       {iconCode && <div className="flex flex-col justify-start scale-200">

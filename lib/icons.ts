@@ -29,7 +29,6 @@ import {
   // Media & Content
   Play,
   Pause,
-  Square as Stop,
   SkipForward,
   SkipBack,
   Volume2,
@@ -150,7 +149,7 @@ export const iconMap: Record<string, IconComponent> = {
   // Media
   'faPlay': Play,
   'faPause': Pause,
-  'faStop': Stop,
+  'faStop': Square,
   'faStepForward': SkipForward,
   'faStepBackward': SkipBack,
   'faVolumeUp': Volume2,
@@ -277,5 +276,6 @@ export {
   CheckCircle,
   XCircle,
   AlertCircle,
-  Info
+  Info,
+  Square as Stop
 }

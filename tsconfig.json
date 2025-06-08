@@ -22,7 +22,7 @@
       "@/*": ["*"],
       "~/*": ["./*"]
     },
-    "types": ["jest", "styled-jsx"],
+    "types": ["jest"],
     "plugins": [
       {
         "name": "next"
@@ -38,5 +38,5 @@
     ".next/types/**/*.ts",
     "jest.setup.js"
   ],
-  "exclude": ["node_modules", "dist", "__tests__"]
+  "exclude": ["node_modules", "dist", "__tests__", "scripts"]
 }

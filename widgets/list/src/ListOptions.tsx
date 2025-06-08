@@ -1,4 +1,5 @@
 import React, { Component } from 'react'
+import { Trash2 } from 'lucide-react'
 import { Form, Input, InlineInputGroup, Button } from '../../../components/Form'
 import * as z from 'zod'
 
@@ -215,11 +216,7 @@ class ListOptions extends Component<IListOptionsProps, IListOptionsState> {
                   expand={false}
                 />
                 <div className={'deleteBtn'} onClick={() => this.deleteItem(index)} role='button' tabIndex={0} onKeyPress={(e) => {if(e.key === 'Enter' || e.key === ' ') this.deleteItem(index)}} aria-label='Delete item'>
-                  <
-                    icon={faTrash }
-                    fixedWidth
-                    color='#828282'
-                  />
+                  <Trash2 className="w-4 h-4 text-gray-500" />
                 </div>
               </InlineInputGroup>
             ))}

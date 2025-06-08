@@ -26,7 +26,7 @@ class Progress extends Component<ProgressProps, ProgressState> {
     return (
       <div className="flex flex-row w-full absolute">
         {orderedSlides.map((slide, i) => (
-          <div key={`slide-${i}` className={`progress-segment ${i < current ? 'active' : ''}`}>
+          <div key={`slide-${i}`} className={`progress-segment ${i < current ? 'active' : ''}`}>
             <div
               className={'progress-segment-content'}
               style={{

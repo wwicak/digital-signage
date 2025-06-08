@@ -100,7 +100,7 @@ const Switch: React.FC<ISwitchProps> = ({
           <label htmlFor={name} className="text-gray-500 font-sans flex items-center cursor-pointer text-sm">
               {uncheckedIcon && (
               <span className="mx-1 inline-flex items-center">
-                  <uncheckedIcon className="w-4 h-4 text-gray-500" />
+                  {React.createElement(uncheckedIcon, { className: "w-4 h-4 text-gray-500" })}
               </span>
               )}
               {uncheckedLabel}
@@ -113,7 +113,7 @@ const Switch: React.FC<ISwitchProps> = ({
           <label htmlFor={name} className="text-gray-500 font-sans flex items-center cursor-pointer text-sm">
               {checkedIcon && (
               <span className="mx-1 inline-flex items-center">
-                  <checkedIcon className="w-4 h-4 text-gray-500" />
+                  {React.createElement(checkedIcon, { className: "w-4 h-4 text-gray-500" })}
               </span>
               )}
               {checkedLabel}

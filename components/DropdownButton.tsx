@@ -1,17 +1,17 @@
 "use client";
 
 import React, { Component, ReactNode, CSSProperties } from "react";
-import {} from "lucide-react";
+import { LucideIcon } from "lucide-react";
 import { getIcon, type IconComponent } from "@/lib/icons";
 
 export interface IDropdownChoice {
   key: string; // Used as the value for onSelect
   name: string; // Display text for the choice
-  icon?: string; // Lucide icon component or icon name
+  icon?: LucideIcon | string; // Lucide icon component or icon name
 }
 
 export interface IDropdownButtonProps {
-  icon?: string; // Lucide icon component or icon name
+  icon?: LucideIcon | string; // Lucide icon component or icon name
   text?: string;
   choices?: IDropdownChoice[];
   onSelect?: (key: string) => void;
@@ -83,7 +83,7 @@ class DropdownButton extends Component<
     }
   };
 
-  renderIcon = (icon: string, className: string = "w-4 h-4") => {
+  renderIcon = (icon: LucideIcon | string, className: string = "w-4 h-4") => {
     if (typeof icon === "string") {
       // Icon name - get from mapping
       const IconComponent = getIcon(icon);

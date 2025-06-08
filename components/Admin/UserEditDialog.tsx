@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { X } from "lucide-react";
 import useUsers, {
   User,
   CreateUserData,
@@ -160,7 +161,7 @@ const UserEditDialog: React.FC<UserEditDialogProps> = ({
             className="text-gray-500 hover:text-gray-700 p-1"
             onClick={onClose}
           >
-            <X />
+            <X className="w-5 h-5" />
           </button>
         </div>
 

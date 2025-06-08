@@ -5,7 +5,7 @@ import YouTube, { YouTubeProps, YouTubePlayer } from 'react-youtube' // Import Y
 
 // This is an interface
 import * as z from 'zod'
-import { Edit, X, Trash2, Plus, Minus, Eye, User, Settings, Key, Tv, Grid3X3, Grid2X2, Images, Image, Play, Pause, Stop, Clock, Calendar, ExternalLink, Download, Upload, Save, LogOut, ChevronDown, ChevronUp, Layout, Cast, Smartphone, Tablet, Monitor } from 'lucide-react'
+
 
 // Zod schema for IYoutubeDefaultData (used in props.data)
 export const YoutubeWidgetDataSchema = z.object({
@@ -31,7 +31,7 @@ export const YoutubeContentPropsSchema = z.object({
 export type IYoutubeContentProps = z.infer<typeof YoutubeContentPropsSchema>;
 
 // Default values from original JS, though IYoutubeDefaultData has its own defaults
-const DEFAULT_YT_URL_FOR_ID_EXTRACTION = 'https://www.youtube.com/watch?v=9xwazD5SyVg'
+const DEFAULT_YT_URL_FOR_ID_EXTRACTION = 'https://www.youtube.com/watch?v=uyyLot4PLXM'
 // const DEFAULT_BG_COLOR = '#95a5a6'; // This color was for the widget frame, not really for YT player area
 
 class YoutubeContent extends Component<IYoutubeContentProps> {
@@ -52,7 +52,7 @@ class YoutubeContent extends Component<IYoutubeContentProps> {
      * }
      */
   }
-  
+
   // Add other event handlers if needed, e.g., onEnd for looping
   onPlayerEnd: YouTubeProps['onEnd'] = (event) => {
     if (this.props.data?.loop) {
@@ -130,7 +130,7 @@ class YoutubeContent extends Component<IYoutubeContentProps> {
               containerClassName={'youtube-player-container'} // For styling the outer container div
               onReady={this.onPlayerReady}
               onEnd={this.onPlayerEnd}
-              // Add other event handlers as needed: onError, onStateChange, onPlaybackRateChange, etc.
+            // Add other event handlers as needed: onError, onStateChange, onPlaybackRateChange, etc.
             />
           )}
         </div>

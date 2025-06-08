@@ -3,23 +3,41 @@
  * along with its title and description.
  */
 
-import GenericSlide from './Generic'
+import React from 'react'
+import GenericSlide, { IGenericSlideProps } from './Generic'
 import getVideoId from 'get-video-id'
 import YouTube from 'react-youtube'
 
-class YoutubeSlide extends GenericSlide {
-  constructor(props) {
+interface IYoutubeSlideProps extends IGenericSlideProps {
+  // Youtube slide specific props can be added here if needed
+}
+
+// YouTube player interface
+interface YouTubePlayer {
+  pauseVideo(): void
+  playVideo(): void
+  seekTo(seconds: number): void
+}
+
+interface YouTubeEvent {
+  target: YouTubePlayer
+}
+
+class YoutubeSlide extends GenericSlide<IYoutubeSlideProps> {
+  private youtube: YouTubePlayer | null = null
+
+  constructor(props: IYoutubeSlideProps) {
     super(props)
     this.youtube = null
   }
 
-  handleYoutubeLoaded = () => {
+  handleYoutubeLoaded = (): void => {
     this.state.loading.resolve
       ? this.state.loading.resolve()
       : this.setState({ loading: { promise: Promise.resolve() } })
   }
 
-  onYoutubeReady = event => {
+  onYoutubeReady = (event: YouTubeEvent): void => {
     // access to player in all event handlers via event.target
     this.youtube = event.target
     this.handleYoutubeLoaded()
@@ -27,18 +45,19 @@ class YoutubeSlide extends GenericSlide {
 
   /**
    * Renders the inner content of the slide (ex. the photo, youtube iframe, etc)
-   * @param {string} data The slide's data (usually a URL or object ID)
-   * @returns {Component}
+   * @param data The slide's data (usually a URL or object ID)
+   * @returns React component
    */
-  renderSlideContent(data) {
+  renderSlideContent(data: string): React.ReactElement {
     const { id, service } = getVideoId(data)
     /* eslint-disable-next-line no-console */
     if (!id || service !== 'youtube') console.error('Failed to parse Youtube URL')
+    
     return (
-      <div className={'youtube-container'}>
+      <div className="w-full h-full min-h-full">
         <YouTube
-          containerClassName={'youtube-container-nojsx'}
-          videoId={id}
+          containerClassName="w-full h-full min-h-full"
+          videoId={id || ''}
           opts={{
             /* eslint-disable camelcase */
             height: '100%',
@@ -58,16 +77,6 @@ class YoutubeSlide extends GenericSlide {
           }}
           onReady={this.onYoutubeReady}
         />
-        <style>
-          {`
-                .youtube-container-nojsx {
-                  width: 100%;
-                  height: 100%;
-                  min-height: 100%;
-                }
-              `}
-        </style>
-        
       </div>
     )
   }
@@ -75,15 +84,20 @@ class YoutubeSlide extends GenericSlide {
   /**
    * Stops the slide's content from playing when the slide is out of focus
    */
-  stop = () => {
-    if (this.youtube) this.youtube.pauseVideo() && this.youtube.seekTo(0)
+  stop = (): void => {
+    if (this.youtube) {
+      this.youtube.pauseVideo()
+      this.youtube.seekTo(0)
+    }
   }
 
   /**
    * Starts or resumes the slide's content when the slide is in focus
    */
-  play = () => {
-    if (this.youtube) this.youtube.playVideo()
+  play = (): void => {
+    if (this.youtube) {
+      this.youtube.playVideo()
+    }
   }
 }
 
