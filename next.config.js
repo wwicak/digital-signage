@@ -1,10 +1,12 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // Enable experimental features for Next.js 14
+  // External packages for server components (moved from experimental in Next.js 15+)
+  serverExternalPackages: ["mongoose"],
+
+  // Enable experimental features for Next.js 15
   experimental: {
     // Enable Turbopack for faster builds (disabled for now due to compatibility issues)
     // turbo: true,
-    serverComponentsExternalPackages: ["mongoose"],
   },
 
   // Transpile packages that might need it
