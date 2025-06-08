@@ -31,12 +31,67 @@ interface ILayoutPageProps extends ProtectProps {
 }
 
 const LayoutPage: React.FC<ILayoutPageProps> = ({ loggedIn, displayId }) => {
+  // Must call these hooks first to check display state for early return
+  const displayContext = useDisplayContext()
+  const { data: displays, isLoading: displaysLoading } = useDisplays()
+
+  // If no display ID is available, show a display selector
+  // MOVED TO TOP to avoid hooks rule violation
+  if (!displayContext.state.id && !displayId) {
+    return (
+      <Frame loggedIn={loggedIn}>
+        <div className="flex items-center justify-center min-h-screen">
+          <div className="text-center space-y-6 max-w-md">
+            <h2 className="text-2xl font-bold">Select a Display</h2>
+            <p className="text-muted-foreground">
+              Choose a display to start designing its layout with widgets.
+            </p>
+            
+            {displaysLoading ? (
+              <div>Loading displays...</div>
+            ) : displays && displays.length > 0 ? (
+              <div className="space-y-3">
+                <h3 className="text-lg font-semibold">Available Displays:</h3>
+                <div className="grid gap-2">
+                  {displays.map((display) => (
+                    <button
+                      key={display._id}
+                      onClick={() => {
+                        console.log('[DEBUG] Selected display:', display._id)
+                        displayContext.setId(display._id)
+                      }}
+                      className="p-3 border rounded-lg hover:bg-gray-50 transition-colors text-left"
+                    >
+                      <div className="font-medium">{display.name || 'Unnamed Display'}</div>
+                      <div className="text-sm text-muted-foreground">
+                        {display.orientation} • {display.layout}
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                <p>No displays found. Create a display first.</p>
+                <button
+                  onClick={() => window.location.href = '/screens'}
+                  className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+                >
+                  Go to Displays
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+      </Frame>
+    )
+  }
+
+  // All other hooks come after the early return check
   const [widgets, setWidgets] = useState<IWidgetData[]>([])
   const [isDragging, setIsDragging] = useState(false)
   const [draggedWidgetId, setDraggedWidgetId] = useState<string | null>(null)
   const [optimisticLayout, setOptimisticLayout] = useState<RglLayout[]>([])
-  const displayContext = useDisplayContext()
-  const { data: displays, isLoading: displaysLoading } = useDisplays()
   const { widgetChoices, isLoading: widgetChoicesLoading } = useWidgetChoices()
   const dragTimeoutRef = useRef<NodeJS.Timeout | null>(null)
   const lastSavedLayoutRef = useRef<RglLayout[]>([])
@@ -177,57 +232,6 @@ const LayoutPage: React.FC<ILayoutPageProps> = ({ loggedIn, displayId }) => {
     setOptimisticLayout(newLayout)
     lastSavedLayoutRef.current = newLayout
   }, [widgets])
-
-  // If no display ID is available, show a display selector
-  if (!displayContext.state.id && !displayId) {
-    return (
-      <Frame loggedIn={loggedIn}>
-        <div className="flex items-center justify-center min-h-screen">
-          <div className="text-center space-y-6 max-w-md">
-            <h2 className="text-2xl font-bold">Select a Display</h2>
-            <p className="text-muted-foreground">
-              Choose a display to start designing its layout with widgets.
-            </p>
-            
-            {displaysLoading ? (
-              <div>Loading displays...</div>
-            ) : displays && displays.length > 0 ? (
-              <div className="space-y-3">
-                <h3 className="text-lg font-semibold">Available Displays:</h3>
-                <div className="grid gap-2">
-                  {displays.map((display) => (
-                    <button
-                      key={display._id}
-                      onClick={() => {
-                        console.log('[DEBUG] Selected display:', display._id)
-                        displayContext.setId(display._id)
-                      }}
-                      className="p-3 border rounded-lg hover:bg-gray-50 transition-colors text-left"
-                    >
-                      <div className="font-medium">{display.name || 'Unnamed Display'}</div>
-                      <div className="text-sm text-muted-foreground">
-                        {display.orientation} • {display.layout}
-                      </div>
-                    </button>
-                  ))}
-                </div>
-              </div>
-            ) : (
-              <div className="space-y-4">
-                <p>No displays found. Create a display first.</p>
-                <button
-                  onClick={() => window.location.href = '/screens'}
-                  className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
-                >
-                  Go to Displays
-                </button>
-              </div>
-            )}
-          </div>
-        </div>
-      </Frame>
-    )
-  }
 
   const refreshWidgets = (displayId: string): Promise<void> => {
     return getWidgets(displayId).then(widgets => {
