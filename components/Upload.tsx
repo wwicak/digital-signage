@@ -101,13 +101,29 @@ class Upload extends Component<IUploadProps, IUploadState> {
     event: DropEvent,
   ): void => {
     if (rejectedFiles.length > 0) {
-      /*
-       * Get the file name from the first rejected file.
-       * rejectedFiles[0] is an object { file: File, errors: Error[] }
-       */
-      const firstRejectedFile = rejectedFiles[0].file;
-      const fileName = firstRejectedFile?.name || "this file type";
-      alert(`File type not allowed or file too large: ${fileName}`);
+      const rejection = rejectedFiles[0];
+      const file = rejection.file;
+      const errors = rejection.errors || [];
+
+      let errorMessage = `File "${file?.name || 'Unknown'}" was rejected:\n`;
+
+      errors.forEach((error) => {
+        switch (error.code) {
+          case 'file-invalid-type':
+            errorMessage += '• Invalid file type. Please select an image file (JPG, PNG, GIF, WebP, SVG, BMP, TIFF)\n';
+            break;
+          case 'file-too-large':
+            errorMessage += '• File is too large. Maximum size is 10MB\n';
+            break;
+          case 'too-many-files':
+            errorMessage += '• Only one file can be uploaded at a time\n';
+            break;
+          default:
+            errorMessage += `• ${error.message}\n`;
+        }
+      });
+
+      alert(errorMessage.trim());
     }
   };
 
@@ -115,8 +131,16 @@ class Upload extends Component<IUploadProps, IUploadState> {
     const {
       slideshowId,
       refresh,
-      accept = { "image/*": [] },
-      maxSize,
+      accept = {
+        'image/jpeg': ['.jpg', '.jpeg'],
+        'image/png': ['.png'],
+        'image/gif': ['.gif'],
+        'image/webp': ['.webp'],
+        'image/svg+xml': ['.svg'],
+        'image/bmp': ['.bmp'],
+        'image/tiff': ['.tiff', '.tif']
+      },
+      maxSize = 10 * 1024 * 1024, // 10MB default
       multiple = false,
     } = this.props;
     const { lastFile } = this.state;

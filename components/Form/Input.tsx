@@ -39,7 +39,10 @@ export interface ITextAreaProps extends IBaseInputProps { type: 'textarea'; rows
 export interface ISelectProps extends IBaseInputProps { type: 'select'; choices: IChoice[]; }
 export interface IColorInputProps extends IBaseInputProps { type: 'color'; } // Value is string (hex)
 export interface ICheckboxProps extends IBaseInputProps { type: 'checkbox'; checked?: boolean; value?: string; } // Value for checkbox is often fixed, checked is the state
-export interface IPhotoUploadProps extends IBaseInputProps { type: 'photo'; accept?: string; } // Value can be File or string (URL)
+export interface IPhotoUploadProps extends IBaseInputProps {
+  type: 'photo';
+  accept?: string | Record<string, string[]>;
+} // Value can be File or string (URL), accept can be string or object for react-dropzone
 
 // Union type for all possible Input component props
 export type IInputProps =
@@ -121,10 +124,29 @@ class Input extends Component<IInputProps> {
   handlePhotoDropRejected = (rejectedFiles: any[]): void => {
     // Using any[] for rejectedFiles as FileRejection type might need specific import from dropzone
     if (rejectedFiles.length > 0) {
-      // Get the specific file object from the rejection if possible
-      const firstRejectedFile = rejectedFiles[0]?.file || rejectedFiles[0]
-      const fileName = firstRejectedFile?.name || 'this file type'
-      alert(`File type not allowed: ${fileName}`)
+      const rejection = rejectedFiles[0]
+      const file = rejection?.file
+      const errors = rejection?.errors || []
+
+      let errorMessage = `File "${file?.name || 'Unknown'}" was rejected:\n`
+
+      errors.forEach((error: any) => {
+        switch (error.code) {
+          case 'file-invalid-type':
+            errorMessage += '• Invalid file type. Please select an image file (JPG, PNG, GIF, WebP, SVG, BMP, TIFF)\n'
+            break
+          case 'file-too-large':
+            errorMessage += '• File is too large. Maximum size is 10MB\n'
+            break
+          case 'too-many-files':
+            errorMessage += '• Only one file can be uploaded at a time\n'
+            break
+          default:
+            errorMessage += `• ${error.message}\n`
+        }
+      })
+
+      alert(errorMessage.trim())
     }
   }
 
@@ -231,7 +253,16 @@ class Input extends Component<IInputProps> {
             onDropAccepted={this.handlePhotoDrop}
             onDropRejected={this.handlePhotoDropRejected}
             multiple={false}
-            accept={photoProps.accept || 'image/*'}
+            accept={photoProps.accept || {
+              'image/jpeg': ['.jpg', '.jpeg'],
+              'image/png': ['.png'],
+              'image/gif': ['.gif'],
+              'image/webp': ['.webp'],
+              'image/svg+xml': ['.svg'],
+              'image/bmp': ['.bmp'],
+              'image/tiff': ['.tiff', '.tif']
+            }}
+            maxSize={10 * 1024 * 1024} // 10MB max file size
           >
             {({ getRootProps, getInputProps, isDragActive }) => (
               <div {...getRootProps()} className={`flex flex-col items-center justify-center cursor-pointer outline-none border-2 border-dashed border-gray-300 bg-gray-50 text-center min-h-[80px] p-4 rounded transition-colors duration-200 ${isDragActive ? 'border-blue-500 bg-blue-50' : ''} ${hasError ? 'border-red-500' : ''}`}>

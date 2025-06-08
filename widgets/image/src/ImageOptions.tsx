@@ -150,6 +150,15 @@ class ImageOptions extends Component<IImageOptionsProps, IImageOptionsState> {
               name={'upload'} // Triggers upload logic in handleChange
               value={url} // Display current URL; input component handles File preview
               onChange={this.handleChange}
+              accept={{
+                'image/jpeg': ['.jpg', '.jpeg'],
+                'image/png': ['.png'],
+                'image/gif': ['.gif'],
+                'image/webp': ['.webp'],
+                'image/svg+xml': ['.svg'],
+                'image/bmp': ['.bmp'],
+                'image/tiff': ['.tiff', '.tif']
+              }}
             />
             <Input
               inline={false}
