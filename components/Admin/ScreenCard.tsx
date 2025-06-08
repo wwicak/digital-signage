@@ -96,63 +96,68 @@ const ScreenCard: React.FC<IScreenCardProps> = ({ value, refresh = () => {} }) =
   return (
     // The outer Link wraps the entire card. Clicks on action icons inside need stopPropagation.
     <Link href={`/layout?display=${value?._id || ''}`}>
-      <a className='card-anchor-wrapper'> {/* Use an anchor tag for proper semantics with Next.js Link */}
-        <div className='card'>
-          <div className='left'>
-            <div className={'thumbnail'}>
+      <a className="no-underline text-inherit block">
+        <div className="p-4 font-sans rounded-lg cursor-pointer bg-white my-10 flex flex-row justify-center relative z-10 shadow-md hover:shadow-lg transition-shadow duration-200">
+          <div className="flex justify-center items-center px-2">
+            <div className="h-16 w-16 bg-cover flex justify-center items-center border border-gray-200 rounded">
               <FontAwesomeIcon icon={faTv as IconProp} fixedWidth size='lg' color='#7bc043' />
             </div>
           </div>
-          <div className='middle'>
-            <div className='title'>{value?.name || 'Untitled Display'}</div>
-            <div className='info'>
-              <div className='widgetnum'>
-                <div className='icon'>
+          <div className="flex flex-col justify-center px-2 flex-1 min-w-0">
+            <div className="font-sans text-base overflow-hidden whitespace-nowrap text-ellipsis text-gray-600 mb-2">
+              {value?.name || 'Untitled Display'}
+            </div>
+            <div className="flex flex-row items-center">
+              <div className="font-sans text-sm text-gray-500 mr-3 flex items-center">
+                <div className="mr-1">
                   <FontAwesomeIcon icon={faWindowRestore as IconProp} fixedWidth color='#878787' />
                 </div>
-                <span className='text'>{widgetCount} widgets</span>
+                <span>{widgetCount} widgets</span>
               </div>
-              <div className='clientnum'>
-                <div className='icon'>
+              <div className="font-sans text-sm text-gray-500 mr-3 flex items-center">
+                <div className="mr-1">
                   <FontAwesomeIcon icon={faChromecast as IconProp} fixedWidth color='#878787' />
                 </div>
-                <span className='text'>
+                <span>
                   {value?.clientCount || 0} client{(value?.clientCount || 0) !== 1 ? 's' : ''} paired
                 </span>
               </div>
-              <div className='orientation-control'>
+              <div className="font-sans text-sm text-gray-500 mr-3 flex flex-col items-start gap-1">
                 <OrientationPreview orientation={value?.orientation || null} />
                 <select
                   value={value?.orientation || 'landscape'}
                   onChange={handleOrientationChange}
                   disabled={isUpdatingOrientation}
                   onClick={(e) => e.stopPropagation()}
-                  className='orientation-select'
+                  className="font-sans text-xs py-1 px-1 border border-gray-300 rounded bg-white text-gray-600 cursor-pointer min-w-[80px] hover:border-green-500 disabled:opacity-60 disabled:cursor-not-allowed"
                 >
                   <option value='landscape'>Landscape</option>
                   <option value='portrait'>Portrait</option>
                 </select>
               </div>
-              <div className={`online ${value?.isOnline ? 'online-status' : 'offline-status'}`}>
-                <span className='text'>{value?.isOnline ? 'online' : 'offline'}</span>
+              <div className={`font-sans text-sm mr-3 flex items-center ${value?.isOnline ? 'text-green-500' : 'text-red-500'}`}>
+                <span className={`text-2xl leading-3 mr-1 ${value?.isOnline ? 'text-green-500' : 'text-red-500'}`}>•</span>
+                <span>{value?.isOnline ? 'online' : 'offline'}</span>
               </div>
             </div>
           </div>
-          <div className='right'>
+          <div className="flex flex-row justify-center items-center px-2">
             {/* Edit Layout Link */}
             <Link href={`/layout?display=${value?._id || ''}`}>
-              <a className='actionIcon' onClick={(e) => e.stopPropagation()} aria-label='Edit Layout'>
+              <a className="mx-2 p-2 rounded-full transition-colors duration-200 hover:bg-gray-100 flex items-center justify-center" onClick={(e) => e.stopPropagation()} aria-label='Edit Layout'>
                 <FontAwesomeIcon icon={faEye as IconProp} fixedWidth color='#828282' />
               </a>
             </Link>
             {/* View Display Link */}
             <Link href={`/display/${value?._id || ''}`}>
-              <a className='actionIcon' onClick={(e) => e.stopPropagation()} aria-label='View Display'>
+              <a className="mx-2 p-2 rounded-full transition-colors duration-200 hover:bg-gray-100 flex items-center justify-center" onClick={(e) => e.stopPropagation()} aria-label='View Display'>
                 <FontAwesomeIcon icon={faLink as IconProp} fixedWidth color='#828282' />
               </a>
             </Link>
             {/* Delete Action */}
-            <div className='actionIcon' onClick={handleDelete}
+            <div
+              className="mx-2 p-2 rounded-full transition-colors duration-200 hover:bg-gray-100 flex items-center justify-center cursor-pointer"
+              onClick={handleDelete}
               role='button'
               tabIndex={0}
               onKeyPress={(e: React.KeyboardEvent<HTMLDivElement>) => { if (e.key === 'Enter' || e.key === ' ') handleDelete(e as any)}}
@@ -162,191 +167,10 @@ const ScreenCard: React.FC<IScreenCardProps> = ({ value, refresh = () => {} }) =
                 icon={faTrash as IconProp}
                 fixedWidth
                 color='#828282'
-                // onClick handler is on the parent div to better manage event propagation
               />
             </div>
           </div>
-          <style jsx>
-            {`
-              .card-anchor-wrapper { /* Style for the anchor tag from Next.js Link */
-                text-decoration: none;
-                color: inherit;
-                display: block; /* Make it block to contain the card properly */
-              }
-              .card {
-                padding: 12px;
-                font-family: 'Open Sans', sans-serif;
-                border-radius: 4px;
-                cursor: pointer;
-                background: white;
-                margin-top: 40px; /* These margins might be better on the parent container */
-                margin-bottom: 40px;
-                display: flex;
-                flex-direction: row;
-                justify-content: center; /* This might not be desired if card width is fixed */
-                position: relative;
-                z-index: 1;
-                box-shadow: 0 2px 8px rgba(0,0,0,0.1); /* Added a subtle shadow */
-                transition: box-shadow 0.2s ease-in-out;
-              }
-              .card:hover {
-                box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-              }
 
-              .title {
-                font-family: 'Open Sans', sans-serif;
-                font-size: 16px;
-                overflow: hidden;
-                white-space: nowrap;
-                text-overflow: ellipsis;
-                color: #4f4f4f;
-                margin-bottom: 8px;
-              }
-
-              .left {
-                font-family: 'Open Sans', sans-serif;
-                justify-content: center;
-                padding-left: 8px;
-                padding-right: 8px;
-                display: flex; /* Added to center thumbnail vertically */
-                align-items: center;
-              }
-
-              .info {
-                display: flex;
-                flex-direction: row;
-                align-items: center; /* Align items in info row */
-              }
-
-              .widgetnum,
-              .online,
-              .clientnum,
-              .orientation-control {
-                font-family: 'Open Sans', sans-serif;
-                font-size: 14px;
-                color: #878787;
-                margin-right: 12px; /* Increased margin */
-                display: flex; /* For icon and text alignment */
-                align-items: center;
-              }
-
-              .orientation-control {
-                flex-direction: column;
-                align-items: flex-start;
-                gap: 4px;
-              }
-
-              .orientation-select {
-                font-family: 'Open Sans', sans-serif;
-                font-size: 12px;
-                padding: 2px 4px;
-                border: 1px solid #ddd;
-                border-radius: 3px;
-                background: white;
-                color: #666;
-                cursor: pointer;
-                min-width: 80px;
-              }
-
-              .orientation-select:hover {
-                border-color: #7bc043;
-              }
-
-              .orientation-select:disabled {
-                opacity: 0.6;
-                cursor: not-allowed;
-              }
-
-              .widgetnum .icon,
-              /* .online .icon, */ /* Online status uses ::before pseudo-element */
-              .clientnum .icon {
-                margin-right: 4px;
-                /* display: inline; */ /* Not needed with flex */
-                /* vertical-align: middle; */ /* Not needed with flex */
-              }
-
-              .widgetnum .text,
-              .online .text,
-              .clientnum .text {
-                /* vertical-align: middle; */ /* Not needed with flex */
-              }
-
-              .online-status {
-                color: #7bc043;
-              }
-
-              .offline-status {
-                color: #dc3545;
-              }
-
-              .online-status::before {
-                content: '•';
-                color: #7bc043;
-                font-size: 32px; /* Visual size of dot */
-                line-height: 14px; /* Align with text */
-                margin-right: 4px; /* Spacing from text */
-                vertical-align: middle; /* Better alignment */
-              }
-
-              .offline-status::before {
-                content: '•';
-                color: #dc3545;
-                font-size: 32px; /* Visual size of dot */
-                line-height: 14px; /* Align with text */
-                margin-right: 4px; /* Spacing from text */
-                vertical-align: middle; /* Better alignment */
-              }
-
-              .middle {
-                font-family: 'Open Sans', sans-serif;
-                display: flex;
-                flex-direction: column;
-                justify-content: center;
-                padding-left: 8px;
-                padding-right: 8px;
-                flex: 1;
-                min-width: 0; /* Prevents text overflow from breaking layout */
-              }
-
-              .right {
-                display: flex;
-                flex-direction: row;
-                font-family: 'Open Sans', sans-serif;
-                justify-content: center;
-                align-items: center;
-                padding-left: 8px;
-                padding-right: 8px;
-              }
-
-              .thumbnail {
-                height: 60px;
-                width: 60px;
-                background-size: cover; /* If using background image */
-                display: flex;
-                justify-content: center;
-                align-items: center;
-                border: 1px solid #eee; /* Added a light border */
-                border-radius: 4px; /* Rounded corners for thumbnail box */
-              }
-
-              .actionIcon {
-                margin-right: 8px; /* Adjusted margin */
-                margin-left: 8px;
-                padding: 8px; /* Added padding to make click target larger */
-                border-radius: 50%; /* Circular background for hover effect */
-                transition: background-color 0.2s ease-in-out;
-                display: flex; /* For centering icon if needed */
-                align-items: center;
-                justify-content: center;
-              }
-              .actionIcon:hover {
-                background-color: #f0f0f0; /* Hover effect */
-              }
-              .actionIcon:last-child {
-                  margin-right: 0; /* Remove margin for last icon */
-              }
-            `}
-          </style>
         </div>
       </a>
     </Link>

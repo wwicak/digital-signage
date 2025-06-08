@@ -131,7 +131,10 @@ class Input extends Component<IInputProps> {
 
 
   renderInput() {
-    const { type, value, placeholder, disabled, onKeyDown, className, name } = this.props
+    const { type, value, placeholder, disabled, onKeyDown, className, name, error } = this.props
+    const hasError = typeof error === 'string' ? !!error : !!error
+
+    const baseInputClasses = `font-sans text-gray-800 bg-gray-100 min-h-[40px] rounded border border-gray-300 outline-none px-3 py-2 text-base box-border w-full transition-all duration-200 focus:border-blue-500 focus:shadow-[0_0_0_2px_rgba(59,130,246,0.2)] disabled:bg-gray-200 disabled:cursor-not-allowed disabled:opacity-70 ${hasError ? 'border-red-500 focus:border-red-500 focus:shadow-[0_0_0_2px_rgba(239,68,68,0.25)]' : ''} ${className || ''}`
 
     switch (type) {
       case 'text':
@@ -144,7 +147,7 @@ class Input extends Component<IInputProps> {
           <input
             type={type}
             name={name}
-            className={className}
+            className={baseInputClasses}
             placeholder={placeholder}
             value={value || ''} // Ensure value is not null/undefined for input
             onChange={this.handleHtmlInputChange}
@@ -158,7 +161,7 @@ class Input extends Component<IInputProps> {
           <input
             type='number'
             name={name}
-            className={className}
+            className={baseInputClasses}
             placeholder={placeholder}
             value={value === undefined || value === null || isNaN(value) ? '' : value} // Handle NaN for number input
             onChange={this.handleHtmlInputChange}
@@ -174,7 +177,7 @@ class Input extends Component<IInputProps> {
         return (
           <textarea
             name={name}
-            className={className}
+            className={`${baseInputClasses} resize-y min-h-[80px]`}
             value={value || ''}
             placeholder={placeholder}
             onChange={this.handleHtmlInputChange}
@@ -190,7 +193,7 @@ class Input extends Component<IInputProps> {
             name={name}
             onChange={this.handleHtmlInputChange}
             value={value || ''} // Ensure value is not null/undefined
-            className={className}
+            className={`${baseInputClasses} appearance-none bg-[url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23007CB2%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.4-12.8z%22%2F%3E%3C%2Fsvg%3E')] bg-no-repeat bg-[right_.7em_top_50%,_0_0] bg-[.65em_auto,_100%] pr-10`}
             disabled={disabled}
             onKeyDown={onKeyDown}
           >
@@ -212,7 +215,7 @@ class Input extends Component<IInputProps> {
             <input
                 type='checkbox'
                 name={name}
-                className={className}
+                className={`w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 focus:ring-2 disabled:opacity-70 disabled:cursor-not-allowed ${className || ''}`}
                 checked={!!cbProps.checked} // Use the checked prop
                 onChange={this.handleHtmlInputChange} // This will pass boolean for 'checked'
                 disabled={disabled}
@@ -233,21 +236,21 @@ class Input extends Component<IInputProps> {
             accept={photoProps.accept || 'image/*'}
           >
             {({ getRootProps, getInputProps, isDragActive }) => (
-              <div {...getRootProps()} className={`upload-dropzone ${isDragActive ? 'active' : ''}`}>
+              <div {...getRootProps()} className={`flex flex-col items-center justify-center cursor-pointer outline-none border-2 border-dashed border-gray-300 bg-gray-50 text-center min-h-[80px] p-4 rounded transition-colors duration-200 ${isDragActive ? 'border-blue-500 bg-blue-50' : ''} ${hasError ? 'border-red-500' : ''}`}>
                 <input {...getInputProps()} />
                 {isDragActive ? (
-                  <div className={'photo-upload-text'}>Drop the photo here...</div>
+                  <div className="font-sans text-gray-600">Drop the photo here...</div>
                 ) : (value && typeof value === 'string') ? ( // If value is a URL string
-                  <div className={'photo-preview-container'}>
-                    <div className={'thumbnail'} style={{ backgroundImage: `url(${value})` }} />
-                    <span className={'link-text'}>{value}</span>
+                  <div className="flex flex-col items-center text-center">
+                    <div className="h-16 w-16 rounded border border-gray-300 mb-2 bg-contain bg-no-repeat bg-center" style={{ backgroundImage: `url(${value})` }} />
+                    <span className="mt-2 overflow-hidden whitespace-nowrap text-ellipsis max-w-full text-sm text-gray-800">{value}</span>
                   </div>
                 ) : (value && value instanceof File) ? ( // If value is a File object (preview usually handled by parent or via FileReader)
-                     <div className={'photo-preview-container'}>
-                        <span className={'link-text'}>{(value as File).name} (New)</span>
+                     <div className="flex flex-col items-center text-center">
+                        <span className="mt-2 overflow-hidden whitespace-nowrap text-ellipsis max-w-full text-sm text-gray-800">{(value as File).name} (New)</span>
                      </div>
                 ) : (
-                  <div className={'photo-upload-text'}>Drag &apos;n&apos; drop a photo here, or click to select</div>
+                  <div className="font-sans text-gray-600">Drag &apos;n&apos; drop a photo here, or click to select</div>
                 )}
               </div>
             )}
@@ -276,190 +279,23 @@ class Input extends Component<IInputProps> {
 
     return (
       <div
-        className={`input-group-wrapper ${inline ? 'inline' : 'block'} ${expand ? 'expand' : ''} ${hasError ? 'has-error' : ''}`}
+        className={`mb-4 flex ${inline ? 'flex-row items-center' : 'flex-col items-stretch'} ${expand ? 'flex-1' : ''}`}
         style={style}
       >
-        {label && <label htmlFor={this.props.name}>{label}</label>}
-        <div className='input-field-container'>
+        {label && (
+          <label
+            htmlFor={this.props.name}
+            className={`text-gray-500 font-sans text-sm leading-relaxed ${inline ? 'mr-4 min-w-[100px] max-w-[150px] inline-block' : 'pb-2'}`}
+          >
+            {label}
+          </label>
+        )}
+        <div className={`flex flex-col ${expand ? 'flex-1' : ''}`}>
           {this.renderInput()}
-          {helpText && !hasError && <small className='help-text'>{helpText}</small>}
-          {typeof error === 'string' && hasError && <small className='error-text'>{error}</small>}
+          {helpText && !hasError && <small className="text-sm text-gray-500 mt-1 block">{helpText}</small>}
+          {typeof error === 'string' && hasError && <small className="text-sm text-red-500 mt-1 block">{error}</small>}
         </div>
-        {/* Original JSX styles were complex and dependent on props.inline and props.expand.
-            It's generally better to handle these with more structured CSS or utility classes.
-            For now, providing a basic structure. Specific styling for inline, expand will be minimal here.
-        */}
-        <style jsx>{`
-          .input-group-wrapper {
-            margin-bottom: 16px;
-            display: flex; /* Default to flex for inline/block behavior */
-            /* flex-direction and justify-content will depend on 'inline' prop */
-          }
-          .input-group-wrapper.inline {
-            flex-direction: row;
-            align-items: center; /* Align label and input field nicely */
-          }
-          .input-group-wrapper.block {
-            flex-direction: column;
-            align-items: stretch; /* Make label and input take full width */
-          }
-          
-          .input-group-wrapper.expand .input-field-container {
-            flex: 1; /* Allow input field container to expand */
-          }
-          .input-group-wrapper.expand input,
-          .input-group-wrapper.expand textarea,
-          .input-group-wrapper.expand select,
-          .input-group-wrapper.expand .upload-dropzone {
-            min-width: 0; /* Override min-width from original if expanding */
-            width: 100%; /* Take full width if expanding */
-          }
 
-
-          label {
-            margin-right: ${inline ? '16px' : '0'};
-            color: #878787;
-            font-family: 'Open Sans', sans-serif;
-            min-width: ${inline ? '100px' : 'auto'}; /* Adjust label width for inline */
-            max-width: ${inline ? '150px' : 'none'};
-            display: inline-block; /* Or block if not inline */
-            padding-top: ${inline ? '0' : '0'}; /* Adjusted based on alignment */
-            padding-bottom: ${inline ? '0' : '8px'}; /* Space below label in block mode */
-            font-size: 0.9em;
-            line-height: 1.4;
-          }
-          
-          .input-field-container {
-            display: flex;
-            flex-direction: column;
-            /* min-width for expand was in original style for input itself, now on container for expand */
-          }
-          .input-field-container.expand {
-            flex: 1;
-          }
-
-
-          /* Base styles for input, textarea, select - from original */
-          :global(.input-group-wrapper input), /* Using :global as these are direct children now */
-          :global(.input-group-wrapper textarea),
-          :global(.input-group-wrapper select),
-          .upload-dropzone { /* Dropzone is a div, can be styled directly */
-            font-family: 'Open Sans', sans-serif;
-            color: #333;
-            background-color: #f7f7f7;
-            min-height: 40px;
-            border-radius: 4px; /* Unified border radius */
-            border: 1px solid #ddd; /* Unified border */
-            outline: none;
-            padding: 8px 12px; /* Unified padding */
-            font-size: 16px;
-            box-sizing: border-box;
-            width: 100%; /* Default to full width of its container */
-            transition: border-color 0.2s ease, box-shadow 0.2s ease;
-          }
-          :global(.input-group-wrapper input:focus),
-          :global(.input-group-wrapper textarea:focus),
-          :global(.input-group-wrapper select:focus) {
-            border-color: #358aed; /* Highlight color */
-            box-shadow: 0 0 0 2px rgba(53, 138, 237, 0.2);
-          }
-
-          :global(.input-group-wrapper input:disabled),
-          :global(.input-group-wrapper textarea:disabled),
-          :global(.input-group-wrapper select:disabled) {
-            background-color: #e9ecef; /* Standard disabled color */
-            cursor: not-allowed;
-            opacity: 0.7;
-          }
-
-          :global(.input-group-wrapper textarea) {
-            resize: vertical;
-            min-height: 80px; /* Default min-height for textareas */
-          }
-
-          :global(.input-group-wrapper select) {
-            -webkit-appearance: none;
-            -moz-appearance: none;
-            appearance: none;
-            background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23007CB2%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.4-12.8z%22%2F%3E%3C%2Fsvg%3E');
-            background-repeat: no-repeat;
-            background-position: right .7em top 50%, 0 0;
-            background-size: .65em auto, 100%;
-            padding-right: 2.5em; /* Space for arrow */
-          }
-          
-          /* Styles for 'photo' type with react-dropzone */
-          .upload-dropzone {
-            display: flex;
-            flex-direction: column; /* Changed for vertical stacking of preview/text */
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            outline: none;
-            border: 2px dashed #ccc;
-            background: #fafafa;
-            text-align: center;
-            min-height: 80px; /* Min height for dropzone */
-            padding: 16px;
-          }
-          .upload-dropzone.active {
-            border-color: #358aed;
-            background-color: #f0f8ff;
-          }
-          .photo-preview-container { /* Renamed from .photo */
-            display: flex;
-            flex-direction: column; /* Stack thumbnail and link */
-            align-items: center;
-            text-align: center;
-          }
-          .photo-upload-text { /* Renamed from .photo-upload */
-            font-family: 'Open Sans', sans-serif;
-            color: #555;
-          }
-          .link-text { /* Renamed from .link */
-            margin-top: 8px; /* Space from thumbnail */
-            overflow: hidden;
-            white-space: nowrap;
-            text-overflow: ellipsis;
-            max-width: 100%; /* Max width within dropzone */
-            font-size: 0.9em;
-            color: #333;
-          }
-          .thumbnail {
-            height: 60px; /* Larger thumbnail preview */
-            width: 60px;
-            border-radius: 4px;
-            background-size: contain; /* Changed to contain for better preview */
-            background-repeat: no-repeat;
-            background-position: center;
-            border: 1px solid #ddd;
-            margin-bottom: 8px; /* If link text is below */
-          }
-          .help-text {
-            font-size: 0.85em;
-            color: #6c757d;
-            margin-top: 4px;
-            display: block;
-          }
-          .error-text {
-            font-size: 0.85em;
-            color: #dc3545; /* Bootstrap danger color */
-            margin-top: 4px;
-            display: block;
-          }
-          .input-group-wrapper.has-error input,
-          .input-group-wrapper.has-error textarea,
-          .input-group-wrapper.has-error select {
-            border-color: #dc3545;
-          }
-          .input-group-wrapper.has-error input:focus,
-          .input-group-wrapper.has-error textarea:focus,
-          .input-group-wrapper.has-error select:focus {
-            border-color: #dc3545;
-            box-shadow: 0 0 0 2px rgba(220, 53, 69, 0.25);
-          }
-
-        `}</style>
       </div>
     )
   }

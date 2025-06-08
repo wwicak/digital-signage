@@ -88,21 +88,26 @@ class DropdownButton extends Component<IDropdownButtonProps, IDropdownButtonStat
     } = this.props
 
     return (
-      <div className={'dropdownContainer'}>
+      <div className="inline-block align-middle relative">
         {children ? (
           <div style={style} onClick={this.showMenu} role='button' tabIndex={0} onKeyPress={(e) => { if (e.key === 'Enter' || e.key === ' ') this.showMenu(e) }}>
             {children}
           </div>
         ) : (
-          <button type='button' className={'btn'} onClick={this.showMenu} style={style}>
-            {icon && <div className={'btnIcon'}><FontAwesomeIcon icon={icon} /></div>}
+          <button
+            type='button'
+            className="font-sans bg-green-500 hover:bg-green-600 text-white text-sm uppercase rounded border-none inline-block px-6 py-4 outline-none cursor-pointer transition-colors duration-200"
+            onClick={this.showMenu}
+            style={style}
+          >
+            {icon && <div className="mr-4 inline"><FontAwesomeIcon icon={icon} /></div>}
             {text}
           </button>
         )}
 
         {this.state.showMenu && (
           <div
-            className='menu'
+            className="absolute top-full left-0 mt-2 flex flex-col z-10 bg-white shadow-lg rounded overflow-hidden min-w-full"
             ref={element => {
               this.dropdownMenu = element
             }}
@@ -112,11 +117,11 @@ class DropdownButton extends Component<IDropdownButtonProps, IDropdownButtonStat
               <button
                 type='button'
                 key={choice.key}
-                className={'choice'}
+                className="font-sans bg-white hover:bg-gray-50 text-gray-800 min-w-[200px] text-sm uppercase border-none border-b border-gray-100 last:border-b-0 flex px-6 py-4 text-left outline-none cursor-pointer flex-row items-center transition-colors duration-200"
                 onClick={() => this.handleChoiceClick(choice.key)}
               >
                 {choice.icon && (
-                  <div className={'btnIcon'}>
+                  <div className="mr-4 inline">
                     <FontAwesomeIcon icon={choice.icon} />
                   </div>
                 )}
@@ -125,74 +130,7 @@ class DropdownButton extends Component<IDropdownButtonProps, IDropdownButtonStat
             ))}
           </div>
         )}
-        <style jsx>
-          {`
-            .dropdownContainer {
-              display: inline-block;
-              vertical-align: middle;
-              position: relative;
-            }
-            .btn {
-              font-family: 'Open Sans', sans-serif;
-              background: #7bc043;
-              text-decoration: none;
-              text-transform: uppercase;
-              color: white;
-              font-size: 14px;
-              border-radius: 4px;
-              border: none;
-              display: inline-block;
-              padding: 16px;
-              padding-left: 24px;
-              padding-right: 24px;
-              outline: none;
-              cursor: pointer;
-            }
-            .btnIcon {
-              margin-right: 16px;
-              display: inline;
-            }
-            .menu {
-              position: absolute;
-              top: calc(100% + 8px);
-              left: 0;
-              display: flex;
-              flex-direction: column;
-              z-index: 2;
-              background: white;
-              box-shadow: 4px 4px 16px rgba(0, 0, 0, 0.1);
-              border-radius: 4px;
-              overflow: hidden;
-              min-width: 100%;
-            }
-            .choice {
-              font-family: 'Open Sans', sans-serif;
-              background: white;
-              text-decoration: none;
-              text-transform: uppercase;
-              color: #333;
-              min-width: 200px;
-              font-size: 14px;
-              border: none;
-              border-bottom: 1px solid #efefef;
-              display: flex;
-              padding: 16px;
-              padding-left: 24px;
-              padding-right: 24px;
-              text-align: left;
-              outline: none;
-              cursor: pointer;
-              flex-direction: row;
-              align-items: center; /* Align icon and text */
-            }
-            .choice:hover {
-              background: #fafafa;
-            }
-            .choice:last-child {
-              border-bottom: 0px;
-            }
-          `}
-        </style>
+
       </div>
     )
   }

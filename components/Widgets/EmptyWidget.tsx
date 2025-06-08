@@ -14,43 +14,15 @@ interface EmptyWidgetState {}
 class EmptyWidget extends React.Component<EmptyWidgetProps, EmptyWidgetState> {
   render() {
     return (
-      <div className={'widget'}>
-        <div className={'info'}>
-          <div className={'icon'}>
+      <div className="bg-gray-600 w-full h-full flex flex-col justify-center rounded-lg shadow-md">
+        <div className="flex flex-col justify-center items-center text-white">
+          <div className="text-white mb-4">
             <FontAwesomeIcon icon={faTimes as IconDefinition} size={'2x'} />
           </div>
-          <span className={'type'}>BROKEN WIDGET</span>
+          <span className="text-white font-sans uppercase text-base mb-4 tracking-wide">
+            BROKEN WIDGET
+          </span>
         </div>
-        <style jsx>
-          {`
-            .widget {
-              background-color: rgba(108, 108, 108, 1);
-              width: 100%;
-              height: 100%;
-              display: flex;
-              flex-direction: column;
-              justify-content: center;
-            }
-            .widget .info {
-              display: flex;
-              flex-direction: column;
-              justify-content: center;
-              align-items: center;
-              color: white;
-            }
-            .widget .info .icon {
-              color: white;
-              margin-bottom: 16px;
-            }
-            .widget .info .type {
-              color: white;
-              font-family: 'Open Sans', sans-serif;
-              text-transform: uppercase;
-              font-size: 16px;
-              margin-bottom: 16px;
-            }
-          `}
-        </style>
       </div>
     )
   }

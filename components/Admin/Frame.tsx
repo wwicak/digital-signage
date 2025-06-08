@@ -25,28 +25,14 @@ export type IFrameProps = z.infer<typeof FramePropsSchema>;
 
 const Frame: React.FC<IFrameProps> = (props) => {
   const { state } = useDisplayContext()
-  
+
   return (
-    <div className='admin-frame-container'>
+    <div className="flex flex-row flex-1 min-h-screen">
       {/* Only render Sidebar when user is logged in */}
       {props.loggedIn && <Sidebar loggedIn={props.loggedIn} displayId={state.id} />}
-      <div className='admin-frame-content'>{props.children}</div>
-      <style jsx>
-        {`
-          .admin-frame-container {
-            display: flex;
-            flex-direction: row;
-            flex: 1; /* This makes the frame take up available space if it's a child of a flex container */
-            min-height: 100vh; /* Ensure it takes at least full viewport height */
-          }
-          .admin-frame-content {
-            padding: 40px;
-            background: #f4f4f4;
-            flex: 1; /* Content area takes remaining space */
-            overflow-y: auto; /* Add scroll for content overflow */
-          }
-        `}
-      </style>
+      <div className="flex-1 p-10 bg-gray-50 overflow-y-auto">
+        {props.children}
+      </div>
     </div>
   )
 }

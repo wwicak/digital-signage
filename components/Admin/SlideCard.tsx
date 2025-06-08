@@ -95,152 +95,62 @@ const SlideCard: React.FC<ISlideCardProps> = ({ value, refresh = () => {} }) => 
   }
 
   return (
-    <div className='slide-card'>
-      {typeof value.order === 'number' && <div className='order-badge'>{value.order}</div>}
-      <div className='left-content'>
-        <div className={'thumbnail'} style={thumbnailStyle}>
+    <div className="p-3 font-sans rounded bg-white my-3 flex flex-row items-center relative z-10 shadow-sm hover:shadow-md transition-shadow duration-200">
+      {typeof value.order === 'number' && (
+        <div className="absolute -top-1 -left-1 bg-gray-600 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold z-20">
+          {value.order}
+        </div>
+      )}
+      <div className="justify-center pr-3">
+        <div
+          className="h-12 w-12 rounded bg-cover bg-center flex justify-center items-center border border-gray-200"
+          style={thumbnailStyle}
+        >
           {!showBackgroundImage && (
             <FontAwesomeIcon icon={getThumbnailIcon(slideType)} fixedWidth size='lg' color='#FFFFFF' />
           )}
         </div>
       </div>
-      <div className='middle-content'>
-        <div className='title-text'>{slideTitle}</div>
-        <div className='duration-info'>
-          <div className='icon'>
+      <div className="font-sans flex flex-col justify-center pr-2 flex-1 min-w-0">
+        <div className="font-sans text-base overflow-hidden whitespace-nowrap text-ellipsis text-gray-600 mb-1">
+          {slideTitle}
+        </div>
+        <div className="font-sans text-sm text-gray-500 flex items-center">
+          <div className="mr-1">
             <FontAwesomeIcon icon={faClock} fixedWidth color='#878787' />
           </div>
-          <span className='text'>{(value.duration || 0)}s</span> {/* Default duration to 0 */}
+          <span>{(value.duration || 0)}s</span>
         </div>
       </div>
-      <div className='right-actions'>
-        <div className='action-icon' onClick={handleEdit} role='button' tabIndex={0} onKeyPress={(e) => {if(e.key === 'Enter' || e.key === ' ') handleEdit()}} aria-label='Edit slide'>
+      <div className="flex flex-row font-sans items-center">
+        <div
+          className="ml-2 p-2 rounded-full cursor-pointer transition-colors duration-200 hover:bg-gray-100"
+          onClick={handleEdit}
+          role='button'
+          tabIndex={0}
+          onKeyPress={(e) => {if(e.key === 'Enter' || e.key === ' ') handleEdit()}}
+          aria-label='Edit slide'
+        >
           <FontAwesomeIcon icon={faEdit} fixedWidth color='#828282' />
         </div>
-        <div className='action-icon' onClick={!loading ? handleDelete : undefined} role='button' tabIndex={!loading ? 0 : -1} onKeyPress={(e) => {if(!loading && (e.key === 'Enter' || e.key === ' ')) handleDelete()}} aria-label='Delete slide' aria-disabled={loading}>
+        <div
+          className={`ml-2 p-2 rounded-full transition-colors duration-200 ${loading ? 'cursor-not-allowed' : 'cursor-pointer hover:bg-gray-100'}`}
+          onClick={!loading ? handleDelete : undefined}
+          role='button'
+          tabIndex={!loading ? 0 : -1}
+          onKeyPress={(e) => {if(!loading && (e.key === 'Enter' || e.key === ' ')) handleDelete()}}
+          aria-label='Delete slide'
+          aria-disabled={loading}
+        >
           <FontAwesomeIcon
             icon={faTrash}
             fixedWidth
-            color={loading ? '#ccc' : '#828282'} // Dim icon when loading
+            color={loading ? '#ccc' : '#828282'}
           />
         </div>
       </div>
       <SlideEditDialog ref={dialogRef} slideId={value._id} refresh={refresh} />
-      <style jsx>
-        {`
-          .slide-card {
-            padding: 12px;
-            font-family: 'Open Sans', sans-serif;
-            border-radius: 4px;
-            /* cursor: pointer; */ /* Card itself isn't clickable, actions are */
-            background: white;
-            margin-top: 10px; /* Adjusted margins */
-            margin-bottom: 10px;
-            display: flex;
-            flex-direction: row;
-            align-items: center; /* Vertically align items */
-            position: relative;
-            z-index: 1;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-            transition: box-shadow 0.2s ease-in-out;
-          }
-          .slide-card:hover {
-              box-shadow: 0 2px 6px rgba(0,0,0,0.15);
-          }
 
-          .order-badge { /* Style for order number */
-            position: absolute;
-            top: -5px;
-            left: -5px;
-            background-color: #555;
-            color: white;
-            border-radius: 50%;
-            width: 20px;
-            height: 20px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 12px;
-            font-weight: bold;
-            z-index: 2;
-          }
-
-          .title-text { /* Renamed for clarity */
-            font-family: 'Open Sans', sans-serif;
-            font-size: 16px;
-            overflow: hidden;
-            white-space: nowrap;
-            text-overflow: ellipsis;
-            color: #4f4f4f;
-            margin-bottom: 4px; /* Space between title and duration */
-          }
-
-          .left-content { /* Renamed */
-            justify-content: center;
-            padding-right: 12px; /* Increased padding */
-          }
-
-          .duration-info { /* Renamed */
-            font-family: 'Open Sans', sans-serif;
-            font-size: 14px;
-            color: #878787;
-            display: flex; /* Align icon and text */
-            align-items: center;
-          }
-
-          .duration-info .icon {
-            margin-right: 4px;
-          }
-
-          /* .duration-info .text is fine as is */
-
-          .middle-content { /* Renamed */
-            font-family: 'Open Sans', sans-serif;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            /* padding-left: 8px; */ /* Removed, covered by left-content's padding-right */
-            padding-right: 8px;
-            flex: 1;
-            min-width: 0; /* Important for text-overflow to work */
-          }
-
-          .right-actions { /* Renamed */
-            display: flex;
-            flex-direction: row;
-            font-family: 'Open Sans', sans-serif;
-            align-items: center; /* Vertically center action icons */
-            /* padding-left: 8px; */ /* No need, icons have their own margin/padding */
-            /* padding-right: 8px; */
-          }
-
-          .thumbnail {
-            height: 50px; /* Adjusted size */
-            width: 50px;
-            border-radius: 4px; /* More rounded */
-            background-size: cover;
-            background-position: center;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            border: 1px solid #eee;
-          }
-
-          .action-icon { /* Renamed */
-            margin-left: 8px; /* Spacing between icons */
-            padding: 8px;
-            border-radius: 50%;
-            cursor: pointer;
-            transition: background-color 0.2s ease-in-out;
-          }
-          .action-icon:hover {
-              background-color: #f0f0f0;
-          }
-          .action-icon:first-child {
-              margin-left: 0;
-          }
-        `}
-      </style>
     </div>
   )
 }
