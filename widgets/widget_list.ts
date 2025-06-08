@@ -13,7 +13,7 @@ const widgetTypes: string[] = [
   'image',
   'list',
   'announcement',
-  'meeting-room',
+  // 'meeting-room', // Temporarily disabled until API is ready
 ]
 
 export default widgetTypes
