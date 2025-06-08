@@ -267,7 +267,7 @@ const FeatureFlagsPage: React.FC<FeatureFlagsPageProps> = ({ user }) => {
   );
 };
 
-export const getServerSideProps: GetServerSideProps = async (context) => {
+export const getServerSideProps = async (context: any) => {
   try {
     const user = await requireAuth(context.req as any);
     
