@@ -56,7 +56,9 @@ RoomSchema.pre("save", function (next) {
   next();
 });
 
-const RoomModel: Model<IRoom> = mongoose.model<IRoom>("Room", RoomSchema);
+const RoomModel: Model<IRoom> =
+  (mongoose.models?.Room as Model<IRoom>) ||
+  mongoose.model<IRoom>("Room", RoomSchema);
 
 // Zod schema for IRoom
 export const RoomSchemaZod = z.object({

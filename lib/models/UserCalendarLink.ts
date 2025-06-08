@@ -152,6 +152,7 @@ UserCalendarLinkSchema.index({ userId: 1, isActive: 1 });
 UserCalendarLinkSchema.index({ provider: 1, externalUserId: 1 });
 
 const UserCalendarLinkModel: Model<IUserCalendarLink> =
+  (mongoose.models?.UserCalendarLink as Model<IUserCalendarLink>) ||
   mongoose.model<IUserCalendarLink>("UserCalendarLink", UserCalendarLinkSchema);
 
 // Zod schema for IUserCalendarLink validation

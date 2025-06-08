@@ -112,10 +112,9 @@ ReservationSchema.index({ room_id: 1, start_time: 1, end_time: 1 });
 ReservationSchema.index({ externalCalendarEventId: 1 });
 ReservationSchema.index({ sourceCalendarType: 1, isExternallyManaged: 1 });
 
-const ReservationModel: Model<IReservation> = mongoose.model<IReservation>(
-  "Reservation",
-  ReservationSchema
-);
+const ReservationModel: Model<IReservation> =
+  (mongoose.models?.Reservation as Model<IReservation>) ||
+  mongoose.model<IReservation>("Reservation", ReservationSchema);
 
 // Zod schema for IReservation
 export const ReservationSchemaZod = z
