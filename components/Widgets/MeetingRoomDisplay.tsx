@@ -83,13 +83,19 @@ const MeetingRoomDisplay: React.FC<IMeetingRoomDisplayProps> = ({
       tomorrow.setDate(tomorrow.getDate() + 1);
 
       let url = `/api/v1/reservations?start_date=${today.toISOString()}&end_date=${tomorrow.toISOString()}&limit=${maxReservations}`;
-      
+
       if (buildingId) {
         url += `&building_id=${buildingId}`;
       }
 
       const response = await fetch(url);
       if (!response.ok) {
+        // If API is not ready, show a friendly message instead of error
+        if (response.status === 404) {
+          setError("Meeting room API is not yet configured. Please set up the API endpoints.");
+          setReservations([]);
+          return;
+        }
         throw new Error("Failed to fetch reservations");
       }
 
@@ -102,7 +108,13 @@ const MeetingRoomDisplay: React.FC<IMeetingRoomDisplayProps> = ({
       }
     } catch (error: any) {
       console.error("Error fetching reservations:", error);
-      setError(error.message || "Failed to load reservations");
+      // Show a more user-friendly error message
+      if (error.message.includes("fetch")) {
+        setError("Meeting room system is being set up. Please check back later.");
+      } else {
+        setError(error.message || "Failed to load reservations");
+      }
+      setReservations([]);
     } finally {
       setLoading(false);
     }
@@ -196,10 +208,20 @@ const MeetingRoomDisplay: React.FC<IMeetingRoomDisplayProps> = ({
   if (error) {
     return (
       <Card className="w-full h-full">
+        <CardHeader className="pb-3">
+          <CardTitle className="flex items-center">
+            <Calendar className="mr-2 h-5 w-5" />
+            <span>Meeting Room Display</span>
+          </CardTitle>
+        </CardHeader>
         <CardContent className="flex items-center justify-center h-full">
           <div className="text-center">
-            <AlertCircle className="h-8 w-8 text-destructive mx-auto mb-2" />
-            <p className="text-destructive">{error}</p>
+            <AlertCircle className="h-8 w-8 text-muted-foreground mx-auto mb-4" />
+            <p className="text-muted-foreground mb-2">{error}</p>
+            <p className="text-xs text-muted-foreground">
+              The meeting room system is being configured. This widget will display
+              today's meetings once the API is set up.
+            </p>
           </div>
         </CardContent>
       </Card>
