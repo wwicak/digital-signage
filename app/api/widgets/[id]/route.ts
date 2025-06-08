@@ -13,9 +13,10 @@ export async function GET(
   try {
     await dbConnect();
     const user = await requireAuth(request);
+    const { id } = await params;
 
     const widget = await Widget.findOne({
-      _id: params.id,
+      _id: id,
       creator_id: user._id,
     });
 
@@ -40,7 +41,6 @@ export async function GET(
     );
   }
 }
-
 export async function PUT(
   request: NextRequest,
   { params }: { params: { id: string } }
@@ -49,11 +49,12 @@ export async function PUT(
     await dbConnect();
     const user = await requireAuth(request);
     const body = await request.json();
+    const { id } = await params;
 
     const { type, data, ...widgetUpdateData } = body;
 
     const widgetToUpdate = await Widget.findOne({
-      _id: params.id,
+      _id: id,
       creator_id: user._id,
     });
 
@@ -130,9 +131,10 @@ export async function DELETE(
   try {
     await dbConnect();
     const user = await requireAuth(request);
+    const { id } = await params;
 
     const widget = await Widget.findOne({
-      _id: params.id,
+      _id: id,
       creator_id: user._id,
     });
 
@@ -144,13 +146,10 @@ export async function DELETE(
     }
 
     // Remove widget from all displays that reference it
-    await Display.updateMany(
-      { widgets: params.id },
-      { $pull: { widgets: params.id } }
-    );
+    await Display.updateMany({ widgets: id }, { $pull: { widgets: id } });
 
     // Delete the widget
-    const deletedWidget = await Widget.findByIdAndDelete(params.id);
+    const deletedWidget = await Widget.findByIdAndDelete(id);
 
     if (!deletedWidget) {
       return NextResponse.json(
@@ -162,7 +161,7 @@ export async function DELETE(
     // Notify relevant displays via SSE
     try {
       const displays = (await Display.find({
-        widgets: params.id,
+        widgets: id,
         creator_id: user._id, // Ensure user owns the display
       })) as IDisplay[];
 
@@ -171,7 +170,7 @@ export async function DELETE(
           displayId: (display._id as any).toString(),
           action: "update",
           reason: "widget_deleted",
-          widgetId: params.id,
+          widgetId: id,
         });
       }
     } catch (notifyError) {
