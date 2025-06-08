@@ -36,15 +36,19 @@ const DialogLegacy = forwardRef<DialogRef, IDialogProps>(
     return (
       <Dialog open={isOpen} onOpenChange={setIsOpen}>
         <DialogContent className={className}>
-          {(title || description) && (
-            <DialogHeader>
-              {title && <DialogTitle>{title}</DialogTitle>}
-              {description && (
-                <DialogDescription>{description}</DialogDescription>
-              )}
-            </DialogHeader>
-          )}
-          {children}
+          <div className="flex flex-col h-full">
+            {(title || description) && (
+              <DialogHeader className="flex-shrink-0">
+                {title && <DialogTitle className="text-xl font-semibold text-gray-900">{title}</DialogTitle>}
+                {description && (
+                  <DialogDescription className="text-gray-600 mt-1">{description}</DialogDescription>
+                )}
+              </DialogHeader>
+            )}
+            <div className="flex-1 overflow-hidden">
+              {children}
+            </div>
+          </div>
         </DialogContent>
       </Dialog>
     );

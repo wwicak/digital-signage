@@ -85,58 +85,89 @@ class WeatherOptions extends Component<IWeatherOptionsProps, IWeatherOptionsStat
     } = this.state
 
     return (
-      <Form>
-        <h3>Widget: Weather</h3>
-        <p>Choose your preferences for the weather widget.</p>
-        <Input
-          label={'API Key (OpenWeatherMap)'}
-          type={'text'}
-          name={'apiKey'}
-          value={apiKey}
-          placeholder={'Enter your OpenWeatherMap API Key'}
-          onChange={this.handleChange}
-          helpText='An API key from OpenWeatherMap is required.'
-        />
-        <InlineInputGroup>
-            <Input
-            label={'Zip Code or City Name'}
-            type={'text'}
-            name={'zip'}
-            value={zip}
-            placeholder={'e.g., 90210 or London'}
-            onChange={this.handleChange}
-            expand={true}
-            />
-            <Input
-            label={'Temperature Unit'}
-            type={'select'}
-            name={'unit'}
-            value={unit}
-            choices={unitChoices}
-            onChange={this.handleChange}
-            expand={false}
-            />
-        </InlineInputGroup>
-        <Input
-            type='checkbox'
-            name='showForecast' // Make sure this matches a key in IWeatherOptionsState
-            label='Show Multi-day Forecast'
-            checked={showForecast} // Direct boolean binding
-            onChange={(name, checked) => this.handleChange(name as keyof IWeatherOptionsState, checked)}
-        />
-        {/* Location Name could be an input if user should set it, or just display if API provides it */}
-        {/* For now, assuming it might be editable if desired, or it's just part of the data object */}
-        <Input
-            label={'Location Display Name (Optional)'}
-            type={'text'}
-            name={'locationName'}
-            value={locationName}
-            placeholder={'e.g., New York City (auto-detected if empty)'}
-            onChange={this.handleChange}
-            helpText='Overrides auto-detected name from API.'
-        />
-        
-      </Form>
+      <div className="space-y-8">
+        {/* Configuration Section */}
+        <div className="bg-white rounded-lg border border-gray-200 p-6">
+          <div className="mb-6">
+            <h3 className="text-lg font-semibold text-gray-900 mb-2">Weather Widget Configuration</h3>
+            <p className="text-gray-600">Configure your weather display settings and data source.</p>
+          </div>
+
+          <Form>
+            <div className="space-y-6">
+              {/* API Key */}
+              <div>
+                <Input
+                  label="OpenWeatherMap API Key"
+                  type="text"
+                  name="apiKey"
+                  value={apiKey}
+                  placeholder="Enter your OpenWeatherMap API Key"
+                  onChange={this.handleChange}
+                />
+                <p className="text-sm text-gray-500 mt-1">
+                  Get your free API key from{' '}
+                  <a href="https://openweathermap.org/api" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:text-blue-800">
+                    OpenWeatherMap
+                  </a>
+                </p>
+              </div>
+
+              {/* Location and Unit Settings */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <Input
+                    label="Location"
+                    type="text"
+                    name="zip"
+                    value={zip}
+                    placeholder="e.g., 90210 or London"
+                    onChange={this.handleChange}
+                    expand={true}
+                  />
+                  <p className="text-sm text-gray-500 mt-1">Enter zip code or city name</p>
+                </div>
+                <div>
+                  <Input
+                    label="Temperature Unit"
+                    type="select"
+                    name="unit"
+                    value={unit}
+                    choices={unitChoices}
+                    onChange={this.handleChange}
+                    expand={false}
+                  />
+                </div>
+              </div>
+
+              {/* Display Options */}
+              <div className="space-y-4">
+                <div className="flex items-center">
+                  <Input
+                    type="checkbox"
+                    name="showForecast"
+                    label="Show Multi-day Forecast"
+                    checked={showForecast}
+                    onChange={(name, checked) => this.handleChange(name as keyof IWeatherOptionsState, checked)}
+                  />
+                </div>
+
+                <div>
+                  <Input
+                    label="Custom Location Name (Optional)"
+                    type="text"
+                    name="locationName"
+                    value={locationName}
+                    placeholder="e.g., New York City"
+                    onChange={this.handleChange}
+                  />
+                  <p className="text-sm text-gray-500 mt-1">Override the auto-detected location name</p>
+                </div>
+              </div>
+            </div>
+          </Form>
+        </div>
+      </div>
     )
   }
 }

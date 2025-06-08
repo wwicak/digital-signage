@@ -41,7 +41,7 @@ const Form: React.FC<IFormProps> = ({
   return (
     // Render an actual <form> element instead of a div
     <form
-      className={`custom-form-wrapper ${className}`} // Combine with any passed className
+      className={`space-y-4 ${className}`} // Use Tailwind spacing and combine with any passed className
       onSubmit={handleSubmit} // Use the potentially wrapped or direct onSubmit
       {...restFormProps} // Pass through other form attributes like 'method', 'action', etc.
     >

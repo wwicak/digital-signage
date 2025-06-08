@@ -139,3 +139,117 @@
     /* Fine-tune portrait display */
   }
 }
+
+/* Widget Settings Modal Improvements */
+@layer components {
+  .widget-settings-modal {
+    max-width: 56rem;
+    width: 100%;
+    max-height: 90vh;
+    overflow: hidden;
+  }
+
+  .widget-settings-content {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+  }
+
+  .widget-settings-body {
+    flex: 1;
+    overflow-y: auto;
+    padding-left: 0.25rem;
+    padding-right: 0.25rem;
+  }
+
+  .widget-config-section {
+    background-color: white;
+    border-radius: 0.5rem;
+    border: 1px solid #e5e7eb;
+    padding: 1.5rem;
+  }
+
+  .widget-config-section > * + * {
+    margin-top: 1.5rem;
+  }
+
+  .widget-config-header {
+    margin-bottom: 1.5rem;
+  }
+
+  .widget-config-title {
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: #111827;
+    margin-bottom: 0.5rem;
+  }
+
+  .widget-config-description {
+    color: #6b7280;
+  }
+
+  .widget-preview-section {
+    background-color: white;
+    border-radius: 0.5rem;
+    border: 1px solid #e5e7eb;
+    padding: 1.5rem;
+  }
+
+  .widget-preview-header {
+    margin-bottom: 1rem;
+  }
+
+  .widget-preview-title {
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: #111827;
+    margin-bottom: 0.5rem;
+  }
+
+  .widget-preview-container {
+    border: 1px solid #d1d5db;
+    border-radius: 0.5rem;
+    overflow: hidden;
+    background-color: #f9fafb;
+    min-height: 300px;
+  }
+
+  /* Form field improvements */
+  .form-field-group {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+
+  @media (min-width: 768px) {
+    .form-field-group {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+
+  .form-field-help {
+    font-size: 0.875rem;
+    color: #6b7280;
+    margin-top: 0.25rem;
+  }
+
+  /* Responsive adjustments for smaller screens */
+  @media (max-width: 768px) {
+    .widget-settings-modal {
+      max-width: 100%;
+      margin-left: 0.5rem;
+      margin-right: 0.5rem;
+      max-height: 95vh;
+    }
+
+    .widget-config-section,
+    .widget-preview-section {
+      padding: 1rem;
+    }
+
+    .form-field-group {
+      grid-template-columns: 1fr;
+      gap: 1rem;
+    }
+  }
+}

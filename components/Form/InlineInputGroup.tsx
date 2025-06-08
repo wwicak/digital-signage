@@ -15,38 +15,24 @@ const InlineInputGroup: React.FC<IInlineInputGroupProps> = ({
   ...restDivProps
 }) => {
   const childArray = Children.toArray(children);
-  const numChildren = childArray.length;
+
+  // Convert spacing to CSS gap value
+  const gapValue = typeof spacing === 'number' ? `${spacing}px` : spacing;
 
   return (
     <div
-      className={`inline-input-group ${className}`}
-      style={style} // Pass through custom styles
+      className={`flex flex-wrap gap-4 md:flex-nowrap ${className}`}
+      style={{
+        gap: gapValue,
+        ...style
+      }}
       {...restDivProps}
     >
       {childArray.map((child, index) => {
-        /*
-         * We need to wrap each child to apply margin, unless child can accept it directly
-         * or if we use CSS gap. For direct migration of margin logic:
-         */
-        const isLastChild = index === numChildren - 1;
-
-        /*
-         * If the child is an Input component that has an 'expand' prop,
-         * we might want to apply flex: 1 to its wrapper.
-         * This requires checking the child's type and props, which can be complex.
-         * For now, a simpler approach is to let Input components manage their own expand behavior.
-         * The original JS logic for 'expand' was on the Input itself, not handled by group.
-         */
-
-        /*
-         * Create a wrapper for each child to apply margin
-         * The key should be on the outermost element returned by map
-         */
         return (
           <div
             key={`input-group-child-${index}`}
-            className="input-group-item-wrapper"
-            style={{ marginRight: isLastChild ? 0 : spacing }}
+            className="flex-1 min-w-0"
           >
             {child}
           </div>

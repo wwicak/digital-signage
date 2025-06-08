@@ -4,6 +4,8 @@ import { Form, Button, ButtonGroup } from "../Form";
 import { getWidget, updateWidget, IWidgetData } from "../../actions/widgets"; // IWidgetData is likely an interface
 import * as z from "zod";
 import { WidgetDataZod, WidgetTypeZod } from "@/lib/models/Widget"; // Import Zod schema for widget's 'data' field and type
+import { DialogFooter } from "../ui/dialog";
+import { Loader2, AlertCircle } from "lucide-react";
 
 // Interface for methods exposed via ref - Zod not directly applicable
 export interface IWidgetEditDialog {
@@ -209,34 +211,59 @@ class WidgetEditDialog
       : 'Configure Widget';
 
     return (
-      <Dialog ref={this.dialogRef} title={dialogTitle}>
-        {error && (
-          <div style={{ color: "red", marginBottom: "10px" }}>
-            Error: {error}
+      <Dialog
+        ref={this.dialogRef}
+        title={dialogTitle}
+        className="widget-settings-modal"
+      >
+        <div className="widget-settings-content">
+          {/* Error Display */}
+          {error && (
+            <div className="flex items-center gap-2 p-4 mb-4 text-red-800 bg-red-50 border border-red-200 rounded-lg">
+              <AlertCircle className="w-5 h-5 flex-shrink-0" />
+              <div>
+                <h4 className="font-medium">Configuration Error</h4>
+                <p className="text-sm">{error}</p>
+              </div>
+            </div>
+          )}
+
+          {/* Content Area */}
+          <div className="widget-settings-body">
+            {isLoading ? (
+              <div className="flex items-center justify-center py-12">
+                <div className="flex items-center gap-3 text-gray-600">
+                  <Loader2 className="w-6 h-6 animate-spin" />
+                  <span className="text-lg">Loading widget configuration...</span>
+                </div>
+              </div>
+            ) : (
+              <OptionsComponent
+                data={widgetConfigData || {}}
+                onChange={this.handleOptionsChange}
+              />
+            )}
           </div>
-        )}
-        {isLoading ? (
-          <div>Loading widget configuration...</div>
-        ) : (
-          /*
-           * Ensure OptionsComponent is only rendered if widgetConfigData is available (not undefined)
-           * or if it can handle undefined data (e.g. for creating new data from scratch)
-           * For simplicity, assuming OptionsComponent can handle widgetConfigData being an empty object.
-           */
-          <OptionsComponent
-            data={widgetConfigData || {}}
-            onChange={this.handleOptionsChange}
-          />
-        )}
-        <ButtonGroup style={{ marginTop: 20 }}>
-          <Button
-            text={"Save"}
-            color={"#8bc34a"}
-            onClick={this.handleSave}
-            disabled={isLoading || !!error}
-          />
-          <Button text={"Cancel"} color={"#e85454"} onClick={this.close} />
-        </ButtonGroup>
+
+          {/* Footer */}
+          <DialogFooter className="mt-6 pt-4 border-t border-gray-200 bg-gray-50">
+            <div className="flex gap-3 justify-end w-full">
+              <Button
+                text="Cancel"
+                color="#6b7280"
+                onClick={this.close}
+                className="px-6 py-2 text-gray-700 bg-white hover:bg-gray-50 border border-gray-300 rounded-lg transition-colors shadow-sm"
+              />
+              <Button
+                text={isLoading ? "Saving..." : "Save Changes"}
+                color="#10b981"
+                onClick={this.handleSave}
+                disabled={isLoading || !!error}
+                className="px-6 py-2 text-white bg-green-600 hover:bg-green-700 disabled:bg-gray-400 disabled:cursor-not-allowed rounded-lg transition-colors shadow-sm"
+              />
+            </div>
+          </DialogFooter>
+        </div>
       </Dialog>
     );
   }
