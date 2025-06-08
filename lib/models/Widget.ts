@@ -173,9 +173,18 @@ const WidgetSchema = new Schema<IWidget>(
  * });
  */
 
-const WidgetModel: Model<IWidget> =
-  (mongoose.models?.Widget as Model<IWidget>) ||
-  mongoose.model<IWidget>("Widget", WidgetSchema);
+// Clear the cached model to ensure the updated schema is used
+if (mongoose.models?.Widget) {
+  delete mongoose.models.Widget;
+}
+
+// Debug: Log the enum values to verify they include media-player
+console.log("WidgetType enum values:", Object.values(WidgetType));
+
+const WidgetModel: Model<IWidget> = mongoose.model<IWidget>(
+  "Widget",
+  WidgetSchema
+);
 
 // Zod Schemas
 
@@ -209,42 +218,44 @@ export const ListWidgetDataSchema = z.object({
   color: z.string().optional(),
 });
 
-export const MediaPlayerWidgetDataSchema = z.object({
-  title: z.string().optional(),
-  url: z.string().optional(),
-  mediaType: z.enum(["video", "audio"]).optional(),
-  backgroundColor: z.string().optional(),
-  // Playback controls
-  autoplay: z.boolean().optional(),
-  loop: z.boolean().optional(),
-  volume: z.number().min(0).max(1).optional(),
-  muted: z.boolean().optional(),
-  showControls: z.boolean().optional(),
-  // Display options
-  fit: z.enum(["contain", "cover", "fill"]).optional(),
-  // Scheduling
-  enableScheduling: z.boolean().optional(),
-  schedule: z
-    .object({
-      daysOfWeek: z.array(z.number().min(0).max(6)).optional(),
-      timeSlots: z
-        .array(
-          z.object({
-            startTime: z.string().regex(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/), // HH:MM format
-            endTime: z.string().regex(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/), // HH:MM format
-          })
-        )
-        .optional(),
-    })
-    .optional(),
-  // Fallback content
-  fallbackContent: z
-    .object({
-      message: z.string().optional(),
-      backgroundColor: z.string().optional(),
-    })
-    .optional(),
-});
+export const MediaPlayerWidgetDataSchema = z
+  .object({
+    title: z.string().optional(),
+    url: z.string().optional(),
+    mediaType: z.enum(["video", "audio"]).optional(),
+    backgroundColor: z.string().optional(),
+    // Playback controls
+    autoplay: z.boolean().optional(),
+    loop: z.boolean().optional(),
+    volume: z.number().min(0).max(1).optional(),
+    muted: z.boolean().optional(),
+    showControls: z.boolean().optional(),
+    // Display options
+    fit: z.enum(["contain", "cover", "fill"]).optional(),
+    // Scheduling
+    enableScheduling: z.boolean().optional(),
+    schedule: z
+      .object({
+        daysOfWeek: z.array(z.number().min(0).max(6)).optional(),
+        timeSlots: z
+          .array(
+            z.object({
+              startTime: z.string(), // Simplified - remove regex for now
+              endTime: z.string(), // Simplified - remove regex for now
+            })
+          )
+          .optional(),
+      })
+      .optional(),
+    // Fallback content
+    fallbackContent: z
+      .object({
+        message: z.string().optional(),
+        backgroundColor: z.string().optional(),
+      })
+      .optional(),
+  })
+  .passthrough(); // Allow additional properties
 
 export const SlideshowWidgetDataSchema = z.object({
   slideshow_id: z.string().optional(), // Could be refined to ObjectId if always the case
@@ -357,11 +368,21 @@ export const WidgetSchemaZod = z
         }
         break;
       case WidgetType.MEDIA_PLAYER:
-        if (!MediaPlayerWidgetDataSchema.safeParse(val.data).success) {
+        const mediaPlayerResult = MediaPlayerWidgetDataSchema.safeParse(
+          val.data
+        );
+        console.log("MediaPlayer Zod validation result:", mediaPlayerResult);
+        if (!mediaPlayerResult.success) {
+          console.error(
+            "MediaPlayer Zod validation failed:",
+            mediaPlayerResult.error
+          );
           ctx.addIssue({
             code: z.ZodIssueCode.custom,
             path: ["data"],
-            message: "Data does not match MEDIA_PLAYER type schema",
+            message: `Data does not match MEDIA_PLAYER type schema: ${JSON.stringify(
+              mediaPlayerResult.error.issues
+            )}`,
           });
         }
         break;

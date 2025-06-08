@@ -59,6 +59,17 @@ export async function POST(request: NextRequest) {
 
     const { name, type, x, y, w, h, data, display_id } = body;
 
+    console.log("Widget creation request:", {
+      name,
+      type,
+      x,
+      y,
+      w,
+      h,
+      data,
+      display_id,
+    });
+
     if (!name || !type) {
       return NextResponse.json(
         { message: "Widget name and type are required." },
@@ -73,7 +84,9 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    console.log("About to validate widget data for type:", type);
     await validateWidgetData(type, data);
+    console.log("Widget data validation passed");
 
     const newWidgetDoc = new Widget({
       name,
@@ -86,7 +99,14 @@ export async function POST(request: NextRequest) {
       creator_id: user._id,
     });
 
+    console.log("About to save widget document:", {
+      name: newWidgetDoc.name,
+      type: newWidgetDoc.type,
+      data: newWidgetDoc.data,
+    });
+
     const savedWidget = await newWidgetDoc.save();
+    console.log("Widget saved successfully:", savedWidget._id);
 
     // If display_id is provided, add widget to display's widgets array
     if (display_id) {
@@ -135,6 +155,14 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json(savedWidget, { status: 201 });
   } catch (error: any) {
+    console.error("Widget creation error:", error);
+    console.error("Error details:", {
+      name: error.name,
+      message: error.message,
+      stack: error.stack,
+      errors: error.errors,
+    });
+
     if (error.message === "Authentication required") {
       return NextResponse.json(
         { message: "Authentication required" },
