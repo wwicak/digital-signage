@@ -7,7 +7,17 @@ import mongoose from "mongoose";
  */
 export interface Permission {
   action: "create" | "read" | "update" | "delete" | "manage";
-  resource: "user" | "building" | "display" | "widget" | "slide" | "slideshow";
+  resource:
+    | "user"
+    | "building"
+    | "display"
+    | "widget"
+    | "slide"
+    | "slideshow"
+    | "dashboard"
+    | "reservation"
+    | "room"
+    | "calendar";
   resourceId?: string; // Optional specific resource ID
 }
 
@@ -59,6 +69,15 @@ export function hasPermission(
       case "slide":
       case "slideshow":
         // Can manage content for displays they manage
+        return ["create", "read", "update", "delete", "manage"].includes(
+          action
+        );
+
+      case "dashboard":
+      case "reservation":
+      case "room":
+      case "calendar":
+        // Can manage meeting room system
         return ["create", "read", "update", "delete", "manage"].includes(
           action
         );

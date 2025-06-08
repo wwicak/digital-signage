@@ -23,7 +23,7 @@ export async function GET(request: NextRequest) {
     const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
     const tomorrow = new Date(today);
     tomorrow.setDate(tomorrow.getDate() + 1);
-    
+
     const thisWeekStart = new Date(today);
     thisWeekStart.setDate(today.getDate() - today.getDay());
     const thisWeekEnd = new Date(thisWeekStart);
@@ -38,26 +38,106 @@ export async function GET(request: NextRequest) {
       totalReservationsToday,
       totalReservationsThisWeek,
       totalReservationsThisMonth,
+      totalCalendarLinks,
       activeCalendarLinks,
       currentMeetings,
+      upcomingMeetingsToday,
     ] = await Promise.all([
       Building.countDocuments({}),
       Room.countDocuments({}),
       Reservation.countDocuments({
-        start_time: { $gte: today, $lt: tomorrow }
+        start_time: { $gte: today, $lt: tomorrow },
       }),
       Reservation.countDocuments({
-        start_time: { $gte: thisWeekStart, $lt: thisWeekEnd }
+        start_time: { $gte: thisWeekStart, $lt: thisWeekEnd },
       }),
       Reservation.countDocuments({
-        start_time: { $gte: thisMonthStart, $lt: thisMonthEnd }
+        start_time: { $gte: thisMonthStart, $lt: thisMonthEnd },
       }),
+      UserCalendarLink.countDocuments({}),
       UserCalendarLink.countDocuments({ isActive: true }),
       Reservation.countDocuments({
         start_time: { $lte: now },
-        end_time: { $gte: now }
+        end_time: { $gte: now },
+      }),
+      Reservation.countDocuments({
+        start_time: { $gte: now, $lt: tomorrow },
       }),
     ]);
+
+    // Calculate calendar integration statistics
+    const calendarSyncStats = await UserCalendarLink.aggregate([
+      {
+        $group: {
+          _id: null,
+          totalConnections: { $sum: 1 },
+          activeConnections: {
+            $sum: { $cond: [{ $eq: ["$isActive", true] }, 1, 0] },
+          },
+          successfulSyncs: {
+            $sum: { $cond: [{ $eq: ["$lastSyncStatus", "success"] }, 1, 0] },
+          },
+          totalSyncs: {
+            $sum: { $cond: [{ $ne: ["$lastSyncStatus", null] }, 1, 0] },
+          },
+        },
+      },
+    ]);
+
+    const calendarStats = calendarSyncStats[0] || {
+      totalConnections: 0,
+      activeConnections: 0,
+      successfulSyncs: 0,
+      totalSyncs: 0,
+    };
+
+    const syncSuccessRate =
+      calendarStats.totalSyncs > 0
+        ? Math.round(
+            (calendarStats.successfulSyncs / calendarStats.totalSyncs) * 100
+          )
+        : 100;
+
+    // Calculate average reservations per day for this month
+    const daysInMonth = new Date(
+      now.getFullYear(),
+      now.getMonth() + 1,
+      0
+    ).getDate();
+    const averageReservationsPerDay = Math.round(
+      totalReservationsThisMonth / daysInMonth
+    );
+
+    // Calculate room utilization rate
+    const roomsWithReservationsToday = await Room.aggregate([
+      {
+        $lookup: {
+          from: "reservations",
+          localField: "_id",
+          foreignField: "room_id",
+          as: "todayReservations",
+          pipeline: [
+            {
+              $match: {
+                start_time: { $gte: today, $lt: tomorrow },
+              },
+            },
+          ],
+        },
+      },
+      {
+        $match: {
+          "todayReservations.0": { $exists: true },
+        },
+      },
+      {
+        $count: "roomsUsed",
+      },
+    ]);
+
+    const roomsUsedToday = roomsWithReservationsToday[0]?.roomsUsed || 0;
+    const roomUtilizationRate =
+      totalRooms > 0 ? Math.round((roomsUsedToday / totalRooms) * 100) : 0;
 
     const roomUtilization = await Room.aggregate([
       {
@@ -69,37 +149,78 @@ export async function GET(request: NextRequest) {
           pipeline: [
             {
               $match: {
-                start_time: { $gte: thisWeekStart, $lt: thisWeekEnd }
-              }
-            }
-          ]
-        }
+                start_time: { $gte: today, $lt: tomorrow },
+              },
+            },
+          ],
+        },
       },
       {
         $lookup: {
           from: "buildings",
           localField: "building_id",
           foreignField: "_id",
-          as: "building"
-        }
+          as: "building",
+        },
       },
       {
-        $unwind: "$building"
+        $unwind: "$building",
+      },
+      {
+        $addFields: {
+          reservationCount: { $size: "$reservations" },
+          totalDuration: {
+            $sum: {
+              $map: {
+                input: "$reservations",
+                as: "reservation",
+                in: {
+                  $divide: [
+                    {
+                      $subtract: [
+                        "$$reservation.end_time",
+                        "$$reservation.start_time",
+                      ],
+                    },
+                    3600000, // Convert milliseconds to hours
+                  ],
+                },
+              },
+            },
+          },
+        },
+      },
+      {
+        $addFields: {
+          utilizationPercentage: {
+            $cond: [
+              { $gt: ["$reservationCount", 0] },
+              { $multiply: [{ $divide: ["$totalDuration", 8] }, 100] }, // Assuming 8-hour workday
+              0,
+            ],
+          },
+        },
       },
       {
         $project: {
-          name: 1,
-          capacity: 1,
-          building_name: "$building.name",
-          reservation_count: { $size: "$reservations" },
-        }
+          roomName: "$name",
+          buildingName: "$building.name",
+          reservationCount: 1,
+          totalDuration: { $round: ["$totalDuration", 1] },
+          utilizationPercentage: { $round: ["$utilizationPercentage", 0] },
+        },
       },
       {
-        $sort: { reservation_count: -1 }
+        $match: {
+          reservationCount: { $gt: 0 },
+        },
       },
       {
-        $limit: 10
-      }
+        $sort: { utilizationPercentage: -1 },
+      },
+      {
+        $limit: 10,
+      },
     ]);
 
     const buildingStats = await Building.aggregate([
@@ -108,8 +229,8 @@ export async function GET(request: NextRequest) {
           from: "rooms",
           localField: "_id",
           foreignField: "building_id",
-          as: "rooms"
-        }
+          as: "rooms",
+        },
       },
       {
         $lookup: {
@@ -119,25 +240,27 @@ export async function GET(request: NextRequest) {
             {
               $match: {
                 $expr: { $in: ["$room_id", "$$roomIds"] },
-                start_time: { $gte: thisWeekStart, $lt: thisWeekEnd }
-              }
-            }
+                start_time: { $gte: thisMonthStart, $lt: thisMonthEnd },
+              },
+            },
           ],
-          as: "reservations"
-        }
+          as: "reservations",
+        },
       },
       {
         $project: {
-          name: 1,
-          address: 1,
-          room_count: { $size: "$rooms" },
-          reservation_count: { $size: "$reservations" },
-          total_capacity: { $sum: "$rooms.capacity" }
-        }
+          buildingName: "$name",
+          reservationCount: { $size: "$reservations" },
+        },
       },
       {
-        $sort: { reservation_count: -1 }
-      }
+        $match: {
+          reservationCount: { $gt: 0 },
+        },
+      },
+      {
+        $sort: { reservationCount: -1 },
+      },
     ]);
 
     const recentActivity = await Reservation.find({})
@@ -145,22 +268,24 @@ export async function GET(request: NextRequest) {
         path: "room_id",
         populate: {
           path: "building_id",
-          select: "name"
-        }
+          select: "name",
+        },
       })
       .sort({ creation_date: -1 })
       .limit(10)
-      .select("title organizer start_time end_time creation_date room_id sourceCalendarType");
+      .select(
+        "title organizer start_time end_time creation_date room_id sourceCalendarType"
+      );
 
     const upcomingMeetings = await Reservation.find({
-      start_time: { $gt: now }
+      start_time: { $gt: now },
     })
       .populate({
         path: "room_id",
         populate: {
           path: "building_id",
-          select: "name"
-        }
+          select: "name",
+        },
       })
       .sort({ start_time: 1 })
       .limit(5)
@@ -173,14 +298,20 @@ export async function GET(request: NextRequest) {
         totalReservationsToday,
         totalReservationsThisWeek,
         totalReservationsThisMonth,
-        activeCalendarLinks,
         currentMeetings,
+        upcomingMeetingsToday,
+        averageReservationsPerDay,
+        roomUtilizationRate,
+      },
+      calendarIntegration: {
+        totalConnections: calendarStats.totalConnections,
+        activeConnections: calendarStats.activeConnections,
+        syncSuccessRate,
       },
       roomUtilization,
       buildingStats,
       recentActivity,
-      upcomingMeetings,
-      generatedAt: new Date().toISOString(),
+      lastUpdated: new Date().toISOString(),
     });
   } catch (error: any) {
     console.error("Error fetching dashboard data:", error);

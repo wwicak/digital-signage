@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+
 import { useRouter } from "next/router";
 import Frame from "../components/Admin/Frame";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -163,11 +164,11 @@ const BuildingsPage = () => {
   };
 
   return (
-    <Frame loggedIn={true} title="Buildings">
+    <Frame loggedIn={true}>
       <div className="space-y-6">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-bold tracking-tight">Buildings</h1>
+            <h1 className="text-3xl font-bold tracking-tight">Buildings</h1>
             <p className="text-muted-foreground">
               Manage buildings for your meeting room system
             </p>

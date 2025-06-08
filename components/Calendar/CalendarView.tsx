@@ -37,6 +37,7 @@ interface IReservation {
   agenda_meeting: string;
   sourceCalendarType?: "google" | "outlook" | "internal";
   isExternallyManaged?: boolean;
+  creation_date: string;
 }
 
 interface ICalendarViewProps {

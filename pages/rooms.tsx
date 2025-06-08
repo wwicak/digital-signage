@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from "react";
-import { NextPage } from "next";
 import Frame from "../components/Admin/Frame";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -53,7 +52,7 @@ interface IRoomFormData {
   facilities: string;
 }
 
-const RoomsPage: NextPage = () => {
+const RoomsPage = () => {
   const [rooms, setRooms] = useState<IRoom[]>([]);
   const [buildings, setBuildings] = useState<IBuilding[]>([]);
   const [loading, setLoading] = useState(true);

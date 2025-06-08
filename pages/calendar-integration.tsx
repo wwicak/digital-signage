@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { NextPage } from "next";
+
 import { useRouter } from "next/router";
 import Frame from "../components/Admin/Frame";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -39,7 +39,7 @@ interface ICalendarLink {
   updatedAt: string;
 }
 
-const CalendarIntegrationPage: NextPage = () => {
+const CalendarIntegrationPage = () => {
   const router = useRouter();
   const [calendarLinks, setCalendarLinks] = useState<ICalendarLink[]>([]);
   const [loading, setLoading] = useState(true);

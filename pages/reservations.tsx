@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from "react";
-import { NextPage } from "next";
 import Frame from "../components/Admin/Frame";
 import CalendarView from "@/components/Calendar/CalendarView";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -82,7 +81,7 @@ interface IReservationFormData {
   agenda_meeting: string;
 }
 
-const ReservationsPage: NextPage = () => {
+const ReservationsPage = () => {
   const [reservations, setReservations] = useState<IReservation[]>([]);
   const [buildings, setBuildings] = useState<IBuilding[]>([]);
   const [rooms, setRooms] = useState<IRoom[]>([]);
