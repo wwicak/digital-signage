@@ -77,7 +77,7 @@ export class NotificationService {
 
       const display = alert.displayId as any;
       const notification: AlertNotification = {
-        alertId: alert._id.toString(),
+        alertId: String(alert._id),
         displayId: display._id.toString(),
         displayName: display.name || `Display ${display._id}`,
         alertType: alert.alertType,
@@ -285,7 +285,7 @@ export class NotificationService {
           this.config.sms?.enabled && alert.shouldSendNotification("sms", 60);
 
         if (shouldSendEmail || shouldSendWebhook || shouldSendSMS) {
-          await this.sendAlertNotification(alert._id.toString());
+          await this.sendAlertNotification(String(alert._id));
         }
       }
     } catch (error) {

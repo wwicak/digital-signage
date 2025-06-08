@@ -35,7 +35,7 @@ const DisplayHeartbeat: React.FC<DisplayHeartbeatProps> = ({
   onHeartbeatSent,
   onConnectionStatusChange,
 }) => {
-  const heartbeatIntervalRef = useRef<NodeJS.Timeout>();
+  const heartbeatIntervalRef = useRef<NodeJS.Timeout | undefined>(undefined);
   const lastHeartbeatRef = useRef<number>(0);
   const consecutiveFailuresRef = useRef<number>(0);
   const errorCountRef = useRef<number>(0);

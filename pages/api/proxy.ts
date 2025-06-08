@@ -1,4 +1,4 @@
-import { NextApiRequest, NextApiResponse } from "next";
+import { NextRequest, NextResponse } from "next/server";
 
 /**
  * Simple proxy endpoint to help bypass X-Frame-Options restrictions
@@ -9,10 +9,7 @@ import { NextApiRequest, NextApiResponse } from "next";
  * - Caching headers
  * - Security headers
  */
-export default async function handler(
-  req: NextApiRequest,
-  res: NextApiResponse
-) {
+export default async function handler(req: any, res: any) {
   if (req.method !== "GET") {
     return res.status(405).json({ error: "Method not allowed" });
   }

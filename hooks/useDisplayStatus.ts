@@ -57,7 +57,7 @@ export const useDisplayStatus = (options?: {
   const [lastUpdateTime, setLastUpdateTime] = useState<Date>(new Date());
   const { isConnected } = useGlobalDisplaySSE(enableRealTimeUpdates);
   const queryClient = useQueryClient();
-  const updateTimeoutRef = useRef<NodeJS.Timeout>();
+  const updateTimeoutRef = useRef<NodeJS.Timeout | undefined>(undefined);
 
   // Fetch monitoring stats
   const {

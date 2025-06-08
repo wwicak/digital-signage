@@ -36,6 +36,13 @@ export interface IDisplayAlert extends Document {
   };
   createdAt: Date;
   updatedAt: Date;
+
+  // Instance methods
+  shouldSendNotification(
+    notificationType: "email" | "webhook" | "sms",
+    cooldownMinutes?: number
+  ): boolean;
+  addNotification(notificationType: "email" | "webhook" | "sms"): Promise<any>;
 }
 
 const DisplayAlertSchema = new Schema<IDisplayAlert>(
@@ -162,6 +169,32 @@ DisplayAlertSchema.methods.shouldSendNotification = function (
   return Date.now() - lastNotification.getTime() > cooldownMs;
 };
 
+// Instance methods
+DisplayAlertSchema.methods.shouldSendNotification = function (
+  notificationType: "email" | "webhook" | "sms",
+  cooldownMinutes: number = 30
+): boolean {
+  const notifications = this.notificationsSent[notificationType] || [];
+  if (notifications.length === 0) return true;
+
+  const lastNotification = notifications[notifications.length - 1];
+  const cooldownMs = cooldownMinutes * 60 * 1000;
+  const timeSinceLastNotification = Date.now() - lastNotification.getTime();
+
+  return timeSinceLastNotification >= cooldownMs;
+};
+
+DisplayAlertSchema.methods.addNotification = function (
+  notificationType: "email" | "webhook" | "sms"
+): Promise<any> {
+  if (!this.notificationsSent[notificationType]) {
+    this.notificationsSent[notificationType] = [];
+  }
+
+  this.notificationsSent[notificationType].push(new Date());
+  return this.save();
+};
+
 // Static methods
 DisplayAlertSchema.statics.createOfflineAlert = function (
   displayId: string,
@@ -285,9 +318,31 @@ DisplayAlertSchema.statics.getAlertStats = function (periodDays: number = 30) {
   ]);
 };
 
-const DisplayAlertModel: Model<IDisplayAlert> =
-  (mongoose.models?.DisplayAlert as Model<IDisplayAlert>) ||
-  mongoose.model<IDisplayAlert>("DisplayAlert", DisplayAlertSchema);
+// Static methods interface
+interface IDisplayAlertModel extends Model<IDisplayAlert> {
+  createOfflineAlert(
+    displayId: string,
+    offlineMinutes: number,
+    metadata?: any
+  ): Promise<IDisplayAlert>;
+  createPerformanceAlert(
+    displayId: string,
+    responseTime: number,
+    threshold: number,
+    metadata?: any
+  ): Promise<IDisplayAlert>;
+  getActiveAlerts(displayId?: string): any;
+  getUnacknowledgedAlerts(displayId?: string): any;
+  resolveAlertsForDisplay(displayId: string, alertTypes?: string[]): any;
+  getAlertStats(periodDays?: number): any;
+}
+
+const DisplayAlertModel: IDisplayAlertModel =
+  (mongoose.models?.DisplayAlert as IDisplayAlertModel) ||
+  mongoose.model<IDisplayAlert, IDisplayAlertModel>(
+    "DisplayAlert",
+    DisplayAlertSchema
+  );
 
 // Zod schema for validation
 export const DisplayAlertSchemaZod = z.object({

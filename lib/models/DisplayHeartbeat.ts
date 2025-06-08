@@ -193,9 +193,19 @@ DisplayHeartbeatSchema.statics.cleanupOldHeartbeats = function (
   });
 };
 
-const DisplayHeartbeatModel: Model<IDisplayHeartbeat> =
-  (mongoose.models?.DisplayHeartbeat as Model<IDisplayHeartbeat>) ||
-  mongoose.model<IDisplayHeartbeat>("DisplayHeartbeat", DisplayHeartbeatSchema);
+// Static methods interface
+interface IDisplayHeartbeatModel extends Model<IDisplayHeartbeat> {
+  getRecentHeartbeats(displayId: string, limitMinutes?: number): any;
+  getHeartbeatStats(displayId: string, periodHours?: number): any;
+  cleanupOldHeartbeats(daysToKeep?: number): any;
+}
+
+const DisplayHeartbeatModel: IDisplayHeartbeatModel =
+  (mongoose.models?.DisplayHeartbeat as IDisplayHeartbeatModel) ||
+  mongoose.model<IDisplayHeartbeat, IDisplayHeartbeatModel>(
+    "DisplayHeartbeat",
+    DisplayHeartbeatSchema
+  );
 
 // Zod schema for validation
 export const DisplayHeartbeatSchemaZod = z.object({
