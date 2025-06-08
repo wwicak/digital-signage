@@ -76,20 +76,28 @@ export const validateWidgetData = async (
 
   switch (type) {
     case WidgetType.ANNOUNCEMENT:
-      if (typeof data.title !== "string" || typeof data.message !== "string") {
+      if (typeof data.text !== "string") {
         throw new Error(
-          "Invalid data for Announcement widget: title and message must be strings."
+          "Invalid data for Announcement widget: text must be a string."
+        );
+      }
+      // title is optional, but if provided should be a string
+      if (data.title !== undefined && typeof data.title !== "string") {
+        throw new Error(
+          "Invalid data for Announcement widget: title, if provided, must be a string."
         );
       }
       break;
     case WidgetType.CONGRATS:
-      if (
-        typeof data.title !== "string" ||
-        typeof data.message !== "string" ||
-        typeof data.recipient !== "string"
-      ) {
+      if (typeof data.text !== "string") {
         throw new Error(
-          "Invalid data for Congrats widget: title, message, and recipient must be strings."
+          "Invalid data for Congrats widget: text must be a string."
+        );
+      }
+      // recipient is optional, but if provided should be a string
+      if (data.recipient !== undefined && typeof data.recipient !== "string") {
+        throw new Error(
+          "Invalid data for Congrats widget: recipient, if provided, must be a string."
         );
       }
       break;
@@ -135,13 +143,10 @@ export const validateWidgetData = async (
       }
       break;
     case WidgetType.WEATHER:
-      // Example: data might include a location string or object
-      if (
-        typeof data.location !== "string" &&
-        (typeof data.location !== "object" || !data.location.city)
-      ) {
+      // Weather widget uses zip code and unit
+      if (typeof data.zip !== "string") {
         throw new Error(
-          "Invalid data for Weather widget: location (string or object with city) is required."
+          "Invalid data for Weather widget: zip must be a string."
         );
       }
       if (data.unit && !["metric", "imperial"].includes(data.unit)) {

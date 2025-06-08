@@ -19,6 +19,7 @@ import { addWidget, getWidgets, deleteWidget, updateWidget, IWidgetData, INewWid
 import { WidgetType } from '../lib/models/Widget'
 import { protect, ProtectProps } from '../helpers/auth' // Assuming auth.js will be typed or allowJs
 import { useDisplayContext } from '../contexts/DisplayContext'
+import { useDisplays } from '../hooks/useDisplays'
 
 const GridLayoutWithWidth = WidthProvider(GridLayout as any)
 
@@ -29,13 +30,66 @@ interface ILayoutPageProps extends ProtectProps {
 const LayoutPage: React.FC<ILayoutPageProps> = ({ loggedIn, displayId }) => {
   const [widgets, setWidgets] = useState<IWidgetData[]>([])
   const displayContext = useDisplayContext()
+  const { data: displays, isLoading: displaysLoading } = useDisplays()
 
   useEffect(() => {
     if (displayId && displayId !== displayContext.state.id) {
+      console.log('[DEBUG] Setting display ID from URL:', displayId)
       displayContext.setId(displayId)
       refreshWidgets(displayId)
     }
   }, [displayId, displayContext.state.id]) // Only depend on the specific state value, not the whole context
+
+  // If no display ID is available, show a display selector
+  if (!displayContext.state.id && !displayId) {
+    return (
+      <Frame loggedIn={loggedIn}>
+        <div className="flex items-center justify-center min-h-screen">
+          <div className="text-center space-y-6 max-w-md">
+            <h2 className="text-2xl font-bold">Select a Display</h2>
+            <p className="text-muted-foreground">
+              Choose a display to start designing its layout with widgets.
+            </p>
+            
+            {displaysLoading ? (
+              <div>Loading displays...</div>
+            ) : displays && displays.length > 0 ? (
+              <div className="space-y-3">
+                <h3 className="text-lg font-semibold">Available Displays:</h3>
+                <div className="grid gap-2">
+                  {displays.map((display) => (
+                    <button
+                      key={display._id}
+                      onClick={() => {
+                        console.log('[DEBUG] Selected display:', display._id)
+                        displayContext.setId(display._id)
+                      }}
+                      className="p-3 border rounded-lg hover:bg-gray-50 transition-colors text-left"
+                    >
+                      <div className="font-medium">{display.name || 'Unnamed Display'}</div>
+                      <div className="text-sm text-muted-foreground">
+                        {display.orientation} • {display.layout}
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                <p>No displays found. Create a display first.</p>
+                <button
+                  onClick={() => window.location.href = '/screens'}
+                  className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+                >
+                  Go to Displays
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+      </Frame>
+    )
+  }
 
   const refreshWidgets = (displayId: string): Promise<void> => {
     return getWidgets(displayId).then(widgets => {
@@ -47,7 +101,19 @@ const LayoutPage: React.FC<ILayoutPageProps> = ({ loggedIn, displayId }) => {
   }
 
   const handleAddWidget = (type: string): void => {
+    console.log('[DEBUG] handleAddWidget called with type:', type)
+    console.log('[DEBUG] displayContext.state:', displayContext.state)
+    console.log('[DEBUG] displayContext.state.id:', displayContext.state.id)
+    
+    if (!displayContext.state.id) {
+      console.error('[ERROR] No display ID available in context')
+      alert('Error: No display selected. Please select a display first.')
+      return
+    }
+
     const widgetDefinition: IWidgetDefinition | undefined = Widgets[type]
+    console.log('[DEBUG] widgetDefinition:', widgetDefinition)
+    
     const newWidgetData: INewWidgetData = { // Construct data for addWidget action
         type: type as WidgetType,
         name: `${type} Widget`, // Provide a default name since it's required by the new API
@@ -55,6 +121,8 @@ const LayoutPage: React.FC<ILayoutPageProps> = ({ loggedIn, displayId }) => {
         display_id: displayContext.state.id!, // Pass display ID to associate widget with display
         // x, y, w, h can be omitted if server assigns defaults or if not needed immediately
     }
+
+    console.log('[DEBUG] newWidgetData before API call:', JSON.stringify(newWidgetData, null, 2))
 
     addWidget(newWidgetData)
         .then(() => refreshWidgets(displayContext.state.id!))
