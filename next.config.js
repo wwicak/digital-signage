@@ -42,10 +42,17 @@ const nextConfig = {
   compiler: {
     styledComponents: true,
   },
+// ESLint configuration - only treat errors as build failures, not warnings
+eslint: {
+  // During builds, only fail on ESLint errors, not warnings
+  ignoreDuringBuilds: false, // Keep linting enabled
+  dirs: ['pages', 'components', 'lib', 'app'], // Specify directories to lint
+},
 
-  // Configure to skip static generation for SSE routes
-  experimental: {
-    serverComponentsExternalPackages: ["mongoose"],
+// Configure to skip static generation for SSE routes
+experimental: {
+  serverComponentsExternalPackages: ["mongoose"],
+},
   },
 
   // Skip static optimization for specific routes
