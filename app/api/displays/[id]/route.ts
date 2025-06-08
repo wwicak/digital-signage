@@ -47,16 +47,17 @@ export async function GET(
   try {
     await dbConnect();
     const user = await requireAuth(request);
+    const { id } = await params;
 
     // Check if user can access this display
-    if (!canAccessDisplay(user, params.id)) {
+    if (!canAccessDisplay(user, id)) {
       return NextResponse.json(
         { message: "Access denied: Cannot view this display" },
         { status: 403 }
       );
     }
 
-    const display = await Display.findById(params.id).populate("widgets");
+    const display = await Display.findById(id).populate("widgets");
 
     if (!display) {
       return NextResponse.json(
@@ -81,9 +82,10 @@ export async function PUT(
   try {
     await dbConnect();
     const user = await requireAuth(request);
+    const { id } = await params;
 
     // Check if user can manage this display
-    if (!canManageDisplay(user, params.id)) {
+    if (!canManageDisplay(user, id)) {
       return NextResponse.json(
         { message: "Access denied: Cannot modify this display" },
         { status: 403 }
@@ -101,7 +103,7 @@ export async function PUT(
     }
 
     const { widgets: newWidgetsData, ...displayData } = parseResult.data;
-    const displayToUpdate = await Display.findById(params.id);
+    const displayToUpdate = await Display.findById(id);
 
     if (!displayToUpdate) {
       return NextResponse.json(
@@ -126,13 +128,13 @@ export async function PUT(
 
     // Send SSE event for display update
     try {
-      sendEventToDisplay(params.id as string, "display_updated", {
-        displayId: params.id,
+      sendEventToDisplay(id as string, "display_updated", {
+        displayId: id,
         action: "update",
         display: populatedDisplay,
       });
       sendEventToDisplay("global", "display-updated", {
-        displayId: params.id,
+        displayId: id,
         action: "update",
         display: populatedDisplay,
       });
@@ -156,16 +158,17 @@ export async function DELETE(
   try {
     await dbConnect();
     const user = await requireAuth(request);
+    const { id } = await params;
 
     // Check if user can manage this display (delete permission)
-    if (!canManageDisplay(user, params.id)) {
+    if (!canManageDisplay(user, id)) {
       return NextResponse.json(
         { message: "Access denied: Cannot delete this display" },
         { status: 403 }
       );
     }
 
-    const display = await Display.findById(params.id);
+    const display = await Display.findById(id);
 
     if (!display) {
       return NextResponse.json(
@@ -175,16 +178,16 @@ export async function DELETE(
     }
 
     await deleteWidgetsForDisplay(display);
-    await Display.findByIdAndDelete(params.id);
+    await Display.findByIdAndDelete(id);
 
     // Send SSE event for display deletion
     try {
-      sendEventToDisplay(params.id as string, "display_updated", {
-        displayId: params.id,
+      sendEventToDisplay(id as string, "display_updated", {
+        displayId: id,
         action: "delete",
       });
       sendEventToDisplay("global", "display-updated", {
-        displayId: params.id,
+        displayId: id,
         action: "delete",
       });
     } catch (error) {
