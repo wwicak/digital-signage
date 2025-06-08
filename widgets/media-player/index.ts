@@ -37,8 +37,6 @@ const mediaPlayerDefinitionArgs: IWidgetDefinitionArgs = {
   version: "1.0.0",
   icon: Play,
   defaultData: {
-    title: undefined,
-    url: undefined,
     mediaType: "video",
     backgroundColor: "#000000",
     autoplay: false,
