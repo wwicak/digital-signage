@@ -2,7 +2,7 @@
 
 import React, { Component, ReactNode, CSSProperties } from "react";
 import { LucideIcon } from "lucide-react";
-import { getIcon, type IconComponent } from "@/lib/icons";
+import { getIcon } from "@/lib/icons";
 
 export interface IDropdownChoice {
   key: string; // Used as the value for onSelect

@@ -222,4 +222,6 @@ const UserList = forwardRef<IUserListRef>((props, ref) => {
   );
 });
 
+UserList.displayName = 'UserList';
+
 export default UserList;

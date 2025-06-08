@@ -1,4 +1,4 @@
-import React, { ReactNode, JSX, memo, useCallback } from "react";
+import React, { ReactNode, JSX } from "react";
 import { Wifi } from "lucide-react";
 import Clock from "react-live-clock";
 
