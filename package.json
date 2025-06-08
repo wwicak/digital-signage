@@ -18,7 +18,7 @@
     "prepare": "husky",
     "seed:admin": "bun run create-admin.ts",
     "seed:meeting-rooms": "bun run scripts/seedMeetingAdmin.ts",
-    "setup:meeting-rooms": "node scripts/setup-meeting-rooms.js"
+    "setup:meeting-rooms": "node scripts/setup-meeting-rooms-simple.js"
   },
   "keywords": [],
   "author": "",
