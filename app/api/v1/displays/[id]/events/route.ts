@@ -1,13 +1,10 @@
 import { NextRequest } from "next/server";
 
-interface RouteParams {
-  params: {
-    id: string;
-  };
-}
-
-export async function GET(request: NextRequest, { params }: RouteParams) {
-  const { id: displayId } = params;
+export async function GET(
+  request: NextRequest,
+  context: { params: Promise<{ id: string }> }
+) {
+  const { id: displayId } = await context.params;
 
   if (!displayId || typeof displayId !== "string") {
     return new Response(JSON.stringify({ message: "Display ID is required" }), {

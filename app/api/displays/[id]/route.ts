@@ -42,12 +42,12 @@ const DisplayUpdateSchema = z.object({
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
   try {
     await dbConnect();
     const user = await requireAuth(request);
-    const { id } = await params;
+    const { id } = await context.params;
 
     // Check if user can access this display
     if (!canAccessDisplay(user, id)) {
@@ -77,12 +77,12 @@ export async function GET(
 
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
   try {
     await dbConnect();
     const user = await requireAuth(request);
-    const { id } = await params;
+    const { id } = await context.params;
 
     // Check if user can manage this display
     if (!canManageDisplay(user, id)) {
@@ -153,12 +153,12 @@ export async function PUT(
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
   try {
     await dbConnect();
     const user = await requireAuth(request);
-    const { id } = await params;
+    const { id } = await context.params;
 
     // Check if user can manage this display (delete permission)
     if (!canManageDisplay(user, id)) {

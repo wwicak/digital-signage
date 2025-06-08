@@ -8,12 +8,12 @@ import { requireAuth } from "@/lib/helpers/auth_helper";
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
   try {
     await dbConnect();
     const user = await requireAuth(request);
-    const { id } = await params;
+    const { id } = await context.params;
 
     const widget = await Widget.findOne({
       _id: id,
@@ -43,13 +43,13 @@ export async function GET(
 }
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
   try {
     await dbConnect();
     const user = await requireAuth(request);
     const body = await request.json();
-    const { id } = await params;
+    const { id } = await context.params;
 
     const { type, data, ...widgetUpdateData } = body;
 
@@ -126,12 +126,12 @@ export async function PUT(
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
   try {
     await dbConnect();
     const user = await requireAuth(request);
-    const { id } = await params;
+    const { id } = await context.params;
 
     const widget = await Widget.findOne({
       _id: id,

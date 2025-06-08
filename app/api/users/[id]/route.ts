@@ -24,11 +24,12 @@ const UpdateUserRoleSchema = z.object({
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
   try {
     await dbConnect();
     const user = await requireAuth(request);
+    const { id } = await context.params;
 
     // Check if user can view users
     if (!hasPermission(user, { action: "read", resource: "user" })) {
@@ -38,7 +39,7 @@ export async function GET(
       );
     }
 
-    const targetUser = await User.findById(params.id)
+    const targetUser = await User.findById(id)
       .populate("role.associatedBuildingIds", "name")
       .populate("role.associatedDisplayIds", "name")
       .select("-salt -hash");
@@ -61,11 +62,12 @@ export async function GET(
 
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
   try {
     await dbConnect();
     const user = await requireAuth(request);
+    const { id } = await context.params;
 
     // Check if user can update users
     if (!hasPermission(user, { action: "update", resource: "user" })) {
@@ -92,14 +94,14 @@ export async function PUT(
     const { role, name, email } = validation.data;
 
     // Find the target user
-    const targetUser = await User.findById(params.id);
+    const targetUser = await User.findById(id);
     if (!targetUser) {
       return NextResponse.json({ message: "User not found" }, { status: 404 });
     }
 
     // Prevent users from modifying their own role unless they're SuperAdmin
     if (
-      user._id.toString() === params.id &&
+      user._id.toString() === id &&
       user.role.name !== UserRoleName.SUPER_ADMIN
     ) {
       return NextResponse.json(
@@ -114,7 +116,7 @@ export async function PUT(
       // Check if email is already taken by another user
       const existingUser = await User.findOne({
         email,
-        _id: { $ne: params.id },
+        _id: { $ne: id },
       });
       if (existingUser) {
         return NextResponse.json(
@@ -262,11 +264,12 @@ export async function PUT(
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
   try {
     await dbConnect();
     const user = await requireAuth(request);
+    const { id } = await context.params;
 
     // Check if user can delete users
     if (!hasPermission(user, { action: "delete", resource: "user" })) {
@@ -277,13 +280,13 @@ export async function DELETE(
     }
 
     // Find the target user
-    const targetUser = await User.findById(params.id);
+    const targetUser = await User.findById(id);
     if (!targetUser) {
       return NextResponse.json({ message: "User not found" }, { status: 404 });
     }
 
     // Prevent users from deleting themselves
-    if (user._id.toString() === params.id) {
+    if (user._id.toString() === id) {
       return NextResponse.json(
         { message: "Access denied: Cannot delete yourself" },
         { status: 403 }
@@ -301,7 +304,7 @@ export async function DELETE(
       );
     }
 
-    await User.findByIdAndDelete(params.id);
+    await User.findByIdAndDelete(id);
 
     return NextResponse.json({
       message: "User deleted successfully",

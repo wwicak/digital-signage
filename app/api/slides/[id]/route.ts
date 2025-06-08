@@ -12,14 +12,15 @@ import { requireAuth } from "@/lib/helpers/auth_helper";
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
   try {
     await dbConnect();
     const user = await requireAuth(request);
+    const { id } = await context.params;
 
     const slide = await Slide.findOne({
-      _id: params.id,
+      _id: id,
       creator_id: user._id,
     });
 
@@ -47,12 +48,13 @@ export async function GET(
 
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
   try {
     await dbConnect();
     const user = await requireAuth(request);
     const body = await request.json();
+    const { id } = await context.params;
 
     const { slideshow_ids, ...slideData } = body;
 
@@ -65,7 +67,7 @@ export async function PUT(
     }
 
     const slideToUpdate = await Slide.findOne({
-      _id: params.id,
+      _id: id,
       creator_id: user._id,
     });
 
@@ -126,7 +128,7 @@ export async function PUT(
     } catch (notifyError) {
       // Log error but don't let it fail the main operation
       console.error(
-        `Error notifying displays after slide update ${params.id}:`,
+        `Error notifying displays after slide update ${id}:`,
         notifyError
       );
     }
@@ -154,14 +156,15 @@ export async function PUT(
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
   try {
     await dbConnect();
     const user = await requireAuth(request);
+    const { id } = await context.params;
 
     const slide = await Slide.findOne({
-      _id: params.id,
+      _id: id,
       creator_id: user._id,
     });
 
@@ -175,15 +178,12 @@ export async function DELETE(
     // Get display IDs before deleting the slide
     let displayIds: string[] = [];
     try {
-      displayIds = await getDisplayIdsForSlide(params.id);
+      displayIds = await getDisplayIdsForSlide(id);
     } catch (notifyError) {
-      console.error(
-        `Error getting display IDs for slide ${params.id}:`,
-        notifyError
-      );
+      console.error(`Error getting display IDs for slide ${id}:`, notifyError);
     }
 
-    const deletedSlide = await deleteSlideAndCleanReferences(params.id);
+    const deletedSlide = await deleteSlideAndCleanReferences(id);
 
     if (!deletedSlide) {
       return NextResponse.json(
@@ -199,12 +199,12 @@ export async function DELETE(
           displayId,
           action: "update",
           reason: "slide_deleted",
-          slideId: params.id,
+          slideId: id,
         });
       }
     } catch (notifyError) {
       console.error(
-        `Error notifying displays after slide deletion ${params.id}:`,
+        `Error notifying displays after slide deletion ${id}:`,
         notifyError
       );
     }

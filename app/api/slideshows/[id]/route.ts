@@ -14,14 +14,15 @@ import { requireAuth } from "@/lib/helpers/auth_helper";
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
   try {
     await dbConnect();
     const user = await requireAuth(request);
+    const { id } = await context.params;
 
     const slideshow = await Slideshow.findOne({
-      _id: params.id,
+      _id: id,
       creator_id: user._id,
     }).populate("slides");
 
@@ -49,12 +50,13 @@ export async function GET(
 
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
   try {
     await dbConnect();
     const user = await requireAuth(request);
     const body = await request.json();
+    const { id } = await context.params;
 
     const result = UpdateSlideshowSchema.safeParse(body);
 
@@ -71,7 +73,7 @@ export async function PUT(
     const { slide_ids, oldIndex, newIndex, ...slideshowData } = result.data;
 
     const slideshowToUpdate = await Slideshow.findOne({
-      _id: params.id,
+      _id: id,
       creator_id: user._id,
     });
 
@@ -123,7 +125,7 @@ export async function PUT(
       }
     } catch (notifyError) {
       console.error(
-        `Error notifying displays after slideshow update ${params.id}:`,
+        `Error notifying displays after slideshow update ${id}:`,
         notifyError
       );
     }
@@ -154,16 +156,17 @@ export async function PUT(
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
   try {
     await dbConnect();
     const user = await requireAuth(request);
+    const { id } = await context.params;
 
     let displayIdsToDeleteNotifications: string[] = [];
 
     const slideshow = await Slideshow.findOne({
-      _id: params.id,
+      _id: id,
       creator_id: user._id,
     });
 
@@ -176,17 +179,15 @@ export async function DELETE(
 
     // Get display IDs before deleting the slideshow
     try {
-      displayIdsToDeleteNotifications = await getDisplayIdsForSlideshow(
-        params.id
-      );
+      displayIdsToDeleteNotifications = await getDisplayIdsForSlideshow(id);
     } catch (notifyError) {
       console.error(
-        `Error getting display IDs for slideshow ${params.id}:`,
+        `Error getting display IDs for slideshow ${id}:`,
         notifyError
       );
     }
 
-    await Slideshow.findByIdAndDelete(params.id);
+    await Slideshow.findByIdAndDelete(id);
 
     // Notify relevant displays after successful deletion
     try {
@@ -195,12 +196,12 @@ export async function DELETE(
           displayId,
           action: "update",
           reason: "slideshow_deleted",
-          slideshowId: params.id,
+          slideshowId: id,
         });
       }
     } catch (notifyError) {
       console.error(
-        `Error notifying displays after slideshow deletion ${params.id}:`,
+        `Error notifying displays after slideshow deletion ${id}:`,
         notifyError
       );
     }
