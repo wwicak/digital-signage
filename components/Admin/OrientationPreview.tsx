@@ -7,58 +7,18 @@ interface OrientationPreviewProps {
 const OrientationPreview: React.FC<OrientationPreviewProps> = ({ orientation }) => {
   const isLandscape = orientation === 'landscape'
   const isPortrait = orientation === 'portrait'
-  
+
   return (
-    <div className="orientation-preview">
-      <div className={`screen ${orientation || 'landscape'}`}>
-        <div className="screen-content">
+    <div className="flex items-center justify-center my-1">
+      <div className={`border-2 border-gray-300 rounded bg-gray-50 flex items-center justify-center transition-all duration-200 relative hover:border-green-500 hover:bg-green-50 ${
+        isPortrait ? 'w-6 h-10' : 'w-10 h-6'
+      }`}>
+        <div className={`text-xs text-gray-600 font-medium text-center leading-none whitespace-nowrap ${
+          isPortrait ? '-rotate-90' : ''
+        }`}>
           {orientation ? orientation.charAt(0).toUpperCase() + orientation.slice(1) : 'Default'}
         </div>
       </div>
-      <style jsx>{`
-        .orientation-preview {
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          margin: 4px 0;
-        }
-        
-        .screen {
-          border: 2px solid #ddd;
-          border-radius: 4px;
-          background: #f8f9fa;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          transition: all 0.2s ease-in-out;
-          position: relative;
-        }
-        
-        .screen.landscape {
-          width: 40px;
-          height: 24px;
-        }
-        
-        .screen.portrait {
-          width: 24px;
-          height: 40px;
-        }
-        
-        .screen-content {
-          font-size: 8px;
-          color: #666;
-          font-weight: 500;
-          text-align: center;
-          line-height: 1;
-          transform: ${isPortrait ? 'rotate(-90deg)' : 'none'};
-          white-space: nowrap;
-        }
-        
-        .screen:hover {
-          border-color: #7bc043;
-          background: #f0f8e8;
-        }
-      `}</style>
     </div>
   )
 }

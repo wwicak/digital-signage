@@ -32,29 +32,21 @@ const ButtonGroup: React.FC<IButtonGroupProps> = ({
    * It's often better to let the parent control flex sizing. Removed for now, can be added back via `style` prop if needed.
    */
 
+  // Create dynamic classes based on props
+  const flexDirection = vertical ? 'flex-col' : 'flex-row'
+  const justifyClass = align === 'center' ? 'justify-center' : align === 'left' ? 'justify-start' : 'justify-end'
+  const alignItems = vertical
+    ? (align === 'left' ? 'items-start' : align === 'right' ? 'items-end' : 'items-stretch')
+    : 'items-center'
+  const width = vertical ? 'w-auto' : 'w-full'
+
   return (
     <div
-      className={`btn-group-container ${className}`} // Combine with any passed className
-      style={style} // Pass through custom styles
-      {...restDivProps} // Pass through other div attributes
+      className={`flex ${flexDirection} ${justifyClass} ${alignItems} ${width} gap-2 ${className}`}
+      style={style}
+      {...restDivProps}
     >
       {children}
-      <style jsx>{`
-        .btn-group-container {
-          display: flex;
-          flex-direction: ${vertical ? 'column' : 'row'};
-          justify-content: ${justifyContent};
-          align-items: ${vertical ? (align === 'left' ? 'flex-start' : align === 'right' ? 'flex-end' : 'stretch') : 'center'}; /* Align items for vertical stack */
-          width: ${vertical ? 'auto' : '100%'}; /* Full width for horizontal, auto for vertical */
-        }
-        /* Styling for spacing between buttons could be added here or handled by Button margins */
-        /* Example:
-        .btn-group-container > :global(button:not(:last-child)) {
-          margin-right: ${vertical ? '0' : '8px'};
-          margin-bottom: ${vertical ? '8px' : '0'};
-        }
-        */
-      `}</style>
     </div>
   )
 }

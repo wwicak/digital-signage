@@ -90,26 +90,30 @@ const Switch: React.FC<ISwitchProps> = ({
   }
 
   return (
-    <div className={`switch-input-group ${className || ''} ${inline ? 'inline' : 'block-layout'}`} style={style}>
-      {label && <label className='main-label'>{label}</label>}
-      <div className='switch-control-area'> {/* Wrapper for labels and switch */}
-          {uncheckedLabel && ( /* Display uncheckedLabel first if present (usually on the left) */
-          <label htmlFor={name} className='side-label unchecked-label'>
+    <div className={`mb-4 flex items-center ${className || ''} ${inline ? 'flex-row' : 'flex-col items-start'}`} style={style}>
+      {label && (
+        <label className={`text-gray-500 font-sans ${inline ? 'mr-4' : 'pb-2'}`}>
+          {label}
+        </label>
+      )}
+      <div className="flex items-center">
+          {uncheckedLabel && (
+          <label htmlFor={name} className="text-gray-500 font-sans flex items-center cursor-pointer text-sm">
               {uncheckedIcon && (
-              <span className='icon unchecked-icon'> {/* Changed div to span for inline flow */}
+              <span className="mx-1 inline-flex items-center">
                   <FontAwesomeIcon icon={uncheckedIcon} fixedWidth color='#828282' />
               </span>
               )}
               {uncheckedLabel}
           </label>
           )}
-          <div className={'switch-element-container'}> {/* Renamed from switch-container */}
+          <div className="mx-2 flex items-center">
               <ReactSwitch {...reactSwitchProps} id={name} />
           </div>
-          {checkedLabel && ( /* Display checkedLabel second if present (usually on the right) */
-          <label htmlFor={name} className='side-label checked-label'>
+          {checkedLabel && (
+          <label htmlFor={name} className="text-gray-500 font-sans flex items-center cursor-pointer text-sm">
               {checkedIcon && (
-              <span className='icon checked-icon'> {/* Changed div to span for inline flow */}
+              <span className="mx-1 inline-flex items-center">
                   <FontAwesomeIcon icon={checkedIcon} fixedWidth color='#828282' />
               </span>
               )}
@@ -117,66 +121,7 @@ const Switch: React.FC<ISwitchProps> = ({
           </label>
           )}
       </div>
-      <style jsx>{`
-        .switch-input-group {
-          margin-bottom: 16px;
-          display: flex; /* Use flex for layout */
-          align-items: center; /* Align items vertically */
-        }
-        .switch-input-group.inline {
-          /* Default: label, switch, labels are in a row */
-          flex-direction: row;
-        }
-        .switch-input-group.block-layout {
-          /* Label on top, switch control area below */
-          flex-direction: column;
-          align-items: flex-start; /* Align label to the left */
-        }
-        
-        .main-label {
-          margin-right: 16px; /* Space between main label and switch area */
-          color: #878787;
-          font-family: 'Open Sans', sans-serif;
-          padding-bottom: ${inline ? '0px' : '8px'}; /* Space below label in block mode */
-          /* Add other styling for main label if needed */
-        }
 
-        .switch-control-area {
-          display: flex;
-          align-items: center; /* Vertically center labels and switch */
-        }
-
-        .switch-element-container { /* Renamed */
-          margin-right: 8px;
-          margin-left: 8px;
-          display: flex; /* Necessary for ReactSwitch to align well sometimes */
-          align-items: center;
-        }
-
-        .side-label { /* Class for checkedLabel and uncheckedLabel */
-          color: #878787;
-          font-family: 'Open Sans', sans-serif;
-          display: flex;
-          align-items: center;
-          cursor: pointer; /* Make labels clickable to toggle switch */
-          font-size: 0.9em;
-        }
-        .checked-label {
-          /* Specific style for checked label if needed */
-        }
-        .unchecked-label {
-          /* Specific style for unchecked label if needed */
-        }
-
-        .side-label .icon {
-          margin-right: 4px; /* Space between icon and text in side-label */
-          margin-left: 4px;
-          display: inline-flex; /* Align icon properly */
-          align-items: center;
-        }
-        
-        /* Original .input styles are not applicable here as this is not a text input */
-      `}</style>
     </div>
   )
 }

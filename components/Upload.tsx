@@ -116,7 +116,7 @@ class Upload extends Component<IUploadProps, IUploadState> {
     }
 
     return (
-      <div className='upload-widget-container'>
+      <div>
         <SlideEditDialog
           slideshowId={slideshowId} // Pass slideshowId to know where to add the new slide
           upload={lastFile} // Pass the selected file (with preview) to the dialog
@@ -127,43 +127,22 @@ class Upload extends Component<IUploadProps, IUploadState> {
         <DropzoneWithNoSSR {...dropzoneProps}>
           {({ getRootProps, getInputProps, isDragActive }) => {
             return (
-              <div {...getRootProps()} className={`upload-dropzone-area ${isDragActive ? 'active' : ''}`}> {/* Renamed class */}
+              <div
+                {...getRootProps()}
+                className={`p-5 font-sans text-center rounded border-2 border-dashed border-gray-400 cursor-pointer bg-white outline-none transition-all duration-200 hover:border-blue-500 hover:bg-blue-50 ${
+                  isDragActive ? 'border-blue-500 bg-blue-50' : ''
+                }`}
+              >
                 <input {...getInputProps()} />
                 {isDragActive ? (
-                  <p>Drop files here to add to the slideshow...</p>
+                  <p className="m-0 text-gray-600">Drop files here to add to the slideshow...</p>
                 ) : (
-                  <p>Drag &apos;n&apos; drop some files here, or click to select files to add to the slideshow.</p> // More descriptive
+                  <p className="m-0 text-gray-600">Drag &apos;n&apos; drop some files here, or click to select files to add to the slideshow.</p>
                 )}
               </div>
             )
           }}
         </DropzoneWithNoSSR>
-        <style jsx>
-          {`
-            .upload-widget-container { /* Renamed */
-              /* Add any container specific styles if needed */
-            }
-            .upload-dropzone-area { /* Renamed */
-              padding: 20px;
-              font-family: 'Open Sans', sans-serif;
-              text-align: center;
-              border-radius: 4px;
-              border: 2px dashed #adadad;
-              cursor: pointer;
-              background: white;
-              outline: none;
-              transition: border-color 0.2s ease-in-out, background-color 0.2s ease-in-out;
-            }
-            .upload-dropzone-area.active {
-                border-color: #358aed;
-                background-color: #f0f8ff;
-            }
-            .upload-dropzone-area p { /* Style paragraph inside dropzone */
-                margin: 0;
-                color: #555;
-            }
-          `}
-        </style>
       </div>
     )
   }
