@@ -10,6 +10,11 @@ import {
   LogOut,
   ChevronDown,
   LucideIcon,
+  Building,
+  DoorOpen,
+  Calendar,
+  CalendarDays,
+  BarChart3,
 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -79,6 +84,12 @@ const Sidebar: React.FC<ISidebarProps> = ({ loggedIn, displayId }) => {
   const menu: IMenuItem[] = loggedIn
     ? [
         {
+          id: "dashboard",
+          name: "Dashboard",
+          path: `/dashboard`,
+          icon: BarChart3,
+        },
+        {
           id: "screen",
           name: "Screens",
           path: `/screens?display=${currentDisplayId}`,
@@ -93,7 +104,7 @@ const Sidebar: React.FC<ISidebarProps> = ({ loggedIn, displayId }) => {
         {
           id: "preview",
           name: "Preview",
-          path: `/preview?display=${currentDisplayId}`, // Assuming a preview page exists
+          path: `/preview?display=${currentDisplayId}`,
           icon: Eye,
         },
         {
@@ -101,6 +112,30 @@ const Sidebar: React.FC<ISidebarProps> = ({ loggedIn, displayId }) => {
           name: "Slideshows",
           path: `/slideshows?display=${currentDisplayId}`,
           icon: Images,
+        },
+        {
+          id: "buildings",
+          name: "Buildings",
+          path: `/buildings`,
+          icon: Building,
+        },
+        {
+          id: "rooms",
+          name: "Meeting Rooms",
+          path: `/rooms`,
+          icon: DoorOpen,
+        },
+        {
+          id: "reservations",
+          name: "Reservations",
+          path: `/reservations`,
+          icon: Calendar,
+        },
+        {
+          id: "calendar-integration",
+          name: "Calendar Sync",
+          path: `/calendar-integration`,
+          icon: CalendarDays,
         },
         {
           id: "users",
