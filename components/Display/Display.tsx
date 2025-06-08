@@ -79,6 +79,13 @@ const Display: React.FC<IDisplayComponentProps> = React.memo(({ display }) => {
     }
   }, [display, setId, refreshDisplay])
 
+  // Determine orientation-specific styling and grid configuration FIRST
+  const isPortrait = state.orientation === 'portrait'
+  const orientationClass = isPortrait ? 'portrait-display' : 'landscape-display'
+
+  // Adjust grid columns based on orientation for better layout
+  const gridCols = isPortrait ? 4 : 6 // Fewer columns in portrait for better widget sizing
+
   // Memoize layout for react-grid-layout to prevent unnecessary re-renders
   const rglWidgetLayout: RglLayout[] = useMemo(() =>
     (state.widgets || []).map((widget: any) => ({
@@ -102,7 +109,7 @@ const Display: React.FC<IDisplayComponentProps> = React.memo(({ display }) => {
     currentLayout === 'spaced' ? [10, 10] as [number, number] : [0, 0] as [number, number]
   , [currentLayout])
 
-  // Memoize widget rendering for performance
+  // Memoize widget rendering for performance - now isPortrait is available
   const renderWidget = useCallback((widget: any) => {
     const WidgetDefinition: IBaseWidget | undefined = Widgets[widget.type]
     const WidgetComponent = WidgetDefinition ? WidgetDefinition.Widget : EmptyWidget
@@ -118,13 +125,6 @@ const Display: React.FC<IDisplayComponentProps> = React.memo(({ display }) => {
       </div>
     )
   }, [currentLayout, isPortrait])
-
-  // Determine orientation-specific styling and grid configuration
-  const isPortrait = state.orientation === 'portrait'
-  const orientationClass = isPortrait ? 'portrait-display' : 'landscape-display'
-  
-  // Adjust grid columns based on orientation for better layout
-  const gridCols = isPortrait ? 4 : 6 // Fewer columns in portrait for better widget sizing
 
   return (
     /*
