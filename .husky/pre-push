@@ -4,8 +4,8 @@
 echo "Running pre-push hook: TypeScript checks and build..."
 
 # Run TypeScript checks
-echo "Running TypeScript checks (bun run type-check)..."
-bun run type-check
+echo "Running TypeScript checks (~/.bun/bin/bun run type-check)..."
+~/.bun/bin/bun run type-check
 if [ $? -ne 0 ]; then
   echo "TypeScript checks failed. Push aborted."
   exit 1
@@ -13,8 +13,8 @@ fi
 echo "TypeScript checks passed."
 
 # Run build
-echo "Running build (bun run build)..."
-bun run build
+echo "Running build (~/.bun/bin/bun run build)..."
+~/.bun/bin/bun run build
 if [ $? -ne 0 ]; then
   echo "Build failed. Push aborted."
   exit 1
