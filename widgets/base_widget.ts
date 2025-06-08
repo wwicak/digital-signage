@@ -1,6 +1,7 @@
 import React, { ComponentType } from 'react'
-import EmptyWidget from '../components/Widgets/EmptyWidget' // Assuming .js or .tsx
-import EmptyWidgetOptions from '../components/Widgets/EmptyWidgetOptions' // Assuming .js or .tsx
+import { LucideIcon } from 'lucide-react'
+import EmptyWidget from '../components/Widgets/EmptyWidget'
+import EmptyWidgetOptions from '../components/Widgets/EmptyWidgetOptions'
 
 // Generic widget content props interface
 export interface IWidgetContentProps<T = Record<string, any>> {
@@ -33,7 +34,7 @@ export interface IWidgetDefinitionArgs<TData = Record<string, any>> {
   name: string; // Human-readable name of the widget
   type: string; // Unique type identifier for the widget (e.g., 'clock', 'weather-map')
   version: string; // Version of the widget definition
-  icon: ; // Icon to represent the widget in UI
+  icon: LucideIcon; // Icon to represent the widget in UI
   defaultData?: TData; // Default configuration data for a new instance of this widget
   WidgetComponent?: ComponentType<IWidgetContentProps<TData>>; // The actual React component to render the widget
   OptionsComponent?: ComponentType<IWidgetOptionsEditorProps<TData>>; // The React component to render widget-specific options/settings
@@ -48,7 +49,7 @@ export interface IBaseWidget<TData = Record<string, any>> {
   name: string;
   type: string;
   version: string;
-  icon: ;
+  icon: LucideIcon;
   defaultData?: TData;
   Widget: ComponentType<IWidgetContentProps<TData>>; // Getter for the widget display component
   Options: ComponentType<IWidgetOptionsEditorProps<TData>>; // Getter for the widget options component
@@ -64,7 +65,7 @@ class BaseWidget implements IBaseWidget {
   public name: string
   public type: string
   public version: string
-  public icon: 
+  public icon: LucideIcon
   public defaultData?: Record<string, any>
 
   // Store the components passed in definition, or use defaults

@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef, memo } from 'react'
 import _ from 'lodash'
+import { Edit } from 'lucide-react'
 
 import Frame from '../components/Admin/Frame'
 import SlideListComponent from '../components/Admin/SlideList'
@@ -90,11 +91,11 @@ const SlideshowPageComponent = memo(function SlideshowPageComponent({ slideshow:
           size={(slideshow && slideshow.name && slideshow.name.length) || 20}
         />
         <div className='icon'>
-          <faPencilAlt 
+          <Edit className="w-4 h-4 text-gray-500" />
         </div>
       </div>
       <div className="max-w-2xl">
-        <Upload slideshowId={slideshow && slideshow._id || ''  refresh={refresh} />
+        <Upload slideshowId={slideshow && slideshow._id || ''} refresh={refresh} />
         <SlideEditDialogComponent
           slideshowId={slideshow && slideshow._id || ''}
           refresh={refresh}

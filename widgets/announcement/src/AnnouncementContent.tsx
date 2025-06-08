@@ -1,4 +1,5 @@
 import React from 'react'
+import { AlertTriangle } from 'lucide-react'
 
 import AutoScroll from '../../../components/AutoScroll'
 import * as z from 'zod'
@@ -38,7 +39,7 @@ const AnnouncementContent: React.FC<IAnnouncementContentProps> = React.memo(({ d
     <div className="relative box-border h-full w-full">
       <div className='title-bar'>
         <div className='icon'>
-          <faExclamationTriangle  style={{ fontSize: '0.9em'  className={accentColor} />
+          <AlertTriangle style={{ fontSize: '0.9em' }} className={accentColor} />
         </div>
         <span>Announcement</span>
       </div>

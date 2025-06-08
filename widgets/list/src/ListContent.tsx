@@ -74,7 +74,7 @@ class ListContent extends Component<IListContentProps> {
           >
             <ListTag className={`list-tag ${ordered ? 'ordered' : 'unordered'}`}>
               {list.map((item, index) => (
-                <li key={`list-item-${index}-${item.text.slice(0,10)}` className="flex-row justify-between items-center rounded w-full box-border" style={itemStyle}> {/* Renamed class */}
+                <li key={`list-item-${index}-${item.text.slice(0,10)}`} className="flex-row justify-between items-center rounded w-full box-border" style={itemStyle}> {/* Renamed class */}
                   <span className='text-content'>{item.text || 'Insert some text ...'}</span> {/* Renamed class */}
                   {item.label && <div className='label-tag'>{item.label}</div>} {/* Renamed class */}
                 </li>

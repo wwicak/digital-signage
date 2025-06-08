@@ -3,6 +3,7 @@
  * This provides a centralized way to manage all icons in the application
  */
 
+import * as React from 'react'
 import {
   // Navigation & UI
   Menu,
@@ -28,7 +29,7 @@ import {
   // Media & Content
   Play,
   Pause,
-  Stop,
+  Square as Stop,
   SkipForward,
   SkipBack,
   Volume2,
@@ -109,12 +110,12 @@ import {
   Clock as ClockIcon,
   Calendar as CalendarIcon,
   
-  type 
+  type LucideIcon
 } from 'lucide-react'
 
 // Icon mapping type
 export type IconName = string
-export type IconComponent = 
+export type IconComponent = LucideIcon
 
 // Comprehensive FontAwesome to Lucide mapping
 export const iconMap: Record<string, IconComponent> = {
@@ -251,8 +252,8 @@ interface IconProps {
 export const Icon: React.FC<IconProps> = ({ name, className = "w-4 h-4", size }) => {
   const IconComponent = getIcon(name)
   const sizeClass = size ? `w-${size} h-${size}` : className
-  
-  return <IconComponent className={sizeClass} />
+
+  return React.createElement(IconComponent, { className: sizeClass })
 }
 
 // Export commonly used icons for direct import

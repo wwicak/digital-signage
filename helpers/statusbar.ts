@@ -1,23 +1,10 @@
-import {
-  faRss,
-  faGripVertical,
-  faClock,
-  faCalendarAlt,
-  /*
-   * faWifi was used in Display/Frame.tsx for 'connection', ensure consistency or add both
-   * For now, sticking to original icons in this file.
-   */
-} from '@fortawesome/free-solid-svg-icons'
-
-config.autoAddCss = false
-// Library add calls are fine here, they register icons globally for FontAwesome
-library.add(faRss, faGripVertical, faClock, faCalendarAlt)
+import { Clock, Calendar, GripVertical, Wifi, LucideIcon } from 'lucide-react'
 
 // Interface for the definition of a status bar element type
 export interface IStatusBarElementDefinition {
   // 'type' field is implicit as it's the key in StatusBarElementTypes record
   name: string; // Display name for UI, e.g., in a selection dropdown
-  icon: ; // FontAwesome icon to represent this element type
+  icon: LucideIcon; // Lucide icon to represent this element type
   /*
    * Potentially add other properties if needed in the future,
    * e.g., a default component for rendering, or specific configuration options.
@@ -27,30 +14,20 @@ export interface IStatusBarElementDefinition {
 // Record of available status bar element types
 export const StatusBarElementTypes: Record<string, IStatusBarElementDefinition> = {
   time: {
-    name: 'Time', // Capitalized for display
-    icon: faClock ,
+    name: 'Time',
+    icon: Clock,
   },
   date: {
-    name: 'Date', // Capitalized
-    icon: faCalendarAlt ,
+    name: 'Date',
+    icon: Calendar,
   },
   spacer: {
-    /*
-     * 'Spacer' might not be a good name if it's just an icon.
-     * If it's a visual spacer, its rendering logic might be different.
-     * For now, assuming it's an icon-based element.
-     */
-    name: 'Spacer / Handle', // Clarified name
-    icon: faGripVertical ,
+    name: 'Spacer / Handle',
+    icon: GripVertical,
   },
   connection: {
-    /*
-     * Note: Display/Frame.tsx used faWifi for 'connection'.
-     * The original statusbar.js used faRss. This needs to be consistent.
-     * Assuming faRss is the intended icon for selection here.
-     */
-    name: 'Connection Status', // More descriptive name
-    icon: faRss ,
+    name: 'Connection Status',
+    icon: Wifi,
   },
   /*
    * Example of adding a new one:
@@ -65,7 +42,7 @@ export const StatusBarElementTypes: Record<string, IStatusBarElementDefinition> 
 export interface IStatusBarElementChoice {
   id: string; // The type key, e.g., "time"
   label: string; // The display name, e.g., "Time"
-  icon: ;
+  icon: LucideIcon;
 }
 
 export const statusBarElementChoices: IStatusBarElementChoice[] = Object.keys(StatusBarElementTypes).map(typeKey => ({

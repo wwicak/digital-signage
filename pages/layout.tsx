@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import GridLayout, { Layout as RglLayout } from 'react-grid-layout'
 import { DragDropContext, Droppable, DropResult, DroppableProvided } from '@hello-pangea/dnd'
+import { Edit, Grid2X2, Grid3X3 } from 'lucide-react'
 
 import Frame from '../components/Admin/Frame' // Assuming .js or .tsx
 import EditableWidget from '../components/Admin/EditableWidget' // Assuming .js or .tsx
@@ -120,7 +121,7 @@ const LayoutPage: React.FC<ILayoutPageProps> = ({ loggedIn, displayId }) => {
     return {
       key: key,
       name: elType.name,
-      icon: elType.icon as , // Cast if confident icon is always 
+      icon: elType.icon, // Lucide icon component
     }
   })
 
@@ -129,7 +130,7 @@ const LayoutPage: React.FC<ILayoutPageProps> = ({ loggedIn, displayId }) => {
       return {
           key: widgetDef.type || key, // Assuming Widgets might have a 'type' field or key is the type
           name: widgetDef.name,
-          icon: widgetDef.icon as ,
+          icon: widgetDef.icon, // Lucide icon component
       }
   })
 
@@ -147,14 +148,14 @@ const LayoutPage: React.FC<ILayoutPageProps> = ({ loggedIn, displayId }) => {
             size={(displayContext.state.name && displayContext.state.name.length > 0) ? displayContext.state.name.length : undefined}
           />
           <div className='icon'>
-            <faPencilAlt 
+            <Edit className="w-4 h-4 text-gray-500" />
           </div>
         </div>
       </div>
 
       <div className="flex flex-row items-center justify-between mb-4">
         <DropdownButton
-          icon={faPencilAlt   // Example icon, adjust as needed
+          icon={Edit}
           text='Add Status Bar Item'
           onSelect={displayContext.addStatusBarItem}
           choices={statusBarChoices}
@@ -198,7 +199,7 @@ const LayoutPage: React.FC<ILayoutPageProps> = ({ loggedIn, displayId }) => {
 
       <div className="flex flex-row items-center justify-between mb-4">
         <DropdownButton
-          icon={faPencilAlt } // Example icon
+          icon={Edit}
           text='Add Widget'
           onSelect={handleAddWidget}
           choices={widgetChoices}
@@ -208,8 +209,8 @@ const LayoutPage: React.FC<ILayoutPageProps> = ({ loggedIn, displayId }) => {
             name='layoutStyle' // Added name prop for Switch
             checkedLabel={'Compact'}
             uncheckedLabel={'Spaced'}
-            checkedIcon={faTh}
-            uncheckedIcon={faThLarge}
+            checkedIcon={Grid2X2}
+            uncheckedIcon={Grid3X3}
             checked={displayContext.state.layout === 'spaced'}
             onValueChange={handleLayoutTypeChange}
           />
