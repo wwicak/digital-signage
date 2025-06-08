@@ -145,6 +145,73 @@ export const validateWidgetData = async (
         );
       }
       break;
+    case WidgetType.MEDIA_PLAYER:
+      // Media player widget validation - all fields are optional
+      if (
+        data.url !== undefined &&
+        data.url !== null &&
+        typeof data.url !== "string"
+      ) {
+        throw new Error(
+          "Invalid data for Media Player widget: url, if provided, must be a string."
+        );
+      }
+      if (
+        data.mediaType !== undefined &&
+        !["video", "audio"].includes(data.mediaType)
+      ) {
+        throw new Error(
+          'Invalid data for Media Player widget: mediaType must be "video" or "audio".'
+        );
+      }
+      if (
+        data.volume !== undefined &&
+        (typeof data.volume !== "number" || data.volume < 0 || data.volume > 1)
+      ) {
+        throw new Error(
+          "Invalid data for Media Player widget: volume must be a number between 0 and 1."
+        );
+      }
+      if (
+        data.fit !== undefined &&
+        !["contain", "cover", "fill"].includes(data.fit)
+      ) {
+        throw new Error(
+          'Invalid data for Media Player widget: fit must be "contain", "cover", or "fill".'
+        );
+      }
+      if (data.schedule !== undefined) {
+        if (data.schedule.daysOfWeek !== undefined) {
+          if (
+            !Array.isArray(data.schedule.daysOfWeek) ||
+            !data.schedule.daysOfWeek.every(
+              (day: any) => typeof day === "number" && day >= 0 && day <= 6
+            )
+          ) {
+            throw new Error(
+              "Invalid data for Media Player widget: schedule.daysOfWeek must be an array of numbers 0-6."
+            );
+          }
+        }
+        if (data.schedule.timeSlots !== undefined) {
+          if (
+            !Array.isArray(data.schedule.timeSlots) ||
+            !data.schedule.timeSlots.every(
+              (slot: any) =>
+                slot &&
+                typeof slot.startTime === "string" &&
+                typeof slot.endTime === "string" &&
+                /^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/.test(slot.startTime) &&
+                /^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/.test(slot.endTime)
+            )
+          ) {
+            throw new Error(
+              "Invalid data for Media Player widget: schedule.timeSlots must be an array of objects with startTime and endTime in HH:MM format."
+            );
+          }
+        }
+      }
+      break;
     case WidgetType.MEETING_ROOM:
       // Meeting room widget validation - all fields are optional
       if (
