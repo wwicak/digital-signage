@@ -17,7 +17,8 @@
     "heroku-postbuild": "next build",
     "prepare": "husky",
     "seed:admin": "bun run create-admin.ts",
-    "seed:meeting-rooms": "bun run scripts/seedMeetingAdmin.ts"
+    "seed:meeting-rooms": "bun run scripts/seedMeetingAdmin.ts",
+    "setup:meeting-rooms": "node scripts/setup-meeting-rooms.js"
   },
   "keywords": [],
   "author": "",
@@ -87,6 +88,7 @@
     "react-switch": "^7.0.0",
     "react-youtube": "^7.9.0",
     "shortid": "^2.2.14",
+    "sonner": "^2.0.5",
     "styled-components": "^6.1.8",
     "styled-jsx": "^5.1.7",
     "superagent": "^5.0.5",

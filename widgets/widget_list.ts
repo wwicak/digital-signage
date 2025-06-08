@@ -13,6 +13,7 @@ const widgetTypes: string[] = [
   'image',
   'list',
   'announcement',
+  'meeting-room',
 ]
 
 export default widgetTypes
