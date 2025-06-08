@@ -1,5 +1,6 @@
 import { AuthenticatedUser } from "../auth";
 import { UserRoleName } from "../models/User";
+import { hasFeatureFlagAccess, FeatureFlagName } from "./feature_flag_helper";
 import mongoose from "mongoose";
 
 /**
@@ -17,19 +18,29 @@ export interface Permission {
     | "dashboard"
     | "reservation"
     | "room"
-    | "calendar";
+    | "calendar"
+    | "feature_flag";
   resourceId?: string; // Optional specific resource ID
+  featureFlag?: FeatureFlagName; // Optional feature flag to check
 }
 
 /**
  * Check if user has required permission
  */
-export function hasPermission(
+export async function hasPermission(
   user: AuthenticatedUser,
   permission: Permission
-): boolean {
+): Promise<boolean> {
   const { role } = user;
-  const { action, resource, resourceId } = permission;
+  const { action, resource, resourceId, featureFlag } = permission;
+
+  // Check feature flag access first if specified
+  if (featureFlag) {
+    const hasFeatureAccess = await hasFeatureFlagAccess(user, featureFlag);
+    if (!hasFeatureAccess) {
+      return false;
+    }
+  }
 
   // SuperAdmin has all permissions
   if (role.name === UserRoleName.SUPER_ADMIN) {
@@ -81,6 +92,10 @@ export function hasPermission(
         return ["create", "read", "update", "delete", "manage"].includes(
           action
         );
+
+      case "feature_flag":
+        // Only SuperAdmin can manage feature flags, but ResourceManager can read
+        return action === "read";
 
       default:
         return false;
@@ -141,11 +156,11 @@ export function hasPermission(
 /**
  * Check if user can access a specific display
  */
-export function canAccessDisplay(
+export async function canAccessDisplay(
   user: AuthenticatedUser,
   displayId: string
-): boolean {
-  return hasPermission(user, {
+): Promise<boolean> {
+  return await hasPermission(user, {
     action: "read",
     resource: "display",
     resourceId: displayId,
@@ -155,11 +170,11 @@ export function canAccessDisplay(
 /**
  * Check if user can manage a specific display
  */
-export function canManageDisplay(
+export async function canManageDisplay(
   user: AuthenticatedUser,
   displayId: string
-): boolean {
-  return hasPermission(user, {
+): Promise<boolean> {
+  return await hasPermission(user, {
     action: "manage",
     resource: "display",
     resourceId: displayId,
@@ -169,8 +184,8 @@ export function canManageDisplay(
 /**
  * Check if user can create users
  */
-export function canCreateUsers(user: AuthenticatedUser): boolean {
-  return hasPermission(user, {
+export async function canCreateUsers(user: AuthenticatedUser): Promise<boolean> {
+  return await hasPermission(user, {
     action: "create",
     resource: "user",
   });
@@ -179,11 +194,11 @@ export function canCreateUsers(user: AuthenticatedUser): boolean {
 /**
  * Check if user can manage buildings
  */
-export function canManageBuilding(
+export async function canManageBuilding(
   user: AuthenticatedUser,
   buildingId?: string
-): boolean {
-  return hasPermission(user, {
+): Promise<boolean> {
+  return await hasPermission(user, {
     action: "manage",
     resource: "building",
     resourceId: buildingId,
@@ -224,8 +239,9 @@ export function getAccessibleBuildingIds(user: AuthenticatedUser): string[] {
  * Middleware to require specific permission
  */
 export function requirePermission(permission: Permission) {
-  return (user: AuthenticatedUser) => {
-    if (!hasPermission(user, permission)) {
+  return async (user: AuthenticatedUser) => {
+    const hasAccess = await hasPermission(user, permission);
+    if (!hasAccess) {
       throw new Error(
         `Access denied: Missing required permission ${permission.action} on ${permission.resource}`
       );
@@ -271,4 +287,24 @@ export function addAccessFilter(
   }
 
   return query;
+}
+
+/**
+ * Check if user can manage feature flags
+ */
+export async function canManageFeatureFlags(user: AuthenticatedUser): Promise<boolean> {
+  return await hasPermission(user, {
+    action: "manage",
+    resource: "feature_flag",
+  });
+}
+
+/**
+ * Check if user can read feature flags
+ */
+export async function canReadFeatureFlags(user: AuthenticatedUser): Promise<boolean> {
+  return await hasPermission(user, {
+    action: "read",
+    resource: "feature_flag",
+  });
 }

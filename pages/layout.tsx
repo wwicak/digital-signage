@@ -14,6 +14,7 @@ import { Form, Switch } from '../components/Form' // Assuming .js or .tsx
 import { StatusBarElementTypes, IStatusBarElementDefinition } from '../helpers/statusbar' // Assuming statusbar.js will be typed
 
 import Widgets, { IWidgetDefinition } from '../widgets' // Assuming widgets/index.js will be typed
+import { useWidgetChoices } from '../hooks/useAvailableWidgets'
 
 import { addWidget, getWidgets, deleteWidget, updateWidget, IWidgetData, INewWidgetData, IUpdateWidgetData } from '../actions/widgets' // Already .tsx
 import { WidgetType } from '../lib/models/Widget'
@@ -31,6 +32,7 @@ const LayoutPage: React.FC<ILayoutPageProps> = ({ loggedIn, displayId }) => {
   const [widgets, setWidgets] = useState<IWidgetData[]>([])
   const displayContext = useDisplayContext()
   const { data: displays, isLoading: displaysLoading } = useDisplays()
+  const { widgetChoices, isLoading: widgetChoicesLoading } = useWidgetChoices()
 
   useEffect(() => {
     if (displayId && displayId !== displayContext.state.id) {
@@ -185,14 +187,8 @@ const LayoutPage: React.FC<ILayoutPageProps> = ({ loggedIn, displayId }) => {
     }
   })
 
-  const widgetChoices: IDropdownChoice[] = Object.keys(Widgets).map(key => {
-      const widgetDef = Widgets[key]
-      return {
-          key: widgetDef.type || key, // Assuming Widgets might have a 'type' field or key is the type
-          name: widgetDef.name,
-          icon: widgetDef.icon, // Lucide icon component
-      }
-  })
+  // Widget choices are now provided by the useWidgetChoices hook
+  // which filters based on feature flags
 
   return (
     <Frame loggedIn={loggedIn}>
@@ -279,9 +275,10 @@ const LayoutPage: React.FC<ILayoutPageProps> = ({ loggedIn, displayId }) => {
               <div className="flex items-center space-x-3">
                 <DropdownButton
                   icon={Edit}
-                  text="Add Widget"
+                  text={widgetChoicesLoading ? "Loading Widgets..." : "Add Widget"}
                   onSelect={handleAddWidget}
                   choices={widgetChoices}
+                  disabled={widgetChoicesLoading}
                   style={{
                     padding: '8px 16px',
                     borderRadius: '6px',

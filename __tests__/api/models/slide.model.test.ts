@@ -89,6 +89,7 @@ describe("Slide Model Zod Schema (SlideSchemaZod)", () => {
       };
       expect(SlideSchemaZod.safeParse(data).success).toBe(true);
     });
+
     it("should validate IMAGE type with correct data (relative URL)", () => {
       const data = {
         ...baseValidSlide,
@@ -97,6 +98,7 @@ describe("Slide Model Zod Schema (SlideSchemaZod)", () => {
       };
       expect(SlideSchemaZod.safeParse(data).success).toBe(true);
     });
+
     it("should invalidate IMAGE type with incorrect data (missing url)", () => {
       const data = {
         ...baseValidSlide,
@@ -144,6 +146,7 @@ describe("Slide Model Zod Schema (SlideSchemaZod)", () => {
       };
       expect(SlideSchemaZod.safeParse(data).success).toBe(true);
     });
+
     it("should validate VIDEO type with correct data (relative URL)", () => {
       const data = {
         ...baseValidSlide,
@@ -152,6 +155,7 @@ describe("Slide Model Zod Schema (SlideSchemaZod)", () => {
       };
       expect(SlideSchemaZod.safeParse(data).success).toBe(true);
     });
+
     it("should invalidate VIDEO type with incorrect data (e.g., content instead of url)", () => {
       const data = {
         ...baseValidSlide,
@@ -228,7 +232,7 @@ describe("Slide Model Zod Schema (SlideSchemaZod)", () => {
     });
 
     // Test for PHOTO type (similar to IMAGE)
-    it("should validate PHOTO type with correct data", () => {
+    it("should validate PHOTO type with correct data (absolute URL)", () => {
       const data = {
         ...baseValidSlide,
         type: SlideType.PHOTO,
@@ -236,6 +240,16 @@ describe("Slide Model Zod Schema (SlideSchemaZod)", () => {
       };
       expect(SlideSchemaZod.safeParse(data).success).toBe(true);
     });
+
+    it("should validate PHOTO type with correct data (relative URL)", () => {
+      const data = {
+        ...baseValidSlide,
+        type: SlideType.PHOTO,
+        data: { url: "/uploads/images/photo.jpg" }
+      };
+      expect(SlideSchemaZod.safeParse(data).success).toBe(true);
+    });
+
     it("should invalidate PHOTO type with incorrect data", () => {
       const data = {
         ...baseValidSlide,

@@ -16,6 +16,7 @@ import { useDisplayContext } from '../../contexts/DisplayContext'
 
 import { StatusBarElementTypes } from '../../helpers/statusbar'
 import Widgets from '../../widgets'
+import { useWidgetChoices } from '../../hooks/useAvailableWidgets'
 
 import { addWidget, getWidgets, deleteWidget, updateWidget, IWidgetData, INewWidgetData, IUpdateWidgetData } from '../../actions/widgets'
 import { WidgetType } from '../../lib/models/Widget'
@@ -26,6 +27,7 @@ const LayoutAdminContent = memo(function LayoutAdminContent() {
   const [widgets, setWidgets] = useState<IWidgetData[]>([])
   const searchParams = useSearchParams()
   const context = useDisplayContext()
+  const { widgetChoices, isLoading: widgetChoicesLoading } = useWidgetChoices()
 
   // Memoize refreshWidgets to stabilize useEffect dependency
   const refreshWidgets = useCallback((displayId: string): Promise<void> => {
@@ -125,14 +127,8 @@ const LayoutAdminContent = memo(function LayoutAdminContent() {
     }
   })
 
-  const widgetChoices = Object.keys(Widgets).map(key => {
-      const widgetDef = Widgets[key]
-      return {
-          key: widgetDef.type || key,
-          name: widgetDef.name,
-          icon: widgetDef.icon,
-      }
-  })
+  // Widget choices are now provided by the useWidgetChoices hook
+  // which filters based on feature flags
 
   return (
     <Frame loggedIn={true}>
@@ -200,9 +196,10 @@ const LayoutAdminContent = memo(function LayoutAdminContent() {
       <div className="flex flex-row items-center justify-between mb-4">
         <DropdownButton
           icon={Edit}
-          text='Add Widget'
+          text={widgetChoicesLoading ? 'Loading Widgets...' : 'Add Widget'}
           onSelect={handleAddWidget}
           choices={widgetChoices}
+          disabled={widgetChoicesLoading}
         />
         <Form>
           <Switch
