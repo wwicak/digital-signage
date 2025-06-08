@@ -3,10 +3,13 @@ import dbConnect from "@/lib/mongodb";
 import UserCalendarLink from "@/lib/models/UserCalendarLink";
 import mongoose from "mongoose";
 
+// Force dynamic rendering to prevent static generation errors
+export const dynamic = "force-dynamic";
+
 export async function GET(request: NextRequest) {
   try {
     await dbConnect();
-    
+
     const { searchParams } = new URL(request.url);
     const code = searchParams.get("code");
     const state = searchParams.get("state"); // This is the userId
@@ -14,7 +17,10 @@ export async function GET(request: NextRequest) {
 
     if (error) {
       return NextResponse.redirect(
-        new URL(`/calendar-integration?error=${encodeURIComponent(error)}`, request.url)
+        new URL(
+          `/calendar-integration?error=${encodeURIComponent(error)}`,
+          request.url
+        )
       );
     }
 
@@ -33,45 +39,53 @@ export async function GET(request: NextRequest) {
     // Check if Google OAuth is configured
     const clientId = process.env.GOOGLE_CLIENT_ID;
     const clientSecret = process.env.GOOGLE_CLIENT_SECRET;
-    const redirectUri = process.env.GOOGLE_REDIRECT_URI || `${process.env.NEXTAUTH_URL}/api/v1/calendar/google/callback`;
+    const redirectUri =
+      process.env.GOOGLE_REDIRECT_URI ||
+      `${process.env.NEXTAUTH_URL}/api/v1/calendar/google/callback`;
 
     if (!clientId || !clientSecret) {
       return NextResponse.redirect(
-        new URL("/calendar-integration?error=google_not_configured", request.url)
+        new URL(
+          "/calendar-integration?error=google_not_configured",
+          request.url
+        )
       );
     }
 
     try {
       // Exchange code for tokens
-      const tokenResponse = await fetch('https://oauth2.googleapis.com/token', {
-        method: 'POST',
+      const tokenResponse = await fetch("https://oauth2.googleapis.com/token", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/x-www-form-urlencoded',
+          "Content-Type": "application/x-www-form-urlencoded",
         },
         body: new URLSearchParams({
           client_id: clientId,
           client_secret: clientSecret,
           code,
-          grant_type: 'authorization_code',
+          grant_type: "authorization_code",
           redirect_uri: redirectUri,
         }),
       });
 
       if (!tokenResponse.ok) {
-        throw new Error('Failed to exchange code for tokens');
+        throw new Error("Failed to exchange code for tokens");
       }
 
       const tokens = await tokenResponse.json();
 
       // Get user profile
-      const profileResponse = await fetch('https://www.googleapis.com/oauth2/v2/userinfo', {
-        headers: {
-          'Authorization': `Bearer ${tokens.access_token}`,
-        },
-      });
+      const profileResponse = await fetch(
+        "https://www.googleapis.com/oauth2/v2/userinfo",
+        {
+          headers: {
+            Authorization: `Bearer ${tokens.access_token}`,
+          },
+        }
+      );
 
       if (!profileResponse.ok) {
-        throw new Error('Failed to get user profile');
+        throw new Error("Failed to get user profile");
       }
 
       const profile = await profileResponse.json();
@@ -86,8 +100,11 @@ export async function GET(request: NextRequest) {
       if (existingLink) {
         // Update existing link
         existingLink.accessToken = tokens.access_token;
-        existingLink.refreshToken = tokens.refresh_token || existingLink.refreshToken;
-        existingLink.tokenExpiryDate = new Date(Date.now() + (tokens.expires_in * 1000));
+        existingLink.refreshToken =
+          tokens.refresh_token || existingLink.refreshToken;
+        existingLink.tokenExpiryDate = new Date(
+          Date.now() + tokens.expires_in * 1000
+        );
         existingLink.isActive = true;
         existingLink.lastSyncStatus = "success";
         existingLink.lastSyncedAt = new Date();
@@ -101,7 +118,7 @@ export async function GET(request: NextRequest) {
           calendarId: "primary",
           accessToken: tokens.access_token,
           refreshToken: tokens.refresh_token,
-          tokenExpiryDate: new Date(Date.now() + (tokens.expires_in * 1000)),
+          tokenExpiryDate: new Date(Date.now() + tokens.expires_in * 1000),
           scopes: tokens.scope ? tokens.scope.split(" ") : [],
           isActive: true,
           lastSyncStatus: "success",
@@ -116,13 +133,21 @@ export async function GET(request: NextRequest) {
     } catch (authError: any) {
       console.error("Google OAuth error:", authError);
       return NextResponse.redirect(
-        new URL(`/calendar-integration?error=${encodeURIComponent(authError.message)}`, request.url)
+        new URL(
+          `/calendar-integration?error=${encodeURIComponent(
+            authError.message
+          )}`,
+          request.url
+        )
       );
     }
   } catch (error: any) {
     console.error("Error handling Google OAuth callback:", error);
     return NextResponse.redirect(
-      new URL(`/calendar-integration?error=${encodeURIComponent(error.message)}`, request.url)
+      new URL(
+        `/calendar-integration?error=${encodeURIComponent(error.message)}`,
+        request.url
+      )
     );
   }
 }

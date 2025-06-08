@@ -1,19 +1,25 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requireAuth } from "@/lib/helpers/auth_helper";
 
+// Force dynamic rendering to prevent static generation errors
+export const dynamic = "force-dynamic";
+
 export async function GET(request: NextRequest) {
   try {
     const user = await requireAuth(request);
 
     // Check if Google OAuth credentials are configured
     const clientId = process.env.GOOGLE_CLIENT_ID;
-    const redirectUri = process.env.GOOGLE_REDIRECT_URI || `${process.env.NEXTAUTH_URL}/api/v1/calendar/google/callback`;
+    const redirectUri =
+      process.env.GOOGLE_REDIRECT_URI ||
+      `${process.env.NEXTAUTH_URL}/api/v1/calendar/google/callback`;
 
     if (!clientId) {
       return NextResponse.json(
-        { 
-          message: "Google Calendar integration is not configured. Please set GOOGLE_CLIENT_ID in environment variables.",
-          configured: false 
+        {
+          message:
+            "Google Calendar integration is not configured. Please set GOOGLE_CLIENT_ID in environment variables.",
+          configured: false,
         },
         { status: 503 }
       );
@@ -21,12 +27,13 @@ export async function GET(request: NextRequest) {
 
     // Generate OAuth URL
     const scopes = [
-      'https://www.googleapis.com/auth/calendar.readonly',
-      'https://www.googleapis.com/auth/calendar.events',
-      'https://www.googleapis.com/auth/userinfo.profile'
-    ].join(' ');
+      "https://www.googleapis.com/auth/calendar.readonly",
+      "https://www.googleapis.com/auth/calendar.events",
+      "https://www.googleapis.com/auth/userinfo.profile",
+    ].join(" ");
 
-    const authUrl = `https://accounts.google.com/o/oauth2/v2/auth?` +
+    const authUrl =
+      `https://accounts.google.com/o/oauth2/v2/auth?` +
       `client_id=${encodeURIComponent(clientId)}&` +
       `redirect_uri=${encodeURIComponent(redirectUri)}&` +
       `scope=${encodeURIComponent(scopes)}&` +

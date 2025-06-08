@@ -4,6 +4,9 @@ import { authenticateUser, sanitizeUser } from "@/lib/helpers/auth_helper";
 import { generateToken, setAuthCookie } from "@/lib/auth";
 import { z } from "zod";
 
+// Force dynamic rendering to prevent static generation errors
+export const dynamic = "force-dynamic";
+
 // Request body schema for login
 const LoginRequestSchema = z.object({
   email: z.string().email("Invalid email address"),

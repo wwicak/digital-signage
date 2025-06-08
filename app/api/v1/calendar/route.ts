@@ -4,6 +4,9 @@ import UserCalendarLink from "@/lib/models/UserCalendarLink";
 import { requireAuth } from "@/lib/helpers/auth_helper";
 import { hasPermission } from "@/lib/helpers/rbac_helper";
 
+// Force dynamic rendering to prevent static generation errors
+export const dynamic = "force-dynamic";
+
 export async function GET(request: NextRequest) {
   try {
     await dbConnect();
