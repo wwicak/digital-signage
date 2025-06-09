@@ -29,12 +29,12 @@ const DisplayHeartbeatSchema = new Schema<IDisplayHeartbeat>(
       type: Schema.Types.ObjectId,
       ref: "Display",
       required: true,
-      index: true,
+      // index: true,
     },
     timestamp: {
       type: Date,
       default: Date.now,
-      index: true,
+      // index: true,
     },
     responseTime: {
       type: Number,

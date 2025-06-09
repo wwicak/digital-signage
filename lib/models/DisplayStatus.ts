@@ -30,17 +30,17 @@ const DisplayStatusSchema = new Schema<IDisplayStatus>(
       ref: "Display",
       required: true,
       unique: true,
-      index: true,
+      // index: true,
     },
     isOnline: {
       type: Boolean,
       default: false,
-      index: true,
+      // index: true,
     },
     lastSeen: {
       type: Date,
       default: Date.now,
-      index: true,
+      // index: true,
     },
     lastHeartbeat: {
       type: Date,

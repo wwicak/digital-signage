@@ -31,13 +31,13 @@ const UserCalendarLinkSchema = new Schema<IUserCalendarLink>(
       type: Schema.Types.ObjectId,
       ref: "User",
       required: [true, "User reference is required"],
-      index: true,
+      // index: true,
     },
     provider: {
       type: String,
       enum: ["google", "outlook"],
       required: [true, "Provider is required"],
-      index: true,
+      // index: true,
     },
     externalUserId: {
       type: String,
@@ -68,7 +68,7 @@ const UserCalendarLinkSchema = new Schema<IUserCalendarLink>(
     isActive: {
       type: Boolean,
       default: true,
-      index: true,
+      // index: true,
     },
     lastSyncStatus: {
       type: String,

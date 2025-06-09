@@ -51,7 +51,7 @@ const DisplayAlertSchema = new Schema<IDisplayAlert>(
       type: Schema.Types.ObjectId,
       ref: "Display",
       required: true,
-      index: true,
+      // index: true,
     },
     alertType: {
       type: String,
@@ -63,13 +63,13 @@ const DisplayAlertSchema = new Schema<IDisplayAlert>(
         "custom",
       ],
       required: true,
-      index: true,
+      // index: true,
     },
     severity: {
       type: String,
       enum: ["low", "medium", "high", "critical"],
       required: true,
-      index: true,
+      // index: true,
     },
     title: {
       type: String,
@@ -82,12 +82,12 @@ const DisplayAlertSchema = new Schema<IDisplayAlert>(
     isActive: {
       type: Boolean,
       default: true,
-      index: true,
+      // index: true,
     },
     isAcknowledged: {
       type: Boolean,
       default: false,
-      index: true,
+      // index: true,
     },
     acknowledgedBy: {
       type: Schema.Types.ObjectId,
