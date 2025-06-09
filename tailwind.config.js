@@ -108,6 +108,8 @@ module.exports = {
           "z-index": "1000 !important",
           "will-change": "transform",
           cursor: "grabbing !important",
+          // Temporary debug outline for dragging
+          outline: "3px solid rgba(255, 0, 0, 0.8) !important",
         },
         ".react-grid-item.react-draggable-dragging *": {
           "pointer-events": "none !important",
