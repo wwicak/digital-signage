@@ -34,9 +34,10 @@ import { cn } from "@/lib/utils";
 interface UserMenuProps {
   className?: string;
   user?: {
-    name?: string;
+    name?: string | any;
     email: string;
-    role?: string;
+    role?: string | any;
+    _id?: string;
   };
 }
 
@@ -48,6 +49,13 @@ interface PasswordChangeForm {
 
 const UserMenu: React.FC<UserMenuProps> = ({ className, user }) => {
   const router = useRouter();
+
+  // Helper function to safely extract string values from potentially nested objects
+  const safeGetString = (value: any, fallback: string = ""): string => {
+    if (typeof value === "string") return value;
+    if (value && typeof value === "object" && value.name) return value.name;
+    return fallback;
+  };
   const [isPasswordDialogOpen, setIsPasswordDialogOpen] = useState(false);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const [isChangingPassword, setIsChangingPassword] = useState(false);
@@ -218,14 +226,14 @@ const UserMenu: React.FC<UserMenuProps> = ({ className, user }) => {
           <DropdownMenuLabel className="font-normal">
             <div className="flex flex-col space-y-1">
               <p className="text-sm font-medium leading-none">
-                {user?.name || "User"}
+                {safeGetString(user?.name, "User")}
               </p>
               <p className="text-xs leading-none text-muted-foreground">
                 {user?.email || "user@example.com"}
               </p>
               {user?.role && (
                 <p className="text-xs leading-none text-muted-foreground capitalize">
-                  {user.role}
+                  {safeGetString(user.role, "User")}
                 </p>
               )}
             </div>
