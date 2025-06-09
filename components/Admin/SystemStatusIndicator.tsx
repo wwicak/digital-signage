@@ -78,7 +78,7 @@ const SystemStatusIndicator: React.FC<SystemStatusIndicatorProps> = ({
   const StatusIndicator = () => (
     <div
       className={cn(
-        "hidden sm:flex items-center gap-3 px-3 py-1.5 rounded-full bg-muted/50 border border-border/50 transition-all duration-200",
+        "hidden sm:flex items-center gap-3 px-3 py-1.5 rounded-full bg-muted/50 border border-border/50 transition-all duration-200 hover:bg-muted/70",
         className
       )}
     >
@@ -92,7 +92,7 @@ const SystemStatusIndicator: React.FC<SystemStatusIndicatorProps> = ({
           )}
         />
       </div>
-      
+
       {showText && (
         <span className="text-xs font-medium text-muted-foreground">
           {statusText}
@@ -102,9 +102,13 @@ const SystemStatusIndicator: React.FC<SystemStatusIndicatorProps> = ({
       <Button
         variant="ghost"
         size="icon"
-        className="h-4 w-4 p-0 hover:bg-transparent"
-        onClick={refreshStatus}
+        className="h-6 w-6 p-1 hover:bg-muted-foreground/20 rounded-full"
+        onClick={(e) => {
+          e.stopPropagation();
+          refreshStatus();
+        }}
         disabled={isLoading}
+        title="Refresh system status"
       >
         <RefreshCw className={cn("h-3 w-3", isLoading && "animate-spin")} />
       </Button>
@@ -119,9 +123,9 @@ const SystemStatusIndicator: React.FC<SystemStatusIndicatorProps> = ({
     <TooltipProvider>
       <Tooltip>
         <TooltipTrigger asChild>
-          <div>
+          <button className="focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 rounded-full">
             <StatusIndicator />
-          </div>
+          </button>
         </TooltipTrigger>
         <TooltipContent side="bottom" className="max-w-xs">
           <div className="space-y-2">
