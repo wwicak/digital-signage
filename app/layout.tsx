@@ -22,7 +22,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang='en'>
+    <html lang='en' suppressHydrationWarning>
       <head>
         <link
           href='https://fonts.googleapis.com/css?family=Open+Sans:300,400,600,700,800'
@@ -30,7 +30,7 @@ export default function RootLayout({
         />
         <style>{'body { margin: 0 } /* custom! */'}</style>
       </head>
-      <body>
+      <body suppressHydrationWarning>
         <Providers>
           {children}
         </Providers>
