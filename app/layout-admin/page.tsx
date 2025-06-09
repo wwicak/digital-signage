@@ -49,7 +49,8 @@ const getWidgetType = (typeString: string): WidgetType => {
     'youtube': WidgetType.YOUTUBE,
   }
 
-  return typeMap[typeString] || WidgetType.SLIDESHOW // Default fallback
+  // Return mapped type or use EMPTY as default for unknown types
+  return typeMap[typeString?.toLowerCase()] || WidgetType.EMPTY
 }
 
 // Memoized widget component to prevent unnecessary re-renders
