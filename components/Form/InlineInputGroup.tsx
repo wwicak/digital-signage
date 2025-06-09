@@ -21,7 +21,7 @@ const InlineInputGroup: React.FC<IInlineInputGroupProps> = ({
 
   return (
     <div
-      className={`flex flex-wrap gap-4 md:flex-nowrap ${className}`}
+      className={`flex flex-wrap md:flex-nowrap ${className}`}
       style={{
         gap: gapValue,
         ...style

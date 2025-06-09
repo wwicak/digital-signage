@@ -397,19 +397,19 @@ const LayoutAdminContent = memo(function LayoutAdminContent() {
 
   // Drag and resize event handlers
   const handleDragStart = useCallback((layout: RglLayout[], oldItem: RglLayout, newItem: RglLayout) => {
-    console.log('[DEBUG] Drag started for widget:', newItem.i)
+    console.log('🎯 [DRAG] Started for widget:', newItem.i, 'at position:', oldItem.x, oldItem.y)
   }, [])
 
   const handleDrag = useCallback((layout: RglLayout[], oldItem: RglLayout, newItem: RglLayout) => {
-    console.log('[DEBUG] Drag event for widget:', newItem.i, 'from', oldItem.x, oldItem.y, 'to', newItem.x, newItem.y)
+    console.log('🎯 [DRAG] Moving widget:', newItem.i, 'from', oldItem.x, oldItem.y, 'to', newItem.x, newItem.y)
   }, [])
 
   const handleResizeStart = useCallback((layout: RglLayout[], oldItem: RglLayout, newItem: RglLayout) => {
-    console.log('[DEBUG] Resize started for widget:', newItem.i)
+    console.log('📏 [RESIZE] Started for widget:', newItem.i, 'size:', oldItem.w, 'x', oldItem.h)
   }, [])
 
   const handleResize = useCallback((layout: RglLayout[], oldItem: RglLayout, newItem: RglLayout) => {
-    console.log('[DEBUG] Resize event for widget:', newItem.i, 'from', oldItem.w, 'x', oldItem.h, 'to', newItem.w, 'x', newItem.h)
+    console.log('📏 [RESIZE] Resizing widget:', newItem.i, 'from', oldItem.w, 'x', oldItem.h, 'to', newItem.w, 'x', newItem.h)
   }, [])
 
   const handleLayoutChange = useCallback((layout: RglLayout[]): void => {
@@ -456,13 +456,13 @@ const LayoutAdminContent = memo(function LayoutAdminContent() {
   }, [savedLayoutId, existingLayout?.widgets])
 
   const handleDragStop = useCallback((layout: RglLayout[], oldItem: RglLayout, newItem: RglLayout) => {
-    console.log('[DEBUG] Drag stopped for widget:', newItem.i)
+    console.log('🎯 [DRAG] Stopped for widget:', newItem.i, 'final position:', newItem.x, newItem.y)
     // Trigger layout change handling
     handleLayoutChange(layout)
   }, [handleLayoutChange])
 
   const handleResizeStop = useCallback((layout: RglLayout[], oldItem: RglLayout, newItem: RglLayout) => {
-    console.log('[DEBUG] Resize stopped for widget:', newItem.i)
+    console.log('📏 [RESIZE] Stopped for widget:', newItem.i, 'final size:', newItem.w, 'x', newItem.h)
     // Trigger layout change handling
     handleLayoutChange(layout)
   }, [handleLayoutChange])

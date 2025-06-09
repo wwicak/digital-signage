@@ -127,15 +127,9 @@ const AutoScroll: React.FC<IAutoScrollProps> = ({
 
   return (
     <div
-      className={`autoscroll-container ${className}`}
+      className={`flex w-full h-full overflow-auto ${className}`}
       ref={containerRef}
-      style={{
-        display: "flex", // Original style
-        width: "100%", // Original style
-        height: "100%", // Original style
-        overflow: "auto", // Original style, essential for scrolling
-        ...style, // Allow overriding with props.style
-      }}
+      style={style} // Allow overriding with props.style
       onMouseEnter={pauseOnHover ? handleMouseEnter : undefined}
       onMouseLeave={pauseOnHover ? handleMouseLeave : undefined}
       {...restDivProps}

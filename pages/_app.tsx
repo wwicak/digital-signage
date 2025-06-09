@@ -7,7 +7,6 @@ import { Toaster } from 'sonner'
 
 // Import global styles
 import '../styles/globals.css'
-import '../styles/GridLayoutStyles.css'
 import 'react-resizable/css/styles.css'
 
 // Create a client with better error handling

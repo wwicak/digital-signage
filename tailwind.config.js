@@ -81,6 +81,8 @@ module.exports = {
         ".react-grid-layout": {
           position: "relative !important",
           transition: "height 200ms ease",
+          // Temporary debug outline
+          outline: "2px dashed rgba(0, 255, 0, 0.3)",
         },
         ".react-grid-item": {
           position: "absolute !important",
@@ -88,6 +90,9 @@ module.exports = {
           "transition-property": "left, top, width, height",
           "box-sizing": "border-box !important",
           "touch-action": "none",
+          // Temporary debug outline
+          outline: "1px solid rgba(255, 0, 0, 0.5)",
+          cursor: "grab",
         },
         ".react-grid-item.cssTransforms": {
           "transition-property": "transform, width, height !important",
