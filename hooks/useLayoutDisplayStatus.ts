@@ -63,22 +63,37 @@ export const useLayoutDisplayStatus = (
     queryKey: ["displays-with-layouts", layoutId],
     queryFn: async () => {
       const url = layoutId
-        ? `/api/displays?layoutId=${layoutId}`
-        : "/api/displays";
+        ? `/api/displays?layoutId=${layoutId}&includeOffline=true`
+        : "/api/displays?includeOffline=true";
 
       const response = await fetch(url);
       if (!response.ok) {
-        throw new Error("Failed to fetch displays");
+        // Provide more specific error messages based on status code
+        if (response.status === 401) {
+          throw new Error("Authentication required. Please log in again.");
+        } else if (response.status === 403) {
+          throw new Error(
+            "Access denied. You don't have permission to view displays."
+          );
+        } else if (response.status === 404) {
+          throw new Error("Display service not found.");
+        } else if (response.status >= 500) {
+          throw new Error("Server error. Please try again later.");
+        } else {
+          throw new Error(`Failed to fetch displays (${response.status})`);
+        }
       }
       return response.json();
     },
     staleTime: 60000, // 1 minute
     refetchInterval: enableRealTimeUpdates ? refreshInterval : false,
-    retry: (failureCount, error) => {
-      // Don't retry on network errors
+    retry: (failureCount, error: any) => {
+      // Don't retry on network errors or client errors
       if (
         error.message.includes("Failed to fetch") ||
-        error.message.includes("ERR_NETWORK")
+        error.message.includes("ERR_NETWORK") ||
+        error.message.includes("Authentication required") ||
+        error.message.includes("Access denied")
       ) {
         return false;
       }
@@ -198,7 +213,26 @@ export const useLayoutDisplayStatus = (
 
         setDisplaysWithLayout(enhancedDisplays);
       } catch (err: any) {
-        setError(err.message || "Failed to update display status");
+        // Provide more user-friendly error messages
+        let errorMessage = "Failed to update display status";
+
+        if (
+          err.message.includes("Failed to fetch") ||
+          err.message.includes("ERR_NETWORK")
+        ) {
+          errorMessage =
+            "Network connection error. Please check your internet connection.";
+        } else if (err.message.includes("404")) {
+          errorMessage = "Display service not found. Please contact support.";
+        } else if (err.message.includes("500")) {
+          errorMessage = "Server error. Please try again later.";
+        } else if (err.message.includes("401") || err.message.includes("403")) {
+          errorMessage = "Authentication error. Please log in again.";
+        } else if (err.message) {
+          errorMessage = err.message;
+        }
+
+        setError(errorMessage);
       } finally {
         setIsLoading(false);
       }

@@ -23,6 +23,127 @@ import {
 import { useLayoutDisplayStatus } from "@/hooks/useLayoutDisplayStatus";
 import { cn } from "@/lib/utils";
 
+// Empty state component for when no displays are found
+interface EmptyDisplayStateProps {
+  layoutId?: string;
+  totalCount: number;
+  onlineCount: number;
+  error?: string | null;
+}
+
+const EmptyDisplayState: React.FC<EmptyDisplayStateProps> = ({
+  layoutId,
+  totalCount,
+  onlineCount,
+  error
+}) => {
+  // Determine the appropriate message based on the situation
+  const getEmptyStateMessage = () => {
+    if (error) {
+      return {
+        title: "Unable to load displays",
+        description: "Please check your connection and try again",
+        icon: AlertTriangle,
+        variant: "error" as const
+      };
+    }
+
+    if (totalCount === 0) {
+      // No displays configured at all
+      return {
+        title: layoutId ? "No displays assigned to this layout" : "No displays configured",
+        description: layoutId
+          ? "Assign displays to this layout to monitor their status here"
+          : "Create and configure your first display to get started",
+        icon: Monitor,
+        variant: "empty" as const
+      };
+    }
+
+    if (onlineCount === 0) {
+      // Displays exist but none are online
+      return {
+        title: "No displays currently online",
+        description: layoutId
+          ? "All displays for this layout are currently offline"
+          : "All configured displays are currently offline or disconnected",
+        icon: WifiOff,
+        variant: "offline" as const
+      };
+    }
+
+    // Fallback
+    return {
+      title: "No displays found",
+      description: "Unable to load display information",
+      icon: Monitor,
+      variant: "empty" as const
+    };
+  };
+
+  const { title, description, icon: Icon, variant } = getEmptyStateMessage();
+
+  const getVariantStyles = () => {
+    switch (variant) {
+      case "error":
+        return "text-red-500";
+      case "offline":
+        return "text-orange-500";
+      case "empty":
+      default:
+        return "text-muted-foreground";
+    }
+  };
+
+  return (
+    <div className="text-center py-12 px-4">
+      <div className={cn("mx-auto mb-4", getVariantStyles())}>
+        <Icon className="w-16 h-16 mx-auto opacity-50" />
+      </div>
+      <h3 className="text-lg font-medium text-foreground mb-2">
+        {title}
+      </h3>
+      <p className="text-sm text-muted-foreground mb-4 max-w-md mx-auto">
+        {description}
+      </p>
+
+      {/* Action suggestions based on state */}
+      <div className="space-y-2 text-xs text-muted-foreground">
+        {variant === "empty" && !layoutId && (
+          <div className="space-y-1">
+            <p>• Create a new display from the displays page</p>
+            <p>• Configure display settings and assign layouts</p>
+            <p>• Connect your display devices to start monitoring</p>
+          </div>
+        )}
+
+        {variant === "empty" && layoutId && (
+          <div className="space-y-1">
+            <p>• Go to the displays page to assign displays to this layout</p>
+            <p>• Create new displays if none exist yet</p>
+          </div>
+        )}
+
+        {variant === "offline" && (
+          <div className="space-y-1">
+            <p>• Check display device power and network connections</p>
+            <p>• Verify display URLs are accessible</p>
+            <p>• Review display configuration settings</p>
+          </div>
+        )}
+
+        {variant === "error" && (
+          <div className="space-y-1">
+            <p>• Check your internet connection</p>
+            <p>• Refresh the page to try again</p>
+            <p>• Contact support if the problem persists</p>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
 // Individual display item component
 interface DisplayItemProps {
   display: {
@@ -289,7 +410,7 @@ const DisplayStatusCard: React.FC<DisplayStatusCardProps> = ({
                   className="h-6 w-6"
                   onClick={refreshStatus}
                   disabled={isLoading}
-                  title="Refresh status"
+                  title={isLoading ? "Refreshing..." : "Refresh status"}
                 >
                   <RefreshCw className={cn("h-3 w-3", isLoading && "animate-spin")} />
                 </Button>
@@ -310,12 +431,43 @@ const DisplayStatusCard: React.FC<DisplayStatusCardProps> = ({
             <div className="space-y-4">
               {/* Error State */}
               {error && (
-                <div className="p-3 bg-red-50 border border-red-200 rounded-lg">
-                  <div className="flex items-center gap-2 text-red-800">
-                    <AlertTriangle className="w-4 h-4" />
-                    <span className="text-sm font-medium">Error loading display data</span>
+                <div className="p-3 bg-amber-50 border border-amber-200 rounded-lg">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2 text-amber-800">
+                      <AlertTriangle className="w-4 h-4" />
+                      <span className="text-sm font-medium">
+                        {error.includes('Failed to fetch') || error.includes('Network Error')
+                          ? 'Unable to connect to server'
+                          : 'Error loading display data'
+                        }
+                      </span>
+                    </div>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={refreshStatus}
+                      disabled={isLoading}
+                      className="h-7 px-2 text-xs border-amber-300 text-amber-700 hover:bg-amber-100"
+                    >
+                      {isLoading ? (
+                        <>
+                          <Loader2 className="w-3 h-3 mr-1 animate-spin" />
+                          Retrying...
+                        </>
+                      ) : (
+                        <>
+                          <RefreshCw className="w-3 h-3 mr-1" />
+                          Retry
+                        </>
+                      )}
+                    </Button>
                   </div>
-                  <p className="text-xs text-red-600 mt-1">{error}</p>
+                  <p className="text-xs text-amber-600 mt-2">
+                    {error.includes('Failed to fetch') || error.includes('Network Error')
+                      ? 'Please check your network connection and try again.'
+                      : error
+                    }
+                  </p>
                 </div>
               )}
 
@@ -388,15 +540,12 @@ const DisplayStatusCard: React.FC<DisplayStatusCardProps> = ({
                       )}
                     </div>
                   ) : (
-                    <div className="text-center py-8 text-muted-foreground">
-                      <Monitor className="w-12 h-12 mx-auto mb-2 opacity-50" />
-                      <p className="text-sm">
-                        {layoutId ? "No displays found for this layout" : "No displays found"}
-                      </p>
-                      <p className="text-xs">
-                        {layoutId ? "Assign displays to this layout to see them here" : "Connect displays to see them here"}
-                      </p>
-                    </div>
+                    <EmptyDisplayState
+                      layoutId={layoutId}
+                      totalCount={totalCount}
+                      onlineCount={onlineCount}
+                      error={error}
+                    />
                   )}
                 </div>
               )}

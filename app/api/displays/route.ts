@@ -125,11 +125,39 @@ export async function GET(request: NextRequest) {
         includeOffline,
         withHeartbeat,
       },
+      meta: {
+        total: enhancedDisplays.length,
+        online: enhancedDisplays.filter((d) => d.isOnline).length,
+        offline: enhancedDisplays.filter((d) => !d.isOnline).length,
+      },
     });
   } catch (error: any) {
+    console.error("Error in displays API:", error);
+
+    // Provide more specific error messages
+    let statusCode = 500;
+    let message = "Error fetching displays";
+
+    if (
+      error.name === "MongoNetworkError" ||
+      error.name === "MongoTimeoutError"
+    ) {
+      message = "Database connection error. Please try again.";
+      statusCode = 503;
+    } else if (error.name === "ValidationError") {
+      message = "Invalid request parameters.";
+      statusCode = 400;
+    } else if (error.message) {
+      message = error.message;
+    }
+
     return NextResponse.json(
-      { message: error.message || "Error fetching displays" },
-      { status: error.status || 500 }
+      {
+        message,
+        error: process.env.NODE_ENV === "development" ? error.stack : undefined,
+        timestamp: new Date().toISOString(),
+      },
+      { status: statusCode }
     );
   }
 }
