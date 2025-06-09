@@ -88,6 +88,10 @@ export async function POST(request: NextRequest) {
 
     // Get authenticated user
     const user = await requireAuth(request);
+    console.log("[DEBUG] Creating layout with user:", {
+      id: user._id,
+      email: user.email,
+    });
 
     // Parse and validate request body
     const body = await request.json();
@@ -114,9 +118,16 @@ export async function POST(request: NextRequest) {
       },
     };
 
+    console.log("[DEBUG] Layout data creator_id:", layoutData.creator_id);
+
     // Create the layout
     const layout = new Layout(layoutData);
     await layout.save();
+
+    console.log("[DEBUG] Layout created successfully:", {
+      id: layout._id,
+      creator_id: layout.creator_id,
+    });
 
     // Populate widgets for response
     await layout.populate("widgets.widget_id");

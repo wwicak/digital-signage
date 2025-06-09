@@ -1,4 +1,5 @@
 import User, { IUser, IUserRole, UserRoleName } from "../models/User";
+import mongoose from "mongoose";
 
 // TODO: Replace with next-auth integration
 // This is a placeholder authentication helper that will be replaced with next-auth
@@ -17,6 +18,12 @@ export interface AuthenticatedUser {
 export async function requireAuth(req: any): Promise<AuthenticatedUser> {
   // Temporary implementation for development/testing
   // TODO: Replace with next-auth integration in production
+
+  console.log("[DEBUG] requireAuth called with headers:", {
+    authorization: req.headers?.authorization ? "present" : "missing",
+    cookie: req.headers?.cookie ? "present" : "missing",
+    "x-user-id": req.headers?.["x-user-id"],
+  });
 
   // Check for authorization header or session
   const authHeader = req.headers?.authorization;
@@ -54,6 +61,7 @@ export async function requireAuth(req: any): Promise<AuthenticatedUser> {
 
   if (userId) {
     // Allow direct user ID for testing
+    console.log("[DEBUG] Direct userId auth - returning user:", userId);
     return {
       _id: userId,
       email: "temp@example.com",
@@ -67,10 +75,11 @@ export async function requireAuth(req: any): Promise<AuthenticatedUser> {
   }
 
   // Check cookie-based authentication
-  // Check cookie-based authentication
   if (isLoggedInViaCookie) {
+    const adminUserId = "683ecc9948ffe97555dde0cc"; // Use string for now
+    console.log("[DEBUG] Cookie auth - returning admin user:", adminUserId);
     return {
-      _id: "683ecc9948ffe97555dde0cc", // Use the actual admin user ID from MongoDB
+      _id: adminUserId,
       email: "admin@example.com",
       name: "Administrator",
       role: {
@@ -83,8 +92,10 @@ export async function requireAuth(req: any): Promise<AuthenticatedUser> {
 
   // For development, return the existing admin user if no auth provided
   // TODO: Remove this in production and throw authentication error
+  const adminUserId = "683ecc9948ffe97555dde0cc"; // Use string for now
+  console.log("[DEBUG] Default auth - returning admin user:", adminUserId);
   return {
-    _id: "683ecc9948ffe97555dde0cc", // Use the actual admin user ID from MongoDB
+    _id: adminUserId,
     email: "admin@example.com",
     name: "Administrator",
     role: {
