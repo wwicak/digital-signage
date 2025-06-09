@@ -23,8 +23,10 @@ import { StatusBarElementTypes } from '../../helpers/statusbar'
 import Widgets from '../../widgets'
 import { useWidgetChoices } from '../../hooks/useAvailableWidgets'
 import { useLayout } from '../../hooks/useLayout'
+import { useLayouts } from '../../hooks/useLayouts'
 import { useLayoutMutations } from '../../hooks/useLayoutMutations'
 import { ILayoutCreateData, ILayoutUpdateData, addWidgetToLayout, updateWidgetPositions, removeWidgetFromLayout } from '../../actions/layouts'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 
 import { WidgetType } from '../../lib/models/Widget'
 
@@ -33,10 +35,14 @@ const GridLayoutWithWidth = WidthProvider(GridLayout as any)
 const LayoutAdminContent = memo(function LayoutAdminContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
-  const layoutId = searchParams?.get('id') || null
-  const isEditing = !!layoutId
+  const urlLayoutId = searchParams?.get('id') || null
 
-  const { data: existingLayout, isLoading: layoutLoading } = useLayout(layoutId)
+  // State for selected layout (can be from URL or dropdown)
+  const [selectedLayoutId, setSelectedLayoutId] = useState<string | null>(urlLayoutId)
+  const isEditing = !!selectedLayoutId
+
+  const { data: existingLayout, isLoading: layoutLoading } = useLayout(selectedLayoutId)
+  const { data: layoutsResponse, isLoading: layoutsLoading } = useLayouts({ limit: 100 })
   const { createLayout, updateLayout, createLayoutAsync, updateLayoutAsync, isCreating, isUpdating } = useLayoutMutations()
   const { widgetChoices, isLoading: widgetChoicesLoading } = useWidgetChoices()
 
@@ -61,7 +67,7 @@ const LayoutAdminContent = memo(function LayoutAdminContent() {
   })
 
   // Track if layout has been saved (needed for widget operations)
-  const [savedLayoutId, setSavedLayoutId] = useState<string | null>(layoutId)
+  const [savedLayoutId, setSavedLayoutId] = useState<string | null>(selectedLayoutId)
 
   // Load existing layout data when editing
   useEffect(() => {
@@ -85,9 +91,62 @@ const LayoutAdminContent = memo(function LayoutAdminContent() {
     }
   }, [existingLayout, isEditing])
 
+  // Handle layout selection from dropdown
+  const handleLayoutSelect = (layoutId: string) => {
+    if (layoutId === 'new') {
+      // Create new layout
+      setSelectedLayoutId(null)
+      setSavedLayoutId(null)
+      setLayoutData({
+        name: '',
+        description: '',
+        orientation: 'landscape' as 'landscape' | 'portrait',
+        layoutType: 'spaced' as 'spaced' | 'compact',
+        statusBar: {
+          enabled: true,
+          elements: [] as string[],
+        },
+        isActive: true,
+        isTemplate: true,
+        gridConfig: {
+          cols: 16,
+          rows: 9,
+          margin: [12, 12] as [number, number],
+          rowHeight: 60,
+        },
+      })
+    } else {
+      // Select existing layout
+      setSelectedLayoutId(layoutId)
+      // Update URL to reflect selection
+      router.replace(`/layout-admin?id=${layoutId}`, { scroll: false })
+    }
+  }
+
   const handleAddWidget = async (type: string): Promise<void> => {
-    if (!savedLayoutId) {
-      alert('Please save the layout first before adding widgets')
+    // If we're creating a new layout, save it first
+    if (!savedLayoutId && !isEditing) {
+      if (!layoutData.name.trim()) {
+        alert('Please enter a layout name before adding widgets')
+        return
+      }
+
+      try {
+        const newLayout = await createLayoutAsync({ ...layoutData, widgets: [] } as any)
+        setSavedLayoutId(newLayout._id as string)
+        setSelectedLayoutId(newLayout._id as string)
+        // Update URL to reflect the new layout
+        router.replace(`/layout-admin?id=${newLayout._id}`, { scroll: false })
+      } catch (error) {
+        console.error('Failed to save layout:', error)
+        alert('Failed to save layout. Please try again.')
+        return
+      }
+    }
+
+    const currentLayoutId = savedLayoutId || selectedLayoutId
+    if (!currentLayoutId) {
+      alert('Unable to add widget. Please try again.')
       return
     }
 
@@ -114,7 +173,7 @@ const LayoutAdminContent = memo(function LayoutAdminContent() {
     }
 
     try {
-      await addWidgetToLayout(savedLayoutId, {
+      await addWidgetToLayout(currentLayoutId, {
         type: type as WidgetType,
         name: `${type} Widget`,
         x: bestPosition.x,
@@ -241,13 +300,15 @@ const LayoutAdminContent = memo(function LayoutAdminContent() {
 
   const handleSave = async (): Promise<void> => {
     try {
-      if (isEditing && layoutId) {
-        updateLayout({ id: layoutId, data: layoutData as any })
+      if (isEditing && selectedLayoutId) {
+        updateLayout({ id: selectedLayoutId, data: layoutData as any })
         router.push('/layouts')
       } else {
         const newLayout = await createLayoutAsync({ ...layoutData, widgets: [] } as any)
         setSavedLayoutId(newLayout._id as string)
-        // Don't redirect immediately - let user add widgets
+        setSelectedLayoutId(newLayout._id as string)
+        // Update URL to reflect the new layout
+        router.replace(`/layout-admin?id=${newLayout._id}`, { scroll: false })
         alert('Layout saved! You can now add widgets to your layout.')
       }
     } catch (error) {
@@ -273,13 +334,15 @@ const LayoutAdminContent = memo(function LayoutAdminContent() {
     }
   })
 
-  if (layoutLoading) {
+  if (layoutLoading || (selectedLayoutId && layoutsLoading)) {
     return (
       <Frame loggedIn={true}>
         <div className="flex items-center justify-center min-h-[400px]">
           <div className="text-center">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
-            <p className="text-muted-foreground">Loading layout...</p>
+            <p className="text-muted-foreground">
+              {layoutLoading ? 'Loading layout...' : 'Loading layouts...'}
+            </p>
           </div>
         </div>
       </Frame>
@@ -311,7 +374,7 @@ const LayoutAdminContent = memo(function LayoutAdminContent() {
           {isEditing && (
             <Button
               variant="outline"
-              onClick={() => window.open(`/layout-preview?id=${layoutId}`, '_blank')}
+              onClick={() => window.open(`/layout-preview?id=${selectedLayoutId}`, '_blank')}
             >
               <Eye className="mr-2 h-4 w-4" />
               Preview
@@ -326,6 +389,61 @@ const LayoutAdminContent = memo(function LayoutAdminContent() {
           </Button>
         </div>
       </div>
+
+      {/* Layout Selector */}
+      <Card className="mb-6">
+        <CardHeader>
+          <CardTitle>Layout Selection</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="flex items-center space-x-4">
+            <div className="flex-1">
+              <label className="text-sm font-medium mb-2 block">
+                Choose Layout to Edit or Create New
+              </label>
+              <Select
+                value={selectedLayoutId || 'new'}
+                onValueChange={handleLayoutSelect}
+                disabled={layoutsLoading}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select a layout to edit or create new" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="new">
+                    <div className="flex items-center">
+                      <span className="font-medium">Create New Layout</span>
+                    </div>
+                  </SelectItem>
+                  {layoutsResponse?.layouts?.map((layout: any) => (
+                    <SelectItem key={layout._id} value={layout._id}>
+                      <div className="flex flex-col">
+                        <span className="font-medium">{layout.name}</span>
+                        <span className="text-xs text-muted-foreground">
+                          {layout.widgets?.length || 0} widgets • {layout.orientation} • {layout.layoutType}
+                        </span>
+                      </div>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="text-sm text-muted-foreground">
+              {isEditing ? (
+                <div className="flex items-center space-x-2">
+                  <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                  <span>Editing existing layout</span>
+                </div>
+              ) : (
+                <div className="flex items-center space-x-2">
+                  <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                  <span>Creating new layout</span>
+                </div>
+              )}
+            </div>
+          </div>
+        </CardContent>
+      </Card>
 
       {/* Layout Settings */}
       <Card className="mb-6">
@@ -411,13 +529,20 @@ const LayoutAdminContent = memo(function LayoutAdminContent() {
 
       {/* Layout Controls */}
       <div className="flex flex-row items-center justify-between mb-4">
-        <DropdownButton
-          icon={Edit}
-          text={widgetChoicesLoading ? 'Loading Widgets...' : 'Add Widget'}
-          onSelect={handleAddWidget}
-          choices={widgetChoices}
-          disabled={widgetChoicesLoading}
-        />
+        <div className="flex items-center space-x-4">
+          <DropdownButton
+            icon={Edit}
+            text={widgetChoicesLoading ? 'Loading Widgets...' : 'Add Widget'}
+            onSelect={handleAddWidget}
+            choices={widgetChoices}
+            disabled={widgetChoicesLoading}
+          />
+          {!isEditing && !savedLayoutId && (
+            <div className="text-sm text-muted-foreground bg-blue-50 px-3 py-2 rounded-md border border-blue-200">
+              💡 Enter a layout name and click "Add Widget" to save and start adding widgets
+            </div>
+          )}
+        </div>
         <Form>
           <Switch
             name='layoutStyle'

@@ -176,7 +176,7 @@ const SystemStatusIndicator: React.FC<SystemStatusIndicatorProps> = ({
                 
                 {statusDetails.database.responseTime && (
                   <div className="flex items-center justify-between">
-                    <span>Response Time:</span>
+                    <span>Response:</span>
                     <span className="font-medium">
                       {statusDetails.database.responseTime}ms
                     </span>
