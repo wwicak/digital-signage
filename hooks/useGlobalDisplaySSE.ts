@@ -117,6 +117,13 @@ export const useGlobalDisplaySSE = (enabled: boolean = true) => {
         console.error("Global display SSE connection error:", event);
         setIsConnected(false);
 
+        // Don't reconnect immediately on network errors
+        const target = event.target as EventSource;
+        if (target && target.readyState === EventSource.CLOSED) {
+          console.log("SSE connection closed, skipping reconnection");
+          return;
+        }
+
         // Implement exponential backoff reconnection
         if (reconnectAttemptsRef.current < maxReconnectAttempts) {
           const delay =

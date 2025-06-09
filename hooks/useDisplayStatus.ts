@@ -75,8 +75,19 @@ export const useDisplayStatus = (options?: {
       return response.json();
     },
     staleTime: 30000, // 30 seconds
-    refetchInterval: refreshInterval,
+    refetchInterval: enableRealTimeUpdates ? refreshInterval : false,
     enabled: enableRealTimeUpdates,
+    retry: (failureCount, error) => {
+      // Don't retry on network errors
+      if (
+        error.message.includes("Failed to fetch") ||
+        error.message.includes("ERR_NETWORK")
+      ) {
+        return false;
+      }
+      return failureCount < 2;
+    },
+    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
   });
 
   // Fetch detailed status for all displays
@@ -109,8 +120,16 @@ export const useDisplayStatus = (options?: {
 
       setDisplayStatus(statusMap);
       setLastUpdateTime(new Date());
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error fetching display statuses:", error);
+      // Don't retry on network errors
+      if (
+        !error.message.includes("Failed to fetch") &&
+        !error.message.includes("ERR_NETWORK")
+      ) {
+        // Only log non-network errors for debugging
+        console.warn("Non-network error in fetchDisplayStatuses:", error);
+      }
     }
   }, []);
 

@@ -73,7 +73,18 @@ export const useLayoutDisplayStatus = (
       return response.json();
     },
     staleTime: 60000, // 1 minute
-    refetchInterval: refreshInterval,
+    refetchInterval: enableRealTimeUpdates ? refreshInterval : false,
+    retry: (failureCount, error) => {
+      // Don't retry on network errors
+      if (
+        error.message.includes("Failed to fetch") ||
+        error.message.includes("ERR_NETWORK")
+      ) {
+        return false;
+      }
+      return failureCount < 2;
+    },
+    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
   });
 
   // Fetch heartbeat data for displays
