@@ -7,8 +7,7 @@ import { useSearchParams, useRouter } from 'next/navigation'
 import { DragDropContext, Droppable, DropResult } from '@hello-pangea/dnd'
 import Link from 'next/link'
 
-// Import GridLayout styles
-import '../../styles/GridLayoutStyles.css'
+// Using Tailwind-only styling for grid layout
 
 import Frame from '../../components/Admin/Frame'
 import EditableWidget from '../../components/Admin/EditableWidget'
@@ -111,7 +110,7 @@ const LayoutWidget = memo(function LayoutWidget({
 
   try {
     return (
-      <div className={isDeleting ? 'opacity-50 pointer-events-none' : ''}>
+      <div className={`w-full h-full ${isDeleting ? 'opacity-50 pointer-events-none' : ''}`}>
         <EditableWidget
           id={widgetId}
           type={getWidgetType(widgetType)}
@@ -396,6 +395,23 @@ const LayoutAdminContent = memo(function LayoutAdminContent() {
     }
   }, [existingLayout?.widgets, layoutData.gridConfig, savedLayoutId, refetchLayout])
 
+  // Drag and resize event handlers
+  const handleDragStart = useCallback((layout: RglLayout[], oldItem: RglLayout, newItem: RglLayout) => {
+    console.log('[DEBUG] Drag started for widget:', newItem.i)
+  }, [])
+
+  const handleDrag = useCallback((layout: RglLayout[], oldItem: RglLayout, newItem: RglLayout) => {
+    console.log('[DEBUG] Drag event for widget:', newItem.i, 'from', oldItem.x, oldItem.y, 'to', newItem.x, newItem.y)
+  }, [])
+
+  const handleResizeStart = useCallback((layout: RglLayout[], oldItem: RglLayout, newItem: RglLayout) => {
+    console.log('[DEBUG] Resize started for widget:', newItem.i)
+  }, [])
+
+  const handleResize = useCallback((layout: RglLayout[], oldItem: RglLayout, newItem: RglLayout) => {
+    console.log('[DEBUG] Resize event for widget:', newItem.i, 'from', oldItem.w, 'x', oldItem.h, 'to', newItem.w, 'x', newItem.h)
+  }, [])
+
   const handleLayoutChange = useCallback((layout: RglLayout[]): void => {
     if (!savedLayoutId || !existingLayout?.widgets) {
       return
@@ -410,11 +426,18 @@ const LayoutAdminContent = memo(function LayoutAdminContent() {
     layoutChangeTimeoutRef.current = setTimeout(async () => {
       // Prepare position updates
       const positionUpdates = layout.map(layoutItem => {
-        const widgetIndex = parseInt(layoutItem.i)
-        const widget = existingLayout.widgets[widgetIndex]
+        // layoutItem.i is now the actual widget ID
+        const widgetId = layoutItem.i
+        const widget = existingLayout.widgets.find((w: any) => {
+          const wId = typeof w.widget_id === 'string'
+            ? w.widget_id
+            : (w.widget_id as any)?._id?.toString() || (w.widget_id as any)?.toString()
+          return wId === widgetId
+        })
+
         if (widget) {
           return {
-            widget_id: widget.widget_id._id || widget.widget_id,
+            widget_id: widgetId,
             x: layoutItem.x,
             y: layoutItem.y,
             w: layoutItem.w,
@@ -431,6 +454,18 @@ const LayoutAdminContent = memo(function LayoutAdminContent() {
       }
     }, 500) // 500ms debounce
   }, [savedLayoutId, existingLayout?.widgets])
+
+  const handleDragStop = useCallback((layout: RglLayout[], oldItem: RglLayout, newItem: RglLayout) => {
+    console.log('[DEBUG] Drag stopped for widget:', newItem.i)
+    // Trigger layout change handling
+    handleLayoutChange(layout)
+  }, [handleLayoutChange])
+
+  const handleResizeStop = useCallback((layout: RglLayout[], oldItem: RglLayout, newItem: RglLayout) => {
+    console.log('[DEBUG] Resize stopped for widget:', newItem.i)
+    // Trigger layout change handling
+    handleLayoutChange(layout)
+  }, [handleLayoutChange])
 
   const handleDragEnd = (result: DropResult): void => {
     if (!result.destination) {
@@ -538,13 +573,23 @@ const LayoutAdminContent = memo(function LayoutAdminContent() {
     
     setInvalidWidgetsCount(invalidCount)
     
-    return validWidgets.map((widget, index) => ({
-      i: index.toString(),
-      x: widget.x,
-      y: widget.y,
-      w: widget.w,
-      h: widget.h,
-    }))
+    return validWidgets.map((widget, index) => {
+      // Get the actual widget ID to use as the grid item ID
+      let widgetId: string
+      if (typeof widget.widget_id === 'string') {
+        widgetId = widget.widget_id
+      } else {
+        widgetId = (widget.widget_id as any)._id?.toString() || (widget.widget_id as any).toString()
+      }
+
+      return {
+        i: widgetId, // Use actual widget ID instead of index
+        x: widget.x,
+        y: widget.y,
+        w: widget.w,
+        h: widget.h,
+      }
+    })
   }, [existingLayout?.widgets])
 
   // Memoize choices to prevent unnecessary re-renders
@@ -857,7 +902,13 @@ const LayoutAdminContent = memo(function LayoutAdminContent() {
                 layout={rglLayout}
                 cols={layoutData.gridConfig.cols}
                 onLayoutChange={handleLayoutChange}
-                draggableCancel={'.ReactModalPortal,.controls,button,.no-drag'}
+                onDragStart={handleDragStart}
+                onDrag={handleDrag}
+                onDragStop={handleDragStop}
+                onResizeStart={handleResizeStart}
+                onResize={handleResize}
+                onResizeStop={handleResizeStop}
+                draggableCancel={'.controls,button,.no-drag'}
                 resizeHandles={['se', 'sw', 'ne', 'nw', 's', 'n', 'e', 'w']}
                 margin={layoutData.gridConfig.margin}
                 rowHeight={layoutData.gridConfig.rowHeight}
@@ -867,7 +918,7 @@ const LayoutAdminContent = memo(function LayoutAdminContent() {
                 preventCollision={true}
                 compactType='vertical'
                 maxRows={layoutData.gridConfig.rows}
-                className="react-grid-layout"
+                className="react-grid-layout w-full h-full"
                 isDraggable={true}
                 isResizable={true}
               >
@@ -937,7 +988,7 @@ const LayoutAdminContent = memo(function LayoutAdminContent() {
 
                   return (
                     <LayoutWidget
-                      key={`${widgetId}-${index}`}
+                      key={widgetId}
                       widgetId={widgetId}
                       widgetType={widgetType}
                       layoutType={layoutData.layoutType}

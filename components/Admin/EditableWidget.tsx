@@ -60,10 +60,10 @@ const EditableWidget: React.FC<IEditableWidgetProps> = memo(({
 
   return (
     <>
-      <div className='group relative bg-white border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow h-full'>
-        <div className='absolute top-2 right-2 flex space-x-1 controls no-drag z-10'>
+      <div className='group bg-white border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow w-full h-full cursor-grab active:cursor-grabbing'>
+        <div className='absolute top-2 right-2 flex space-x-1 controls no-drag z-20 opacity-0 group-hover:opacity-100 transition-opacity'>
           <button
-            className='p-2 rounded hover:bg-gray-100 transition-colors opacity-0 group-hover:opacity-100 md:opacity-0 touch:opacity-100 bg-white/90 backdrop-blur-sm shadow-sm'
+            className='p-2 rounded hover:bg-gray-100 transition-colors bg-white/90 backdrop-blur-sm shadow-sm'
             onClick={openDialog}
             aria-label='Edit widget'
             onMouseDown={(e) => {
@@ -82,7 +82,7 @@ const EditableWidget: React.FC<IEditableWidgetProps> = memo(({
             <Settings className='w-4 h-4 text-gray-500' />
           </button>
           <button
-            className='p-2 rounded hover:bg-gray-100 transition-colors opacity-0 group-hover:opacity-100 md:opacity-0 touch:opacity-100 bg-white/90 backdrop-blur-sm shadow-sm hover:bg-red-50 hover:text-red-600'
+            className='p-2 rounded hover:bg-gray-100 transition-colors bg-white/90 backdrop-blur-sm shadow-sm hover:bg-red-50 hover:text-red-600'
             onClick={handleDeleteClick}
             aria-label='Delete widget'
             onMouseDown={(e) => {
@@ -101,7 +101,7 @@ const EditableWidget: React.FC<IEditableWidgetProps> = memo(({
             <X className='w-4 h-4 text-gray-500' />
           </button>
         </div>
-        <div className='flex flex-col items-center justify-center h-full min-h-24 pointer-events-none select-none'>
+        <div className='flex flex-col items-center justify-center h-full min-h-24 select-none'>
           <div className='mb-2'>
             <WidgetIcon className='w-8 h-8 text-primary' />
           </div>

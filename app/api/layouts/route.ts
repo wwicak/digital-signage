@@ -109,7 +109,7 @@ export async function POST(request: NextRequest) {
       },
       isActive: body.isActive !== undefined ? body.isActive : true,
       isTemplate: body.isTemplate !== undefined ? body.isTemplate : true,
-      creator_id: user._id, // Use authenticated user's ID
+      creator_id: new (require("mongoose").Types.ObjectId)(user._id), // Convert string to ObjectId
       gridConfig: body.gridConfig || {
         cols: 16,
         rows: 9,

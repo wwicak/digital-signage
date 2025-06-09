@@ -73,5 +73,161 @@ module.exports = {
       },
     },
   },
-  plugins: [require("tailwindcss-animate")],
+  plugins: [
+    require("tailwindcss-animate"),
+    function ({ addUtilities }) {
+      const newUtilities = {
+        // React Grid Layout utilities
+        ".react-grid-layout": {
+          position: "relative !important",
+          transition: "height 200ms ease",
+        },
+        ".react-grid-item": {
+          position: "absolute !important",
+          transition: "all 150ms cubic-bezier(0.2, 0, 0.2, 1)",
+          "transition-property": "left, top, width, height",
+          "box-sizing": "border-box !important",
+          "touch-action": "none",
+        },
+        ".react-grid-item.cssTransforms": {
+          "transition-property": "transform, width, height !important",
+          "transition-timing-function": "cubic-bezier(0.2, 0, 0.2, 1)",
+        },
+        ".react-grid-item.resizing": {
+          "z-index": "999 !important",
+          "will-change": "width, height, transform",
+          transition: "none !important",
+        },
+        ".react-grid-item.react-draggable-dragging": {
+          transition: "none !important",
+          "z-index": "1000 !important",
+          "will-change": "transform",
+          cursor: "grabbing !important",
+        },
+        ".react-grid-item.react-draggable-dragging *": {
+          "pointer-events": "none !important",
+          "user-select": "none !important",
+        },
+        ".react-grid-item.react-grid-placeholder": {
+          background:
+            "linear-gradient(135deg, rgba(123, 192, 67, 0.3), rgba(123, 192, 67, 0.1))",
+          border: "2px dashed rgba(123, 192, 67, 0.5)",
+          "border-radius": "8px",
+          opacity: "0.8",
+          "z-index": "2",
+          "user-select": "none",
+        },
+        // Resize handles
+        ".react-grid-item > .react-resizable-handle": {
+          position: "absolute !important",
+          "pointer-events": "auto !important",
+          "touch-action": "none !important",
+          "z-index": "10 !important",
+          opacity: "0",
+          transition: "opacity 200ms ease",
+        },
+        ".react-grid-item:hover > .react-resizable-handle": {
+          opacity: "1",
+        },
+        // Southeast handle (bottom-right)
+        ".react-grid-item > .react-resizable-handle.react-resizable-handle-se":
+          {
+            width: "24px",
+            height: "24px",
+            bottom: "0",
+            right: "0",
+            cursor: "se-resize",
+          },
+        ".react-grid-item > .react-resizable-handle.react-resizable-handle-se::after":
+          {
+            content: '""',
+            position: "absolute",
+            right: "6px",
+            bottom: "6px",
+            width: "8px",
+            height: "8px",
+            "border-right": "3px solid rgba(123, 192, 67, 0.8)",
+            "border-bottom": "3px solid rgba(123, 192, 67, 0.8)",
+            "border-radius": "0 0 2px 0",
+          },
+        // Other resize handles
+        ".react-grid-item > .react-resizable-handle.react-resizable-handle-sw":
+          {
+            width: "24px",
+            height: "24px",
+            bottom: "0",
+            left: "0",
+            cursor: "sw-resize",
+          },
+        ".react-grid-item > .react-resizable-handle.react-resizable-handle-ne":
+          {
+            width: "24px",
+            height: "24px",
+            top: "0",
+            right: "0",
+            cursor: "ne-resize",
+          },
+        ".react-grid-item > .react-resizable-handle.react-resizable-handle-nw":
+          {
+            width: "24px",
+            height: "24px",
+            top: "0",
+            left: "0",
+            cursor: "nw-resize",
+          },
+        ".react-grid-item > .react-resizable-handle.react-resizable-handle-s": {
+          width: "100%",
+          height: "8px",
+          bottom: "0",
+          left: "0",
+          cursor: "s-resize",
+        },
+        ".react-grid-item > .react-resizable-handle.react-resizable-handle-n": {
+          width: "100%",
+          height: "8px",
+          top: "0",
+          left: "0",
+          cursor: "n-resize",
+        },
+        ".react-grid-item > .react-resizable-handle.react-resizable-handle-e": {
+          width: "8px",
+          height: "100%",
+          top: "0",
+          right: "0",
+          cursor: "e-resize",
+        },
+        ".react-grid-item > .react-resizable-handle.react-resizable-handle-w": {
+          width: "8px",
+          height: "100%",
+          top: "0",
+          left: "0",
+          cursor: "w-resize",
+        },
+        // Widget controls
+        ".react-grid-item .controls": {
+          "pointer-events": "auto !important",
+        },
+        ".react-grid-item .no-drag": {
+          "pointer-events": "auto !important",
+        },
+        // Ensure proper sizing for widget content
+        ".react-grid-item > div": {
+          width: "100% !important",
+          height: "100% !important",
+        },
+        // Touch device optimizations
+        "@media (hover: none) and (pointer: coarse)": {
+          ".react-grid-item > .react-resizable-handle": {
+            width: "32px !important",
+            height: "32px !important",
+            opacity: "0.7 !important",
+          },
+          ".react-grid-item": {
+            "touch-action": "none !important",
+          },
+        },
+      };
+      addUtilities(newUtilities);
+    },
+  ],
 };

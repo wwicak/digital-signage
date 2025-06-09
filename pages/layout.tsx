@@ -3,8 +3,7 @@ import GridLayout, { Layout as RglLayout } from 'react-grid-layout'
 import { DragDropContext, Droppable, DropResult, DroppableProvided } from '@hello-pangea/dnd'
 import { Edit, Grid2X2, Grid3X3, Monitor, Smartphone, Maximize2 } from 'lucide-react'
 
-// Import GridLayout styles
-import '../styles/GridLayoutStyles.css'
+// Using Tailwind-only styling for grid layout
 
 import Frame from '../components/Admin/Frame' // Assuming .js or .tsx
 import EditableWidget from '../components/Admin/EditableWidget' // Assuming .js or .tsx
@@ -786,7 +785,7 @@ const LayoutPage: React.FC<ILayoutPageProps> = ({ loggedIn, displayId }) => {
               onResizeStart={handleResizeStart}
               onResize={handleResize}
               onResizeStop={handleResizeStop}
-              draggableCancel={'.ReactModalPortal,.controls,button,.no-drag'}
+              draggableCancel={'.controls,button,.no-drag'}
               resizeHandles={['se', 'sw', 'ne', 'nw', 's', 'n', 'e', 'w']}
               margin={gridConstraints.recommendedMargin}
               rowHeight={gridConstraints.recommendedRowHeight}
@@ -802,23 +801,18 @@ const LayoutPage: React.FC<ILayoutPageProps> = ({ loggedIn, displayId }) => {
               verticalCompact={true}
               allowOverlap={false}
               maxRows={gridConstraints.rows}
-              className="react-grid-layout"
+              className="react-grid-layout w-full h-full"
             >
               {widgets.map(widget => (
                 <div
                   key={widget._id}
-                  className={`group relative transition-all duration-200 ${
+                  className={`w-full h-full ${
                     draggedWidgetId === widget._id
-                      ? 'z-10 ring-2 ring-primary/50'
+                      ? 'z-10 ring-2 ring-primary/50 scale-105'
                       : isDragging
                         ? 'opacity-90'
                         : ''
-                  }`}
-                  style={{
-                    transform: draggedWidgetId === widget._id ? 'scale(1.02)' : 'scale(1)',
-                    transition: isDragging ? 'none' : 'all 200ms ease',
-                    cursor: isDragging && draggedWidgetId === widget._id ? 'grabbing' : 'grab',
-                  }}
+                  } ${isDragging && draggedWidgetId === widget._id ? 'cursor-grabbing' : 'cursor-grab'}`}
                 >
                   <EditableWidget
                     id={widget._id}
