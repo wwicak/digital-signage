@@ -800,8 +800,8 @@ const LayoutAdminContent = memo(function LayoutAdminContent() {
                     widgetId = (widget.widget_id as any)._id?.toString() || (widget.widget_id as any).toString()
                     widgetType = (widget.widget_id as any).type || 'unknown'
                   } else {
-                    // Fallback
-                    widgetId = widget.widget_id?.toString() || `widget-${index}`
+                    // Fallback for null, undefined, or other unexpected values
+                    widgetId = widget.widget_id ? String(widget.widget_id) : `widget-${index}`
                     widgetType = 'unknown'
                   }
 
