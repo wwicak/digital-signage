@@ -1,15 +1,21 @@
-import { ILayout } from "../lib/models/Layout";
+import { ILayout, ILayoutWidget } from "../lib/models/Layout";
+import { IWidget } from "../lib/models/Widget";
 
 // Base API URL
 const API_BASE = "/api/layouts";
 
-// Types for API responses
-export interface ILayoutData extends Omit<ILayout, "creator_id"> {
+// Extended layout data with populated widgets
+export interface ILayoutData extends Omit<ILayout, "creator_id" | "widgets"> {
   creator_id: {
     _id: string;
     name: string;
     email: string;
   };
+  widgets: Array<
+    ILayoutWidget & {
+      widget?: IWidget; // Populated widget data
+    }
+  >;
   displays?: Array<{
     _id: string;
     name: string;
@@ -20,18 +26,18 @@ export interface ILayoutData extends Omit<ILayout, "creator_id"> {
   }>;
 }
 
+// For creating layouts - simplified widget structure
 export interface ILayoutCreateData {
   name: string;
   description?: string;
   orientation: "landscape" | "portrait";
   layoutType: "spaced" | "compact";
   widgets: Array<{
-    type: string;
+    widget_id: string; // Reference to existing widget
     x: number;
     y: number;
     w: number;
     h: number;
-    data?: any;
   }>;
   statusBar: {
     enabled: boolean;
@@ -221,39 +227,95 @@ export async function getActiveLayoutTemplates(): Promise<ILayoutData[]> {
   return response.layouts;
 }
 
-// Create a default layout template
+// Add widget to layout
+export async function addWidgetToLayout(
+  layoutId: string,
+  widgetData: {
+    type: string;
+    name: string;
+    x: number;
+    y: number;
+    w: number;
+    h: number;
+    data?: any;
+  }
+): Promise<any> {
+  const response = await fetch(`/api/layouts/${layoutId}/widgets`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    credentials: "include",
+    body: JSON.stringify(widgetData),
+  });
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.error || "Failed to add widget to layout");
+  }
+
+  return response.json();
+}
+
+// Update widget positions in layout
+export async function updateWidgetPositions(
+  layoutId: string,
+  positions: Array<{
+    widget_id: string;
+    x: number;
+    y: number;
+    w: number;
+    h: number;
+  }>
+): Promise<any> {
+  const response = await fetch(`/api/layouts/${layoutId}/widgets`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    credentials: "include",
+    body: JSON.stringify(positions),
+  });
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.error || "Failed to update widget positions");
+  }
+
+  return response.json();
+}
+
+// Remove widget from layout
+export async function removeWidgetFromLayout(
+  layoutId: string,
+  widgetId: string
+): Promise<void> {
+  const response = await fetch(
+    `/api/layouts/${layoutId}/widgets?widget_id=${widgetId}`,
+    {
+      method: "DELETE",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      credentials: "include",
+    }
+  );
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.error || "Failed to remove widget from layout");
+  }
+}
+
+// Create a default layout template (now creates actual widgets)
 export async function createDefaultLayout(): Promise<ILayoutData> {
-  const defaultLayoutData: ILayoutCreateData = {
+  // First create the layout without widgets
+  const defaultLayoutData: Omit<ILayoutCreateData, "widgets"> = {
     name: "Default Layout",
     description: "A basic layout template with essential widgets",
     orientation: "landscape",
     layoutType: "spaced",
-    widgets: [
-      {
-        type: "clock",
-        x: 0,
-        y: 0,
-        w: 4,
-        h: 2,
-        data: {},
-      },
-      {
-        type: "weather",
-        x: 4,
-        y: 0,
-        w: 4,
-        h: 2,
-        data: {},
-      },
-      {
-        type: "announcement",
-        x: 0,
-        y: 2,
-        w: 8,
-        h: 4,
-        data: {},
-      },
-    ],
+    widgets: [], // Start empty
     statusBar: {
       enabled: true,
       color: "#000000",
@@ -269,5 +331,35 @@ export async function createDefaultLayout(): Promise<ILayoutData> {
     },
   };
 
-  return createLayout(defaultLayoutData);
+  const layout = await createLayout(defaultLayoutData as ILayoutCreateData);
+
+  // Then add default widgets
+  const defaultWidgets = [
+    { type: "clock", name: "Clock Widget", x: 0, y: 0, w: 4, h: 2, data: {} },
+    {
+      type: "weather",
+      name: "Weather Widget",
+      x: 4,
+      y: 0,
+      w: 4,
+      h: 2,
+      data: {},
+    },
+    {
+      type: "announcement",
+      name: "Announcement Widget",
+      x: 0,
+      y: 2,
+      w: 8,
+      h: 4,
+      data: {},
+    },
+  ];
+
+  for (const widget of defaultWidgets) {
+    await addWidgetToLayout(layout._id, widget);
+  }
+
+  // Return the updated layout
+  return getLayout(layout._id);
 }

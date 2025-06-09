@@ -1,4 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
+import { useMemo } from "react";
 import {
   getLayouts,
   ILayoutQueryParams,
@@ -15,13 +16,28 @@ import {
  * - Pagination support
  * - Search functionality
  * - Real-time updates when layouts change
+ * - Memory leak prevention with stable query keys
  *
  * @param params - Query parameters for filtering and pagination
  * @returns Query result with layouts data, loading state, and error handling
  */
 export const useLayouts = (params: ILayoutQueryParams = {}) => {
+  // Memoize query key to prevent unnecessary re-renders
+  const queryKey = useMemo(
+    () => ["layouts", params],
+    [
+      params.page,
+      params.limit,
+      params.search,
+      params.orientation,
+      params.isActive,
+      params.isTemplate,
+      params.creator_id,
+    ]
+  );
+
   return useQuery<ILayoutsResponse, Error>({
-    queryKey: ["layouts", params],
+    queryKey,
     queryFn: () => getLayouts(params),
     staleTime: 5 * 60 * 1000, // 5 minutes - data considered fresh for 5 minutes
     gcTime: 10 * 60 * 1000, // 10 minutes - cache garbage collection time
@@ -29,7 +45,7 @@ export const useLayouts = (params: ILayoutQueryParams = {}) => {
     refetchOnReconnect: true, // Enable refetch on reconnect for reliability
     retry: 2, // Retry failed requests twice
     refetchInterval: false, // Disable polling - layouts don't change frequently
-    refetchOnMount: "always", // Always refetch when component mounts
+    refetchOnMount: false, // Don't always refetch - use cache when available
   });
 };
 

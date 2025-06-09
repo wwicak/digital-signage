@@ -187,7 +187,7 @@ export default function DisplaySelector() {
                     <div className="space-y-3">
                       <div className="flex items-center justify-between text-sm">
                         <span className="text-gray-600">Widgets:</span>
-                        <span className="font-medium">{layout.widgets?.length || 0}</span>
+                        <span className="font-medium">{Array.isArray(layout.widgets) ? layout.widgets.length : 0}</span>
                       </div>
 
                       <div className="flex items-center justify-between text-sm">

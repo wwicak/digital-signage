@@ -1,19 +1,22 @@
 import mongoose, { Document, Model, Schema } from "mongoose";
 import * as z from "zod";
+import { IWidget } from "./Widget";
+
+// Layout widget positioning data (separate from actual widget content)
+export interface ILayoutWidget {
+  widget_id: mongoose.Types.ObjectId; // Reference to actual Widget document
+  x: number;
+  y: number;
+  w: number;
+  h: number;
+}
 
 export interface ILayout extends Document {
   name: string;
   description?: string;
   orientation: "landscape" | "portrait";
   layoutType: "spaced" | "compact";
-  widgets: Array<{
-    type: string;
-    x: number;
-    y: number;
-    w: number;
-    h: number;
-    data?: any;
-  }>;
+  widgets: ILayoutWidget[]; // Array of widget positioning data
   statusBar: {
     enabled: boolean;
     color?: string;
@@ -63,8 +66,9 @@ const LayoutSchema = new Schema<ILayout>(
     },
     widgets: [
       {
-        type: {
-          type: String,
+        widget_id: {
+          type: Schema.Types.ObjectId,
+          ref: "Widget",
           required: true,
         },
         x: {
@@ -86,10 +90,6 @@ const LayoutSchema = new Schema<ILayout>(
           type: Number,
           required: true,
           min: 1,
-        },
-        data: {
-          type: Schema.Types.Mixed,
-          default: {},
         },
       },
     ],
@@ -181,6 +181,15 @@ LayoutSchema.pre("save", function (next) {
   next();
 });
 
+// Zod schema for layout widget positioning
+export const LayoutWidgetSchemaZod = z.object({
+  widget_id: z.instanceof(mongoose.Types.ObjectId),
+  x: z.number().min(0),
+  y: z.number().min(0),
+  w: z.number().min(1),
+  h: z.number().min(1),
+});
+
 // Zod schema for validation
 export const LayoutSchemaZod = z.object({
   _id: z.instanceof(mongoose.Types.ObjectId).optional(),
@@ -194,18 +203,7 @@ export const LayoutSchemaZod = z.object({
     .optional(),
   orientation: z.enum(["landscape", "portrait"]).default("landscape"),
   layoutType: z.enum(["spaced", "compact"]).default("spaced"),
-  widgets: z
-    .array(
-      z.object({
-        type: z.string(),
-        x: z.number().min(0),
-        y: z.number().min(0),
-        w: z.number().min(1),
-        h: z.number().min(1),
-        data: z.any().optional().default({}),
-      })
-    )
-    .default([]),
+  widgets: z.array(LayoutWidgetSchemaZod).default([]),
   statusBar: z
     .object({
       enabled: z.boolean().default(true),

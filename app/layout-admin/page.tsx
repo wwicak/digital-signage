@@ -24,7 +24,7 @@ import Widgets from '../../widgets'
 import { useWidgetChoices } from '../../hooks/useAvailableWidgets'
 import { useLayout } from '../../hooks/useLayout'
 import { useLayoutMutations } from '../../hooks/useLayoutMutations'
-import { ILayoutCreateData, ILayoutUpdateData } from '../../actions/layouts'
+import { ILayoutCreateData, ILayoutUpdateData, addWidgetToLayout, updateWidgetPositions, removeWidgetFromLayout } from '../../actions/layouts'
 
 import { WidgetType } from '../../lib/models/Widget'
 
@@ -40,26 +40,28 @@ const LayoutAdminContent = memo(function LayoutAdminContent() {
   const { createLayout, updateLayout, isCreating, isUpdating } = useLayoutMutations()
   const { widgetChoices, isLoading: widgetChoicesLoading } = useWidgetChoices()
 
-  // Layout state
-  const [layoutData, setLayoutData] = useState<ILayoutCreateData>({
+  // Layout state - simplified for form data
+  const [layoutData, setLayoutData] = useState({
     name: '',
     description: '',
-    orientation: 'landscape',
-    layoutType: 'spaced',
-    widgets: [],
+    orientation: 'landscape' as 'landscape' | 'portrait',
+    layoutType: 'spaced' as 'spaced' | 'compact',
     statusBar: {
       enabled: true,
-      elements: [],
+      elements: [] as string[],
     },
     isActive: true,
     isTemplate: true,
     gridConfig: {
       cols: 16,
       rows: 9,
-      margin: [12, 12],
+      margin: [12, 12] as [number, number],
       rowHeight: 60,
     },
   })
+
+  // Track if layout has been saved (needed for widget operations)
+  const [savedLayoutId, setSavedLayoutId] = useState<string | null>(layoutId)
 
   // Load existing layout data when editing
   useEffect(() => {
@@ -69,7 +71,6 @@ const LayoutAdminContent = memo(function LayoutAdminContent() {
         description: existingLayout.description || '',
         orientation: existingLayout.orientation,
         layoutType: existingLayout.layoutType,
-        widgets: existingLayout.widgets || [],
         statusBar: existingLayout.statusBar,
         isActive: existingLayout.isActive,
         isTemplate: existingLayout.isTemplate,
@@ -80,30 +81,29 @@ const LayoutAdminContent = memo(function LayoutAdminContent() {
           rowHeight: 60,
         },
       })
+      setSavedLayoutId(existingLayout._id)
     }
   }, [existingLayout, isEditing])
 
-  const handleAddWidget = (type: string): void => {
-    const widgetDefinition = Widgets[type]
-    const newWidget = {
-      type: type as WidgetType,
-      x: 0,
-      y: 0,
-      w: widgetDefinition?.defaultSize?.w || 4,
-      h: widgetDefinition?.defaultSize?.h || 2,
-      data: widgetDefinition?.defaultData || {},
+  const handleAddWidget = async (type: string): Promise<void> => {
+    if (!savedLayoutId) {
+      alert('Please save the layout first before adding widgets')
+      return
     }
 
+    const widgetDefinition = Widgets[type]
+
     // Find a good position for the new widget
-    const existingPositions = layoutData.widgets.map(w => ({ x: w.x, y: w.y, w: w.w, h: w.h }))
+    const existingPositions = existingLayout?.widgets?.map(w => ({ x: w.x, y: w.y, w: w.w, h: w.h })) || []
     let bestPosition = { x: 0, y: 0 }
+    const widgetSize = { w: widgetDefinition?.defaultSize?.w || 4, h: widgetDefinition?.defaultSize?.h || 2 }
 
     // Simple placement algorithm - find first available spot
     for (let y = 0; y < layoutData.gridConfig.rows; y++) {
-      for (let x = 0; x <= layoutData.gridConfig.cols - newWidget.w; x++) {
+      for (let x = 0; x <= layoutData.gridConfig.cols - widgetSize.w; x++) {
         const wouldOverlap = existingPositions.some(pos =>
-          x < pos.x + pos.w && x + newWidget.w > pos.x &&
-          y < pos.y + pos.h && y + newWidget.h > pos.y
+          x < pos.x + pos.w && x + widgetSize.w > pos.x &&
+          y < pos.y + pos.h && y + widgetSize.h > pos.y
         )
         if (!wouldOverlap) {
           bestPosition = { x, y }
@@ -113,38 +113,67 @@ const LayoutAdminContent = memo(function LayoutAdminContent() {
       if (bestPosition.x !== 0 || bestPosition.y !== 0) break
     }
 
-    setLayoutData(prev => ({
-      ...prev,
-      widgets: [...prev.widgets, { ...newWidget, x: bestPosition.x, y: bestPosition.y }]
-    }))
-  }
-
-  const handleDeleteWidget = (index: number): void => {
-    setLayoutData(prev => ({
-      ...prev,
-      widgets: prev.widgets.filter((_, i) => i !== index)
-    }))
-  }
-
-  const handleLayoutChange = useCallback((layout: RglLayout[]): void => {
-    // Update widget positions in layout data
-    setLayoutData(prev => ({
-      ...prev,
-      widgets: prev.widgets.map((widget, index) => {
-        const layoutItem = layout.find(item => item.i === index.toString())
-        if (layoutItem) {
-          return {
-            ...widget,
-            x: layoutItem.x,
-            y: layoutItem.y,
-            w: layoutItem.w,
-            h: layoutItem.h,
-          }
-        }
-        return widget
+    try {
+      await addWidgetToLayout(savedLayoutId, {
+        type: type as WidgetType,
+        name: `${type} Widget`,
+        x: bestPosition.x,
+        y: bestPosition.y,
+        w: widgetSize.w,
+        h: widgetSize.h,
+        data: widgetDefinition?.defaultData || {},
       })
-    }))
-  }, [])
+
+      // Refresh layout data
+      window.location.reload() // Simple refresh for now
+    } catch (error) {
+      console.error('Failed to add widget:', error)
+      alert('Failed to add widget. Please try again.')
+    }
+  }
+
+  const handleDeleteWidget = async (widgetId: string): Promise<void> => {
+    if (!savedLayoutId) {
+      return
+    }
+
+    try {
+      await removeWidgetFromLayout(savedLayoutId, widgetId)
+      // Refresh layout data
+      window.location.reload() // Simple refresh for now
+    } catch (error) {
+      console.error('Failed to delete widget:', error)
+      alert('Failed to delete widget. Please try again.')
+    }
+  }
+
+  const handleLayoutChange = useCallback(async (layout: RglLayout[]): Promise<void> => {
+    if (!savedLayoutId || !existingLayout?.widgets) {
+      return
+    }
+
+    // Prepare position updates
+    const positionUpdates = layout.map(layoutItem => {
+      const widgetIndex = parseInt(layoutItem.i)
+      const widget = existingLayout.widgets[widgetIndex]
+      if (widget) {
+        return {
+          widget_id: widget.widget_id._id || widget.widget_id,
+          x: layoutItem.x,
+          y: layoutItem.y,
+          w: layoutItem.w,
+          h: layoutItem.h,
+        }
+      }
+      return null
+    }).filter(Boolean)
+
+    try {
+      await updateWidgetPositions(savedLayoutId, positionUpdates as any)
+    } catch (error) {
+      console.error('Failed to update widget positions:', error)
+    }
+  }, [savedLayoutId, existingLayout?.widgets])
 
   const handleDragEnd = (result: DropResult): void => {
     if (!result.destination) {
@@ -213,24 +242,27 @@ const LayoutAdminContent = memo(function LayoutAdminContent() {
   const handleSave = async (): Promise<void> => {
     try {
       if (isEditing && layoutId) {
-        await updateLayout({ id: layoutId, data: layoutData })
+        await updateLayout({ id: layoutId, data: layoutData as any })
         router.push('/layouts')
       } else {
-        const newLayout = await createLayout(layoutData)
-        router.push('/layouts')
+        const newLayout = await createLayout({ ...layoutData, widgets: [] } as any)
+        setSavedLayoutId(newLayout._id)
+        // Don't redirect immediately - let user add widgets
+        alert('Layout saved! You can now add widgets to your layout.')
       }
     } catch (error) {
       console.error('Failed to save layout:', error)
+      alert('Failed to save layout. Please try again.')
     }
   }
 
-  const rglLayout: RglLayout[] = layoutData.widgets.map((widget, index) => ({
+  const rglLayout: RglLayout[] = existingLayout?.widgets?.map((widget, index) => ({
     i: index.toString(),
     x: widget.x,
     y: widget.y,
     w: widget.w,
     h: widget.h,
-  }))
+  })) || []
 
   const statusBarChoices = Object.keys(StatusBarElementTypes).map(key => {
     const elType = StatusBarElementTypes[key as keyof typeof StatusBarElementTypes]
@@ -426,7 +458,7 @@ const LayoutAdminContent = memo(function LayoutAdminContent() {
               {layoutData.orientation === 'portrait' ? '9:16' : '16:9'} • {layoutData.gridConfig.cols}×{layoutData.gridConfig.rows}
             </div>
 
-            {layoutData.widgets.length === 0 ? (
+            {(!existingLayout?.widgets || existingLayout.widgets.length === 0) ? (
               <div className="absolute inset-0 flex items-center justify-center">
                 <div className="text-center text-gray-500">
                   <Grid3X3 className="mx-auto h-12 w-12 mb-4 opacity-50" />
@@ -449,18 +481,23 @@ const LayoutAdminContent = memo(function LayoutAdminContent() {
                 compactType="vertical"
                 maxRows={layoutData.gridConfig.rows}
               >
-                {layoutData.widgets.map((widget, index) => (
+                {existingLayout?.widgets?.map((widget, index) => (
                   <div key={index}>
                     <div className="bg-white rounded border-2 border-dashed border-gray-400 h-full flex items-center justify-center relative group">
                       <div className="text-center">
-                        <div className="text-sm font-medium text-gray-600 mb-1">{widget.type}</div>
+                        <div className="text-sm font-medium text-gray-600 mb-1">
+                          {widget.widget_id?.type || 'Unknown'}
+                        </div>
                         <div className="text-xs text-gray-400">{widget.w}×{widget.h}</div>
+                        <div className="text-xs text-gray-500 mt-1">
+                          {widget.widget_id?.name || 'Unnamed'}
+                        </div>
                       </div>
                       <Button
                         variant="destructive"
                         size="sm"
                         className="absolute top-1 right-1 opacity-0 group-hover:opacity-100 transition-opacity h-6 w-6 p-0"
-                        onClick={() => handleDeleteWidget(index)}
+                        onClick={() => handleDeleteWidget(widget.widget_id._id || widget.widget_id)}
                       >
                         ×
                       </Button>

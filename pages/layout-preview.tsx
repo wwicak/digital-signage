@@ -31,8 +31,12 @@ const LayoutPreviewComponent: React.FC<LayoutPreviewProps> = ({ loggedIn }) => {
 
     updateScale()
     window.addEventListener('resize', updateScale)
-    return () => window.removeEventListener('resize', updateScale)
-  }, [layout])
+
+    // Cleanup function to prevent memory leaks
+    return () => {
+      window.removeEventListener('resize', updateScale)
+    }
+  }, [layout?.orientation]) // Only depend on orientation, not entire layout object
 
   if (isLoading) {
     return (

@@ -254,7 +254,7 @@ const LayoutsComponent = memo(function LayoutsComponent({ loggedIn }: LayoutsPro
                     <div className="space-y-4">
                       <div className="flex items-center justify-between text-sm">
                         <span className="text-muted-foreground">Widgets:</span>
-                        <span className="font-medium">{layout.widgets?.length || 0}</span>
+                        <span className="font-medium">{Array.isArray(layout.widgets) ? layout.widgets.length : 0}</span>
                       </div>
 
                       <div className="flex items-center justify-between text-sm">
