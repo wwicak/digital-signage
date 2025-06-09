@@ -265,10 +265,10 @@ class MediaPlayerOptions extends Component<IWidgetOptionsEditorProps<MediaPlayer
           <p className="text-blue-100">Create an engaging media experience for your digital signage</p>
         </div>
 
-        {/* Main Content */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Configuration Panel */}
-          <div className="lg:col-span-2 space-y-6">
+        {/* Main Content - Responsive Grid Layout */}
+        <div className="grid grid-cols-1 xl:grid-cols-3 gap-6 lg:gap-8">
+          {/* Configuration Panel - Responsive Column Span */}
+          <div className="xl:col-span-2 space-y-6">
             
             {/* Media Source Section */}
             <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
@@ -332,8 +332,9 @@ class MediaPlayerOptions extends Component<IWidgetOptionsEditorProps<MediaPlayer
                   </div>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div>
+                {/* Responsive Grid for Media Type and Background */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 lg:gap-6">
+                  <div className="flex flex-col">
                     <Input
                       label="Media Type"
                       type="select"
@@ -346,7 +347,7 @@ class MediaPlayerOptions extends Component<IWidgetOptionsEditorProps<MediaPlayer
                       onChange={this.handleChange}
                     />
                   </div>
-                  <div>
+                  <div className="flex flex-col">
                     <Input
                       label="Background Color"
                       type="color"
@@ -385,16 +386,20 @@ class MediaPlayerOptions extends Component<IWidgetOptionsEditorProps<MediaPlayer
               </div>
               
               <div className="p-6 space-y-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div className="space-y-4">
-                    <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg border border-gray-200">
-                      <div className="flex items-center gap-3">
+                {/* Responsive Grid for Playback Controls */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2 gap-4">
+                  {/* Autoplay Control */}
+                  <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg border border-gray-200 hover:border-gray-300 transition-colors">
+                    <div className="flex items-center gap-3 flex-1 min-w-0">
+                      <div className="w-6 h-6 flex items-center justify-center flex-shrink-0">
                         <Play className="w-5 h-5 text-gray-600" />
-                        <div>
-                          <label className="text-sm font-medium text-gray-900">Autoplay</label>
-                          <p className="text-xs text-gray-600">Start playing automatically</p>
-                        </div>
                       </div>
+                      <div className="flex-1 min-w-0">
+                        <label className="text-sm font-medium text-gray-900 block">Autoplay</label>
+                        <p className="text-xs text-gray-600 truncate">Start playing automatically</p>
+                      </div>
+                    </div>
+                    <div className="flex-shrink-0 ml-3">
                       <Input
                         type="checkbox"
                         name="autoplay"
@@ -403,17 +408,20 @@ class MediaPlayerOptions extends Component<IWidgetOptionsEditorProps<MediaPlayer
                         onChange={(name, checked) => this.handleChange(name, checked)}
                       />
                     </div>
-                    
-                    <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg border border-gray-200">
-                      <div className="flex items-center gap-3">
-                        <div className="w-5 h-5 flex items-center justify-center">
-                          <div className="w-3 h-3 border-2 border-gray-600 rounded-full"></div>
-                        </div>
-                        <div>
-                          <label className="text-sm font-medium text-gray-900">Loop</label>
-                          <p className="text-xs text-gray-600">Repeat when finished</p>
-                        </div>
+                  </div>
+
+                  {/* Loop Control */}
+                  <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg border border-gray-200 hover:border-gray-300 transition-colors">
+                    <div className="flex items-center gap-3 flex-1 min-w-0">
+                      <div className="w-6 h-6 flex items-center justify-center flex-shrink-0">
+                        <div className="w-3 h-3 border-2 border-gray-600 rounded-full"></div>
                       </div>
+                      <div className="flex-1 min-w-0">
+                        <label className="text-sm font-medium text-gray-900 block">Loop</label>
+                        <p className="text-xs text-gray-600 truncate">Repeat when finished</p>
+                      </div>
+                    </div>
+                    <div className="flex-shrink-0 ml-3">
                       <Input
                         type="checkbox"
                         name="loop"
@@ -424,15 +432,18 @@ class MediaPlayerOptions extends Component<IWidgetOptionsEditorProps<MediaPlayer
                     </div>
                   </div>
 
-                  <div className="space-y-4">
-                    <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg border border-gray-200">
-                      <div className="flex items-center gap-3">
+                  {/* Muted Control */}
+                  <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg border border-gray-200 hover:border-gray-300 transition-colors">
+                    <div className="flex items-center gap-3 flex-1 min-w-0">
+                      <div className="w-6 h-6 flex items-center justify-center flex-shrink-0">
                         {muted ? <VolumeX className="w-5 h-5 text-gray-600" /> : <Volume2 className="w-5 h-5 text-gray-600" />}
-                        <div>
-                          <label className="text-sm font-medium text-gray-900">Muted</label>
-                          <p className="text-xs text-gray-600">Start without sound</p>
-                        </div>
                       </div>
+                      <div className="flex-1 min-w-0">
+                        <label className="text-sm font-medium text-gray-900 block">Muted</label>
+                        <p className="text-xs text-gray-600 truncate">Start without sound</p>
+                      </div>
+                    </div>
+                    <div className="flex-shrink-0 ml-3">
                       <Input
                         type="checkbox"
                         name="muted"
@@ -441,15 +452,20 @@ class MediaPlayerOptions extends Component<IWidgetOptionsEditorProps<MediaPlayer
                         onChange={(name, checked) => this.handleChange(name, checked)}
                       />
                     </div>
-                    
-                    <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg border border-gray-200">
-                      <div className="flex items-center gap-3">
+                  </div>
+
+                  {/* Show Controls */}
+                  <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg border border-gray-200 hover:border-gray-300 transition-colors">
+                    <div className="flex items-center gap-3 flex-1 min-w-0">
+                      <div className="w-6 h-6 flex items-center justify-center flex-shrink-0">
                         <Monitor className="w-5 h-5 text-gray-600" />
-                        <div>
-                          <label className="text-sm font-medium text-gray-900">Show Controls</label>
-                          <p className="text-xs text-gray-600">Display player controls</p>
-                        </div>
                       </div>
+                      <div className="flex-1 min-w-0">
+                        <label className="text-sm font-medium text-gray-900 block">Show Controls</label>
+                        <p className="text-xs text-gray-600 truncate">Display player controls</p>
+                      </div>
+                    </div>
+                    <div className="flex-shrink-0 ml-3">
                       <Input
                         type="checkbox"
                         name="showControls"
@@ -461,20 +477,38 @@ class MediaPlayerOptions extends Component<IWidgetOptionsEditorProps<MediaPlayer
                   </div>
                 </div>
 
-                <div className="max-w-md">
-                  <Input
-                    label="Volume Level"
-                    type="number"
-                    name="volume"
-                    value={volume}
-                    min={0}
-                    max={1}
-                    step={0.1}
-                    onChange={this.handleChange}
-                  />
-                  <div className="mt-2 flex justify-between text-xs text-gray-500">
-                    <span>Silent (0.0)</span>
-                    <span>Maximum (1.0)</span>
+                {/* Volume Control with Consistent Layout */}
+                <div className="bg-white rounded-lg border border-gray-200 p-4">
+                  <div className="flex items-center gap-3 mb-4">
+                    <div className="w-6 h-6 flex items-center justify-center flex-shrink-0">
+                      <Volume2 className="w-5 h-5 text-gray-600" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <label className="text-sm font-medium text-gray-900 block">Volume Level</label>
+                      <p className="text-xs text-gray-600">Control playback volume (0.0 - 1.0)</p>
+                    </div>
+                  </div>
+                  <div className="space-y-3">
+                    <Input
+                      label=""
+                      type="number"
+                      name="volume"
+                      value={volume}
+                      min={0}
+                      max={1}
+                      step={0.1}
+                      onChange={this.handleChange}
+                    />
+                    <div className="flex justify-between text-xs text-gray-500 px-1">
+                      <span className="flex items-center gap-1">
+                        <VolumeX className="w-3 h-3" />
+                        Silent (0.0)
+                      </span>
+                      <span className="flex items-center gap-1">
+                        <Volume2 className="w-3 h-3" />
+                        Maximum (1.0)
+                      </span>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -496,21 +530,26 @@ class MediaPlayerOptions extends Component<IWidgetOptionsEditorProps<MediaPlayer
               </div>
               
               <div className="p-6 space-y-6">
-                <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg border border-gray-200">
-                  <div className="flex items-center gap-3">
-                    <Calendar className="w-5 h-5 text-gray-600" />
-                    <div>
-                      <label className="text-sm font-medium text-gray-900">Enable Time-based Scheduling</label>
-                      <p className="text-xs text-gray-600">Set specific days and times for playback</p>
+                {/* Enable Scheduling Control */}
+                <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg border border-gray-200 hover:border-gray-300 transition-colors">
+                  <div className="flex items-center gap-3 flex-1 min-w-0">
+                    <div className="w-6 h-6 flex items-center justify-center flex-shrink-0">
+                      <Calendar className="w-5 h-5 text-gray-600" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <label className="text-sm font-medium text-gray-900 block">Enable Time-based Scheduling</label>
+                      <p className="text-xs text-gray-600 truncate">Set specific days and times for playback</p>
                     </div>
                   </div>
-                  <Input
-                    type="checkbox"
-                    name="enableScheduling"
-                    label=""
-                    checked={enableScheduling}
-                    onChange={(name, checked) => this.handleChange(name, checked)}
-                  />
+                  <div className="flex-shrink-0 ml-3">
+                    <Input
+                      type="checkbox"
+                      name="enableScheduling"
+                      label=""
+                      checked={enableScheduling}
+                      onChange={(name, checked) => this.handleChange(name, checked)}
+                    />
+                  </div>
                 </div>
 
                 {enableScheduling && (
@@ -521,23 +560,28 @@ class MediaPlayerOptions extends Component<IWidgetOptionsEditorProps<MediaPlayer
                         Active Days
                       </label>
                       <p className="text-xs text-gray-600 mb-4">Leave empty to play on all days</p>
-                      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                      {/* Responsive Grid for Days - Adapts to screen size */}
+                      <div className="grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-2 xl:grid-cols-4 gap-3">
                         {dayChoices.map((day) => (
-                          <label key={day.id} className="flex items-center gap-2 p-3 bg-white rounded-lg border border-gray-200 hover:border-blue-300 transition-colors cursor-pointer">
-                            <input
-                              type="checkbox"
-                              checked={(schedule?.daysOfWeek || []).includes(parseInt(day.id.toString()))}
-                              onChange={(e) => {
-                                const currentDays = schedule?.daysOfWeek || [];
-                                const dayNum = parseInt(day.id.toString());
-                                const newDays = e.target.checked
-                                  ? [...currentDays, dayNum]
-                                  : currentDays.filter(d => d !== dayNum);
-                                this.handleChange('scheduleDays', newDays);
-                              }}
-                              className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 focus:ring-2"
-                            />
-                            <span className="text-sm font-medium text-gray-900">{day.label}</span>
+                          <label key={day.id} className="flex items-center gap-3 p-3 bg-white rounded-lg border border-gray-200 hover:border-blue-300 transition-colors cursor-pointer group">
+                            <div className="flex-shrink-0">
+                              <input
+                                type="checkbox"
+                                checked={(schedule?.daysOfWeek || []).includes(parseInt(day.id.toString()))}
+                                onChange={(e) => {
+                                  const currentDays = schedule?.daysOfWeek || [];
+                                  const dayNum = parseInt(day.id.toString());
+                                  const newDays = e.target.checked
+                                    ? [...currentDays, dayNum]
+                                    : currentDays.filter(d => d !== dayNum);
+                                  this.handleChange('scheduleDays', newDays);
+                                }}
+                                className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 focus:ring-2"
+                              />
+                            </div>
+                            <span className="text-sm font-medium text-gray-900 flex-1 min-w-0 truncate group-hover:text-blue-700 transition-colors">
+                              {day.label}
+                            </span>
                           </label>
                         ))}
                       </div>
@@ -564,34 +608,44 @@ class MediaPlayerOptions extends Component<IWidgetOptionsEditorProps<MediaPlayer
                       
                       <div className="space-y-3">
                         {(schedule?.timeSlots || []).map((slot, index) => (
-                          <div key={index} className="flex items-center gap-3 p-4 bg-white rounded-lg border border-gray-200">
-                            <div className="flex items-center gap-2 flex-1">
-                              <Input
-                                label=""
-                                type="text"
-                                name={`timeSlot_${index}_startTime`}
-                                value={slot.startTime}
-                                placeholder="09:00"
-                                onChange={this.handleChange}
-                              />
-                              <span className="text-gray-500 font-medium">to</span>
-                              <Input
-                                label=""
-                                type="text"
-                                name={`timeSlot_${index}_endTime`}
-                                value={slot.endTime}
-                                placeholder="17:00"
-                                onChange={this.handleChange}
-                              />
+                          <div key={index} className="flex items-center gap-3 p-4 bg-white rounded-lg border border-gray-200 hover:border-gray-300 transition-colors">
+                            {/* Time Inputs Container */}
+                            <div className="flex items-center gap-3 flex-1 min-w-0">
+                              <div className="flex-1 min-w-0">
+                                <Input
+                                  label=""
+                                  type="text"
+                                  name={`timeSlot_${index}_startTime`}
+                                  value={slot.startTime}
+                                  placeholder="09:00"
+                                  onChange={this.handleChange}
+                                />
+                              </div>
+                              <div className="flex-shrink-0 px-2">
+                                <span className="text-gray-500 font-medium text-sm">to</span>
+                              </div>
+                              <div className="flex-1 min-w-0">
+                                <Input
+                                  label=""
+                                  type="text"
+                                  name={`timeSlot_${index}_endTime`}
+                                  value={slot.endTime}
+                                  placeholder="17:00"
+                                  onChange={this.handleChange}
+                                />
+                              </div>
                             </div>
-                            <button
-                              type="button"
-                              onClick={() => this.removeTimeSlot(index)}
-                              className="flex items-center gap-1 px-3 py-2 text-sm text-red-600 hover:text-red-800 hover:bg-red-50 rounded-lg transition-colors"
-                            >
-                              <Trash2 className="w-4 h-4" />
-                              Remove
-                            </button>
+                            {/* Remove Button */}
+                            <div className="flex-shrink-0">
+                              <button
+                                type="button"
+                                onClick={() => this.removeTimeSlot(index)}
+                                className="flex items-center gap-2 px-3 py-2 text-sm text-red-600 hover:text-red-800 hover:bg-red-50 rounded-lg transition-colors border border-transparent hover:border-red-200"
+                              >
+                                <Trash2 className="w-4 h-4 flex-shrink-0" />
+                                <span className="hidden sm:inline">Remove</span>
+                              </button>
+                            </div>
                           </div>
                         ))}
                         
@@ -643,30 +697,37 @@ class MediaPlayerOptions extends Component<IWidgetOptionsEditorProps<MediaPlayer
             </div>
           </div>
 
-          {/* Preview Panel */}
-          <div className="lg:col-span-1">
+          {/* Preview Panel - Responsive Layout */}
+          <div className="xl:col-span-1 order-first xl:order-last">
             <div className="sticky top-6">
               <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+                {/* Preview Header with Consistent Flexbox */}
                 <div className="bg-gradient-to-r from-gray-50 to-gray-100 px-6 py-4 border-b border-gray-200">
                   <div className="flex items-center gap-3">
-                    <div className="p-2 bg-indigo-100 rounded-lg">
+                    <div className="w-10 h-10 flex items-center justify-center bg-indigo-100 rounded-lg flex-shrink-0">
                       <Eye className="w-5 h-5 text-indigo-600" />
                     </div>
-                    <div>
+                    <div className="flex-1 min-w-0">
                       <h3 className="text-lg font-semibold text-gray-900">Live Preview</h3>
-                      <p className="text-sm text-gray-600">See how your widget looks</p>
+                      <p className="text-sm text-gray-600 truncate">See how your widget looks</p>
                     </div>
                   </div>
                 </div>
-                
+
                 <div className="p-6">
+                  {/* Responsive Preview Container */}
                   <div className="aspect-video bg-gray-100 rounded-lg border-2 border-dashed border-gray-300 overflow-hidden">
                     <MediaPlayerContent data={previewData} isPreview={true} />
                   </div>
-                  <div className="mt-4 p-3 bg-gray-50 rounded-lg">
-                    <p className="text-xs text-gray-600">
-                      <strong>Note:</strong> Preview shows muted playback with controls disabled for safety.
-                    </p>
+                  <div className="mt-4 p-3 bg-gray-50 rounded-lg border border-gray-200">
+                    <div className="flex items-start gap-2">
+                      <div className="w-4 h-4 flex items-center justify-center flex-shrink-0 mt-0.5">
+                        <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                      </div>
+                      <p className="text-xs text-gray-600 flex-1">
+                        <strong>Note:</strong> Preview shows muted playback with controls disabled for safety.
+                      </p>
+                    </div>
                   </div>
                 </div>
               </div>
