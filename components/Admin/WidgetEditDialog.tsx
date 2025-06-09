@@ -8,7 +8,10 @@ import { DialogFooter } from "../ui/dialog";
 import { Loader2, AlertCircle } from "lucide-react";
 
 // Widget data cache to avoid repeated API calls
-const widgetDataCache = new Map<string, { data: IWidgetData; timestamp: number }>();
+const widgetDataCache = new Map<
+  string,
+  { data: IWidgetData; timestamp: number }
+>();
 const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
 
 // Helper function to get cached widget data
@@ -173,7 +176,7 @@ class WidgetEditDialog
         } else {
           console.error(
             `Fetched widget data for ${widgetId} does not match schema:`,
-            parsedFullData.error,
+            parsedFullData.error
           );
           this.setState({
             error: "Fetched widget configuration is invalid.",
@@ -185,14 +188,20 @@ class WidgetEditDialog
         console.error(`Failed to fetch widget data for ${widgetId}:`, error);
 
         // Check if it's a 404 error and provide better error message
-        if (error.message?.includes('404') || error.message?.includes('not found')) {
+        if (
+          error.message?.includes("404") ||
+          error.message?.includes("not found")
+        ) {
           this.setState({
-            error: "Widget not found. This widget may have been deleted or you may not have permission to access it.",
+            error:
+              "Widget not found. This widget may have been deleted or you may not have permission to access it.",
             initialWidgetData: null,
           });
         } else {
           this.setState({
-            error: `Failed to load widget configuration: ${error.message || error}`,
+            error: `Failed to load widget configuration: ${
+              error.message || error
+            }`,
             initialWidgetData: null,
           });
         }
@@ -263,8 +272,11 @@ class WidgetEditDialog
     // Get widget type name for dialog title
     const { widgetType } = this.props;
     const dialogTitle = widgetType
-      ? `Configure ${widgetType.charAt(0).toUpperCase() + widgetType.slice(1).replace(/-/g, ' ')} Widget`
-      : 'Configure Widget';
+      ? `Configure ${
+          widgetType.charAt(0).toUpperCase() +
+          widgetType.slice(1).replace(/-/g, " ")
+        } Widget`
+      : "Configure Widget";
 
     return (
       <Dialog
@@ -294,8 +306,12 @@ class WidgetEditDialog
                   <div className="flex items-center gap-3 text-gray-600">
                     <Loader2 className="w-6 h-6 animate-spin" />
                     <div className="flex flex-col">
-                      <span className="text-lg">Loading widget configuration...</span>
-                      <span className="text-sm text-gray-500 mt-1">This should only take a moment</span>
+                      <span className="text-lg">
+                        Loading widget configuration...
+                      </span>
+                      <span className="text-sm text-gray-500 mt-1">
+                        This should only take a moment
+                      </span>
                     </div>
                   </div>
                 </div>
