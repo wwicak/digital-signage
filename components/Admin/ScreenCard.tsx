@@ -8,7 +8,7 @@ import {
   Trash2,
   Cast,
 } from "lucide-react";
-import Link from "next/link";
+import { useRouter } from "next/router";
 import * as z from "zod";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -51,6 +51,7 @@ const ScreenCard: React.FC<IScreenCardProps> = ({
   value,
   refresh = () => {},
 }) => {
+  const router = useRouter();
   const { deleteDisplay, updateDisplay } = useDisplayMutations();
   const [isUpdatingOrientation, setIsUpdatingOrientation] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
@@ -120,10 +121,14 @@ const ScreenCard: React.FC<IScreenCardProps> = ({
   const widgetCount =
     value && Array.isArray(value.widgets) ? value.widgets.length : 0;
 
+  const handleCardClick = () => {
+    // Navigate to layout page when clicking the card
+    router.push(`/layout?display=${value?._id || ""}`);
+  };
+
   return (
-    <Card className="group my-6 transition-all duration-200 hover:shadow-lg cursor-pointer">
-      <Link href={`/layout?display=${value?._id || ""}`} className="block">
-        <CardContent className="p-6">
+    <Card className="group my-6 transition-all duration-200 hover:shadow-lg cursor-pointer" onClick={handleCardClick}>
+      <CardContent className="p-6">
           <div className="flex items-center space-x-4">
             {/* Display Icon */}
             <div className="flex-shrink-0">
@@ -186,24 +191,32 @@ const ScreenCard: React.FC<IScreenCardProps> = ({
                 <Edit className="h-4 w-4" />
               </Button>
 
-              <Button variant="ghost" size="icon" asChild className="h-8 w-8">
-                <Link
-                  href={`/layout?display=${value?._id || ""}`}
-                  onClick={(e) => e.stopPropagation()}
-                  aria-label="Edit Layout"
-                >
-                  <Eye className="h-4 w-4" />
-                </Link>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-8 w-8"
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  router.push(`/layout?display=${value?._id || ""}`);
+                }}
+                aria-label="Edit Layout"
+              >
+                <Eye className="h-4 w-4" />
               </Button>
 
-              <Button variant="ghost" size="icon" asChild className="h-8 w-8">
-                <Link
-                  href={`/display/${value?._id || ""}`}
-                  onClick={(e) => e.stopPropagation()}
-                  aria-label="View Display"
-                >
-                  <ExternalLink className="h-4 w-4" />
-                </Link>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-8 w-8"
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  window.open(`/display/${value?._id || ""}`, '_blank');
+                }}
+                aria-label="View Display"
+              >
+                <ExternalLink className="h-4 w-4" />
               </Button>
 
               <Button
@@ -222,7 +235,6 @@ const ScreenCard: React.FC<IScreenCardProps> = ({
             </div>
           </div>
         </CardContent>
-      </Link>
 
       {/* Edit Dialog */}
       {isEditDialogOpen && (

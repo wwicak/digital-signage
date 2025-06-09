@@ -70,21 +70,40 @@ export async function GET(request: NextRequest) {
       query.last_update = { $gte: cutoffTime };
     }
 
-    const displays = await Display.find(query)
-      .populate(withHeartbeat ? "widgets" : "")
-      .select({
-        _id: 1,
-        name: 1,
-        layout: 1,
-        last_update: 1,
-        location: 1,
-        building: 1,
-        created_at: 1,
-        updated_at: 1,
-        widgets: withHeartbeat ? 1 : 0,
-      })
-      .sort({ last_update: -1 })
-      .lean();
+    let displays;
+    if (withHeartbeat) {
+      // Include widgets when heartbeat data is requested
+      displays = await Display.find(query)
+        .populate("widgets")
+        .select({
+          _id: 1,
+          name: 1,
+          layout: 1,
+          last_update: 1,
+          location: 1,
+          building: 1,
+          created_at: 1,
+          updated_at: 1,
+          widgets: 1,
+        })
+        .sort({ last_update: -1 })
+        .lean();
+    } else {
+      // Exclude widgets when not needed for better performance
+      displays = await Display.find(query)
+        .select({
+          _id: 1,
+          name: 1,
+          layout: 1,
+          last_update: 1,
+          location: 1,
+          building: 1,
+          created_at: 1,
+          updated_at: 1,
+        })
+        .sort({ last_update: -1 })
+        .lean();
+    }
 
     // Enhance displays with status information
     const enhancedDisplays = displays.map((display) => {

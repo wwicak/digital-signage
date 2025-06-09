@@ -16,6 +16,8 @@ import {
   CalendarDays,
   BarChart3,
   Settings,
+  Layout,
+  Monitor,
 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -96,15 +98,22 @@ const Sidebar: React.FC<ISidebarProps> = ({ loggedIn, displayId, collapsed = fal
           featureFlag: FeatureFlagName.MENU_DASHBOARD,
         },
         {
-          id: "screen",
-          name: "Screens",
-          path: `/screens?display=${currentDisplayId}`,
-          icon: Tv,
+          id: "layouts",
+          name: "Layouts",
+          path: `/layouts`,
+          icon: Layout,
+          featureFlag: FeatureFlagName.MENU_LAYOUT,
+        },
+        {
+          id: "screens",
+          name: "Connected Displays",
+          path: `/screens`,
+          icon: Monitor,
           featureFlag: FeatureFlagName.MENU_SCREENS,
         },
         {
-          id: "layout",
-          name: "Layout",
+          id: "layout-editor",
+          name: "Layout Editor",
           path: `/layout?display=${currentDisplayId}`,
           icon: Grid3X3,
           featureFlag: FeatureFlagName.MENU_LAYOUT,

@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, memo } from 'react'
-import { Tv } from 'lucide-react'
+import { Tv, Layout } from 'lucide-react'
 
 import Frame from '../components/Admin/Frame.tsx' // Assuming .tsx
 import ScreenListComponent, { IScreenListRef } from '../components/Admin/ScreenList.tsx' // Renamed, Assuming .tsx
@@ -46,19 +46,30 @@ const ScreensComponent = memo(function ScreensComponent({ loggedIn, displayId }:
         {/* Header Section */}
         <div className="flex flex-col space-y-4 sm:flex-row sm:items-center sm:justify-between sm:space-y-0">
           <div>
-            <h1 className="text-3xl font-bold tracking-tight">Screens</h1>
+            <h1 className="text-3xl font-bold tracking-tight">Connected Displays</h1>
             <p className="text-muted-foreground">
-              Manage your digital displays and monitor their status in real-time.
+              Monitor physical displays that are currently connected and showing your layouts.
             </p>
           </div>
-          <Button
-            onClick={add}
-            size="lg"
-            className="w-full sm:w-auto"
-          >
-            <Tv className="mr-2 h-5 w-5" />
-            Add New Display
-          </Button>
+          <div className="flex gap-2">
+            <Button
+              onClick={() => window.location.href = '/layouts'}
+              variant="outline"
+              size="lg"
+              className="w-full sm:w-auto"
+            >
+              <Layout className="mr-2 h-5 w-5" />
+              Manage Layouts
+            </Button>
+            <Button
+              onClick={add}
+              size="lg"
+              className="w-full sm:w-auto"
+            >
+              <Tv className="mr-2 h-5 w-5" />
+              Register Display
+            </Button>
+          </div>
         </div>
 
         {/* Screens List */}
