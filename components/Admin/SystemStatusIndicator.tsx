@@ -205,7 +205,7 @@ const SystemStatusIndicator: React.FC<SystemStatusIndicatorProps> = ({
                 )}
                 
                 <div className="flex items-center justify-between">
-                  <span>Last Checked:</span>
+                  <span>Checked:</span>
                   <span className="font-medium">
                     {new Date(statusDetails.lastChecked).toLocaleTimeString()}
                   </span>
