@@ -237,7 +237,7 @@ const FeatureFlagsPage: React.FC = () => {
       <Frame loggedIn={true} title="Feature Flags">
         <Card className="border-destructive">
           <CardContent className="pt-6">
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-4">
               <AlertTriangle className="h-5 w-5 text-destructive" />
               <p className="text-destructive">Failed to load feature flags. Please try again.</p>
             </div>
@@ -293,7 +293,7 @@ const FeatureFlagsPage: React.FC = () => {
                         </CardDescription>
                       </div>
                     </div>
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-4">
                       <Switch
                         checked={flag.enabled}
                         onCheckedChange={() => handleToggleEnabled(flag)}
@@ -322,7 +322,7 @@ const FeatureFlagsPage: React.FC = () => {
                 </CardHeader>
                 <CardContent>
                   <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-4">
                       <Badge variant="outline" className={getTypeColor(flag.type)}>
                         {flag.type.replace('_', ' ')}
                       </Badge>
@@ -330,7 +330,7 @@ const FeatureFlagsPage: React.FC = () => {
                         {flag.enabled ? "Enabled" : "Disabled"}
                       </Badge>
                     </div>
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-4">
                       <Users className="h-4 w-4 text-muted-foreground" />
                       <div className="flex gap-1">
                         {flag.allowedRoles.map((role) => (

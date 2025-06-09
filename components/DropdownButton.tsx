@@ -150,7 +150,7 @@ class DropdownButton extends Component<
               <button
                 type="button"
                 key={choice.key}
-                className="font-sans bg-white hover:bg-gray-50 text-gray-800 min-w-[200px] text-sm uppercase border-none border-b border-gray-100 last:border-b-0 flex px-6 py-4 text-left outline-none cursor-pointer flex-row items-center transition-colors duration-200"
+                className="font-sans bg-white hover:bg-gray-50 text-gray-800 min-w-[200px] text-sm uppercase border-none border-b border-gray-100 last:border-b-0 flex px-6 py-3 text-left outline-none cursor-pointer flex-row items-center transition-colors duration-200"
                 onClick={() => this.handleChoiceClick(choice.key)}
               >
                 {choice.icon && (

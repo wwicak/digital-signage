@@ -158,7 +158,7 @@ const ScreenCard: React.FC<IScreenCardProps> = ({
                     {(value?.clientCount || 0) !== 1 ? "s" : ""} paired
                   </span>
                 </div>
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-4">
                   <OrientationPreview
                     orientation={value?.orientation || null}
                   />

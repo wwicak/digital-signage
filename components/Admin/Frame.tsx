@@ -93,7 +93,7 @@ const Frame: React.FC<IFrameProps> = (props) => {
                   </div>
                   {!collapsed && (
                     <div className="transition-all duration-300">
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-4">
                         <h2 className="font-bold text-lg text-foreground tracking-tight">
                           Digital Signage
                         </h2>
@@ -185,9 +185,9 @@ const Frame: React.FC<IFrameProps> = (props) => {
 
             {/* Header Actions */}
             {props.loggedIn && (
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-4">
                 {/* Status Indicator */}
-                <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-full bg-muted/50 border border-border/50">
+                <div className="hidden sm:flex items-center gap-4 px-3 py-1.5 rounded-full bg-muted/50 border border-border/50">
                   <Activity className="w-3 h-3 text-green-500" />
                   <span className="text-xs font-medium text-muted-foreground">
                     System Online

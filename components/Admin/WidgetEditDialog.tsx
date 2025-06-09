@@ -219,7 +219,7 @@ class WidgetEditDialog
         <div className="widget-settings-content">
           {/* Error Display */}
           {error && (
-            <div className="flex items-center gap-2 p-4 mb-4 text-red-800 bg-red-50 border border-red-200 rounded-lg">
+            <div className="flex items-center gap-4 p-4 mb-4 text-red-800 bg-red-50 border border-red-200 rounded-lg">
               <AlertCircle className="w-5 h-5 flex-shrink-0" />
               <div>
                 <h4 className="font-medium">Configuration Error</h4>

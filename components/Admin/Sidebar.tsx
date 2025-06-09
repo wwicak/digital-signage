@@ -210,7 +210,7 @@ const Sidebar: React.FC<ISidebarProps> = ({ loggedIn, displayId, collapsed = fal
         <Card className="mx-0 mt-3 mb-4 border-border/50 bg-card/60 backdrop-blur-sm">
           <CardContent className="p-4">
             <div className="mb-3">
-              <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider flex items-center gap-2">
+              <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider flex items-center gap-4">
                 <Tv className="w-3 h-3" />
                 Active Display
               </p>
@@ -230,7 +230,7 @@ const Sidebar: React.FC<ISidebarProps> = ({ loggedIn, displayId, collapsed = fal
                       </div>
                     </div>
                     <div className="flex flex-col justify-center flex-1 min-w-0">
-                      <span className="font-medium text-sm text-foreground truncate">
+                      <span className="font-medium text-sm text-foreground whitespace-normal">
                         {context.state.name || "Select Display"}
                       </span>
                       <DisplayStatusIndicator
