@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { ArrowRight, Tv, Layout, Eye, Users, Zap, Shield, Palette } from 'lucide-react'
+import { ArrowRight, Tv, Layout, Users, Zap, Shield, Palette } from 'lucide-react'
 
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -19,7 +19,7 @@ interface IDisplaySummary {
 
 export default function HomePage() {
   const [displays, setDisplays] = useState<IDisplaySummary[]>([])
-  const [loading, setLoading] = useState(true)
+  const [_loading, setLoading] = useState(true)
   const router = useRouter()
 
   useEffect(() => {

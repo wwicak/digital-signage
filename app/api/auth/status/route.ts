@@ -21,26 +21,29 @@ export async function GET(request: NextRequest) {
     const user = await requireAuth(request);
 
     if (user) {
-      return NextResponse.json({
+      const response: StatusResponse = {
         authenticated: true,
         user: {
           _id: user._id,
           email: user.email,
           name: user.name,
-          role: user.role,
+          role: user.role.name,
         },
-      });
+      };
+      return NextResponse.json(response);
     } else {
-      return NextResponse.json({
+      const response: StatusResponse = {
         authenticated: false,
         message: "User not authenticated",
-      });
+      };
+      return NextResponse.json(response);
     }
   } catch (error: any) {
     // If requireAuth throws an error, user is not authenticated
-    return NextResponse.json({
+    const response: StatusResponse = {
       authenticated: false,
       message: "User not authenticated",
-    });
+    };
+    return NextResponse.json(response);
   }
 }

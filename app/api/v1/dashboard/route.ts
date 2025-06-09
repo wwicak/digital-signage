@@ -310,10 +310,13 @@ export async function GET(request: NextRequest) {
         totalConnections: calendarStats.totalConnections,
         activeConnections: calendarStats.activeConnections,
         syncSuccessRate,
+        totalCalendarLinks,
+        activeCalendarLinks,
       },
       roomUtilization,
       buildingStats,
       recentActivity,
+      upcomingMeetings,
       lastUpdated: new Date().toISOString(),
     });
   } catch (error: any) {

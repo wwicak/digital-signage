@@ -3,7 +3,7 @@ import dbConnect from "@/lib/mongodb";
 import Display from "@/lib/models/Display";
 import DisplayHeartbeat from "@/lib/models/DisplayHeartbeat";
 
-export async function GET(request: NextRequest) {
+export async function GET(_request: NextRequest) {
   try {
     await dbConnect();
 

@@ -15,7 +15,7 @@ import {
   ChevronRight,
   MapPin,
   Clock,
-  Activity,
+
   AlertTriangle,
   RefreshCw,
   Loader2,
@@ -308,10 +308,10 @@ const DisplayStatusCard: React.FC<DisplayStatusCardProps> = ({
 
   // Get displays for the current layout or all displays
   const currentDisplays = layoutId ? displays : Object.values(displaysByLayout).flat();
-  const onlineDisplays = getOnlineDisplays();
-  const offlineDisplays = getOfflineDisplays();
+  const _onlineDisplays = getOnlineDisplays();
+  const _offlineDisplays = getOfflineDisplays();
 
-  const formatLastSeen = (date?: Date) => {
+  const _formatLastSeen = (date?: Date) => {
     if (!date) return "Never";
     
     const now = new Date();
@@ -326,7 +326,7 @@ const DisplayStatusCard: React.FC<DisplayStatusCardProps> = ({
     return `${diffDays}d ago`;
   };
 
-  const getStatusBadge = (isOnline: boolean) => {
+  const _getStatusBadge = (isOnline: boolean) => {
     return (
       <Badge
         variant={isOnline ? "default" : "destructive"}
@@ -352,7 +352,7 @@ const DisplayStatusCard: React.FC<DisplayStatusCardProps> = ({
     );
   };
 
-  const getUptimeBadge = (percentage?: number) => {
+  const _getUptimeBadge = (percentage?: number) => {
     if (!percentage) return null;
     
     const color = percentage >= 95 ? "green" : percentage >= 85 ? "yellow" : "red";

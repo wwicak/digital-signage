@@ -41,7 +41,7 @@ export async function POST(
 
     // Add widget reference to layout
     layout.widgets.push({
-      widget_id: widget._id,
+      widget_id: widget._id as mongoose.Types.ObjectId,
       x: x || 0,
       y: y || 0,
       w: w || 2,

@@ -27,7 +27,6 @@ import {
   Edit,
   Trash2,
   Users,
-  Shield,
   AlertTriangle,
   Save,
   X

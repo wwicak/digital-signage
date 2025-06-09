@@ -327,6 +327,11 @@ const LayoutAdminContent = memo(function LayoutAdminContent() {
         </div>
       </div>
 
+      {/* Display Status Card */}
+      <div className="mb-6">
+        <DisplayStatusCard />
+      </div>
+
       {/* Layout Settings */}
       <Card className="mb-6">
         <CardHeader>

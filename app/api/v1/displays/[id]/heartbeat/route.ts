@@ -26,9 +26,14 @@ const HeartbeatRequestSchema = z.object({
     .optional(),
   performanceMetrics: z
     .object({
+      fps: z.number().optional(),
+      memoryUsage: z.number().optional(),
+      cpuUsage: z.number().optional(),
       renderTime: z.number().optional(),
       loadTime: z.number().optional(),
+      networkLatency: z.number().optional(),
       errorCount: z.number().optional(),
+      warningCount: z.number().optional(),
     })
     .optional(),
   disconnect: z.boolean().optional(),
@@ -113,6 +118,19 @@ export async function POST(
     const serverTime = new Date();
     const responseTime = serverTime.getTime() - requestTime.getTime();
 
+    // Process performance metrics if provided
+    const processedPerformanceMetrics = performanceMetrics ? {
+      fps: performanceMetrics.fps || 0,
+      memoryUsage: performanceMetrics.memoryUsage || 0,
+      cpuUsage: performanceMetrics.cpuUsage || 0,
+      loadTime: performanceMetrics.loadTime || 0,
+      renderTime: performanceMetrics.renderTime || 0,
+      networkLatency: performanceMetrics.networkLatency || responseTime,
+      errorCount: performanceMetrics.errorCount || 0,
+      warningCount: performanceMetrics.warningCount || 0,
+      timestamp: new Date(),
+    } : null;
+
     // Record heartbeat
     const heartbeat = await DisplayHeartbeat.create({
       displayId,
@@ -134,6 +152,7 @@ export async function POST(
         processingTime: responseTime,
         activeConnections: 1, // This would be calculated from active SSE connections
       },
+      performanceMetrics: processedPerformanceMetrics,
     });
 
     // Update display's last seen timestamp

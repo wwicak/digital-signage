@@ -15,8 +15,8 @@ interface SystemStatusResponse {
   lastChecked: Date;
 }
 
-export async function GET(request: NextRequest) {
-  const startTime = Date.now();
+export async function GET(_request: NextRequest) {
+  const _startTime = Date.now();
 
   try {
     // Check database connectivity

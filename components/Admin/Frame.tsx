@@ -2,7 +2,6 @@ import React, { ReactNode, useState, useEffect } from "react";
 import * as z from "zod";
 import { Container } from "@/components/ui/container";
 import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
 import {
@@ -11,10 +10,6 @@ import {
   Monitor,
   Menu,
   X,
-  Settings,
-  Bell,
-  User,
-  Activity,
   Sparkles
 } from "lucide-react";
 import { cn } from "@/lib/utils";
