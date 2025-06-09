@@ -179,7 +179,7 @@ if (mongoose.models?.Widget) {
 }
 
 // Debug: Log the enum values to verify they include media-player
-console.log("WidgetType enum values:", Object.values(WidgetType));
+//console.log("WidgetType enum values:", Object.values(WidgetType));
 
 const WidgetModel: Model<IWidget> = mongoose.model<IWidget>(
   "Widget",
