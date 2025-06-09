@@ -123,14 +123,11 @@ class WidgetEditDialog
       return;
     }
 
-    // Validate widget ID format (should be a valid MongoDB ObjectId)
-    if (!/^[0-9a-fA-F]{24}$/.test(widgetId)) {
-      this.setState({
-        error: `Invalid widget ID format: ${widgetId}. Widget IDs should be 24-character hexadecimal strings.`,
-        widgetConfigData: undefined,
-        initialWidgetData: null,
-      });
-      return;
+    // More flexible widget ID validation - accept both string and ObjectId formats
+    const trimmedId = widgetId.toString().trim();
+    if (!trimmedId || (trimmedId.length !== 24 && !/^[0-9a-fA-F]{24}$/.test(trimmedId))) {
+      console.warn(`Widget ID format may be non-standard: ${widgetId}, attempting to fetch anyway...`);
+      // Don't return here - try to fetch the widget anyway as the server might handle it
     }
 
     // Check cache first
@@ -157,7 +154,7 @@ class WidgetEditDialog
       initialWidgetData: undefined,
     });
 
-    getWidget(widgetId)
+    getWidget(trimmedId)
       .then((widgetFullData: IWidgetData) => {
         // Cache the successful response
         setCachedWidgetData(widgetId, widgetFullData);
@@ -178,6 +175,7 @@ class WidgetEditDialog
                 ? parsedFullData.data.data
                 : {},
             initialWidgetData: parsedFullData.data,
+            error: null, // Clear any previous errors
           });
         } else {
           console.error(
@@ -195,6 +193,24 @@ class WidgetEditDialog
 
         // Provide more specific error messages based on error type
         let errorMessage = "Failed to load widget configuration.";
+
+        if (error.response) {
+          // Server responded with error status
+          const status = error.response.status;
+          if (status === 404) {
+            errorMessage = "Widget not found. This widget may have been deleted, moved, or you may not have permission to access it. You can delete this widget from the layout to remove this error.";
+          } else if (status === 403) {
+            errorMessage = "You don't have permission to access this widget.";
+          } else if (status >= 500) {
+            errorMessage = "Server error occurred while loading widget configuration.";
+          }
+        } else if (error.request) {
+          // Network error
+          errorMessage = "Network error occurred while loading widget configuration. Please check your connection.";
+        } else {
+          // Other error
+          errorMessage = `Unexpected error: ${error.message || 'Unknown error occurred'}`;
+        }
 
         if (error.message?.includes('404') || error.message?.includes('not found')) {
           errorMessage = "Widget not found. This widget may have been deleted or you may not have permission to access it.";
@@ -288,17 +304,28 @@ class WidgetEditDialog
       <Dialog
         ref={this.dialogRef}
         title={dialogTitle}
+        description="Configure widget settings and properties"
         className='widget-settings-modal'
       >
         <div className='flex flex-col h-full max-h-[calc(90vh-8rem)]'>
           {/* Error Display - Fixed at top */}
           {error && (
             <div className='flex-shrink-0 mb-4'>
-              <div className='flex items-center gap-4 p-4 text-red-800 bg-red-50 border border-red-200 rounded-lg'>
-                <AlertCircle className='w-5 h-5 flex-shrink-0' />
-                <div>
+              <div className='flex items-start gap-4 p-4 text-red-800 bg-red-50 border border-red-200 rounded-lg'>
+                <AlertCircle className='w-5 h-5 flex-shrink-0 mt-0.5' />
+                <div className='flex-1'>
                   <h4 className='font-medium'>Configuration Error</h4>
-                  <p className='text-sm'>{error}</p>
+                  <p className='text-sm mt-1'>{error}</p>
+                  {error.includes('Widget not found') && (
+                    <div className='mt-3 text-sm'>
+                      <p className='font-medium'>Suggested actions:</p>
+                      <ul className='list-disc list-inside mt-1 space-y-1'>
+                        <li>Close this dialog and delete the widget from the layout</li>
+                        <li>Check if the widget was moved to a different layout</li>
+                        <li>Contact your administrator if this persists</li>
+                      </ul>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>

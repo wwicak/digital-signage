@@ -3,6 +3,9 @@ import GridLayout, { Layout as RglLayout } from 'react-grid-layout'
 import { DragDropContext, Droppable, DropResult, DroppableProvided } from '@hello-pangea/dnd'
 import { Edit, Grid2X2, Grid3X3, Monitor, Smartphone, Maximize2 } from 'lucide-react'
 
+// Import GridLayout styles
+import '../styles/GridLayoutStyles.css'
+
 import Frame from '../components/Admin/Frame' // Assuming .js or .tsx
 import EditableWidget from '../components/Admin/EditableWidget' // Assuming .js or .tsx
 import StatusBarElement from '../components/Admin/StatusBarElement' // Assuming .js or .tsx
@@ -214,14 +217,20 @@ const LayoutPage: React.FC<ILayoutPageProps> = ({ loggedIn, displayId }) => {
 
   // Optimized drag start handler
   const handleDragStart = useCallback((layout: RglLayout[], oldItem: RglLayout, newItem: RglLayout) => {
-    setIsDragging(true)
-    setDraggedWidgetId(newItem.i)
-    startMonitoring()
-    console.log('[DEBUG] Drag started for widget:', newItem.i)
+    try {
+      setIsDragging(true)
+      setDraggedWidgetId(newItem.i)
+      startMonitoring()
+      console.log('[DEBUG] Drag started for widget:', newItem.i)
+    } catch (error) {
+      console.error('[ERROR] Failed to handle drag start:', error)
+    }
   }, [startMonitoring])
 
   // Optimized drag handler with boundary validation using utility
   const handleDrag = useCallback((layout: RglLayout[], oldItem: RglLayout, newItem: RglLayout) => {
+    console.log('[DEBUG] Drag event for widget:', newItem.i, 'from', oldItem.x, oldItem.y, 'to', newItem.x, newItem.y)
+
     // Validate boundaries using utility function
     const validated = validateWidgetDimensions(
       newItem.x,
@@ -293,12 +302,19 @@ const LayoutPage: React.FC<ILayoutPageProps> = ({ loggedIn, displayId }) => {
 
   // Optimized resize handlers
   const handleResizeStart = useCallback((layout: RglLayout[], oldItem: RglLayout, newItem: RglLayout) => {
-    setIsDragging(true)
-    setDraggedWidgetId(newItem.i)
-    console.log('[DEBUG] Resize started for widget:', newItem.i)
-  }, [])
+    try {
+      setIsDragging(true)
+      setDraggedWidgetId(newItem.i)
+      startMonitoring()
+      console.log('[DEBUG] Resize started for widget:', newItem.i)
+    } catch (error) {
+      console.error('[ERROR] Failed to handle resize start:', error)
+    }
+  }, [startMonitoring])
 
   const handleResize = useCallback((layout: RglLayout[], oldItem: RglLayout, newItem: RglLayout) => {
+    console.log('[DEBUG] Resize event for widget:', newItem.i, 'from', oldItem.w, 'x', oldItem.h, 'to', newItem.w, 'x', newItem.h)
+
     // Validate boundaries using utility function
     const validated = validateWidgetDimensions(
       newItem.x,
@@ -770,7 +786,8 @@ const LayoutPage: React.FC<ILayoutPageProps> = ({ loggedIn, displayId }) => {
               onResizeStart={handleResizeStart}
               onResize={handleResize}
               onResizeStop={handleResizeStop}
-              draggableCancel={'.ReactModalPortal,.controls,button'}
+              draggableCancel={'.ReactModalPortal,.controls,button,.no-drag'}
+              resizeHandles={['se', 'sw', 'ne', 'nw', 's', 'n', 'e', 'w']}
               margin={gridConstraints.recommendedMargin}
               rowHeight={gridConstraints.recommendedRowHeight}
               isBounded={true}
@@ -785,6 +802,7 @@ const LayoutPage: React.FC<ILayoutPageProps> = ({ loggedIn, displayId }) => {
               verticalCompact={true}
               allowOverlap={false}
               maxRows={gridConstraints.rows}
+              className="react-grid-layout"
             >
               {widgets.map(widget => (
                 <div
@@ -799,6 +817,7 @@ const LayoutPage: React.FC<ILayoutPageProps> = ({ loggedIn, displayId }) => {
                   style={{
                     transform: draggedWidgetId === widget._id ? 'scale(1.02)' : 'scale(1)',
                     transition: isDragging ? 'none' : 'all 200ms ease',
+                    cursor: isDragging && draggedWidgetId === widget._id ? 'grabbing' : 'grab',
                   }}
                 >
                   <EditableWidget

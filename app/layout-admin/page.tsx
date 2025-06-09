@@ -1,11 +1,14 @@
 'use client'
 
 import React, { useState, useEffect, useCallback, Suspense, memo, useRef, useMemo } from 'react'
-import { Grid3X3, Grid2X2, Edit, Monitor, Smartphone, Save, ArrowLeft, Eye, Maximize2, AlertCircle } from 'lucide-react'
+import { Grid3X3, Grid2X2, Edit, Monitor, Smartphone, Save, ArrowLeft, Eye, Maximize2, AlertCircle, X } from 'lucide-react'
 import GridLayout, { Layout as RglLayout } from 'react-grid-layout'
 import { useSearchParams, useRouter } from 'next/navigation'
 import { DragDropContext, Droppable, DropResult } from '@hello-pangea/dnd'
 import Link from 'next/link'
+
+// Import GridLayout styles
+import '../../styles/GridLayoutStyles.css'
 
 import Frame from '../../components/Admin/Frame'
 import EditableWidget from '../../components/Admin/EditableWidget'
@@ -51,6 +54,40 @@ const getWidgetType = (typeString: string): WidgetType => {
   return typeMap[typeString?.toLowerCase()] || WidgetType.EMPTY
 }
 
+// Fallback component for broken widgets
+const BrokenWidget = memo(function BrokenWidget({
+  widgetId,
+  onDelete
+}: {
+  widgetId: string
+  onDelete: (id: string) => void
+}) {
+  const handleDelete = useCallback(() => onDelete(widgetId), [onDelete, widgetId])
+
+  return (
+    <div className='group relative bg-red-50 border border-red-200 rounded-lg p-4 h-full'>
+      <div className='absolute top-2 right-2 flex space-x-1 controls no-drag z-10'>
+        <button
+          className='p-2 rounded hover:bg-red-100 transition-colors bg-white/90 backdrop-blur-sm shadow-sm hover:bg-red-50 hover:text-red-600'
+          onClick={handleDelete}
+          aria-label='Delete broken widget'
+        >
+          <X className='w-4 h-4 text-red-500' />
+        </button>
+      </div>
+      <div className='flex flex-col items-center justify-center h-full min-h-24'>
+        <AlertCircle className='w-8 h-8 text-red-500 mb-2' />
+        <span className='text-sm font-medium text-red-600 text-center'>
+          Broken Widget
+        </span>
+        <span className='text-xs text-red-500 text-center mt-1'>
+          ID: {widgetId.slice(0, 8)}...
+        </span>
+      </div>
+    </div>
+  )
+})
+
 // Memoized widget component to prevent unnecessary re-renders
 const LayoutWidget = memo(function LayoutWidget({
   widgetId,
@@ -67,16 +104,26 @@ const LayoutWidget = memo(function LayoutWidget({
 }) {
   const handleDelete = useCallback(() => onDelete(widgetId), [onDelete, widgetId])
 
-  return (
-    <div className={isDeleting ? 'opacity-50 pointer-events-none' : ''}>
-      <EditableWidget
-        id={widgetId}
-        type={getWidgetType(widgetType)}
-        layout={layoutType}
-        onDelete={handleDelete}
-      />
-    </div>
-  )
+  // If widget type is unknown or invalid, show broken widget component
+  if (!widgetType || widgetType === 'unknown') {
+    return <BrokenWidget widgetId={widgetId} onDelete={handleDelete} />
+  }
+
+  try {
+    return (
+      <div className={isDeleting ? 'opacity-50 pointer-events-none' : ''}>
+        <EditableWidget
+          id={widgetId}
+          type={getWidgetType(widgetType)}
+          layout={layoutType}
+          onDelete={handleDelete}
+        />
+      </div>
+    )
+  } catch (error) {
+    console.error('Error rendering widget:', error)
+    return <BrokenWidget widgetId={widgetId} onDelete={handleDelete} />
+  }
 })
 
 const LayoutAdminContent = memo(function LayoutAdminContent() {
@@ -152,11 +199,18 @@ const LayoutAdminContent = memo(function LayoutAdminContent() {
   // Preload widget data to cache for faster configuration dialog opening
   const preloadWidgetData = useCallback(async (widgets: any[]) => {
     const preloadPromises = widgets.map(async (widget) => {
-      const widgetId = typeof widget.widget_id === 'string'
-        ? widget.widget_id
-        : (widget.widget_id as any)?._id || widget.widget_id?.toString()
+      let widgetId: string | null = null
 
-      if (widgetId) {
+      // Handle different widget_id formats
+      if (typeof widget.widget_id === 'string') {
+        widgetId = widget.widget_id
+      } else if (widget.widget_id && typeof widget.widget_id === 'object') {
+        // If widget_id is populated, use the _id from the populated object
+        widgetId = (widget.widget_id as any)._id?.toString() || (widget.widget_id as any).toString()
+      }
+
+      // Only try to preload if we have a valid widget ID
+      if (widgetId && /^[0-9a-fA-F]{24}$/.test(widgetId)) {
         try {
           // This will cache the widget data
           await getWidget(widgetId)
@@ -164,6 +218,8 @@ const LayoutAdminContent = memo(function LayoutAdminContent() {
           // Silently fail for preloading - user will see error when they actually open the dialog
           console.warn(`Failed to preload widget data for ${widgetId}:`, error)
         }
+      } else {
+        console.warn('Skipping preload for invalid widget ID:', widgetId, 'from widget:', widget)
       }
     })
 
@@ -801,7 +857,8 @@ const LayoutAdminContent = memo(function LayoutAdminContent() {
                 layout={rglLayout}
                 cols={layoutData.gridConfig.cols}
                 onLayoutChange={handleLayoutChange}
-                draggableCancel={'.ReactModalPortal,.controls,button'}
+                draggableCancel={'.ReactModalPortal,.controls,button,.no-drag'}
+                resizeHandles={['se', 'sw', 'ne', 'nw', 's', 'n', 'e', 'w']}
                 margin={layoutData.gridConfig.margin}
                 rowHeight={layoutData.gridConfig.rowHeight}
                 isBounded={true}
@@ -810,18 +867,33 @@ const LayoutAdminContent = memo(function LayoutAdminContent() {
                 preventCollision={true}
                 compactType='vertical'
                 maxRows={layoutData.gridConfig.rows}
+                className="react-grid-layout"
+                isDraggable={true}
+                isResizable={true}
               >
                 {existingLayout?.widgets?.filter((widget, index) => {
-                  // Pre-filter to only include widgets with valid IDs
+                  // Pre-filter to only include widgets with valid IDs and populated data
                   let widgetId: string | null = null
-                  
+                  let hasValidData = false
+
                   if (typeof widget.widget_id === 'string') {
                     widgetId = widget.widget_id
+                    // For string IDs, we can't verify if the widget exists without making an API call
+                    // So we'll allow it through and handle errors in the component
+                    hasValidData = true
                   } else if (widget.widget_id && typeof widget.widget_id === 'object') {
+                    // If widget_id is populated, we have the widget data
                     widgetId = (widget.widget_id as any)._id?.toString() || (widget.widget_id as any).toString()
+                    hasValidData = !!(widget.widget_id as any).type // Check if we have type data
                   }
-                  
-                  return widgetId && /^[0-9a-fA-F]{24}$/.test(widgetId)
+
+                  const isValidId = widgetId && /^[0-9a-fA-F]{24}$/.test(widgetId)
+
+                  if (!isValidId || !hasValidData) {
+                    console.warn('Filtering out invalid widget:', { widgetId, hasValidData, widget })
+                  }
+
+                  return isValidId && hasValidData
                 }).map((widget, index) => {
                   // Handle both populated and non-populated widget_id
                   let widgetId: string
@@ -839,13 +911,24 @@ const LayoutAdminContent = memo(function LayoutAdminContent() {
                   }
 
                   if (typeof widget.widget_id === 'string') {
-                    // widget_id is just a string ID
+                    // widget_id is just a string ID - this shouldn't happen after filtering but handle it
                     widgetId = widget.widget_id
                     widgetType = 'unknown' // We don't have type info when not populated
+                    console.warn('Using non-populated widget ID:', widgetId)
                   } else if (widget.widget_id && typeof widget.widget_id === 'object') {
-                    // widget_id is a populated object
-                    widgetId = (widget.widget_id as any)._id?.toString() || (widget.widget_id as any).toString()
-                    widgetType = (widget.widget_id as any).type || 'unknown'
+                    // widget_id is a populated object - this is the preferred case
+                    const populatedWidget = widget.widget_id as any
+                    widgetId = populatedWidget._id?.toString() || populatedWidget.toString()
+                    widgetType = populatedWidget.type || 'unknown'
+
+                    // Log populated widget info for debugging
+                    if (process.env.NODE_ENV === 'development') {
+                      console.log('Using populated widget:', {
+                        widgetId,
+                        widgetType,
+                        name: populatedWidget.name
+                      })
+                    }
                   } else {
                     // This should not happen due to pre-filtering, but just in case
                     console.error('Unexpected invalid widget in filtered list:', widget)

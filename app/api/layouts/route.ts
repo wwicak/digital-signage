@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import dbConnect from "../../../lib/mongodb";
 import Layout from "../../../lib/models/Layout";
+import { requireAuth } from "../../../lib/helpers/auth_helper";
 
 // Force dynamic rendering
 export const dynamic = "force-dynamic";
@@ -85,11 +86,13 @@ export async function POST(request: NextRequest) {
   try {
     await dbConnect();
 
+    // Get authenticated user
+    const user = await requireAuth(request);
+
     // Parse and validate request body
     const body = await request.json();
 
-    // For now, create a simple layout without full auth
-    // In production, you'd want proper authentication and validation
+    // Create layout with authenticated user's ID
     const layoutData = {
       name: body.name || "Untitled Layout",
       description: body.description || "",
@@ -102,7 +105,7 @@ export async function POST(request: NextRequest) {
       },
       isActive: body.isActive !== undefined ? body.isActive : true,
       isTemplate: body.isTemplate !== undefined ? body.isTemplate : true,
-      creator_id: body.creator_id || new (require("mongoose").Types.ObjectId)(), // Temporary fallback
+      creator_id: user._id, // Use authenticated user's ID
       gridConfig: body.gridConfig || {
         cols: 16,
         rows: 9,

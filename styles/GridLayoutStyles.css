@@ -53,38 +53,133 @@
   backdrop-filter: blur(2px);
 }
 
+/* Resize handles for all directions */
 .react-grid-item > .react-resizable-handle {
   position: absolute;
-  width: 24px;
-  height: 24px;
-  bottom: 0;
-  right: 0;
-  cursor: se-resize;
   background: none;
   opacity: 0;
   transition: opacity 200ms ease;
   z-index: 10;
 }
 
+/* Southeast handle (bottom-right) */
+.react-grid-item > .react-resizable-handle.react-resizable-handle-se {
+  width: 24px;
+  height: 24px;
+  bottom: 0;
+  right: 0;
+  cursor: se-resize;
+}
+
+/* Southwest handle (bottom-left) */
+.react-grid-item > .react-resizable-handle.react-resizable-handle-sw {
+  width: 24px;
+  height: 24px;
+  bottom: 0;
+  left: 0;
+  cursor: sw-resize;
+}
+
+/* Northeast handle (top-right) */
+.react-grid-item > .react-resizable-handle.react-resizable-handle-ne {
+  width: 24px;
+  height: 24px;
+  top: 0;
+  right: 0;
+  cursor: ne-resize;
+}
+
+/* Northwest handle (top-left) */
+.react-grid-item > .react-resizable-handle.react-resizable-handle-nw {
+  width: 24px;
+  height: 24px;
+  top: 0;
+  left: 0;
+  cursor: nw-resize;
+}
+
+/* South handle (bottom) */
+.react-grid-item > .react-resizable-handle.react-resizable-handle-s {
+  width: 100%;
+  height: 8px;
+  bottom: 0;
+  left: 0;
+  cursor: s-resize;
+}
+
+/* North handle (top) */
+.react-grid-item > .react-resizable-handle.react-resizable-handle-n {
+  width: 100%;
+  height: 8px;
+  top: 0;
+  left: 0;
+  cursor: n-resize;
+}
+
+/* East handle (right) */
+.react-grid-item > .react-resizable-handle.react-resizable-handle-e {
+  width: 8px;
+  height: 100%;
+  top: 0;
+  right: 0;
+  cursor: e-resize;
+}
+
+/* West handle (left) */
+.react-grid-item > .react-resizable-handle.react-resizable-handle-w {
+  width: 8px;
+  height: 100%;
+  top: 0;
+  left: 0;
+  cursor: w-resize;
+}
+
 .react-grid-item:hover > .react-resizable-handle {
   opacity: 1;
 }
 
-.react-grid-item > .react-resizable-handle::after {
+/* Visual indicators for corner handles */
+.react-grid-item > .react-resizable-handle.react-resizable-handle-se::after,
+.react-grid-item > .react-resizable-handle.react-resizable-handle-sw::after,
+.react-grid-item > .react-resizable-handle.react-resizable-handle-ne::after,
+.react-grid-item > .react-resizable-handle.react-resizable-handle-nw::after {
   content: '';
   position: absolute;
-  right: 6px;
-  bottom: 6px;
   width: 8px;
   height: 8px;
+  border-radius: 2px;
+}
+
+.react-grid-item > .react-resizable-handle.react-resizable-handle-se::after {
+  right: 6px;
+  bottom: 6px;
   border-right: 3px solid rgba(123, 192, 67, 0.8);
   border-bottom: 3px solid rgba(123, 192, 67, 0.8);
-  border-radius: 0 0 2px 0;
+}
+
+.react-grid-item > .react-resizable-handle.react-resizable-handle-sw::after {
+  left: 6px;
+  bottom: 6px;
+  border-left: 3px solid rgba(123, 192, 67, 0.8);
+  border-bottom: 3px solid rgba(123, 192, 67, 0.8);
+}
+
+.react-grid-item > .react-resizable-handle.react-resizable-handle-ne::after {
+  right: 6px;
+  top: 6px;
+  border-right: 3px solid rgba(123, 192, 67, 0.8);
+  border-top: 3px solid rgba(123, 192, 67, 0.8);
+}
+
+.react-grid-item > .react-resizable-handle.react-resizable-handle-nw::after {
+  left: 6px;
+  top: 6px;
+  border-left: 3px solid rgba(123, 192, 67, 0.8);
+  border-top: 3px solid rgba(123, 192, 67, 0.8);
 }
 
 .react-grid-item.resizing > .react-resizable-handle::after {
-  border-right-color: rgba(123, 192, 67, 1);
-  border-bottom-color: rgba(123, 192, 67, 1);
+  border-color: rgba(123, 192, 67, 1) !important;
 }
 
 /* Performance optimizations */
@@ -206,9 +301,46 @@
 .react-grid-item .controls {
   opacity: 0;
   transition: opacity 200ms ease;
+  pointer-events: auto;
 }
 
 .react-grid-item:hover .controls,
 .react-grid-item:focus-within .controls {
   opacity: 1;
+}
+
+/* Ensure controls don't interfere with dragging */
+.react-grid-item .controls.no-drag {
+  pointer-events: auto;
+}
+
+.react-grid-item.react-draggable-dragging .controls {
+  pointer-events: none;
+}
+
+/* Improve drag cursor */
+.react-grid-item {
+  cursor: grab;
+}
+
+.react-grid-item:active {
+  cursor: grabbing;
+}
+
+.react-grid-item.react-draggable-dragging {
+  cursor: grabbing !important;
+}
+
+/* Ensure resize handles are above other content */
+.react-grid-item > .react-resizable-handle {
+  z-index: 20;
+}
+
+/* Prevent text selection during drag operations */
+.react-grid-layout.dragging,
+.react-grid-layout.dragging * {
+  user-select: none !important;
+  -webkit-user-select: none !important;
+  -moz-user-select: none !important;
+  -ms-user-select: none !important;
 }

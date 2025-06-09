@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import dbConnect from "../../../../../lib/mongodb";
 import Layout from "../../../../../lib/models/Layout";
 import Widget from "../../../../../lib/models/Widget";
+import { requireAuth } from "../../../../../lib/helpers/auth_helper";
 import mongoose from "mongoose";
 
 // Force dynamic rendering
@@ -14,27 +15,37 @@ export async function POST(
   try {
     await dbConnect();
 
+    // Get authenticated user
+    const user = await requireAuth(request);
+
     const { id: layoutId } = await params;
     if (!layoutId || !mongoose.Types.ObjectId.isValid(layoutId)) {
       return NextResponse.json({ error: "Invalid layout ID" }, { status: 400 });
     }
 
-    // Find the layout
-    const layout = await Layout.findById(layoutId);
+    // Find the layout and verify ownership
+    const layout = await Layout.findOne({
+      _id: layoutId,
+      creator_id: user._id,
+    });
+
     if (!layout) {
-      return NextResponse.json({ error: "Layout not found" }, { status: 404 });
+      return NextResponse.json(
+        { error: "Layout not found or not authorized" },
+        { status: 404 }
+      );
     }
 
     // Parse request body
     const body = await request.json();
     const { type, name, x, y, w, h, data } = body;
 
-    // Create the widget first
+    // Create the widget with the authenticated user's ID
     const widget = new Widget({
       type,
       name: name || `${type} Widget`,
       data: data || {},
-      creator_id: layout.creator_id || new mongoose.Types.ObjectId(),
+      creator_id: user._id, // Use authenticated user's ID
     });
 
     await widget.save();
