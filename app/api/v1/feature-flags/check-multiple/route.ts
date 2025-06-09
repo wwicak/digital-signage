@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
-import { dbConnect } from "@/lib/mongodb";
-import { requireAuth } from "@/lib/auth";
-import { FeatureFlag } from "@/lib/models/FeatureFlag";
+import dbConnect from "@/lib/mongodb";
+import { requireAuth } from "@/lib/helpers/auth_helper";
+import FeatureFlag from "@/lib/models/FeatureFlag";
 import { FeatureFlagName } from "@/lib/types/feature-flags";
 
 interface CheckMultipleRequest {
@@ -44,10 +44,10 @@ export async function POST(request: NextRequest) {
     });
 
     // Build access map
-    const access: Record<FeatureFlagName, boolean> = {};
+    const access: Partial<Record<FeatureFlagName, boolean>> = {};
 
     for (const flagName of flagNames) {
-      const flag = featureFlags.find(f => f.name === flagName);
+      const flag = featureFlags.find((f: any) => f.name === flagName);
       
       if (!flag) {
         // Flag doesn't exist, deny access

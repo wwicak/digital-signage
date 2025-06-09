@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
-import { dbConnect } from "@/lib/mongodb";
-import { requireAuth } from "@/lib/auth";
-import { FeatureFlag } from "@/lib/models/FeatureFlag";
+import dbConnect from "@/lib/mongodb";
+import { requireAuth } from "@/lib/helpers/auth_helper";
+import FeatureFlag from "@/lib/models/FeatureFlag";
 
 export async function GET(request: NextRequest) {
   try {
