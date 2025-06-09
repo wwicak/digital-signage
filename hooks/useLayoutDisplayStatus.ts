@@ -205,7 +205,7 @@ export const useLayoutDisplayStatus = (
     };
 
     updateDisplaysWithStatus();
-  }, [allDisplays, displayStatus, fetchDisplayHeartbeats]);
+  }, [allDisplays, displayStatus]); // Removed fetchDisplayHeartbeats from dependencies
 
   // Filter displays by layout if layoutId is provided
   const filteredDisplays = useMemo(() => {

@@ -133,65 +133,20 @@ export const useDisplayStatus = (options?: {
     }
   }, []);
 
-  // Real-time status updates via SSE
-  useEffect(() => {
-    if (!enableRealTimeUpdates) return;
-
-    const handleDisplayStatusUpdate = (event: MessageEvent) => {
-      try {
-        const data = JSON.parse(event.data);
-        const { displayId, status } = data;
-
-        if (displayId && status) {
-          setDisplayStatus((prev) => ({
-            ...prev,
-            [displayId]: {
-              ...prev[displayId],
-              ...status,
-              lastSeen: status.lastSeen
-                ? new Date(status.lastSeen)
-                : prev[displayId]?.lastSeen,
-              lastHeartbeat: status.lastHeartbeat
-                ? new Date(status.lastHeartbeat)
-                : prev[displayId]?.lastHeartbeat,
-            },
-          }));
-          setLastUpdateTime(new Date());
-        }
-      } catch (error) {
-        console.error("Error processing display status update:", error);
-      }
-    };
-
-    // Listen for SSE events if connected
-    if (isConnected && typeof window !== "undefined") {
-      const eventSource = new EventSource("/api/v1/displays/events");
-
-      eventSource.addEventListener(
-        "display-status-changed",
-        handleDisplayStatusUpdate
-      );
-      eventSource.addEventListener(
-        "display-heartbeat",
-        handleDisplayStatusUpdate
-      );
-
-      return () => {
-        eventSource.close();
-      };
-    }
-  }, [isConnected, enableRealTimeUpdates]);
+  // Real-time status updates via SSE (handled by useGlobalDisplaySSE)
+  // The SSE connection is managed by useGlobalDisplaySSE to prevent duplicate connections
 
   // Periodic status updates
   useEffect(() => {
     // Initial fetch
     fetchDisplayStatuses();
 
-    // Set up periodic updates
-    const interval = setInterval(fetchDisplayStatuses, refreshInterval);
-
-    return () => clearInterval(interval);
-  }, [fetchDisplayStatuses, refreshInterval]);
+    // Set up periodic updates only if real-time updates are enabled
+    if (enableRealTimeUpdates) {
+      const interval = setInterval(fetchDisplayStatuses, refreshInterval);
+      return () => clearInterval(interval);
+    }
+  }, [refreshInterval, enableRealTimeUpdates]); // Removed fetchDisplayStatuses from dependencies
 
   // Utility functions
   const getDisplayStatus = useCallback(
