@@ -11,6 +11,8 @@ export interface IDisplay extends Document {
   last_update: Date;
   layout: string; // e.g., 'spaced', 'compact'
   orientation: string; // e.g., 'landscape', 'portrait'
+  location?: string; // Physical location of the display
+  building?: string; // Building where the display is located
   statusBar: {
     enabled: boolean;
     color?: string;
@@ -54,6 +56,14 @@ const DisplaySchema = new Schema<IDisplay>(
     orientation: {
       type: String,
       default: "landscape", // Default to 'landscape' orientation
+    },
+    location: {
+      type: String,
+      default: "Unknown Location",
+    },
+    building: {
+      type: String,
+      default: "Main Building",
     },
     statusBar: {
       enabled: { type: Boolean, default: true },
@@ -100,6 +110,8 @@ export const DisplaySchemaZod = z.object({
   last_update: z.date().optional(), // Defaulted by Mongoose timestamps
   layout: z.string().default("spaced"),
   orientation: z.string().default("landscape"),
+  location: z.string().optional(),
+  building: z.string().optional(),
   statusBar: StatusBarSchemaZod.default({ enabled: true, elements: [] }), // Provide default for the object itself
   // Dynamic properties (calculated at runtime)
   clientCount: z.number().optional(),

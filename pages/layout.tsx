@@ -8,6 +8,7 @@ import EditableWidget from '../components/Admin/EditableWidget' // Assuming .js 
 import StatusBarElement from '../components/Admin/StatusBarElement' // Assuming .js or .tsx
 import WidthProvider from '../components/Widgets/WidthProvider' // Assuming .js or .tsx
 import DropdownButton, { IDropdownChoice } from '../components/DropdownButton' // Already .tsx
+import DisplayStatusCard from '../components/Admin/DisplayStatusCard'
 
 import { Form, Switch } from '../components/Form' // Assuming .js or .tsx
 
@@ -608,6 +609,13 @@ const LayoutPage: React.FC<ILayoutPageProps> = ({ loggedIn, displayId }) => {
             </div>
           </div>
         </div>
+
+        {/* Display Status Card - Shows displays using this layout */}
+        <DisplayStatusCard
+          layoutId={displayId}
+          title="Displays Using This Layout"
+          className="mb-6"
+        />
 
         {/* Controls Section */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">

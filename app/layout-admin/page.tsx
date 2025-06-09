@@ -11,6 +11,7 @@ import EditableWidget from '../../components/Admin/EditableWidget'
 import StatusBarElement from '../../components/Admin/StatusBarElement'
 import WidthProvider from '../../components/Widgets/WidthProvider'
 import DropdownButton from '../../components/DropdownButton'
+import DisplayStatusCard from '../../components/Admin/DisplayStatusCard'
 import { Form, Switch } from '../../components/Form'
 import { useDisplayContext } from '../../contexts/DisplayContext'
 
@@ -163,6 +164,13 @@ const LayoutAdminContent = memo(function LayoutAdminContent() {
           </div>
         </div>
       </div>
+
+      {/* Display Status Card - Shows displays using this layout */}
+      <DisplayStatusCard
+        layoutId={context.state.id || undefined}
+        title="Displays Using This Layout"
+        className="mb-6"
+      />
 
       <div className="flex flex-row items-center justify-between mb-4">
         <DropdownButton

@@ -49,12 +49,83 @@ export async function GET(request: NextRequest) {
       );
     }
 
+    // Get query parameters for filtering
+    const { searchParams } = new URL(request.url);
+    const layoutId = searchParams.get("layoutId");
+    const includeOffline = searchParams.get("includeOffline") === "true";
+    const withHeartbeat = searchParams.get("withHeartbeat") === "true";
+
     // Apply access filter based on user's role
-    let query = {};
+    let query: any = {};
     query = addAccessFilter(user, "display", query);
 
-    const displays = await Display.find(query).populate("widgets");
-    return NextResponse.json(displays);
+    // Add layout filter if specified
+    if (layoutId) {
+      query.layout = layoutId;
+    }
+
+    // Filter by recent activity if not including offline displays
+    if (!includeOffline) {
+      const cutoffTime = new Date(Date.now() - 5 * 60 * 1000); // 5 minutes ago
+      query.last_update = { $gte: cutoffTime };
+    }
+
+    const displays = await Display.find(query)
+      .populate(withHeartbeat ? "widgets" : "")
+      .select({
+        _id: 1,
+        name: 1,
+        layout: 1,
+        last_update: 1,
+        location: 1,
+        building: 1,
+        created_at: 1,
+        updated_at: 1,
+        widgets: withHeartbeat ? 1 : 0,
+      })
+      .sort({ last_update: -1 })
+      .lean();
+
+    // Enhance displays with status information
+    const enhancedDisplays = displays.map((display) => {
+      const lastUpdate = display.last_update
+        ? new Date(display.last_update)
+        : null;
+      const isOnline =
+        lastUpdate && Date.now() - lastUpdate.getTime() < 2 * 60 * 1000; // 2 minutes
+
+      return {
+        ...display,
+        name: display.name || `Display ${display._id.toString().slice(-4)}`,
+        layout: display.layout || "default",
+        lastSeen: lastUpdate,
+        isOnline,
+        location: display.location || "Unknown Location",
+        building: display.building || "Main Building",
+      };
+    });
+
+    // Group by layout if no specific layout requested
+    let groupedByLayout: Record<string, any[]> = {};
+    if (!layoutId) {
+      enhancedDisplays.forEach((display) => {
+        const layout = display.layout || "default";
+        if (!groupedByLayout[layout]) {
+          groupedByLayout[layout] = [];
+        }
+        groupedByLayout[layout].push(display);
+      });
+    }
+
+    return NextResponse.json({
+      displays: enhancedDisplays,
+      groupedByLayout: !layoutId ? groupedByLayout : undefined,
+      filters: {
+        layoutId,
+        includeOffline,
+        withHeartbeat,
+      },
+    });
   } catch (error: any) {
     return NextResponse.json(
       { message: error.message || "Error fetching displays" },
