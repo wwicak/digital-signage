@@ -3,6 +3,9 @@ import GridLayout, { Layout as RglLayout } from 'react-grid-layout'
 import { DragDropContext, Droppable, DropResult, DroppableProvided } from '@hello-pangea/dnd'
 import { Edit, Grid2X2, Grid3X3, Monitor, Smartphone, Maximize2 } from 'lucide-react'
 
+// Import react-grid-layout CSS
+import 'react-grid-layout/css/styles.css'
+
 // Using Tailwind-only styling for grid layout
 
 import Frame from '../components/Admin/Frame' // Assuming .js or .tsx
@@ -217,6 +220,8 @@ const LayoutPage: React.FC<ILayoutPageProps> = ({ loggedIn, displayId }) => {
   // Optimized drag start handler
   const handleDragStart = useCallback((layout: RglLayout[], oldItem: RglLayout, newItem: RglLayout) => {
     try {
+      console.log('[DEBUG] Drag start event triggered for widget:', newItem.i)
+      console.log('[DEBUG] Mouse event details:', { x: newItem.x, y: newItem.y, w: newItem.w, h: newItem.h })
       setIsDragging(true)
       setDraggedWidgetId(newItem.i)
       startMonitoring()
@@ -302,6 +307,8 @@ const LayoutPage: React.FC<ILayoutPageProps> = ({ loggedIn, displayId }) => {
   // Optimized resize handlers
   const handleResizeStart = useCallback((layout: RglLayout[], oldItem: RglLayout, newItem: RglLayout) => {
     try {
+      console.log('[DEBUG] Resize start event triggered for widget:', newItem.i)
+      console.log('[DEBUG] Resize handles available:', ['se', 'sw', 'ne', 'nw', 's', 'n', 'e', 'w'])
       setIsDragging(true)
       setDraggedWidgetId(newItem.i)
       startMonitoring()
@@ -785,7 +792,7 @@ const LayoutPage: React.FC<ILayoutPageProps> = ({ loggedIn, displayId }) => {
               onResizeStart={handleResizeStart}
               onResize={handleResize}
               onResizeStop={handleResizeStop}
-              draggableCancel={'.controls,button,.no-drag'}
+              draggableCancel={'.ReactModalPortal,.controls,button'}
               resizeHandles={['se', 'sw', 'ne', 'nw', 's', 'n', 'e', 'w']}
               margin={gridConstraints.recommendedMargin}
               rowHeight={gridConstraints.recommendedRowHeight}
@@ -802,6 +809,10 @@ const LayoutPage: React.FC<ILayoutPageProps> = ({ loggedIn, displayId }) => {
               allowOverlap={false}
               maxRows={gridConstraints.rows}
               className="react-grid-layout w-full h-full"
+              style={{
+                minHeight: '400px',
+                position: 'relative'
+              }}
             >
               {widgets.map(widget => (
                 <div
@@ -813,6 +824,18 @@ const LayoutPage: React.FC<ILayoutPageProps> = ({ loggedIn, displayId }) => {
                         ? 'opacity-90'
                         : ''
                   } ${isDragging && draggedWidgetId === widget._id ? 'cursor-grabbing' : 'cursor-grab'}`}
+                  onMouseDown={(e) => {
+                    console.log('[DEBUG] Widget container mouseDown:', widget._id, e.target);
+                  }}
+                  onMouseMove={(e) => {
+                    if (isDragging && draggedWidgetId === widget._id) {
+                      console.log('[DEBUG] Widget container mouseMove during drag:', widget._id);
+                    }
+                  }}
+                  style={{
+                    touchAction: 'none',
+                    userSelect: 'none'
+                  }}
                 >
                   <EditableWidget
                     id={widget._id}

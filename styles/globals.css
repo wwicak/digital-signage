@@ -188,7 +188,7 @@
 .react-grid-layout {
   position: relative !important;
   transition: height 200ms ease;
-  /* Remove layout outline - we want to see widget outlines */
+  background: transparent;
 }
 
 .react-grid-item {
@@ -198,8 +198,14 @@
   box-sizing: border-box !important;
   touch-action: none !important;
   cursor: grab !important;
-  /* Green outline around each WIDGET for debugging */
-  outline: 2px dashed rgba(0, 255, 0, 0.6) !important;
+  border: 2px solid transparent;
+  border-radius: 8px;
+  background-clip: padding-box;
+}
+
+.react-grid-item:hover {
+  border-color: rgba(59, 130, 246, 0.5);
+  box-shadow: 0 0 0 1px rgba(59, 130, 246, 0.2);
 }
 
 .react-grid-item:active {
@@ -215,7 +221,8 @@
   z-index: 999 !important;
   will-change: width, height, transform;
   transition: none !important;
-  outline: 2px solid rgba(0, 0, 255, 0.8) !important;
+  border-color: rgba(16, 185, 129, 0.8) !important;
+  box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.3) !important;
 }
 
 .react-grid-item.react-draggable-dragging {
@@ -223,8 +230,9 @@
   z-index: 1000 !important;
   will-change: transform;
   cursor: grabbing !important;
-  /* Red outline when dragging a WIDGET */
-  outline: 3px solid rgba(255, 0, 0, 0.8) !important;
+  border-color: rgba(239, 68, 68, 0.8) !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
+  transform: scale(1.02) !important;
 }
 
 .react-grid-item.react-draggable-dragging * {
@@ -233,26 +241,97 @@
 }
 
 .react-grid-item.react-grid-placeholder {
-  background: linear-gradient(135deg, rgba(123, 192, 67, 0.3), rgba(123, 192, 67, 0.1)) !important;
-  border: 2px dashed rgba(123, 192, 67, 0.5) !important;
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(59, 130, 246, 0.05)) !important;
+  border: 2px dashed rgba(59, 130, 246, 0.4) !important;
   border-radius: 8px !important;
   opacity: 0.8 !important;
   z-index: 2 !important;
   user-select: none !important;
 }
 
-/* Resize handles */
+/* Resize handles - Enhanced visibility and styling */
 .react-grid-item > .react-resizable-handle {
   position: absolute !important;
   pointer-events: auto !important;
   touch-action: none !important;
-  z-index: 10 !important;
+  z-index: 20 !important;
   opacity: 0;
   transition: opacity 200ms ease;
+  background: rgba(59, 130, 246, 0.8);
+  border: 1px solid rgba(255, 255, 255, 0.8);
 }
 
 .react-grid-item:hover > .react-resizable-handle {
   opacity: 1 !important;
+}
+
+/* Specific resize handle positions and styles */
+.react-grid-item > .react-resizable-handle.react-resizable-handle-se {
+  bottom: 0;
+  right: 0;
+  width: 20px;
+  height: 20px;
+  border-radius: 0 0 8px 0;
+}
+
+.react-grid-item > .react-resizable-handle.react-resizable-handle-sw {
+  bottom: 0;
+  left: 0;
+  width: 20px;
+  height: 20px;
+  border-radius: 0 0 0 8px;
+}
+
+.react-grid-item > .react-resizable-handle.react-resizable-handle-ne {
+  top: 0;
+  right: 0;
+  width: 20px;
+  height: 20px;
+  border-radius: 0 8px 0 0;
+}
+
+.react-grid-item > .react-resizable-handle.react-resizable-handle-nw {
+  top: 0;
+  left: 0;
+  width: 20px;
+  height: 20px;
+  border-radius: 8px 0 0 0;
+}
+
+.react-grid-item > .react-resizable-handle.react-resizable-handle-s {
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 40px;
+  height: 8px;
+  border-radius: 0 0 4px 4px;
+}
+
+.react-grid-item > .react-resizable-handle.react-resizable-handle-n {
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 40px;
+  height: 8px;
+  border-radius: 4px 4px 0 0;
+}
+
+.react-grid-item > .react-resizable-handle.react-resizable-handle-e {
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 8px;
+  height: 40px;
+  border-radius: 0 4px 4px 0;
+}
+
+.react-grid-item > .react-resizable-handle.react-resizable-handle-w {
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 8px;
+  height: 40px;
+  border-radius: 4px 0 0 4px;
 }
 
 /* Southeast handle (bottom-right) */
@@ -276,11 +355,26 @@
   border-radius: 0 0 2px 0 !important;
 }
 
+/* Visual feedback for drag and resize operations */
+.react-grid-item.dragging-active {
+  transform: scale(1.02) !important;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15) !important;
+  border-color: rgba(239, 68, 68, 0.8) !important;
+  z-index: 1000 !important;
+}
+
+.react-grid-item.resizing-active {
+  border-color: rgba(16, 185, 129, 0.8) !important;
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.2) !important;
+  z-index: 999 !important;
+}
+
 /* Widget controls visibility fix */
 .react-grid-item .controls {
   pointer-events: auto !important;
-  /* Temporary: make controls always visible for debugging */
   opacity: 1 !important;
+  position: relative;
+  z-index: 25 !important;
 }
 
 .react-grid-item .no-drag {
@@ -291,6 +385,7 @@
 .react-grid-item .controls button {
   pointer-events: auto !important;
   z-index: 30 !important;
+  position: relative;
 }
 
 @utility container {

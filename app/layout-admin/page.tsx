@@ -7,6 +7,9 @@ import { useSearchParams, useRouter } from 'next/navigation'
 import { DragDropContext, Droppable, DropResult } from '@hello-pangea/dnd'
 import Link from 'next/link'
 
+// Import react-grid-layout CSS
+import 'react-grid-layout/css/styles.css'
+
 // Using Tailwind-only styling for grid layout
 
 import Frame from '../../components/Admin/Frame'
@@ -360,6 +363,16 @@ const LayoutAdminContent = memo(function LayoutAdminContent() {
     }
   }
 
+  // Helper function to extract widget ID consistently
+  const getWidgetId = useCallback((widget: any): string | null => {
+    if (typeof widget.widget_id === 'string') {
+      return widget.widget_id
+    } else if (widget.widget_id && typeof widget.widget_id === 'object') {
+      return (widget.widget_id as any)._id?.toString() || (widget.widget_id as any).toString()
+    }
+    return null
+  }, [])
+
   // Auto-arrange widgets to optimize space usage
   const handleAutoArrange = useCallback(async (): Promise<void> => {
     if (!existingLayout?.widgets || existingLayout.widgets.length === 0) {
@@ -395,9 +408,14 @@ const LayoutAdminContent = memo(function LayoutAdminContent() {
     }
   }, [existingLayout?.widgets, layoutData.gridConfig, savedLayoutId, refetchLayout])
 
-  // Drag and resize event handlers
+  // Drag and resize event handlers with improved feedback
   const handleDragStart = useCallback((layout: RglLayout[], oldItem: RglLayout, newItem: RglLayout) => {
     console.log('🎯 [DRAG] Started for widget:', newItem.i, 'at position:', oldItem.x, oldItem.y)
+    // Add visual feedback for drag start
+    const element = document.querySelector(`[data-grid='${newItem.i}']`)
+    if (element) {
+      element.classList.add('dragging-active')
+    }
   }, [])
 
   const handleDrag = useCallback((layout: RglLayout[], oldItem: RglLayout, newItem: RglLayout) => {
@@ -406,6 +424,11 @@ const LayoutAdminContent = memo(function LayoutAdminContent() {
 
   const handleResizeStart = useCallback((layout: RglLayout[], oldItem: RglLayout, newItem: RglLayout) => {
     console.log('📏 [RESIZE] Started for widget:', newItem.i, 'size:', oldItem.w, 'x', oldItem.h)
+    // Add visual feedback for resize start
+    const element = document.querySelector(`[data-grid='${newItem.i}']`)
+    if (element) {
+      element.classList.add('resizing-active')
+    }
   }, [])
 
   const handleResize = useCallback((layout: RglLayout[], oldItem: RglLayout, newItem: RglLayout) => {
@@ -413,7 +436,12 @@ const LayoutAdminContent = memo(function LayoutAdminContent() {
   }, [])
 
   const handleLayoutChange = useCallback((layout: RglLayout[]): void => {
-    if (!savedLayoutId || !existingLayout?.widgets) {
+    if (!savedLayoutId || !existingLayout?.widgets || layout.length === 0) {
+      console.log('Skipping layout change - missing requirements:', {
+        savedLayoutId: !!savedLayoutId,
+        hasWidgets: !!existingLayout?.widgets,
+        layoutLength: layout.length
+      })
       return
     }
 
@@ -424,45 +452,67 @@ const LayoutAdminContent = memo(function LayoutAdminContent() {
 
     // Debounce the layout update to improve performance
     layoutChangeTimeoutRef.current = setTimeout(async () => {
+      console.log('Processing layout change with', layout.length, 'items')
+
       // Prepare position updates
       const positionUpdates = layout.map(layoutItem => {
-        // layoutItem.i is now the actual widget ID
         const widgetId = layoutItem.i
         const widget = existingLayout.widgets.find((w: any) => {
-          const wId = typeof w.widget_id === 'string'
-            ? w.widget_id
-            : (w.widget_id as any)?._id?.toString() || (w.widget_id as any)?.toString()
+          const wId = getWidgetId(w)
           return wId === widgetId
         })
 
         if (widget) {
           return {
             widget_id: widgetId,
-            x: layoutItem.x,
-            y: layoutItem.y,
-            w: layoutItem.w,
-            h: layoutItem.h,
+            x: Math.max(0, layoutItem.x),
+            y: Math.max(0, layoutItem.y),
+            w: Math.max(1, layoutItem.w),
+            h: Math.max(1, layoutItem.h),
           }
+        } else {
+          console.warn('Widget not found for layout item:', layoutItem)
+          return null
         }
-        return null
       }).filter(Boolean)
 
+      if (positionUpdates.length === 0) {
+        console.warn('No valid position updates to save')
+        return
+      }
+
       try {
+        console.log('Saving position updates:', positionUpdates)
         await updateWidgetPositions(savedLayoutId, positionUpdates as any)
+        console.log('Successfully updated widget positions')
       } catch (error) {
         console.error('Failed to update widget positions:', error)
       }
     }, 500) // 500ms debounce
-  }, [savedLayoutId, existingLayout?.widgets])
+  }, [savedLayoutId, existingLayout?.widgets, getWidgetId])
 
   const handleDragStop = useCallback((layout: RglLayout[], oldItem: RglLayout, newItem: RglLayout) => {
     console.log('🎯 [DRAG] Stopped for widget:', newItem.i, 'final position:', newItem.x, newItem.y)
+
+    // Clean up visual feedback
+    const element = document.querySelector(`[data-grid='${newItem.i}']`)
+    if (element) {
+      element.classList.remove('dragging-active')
+    }
+
     // Trigger layout change handling
     handleLayoutChange(layout)
   }, [handleLayoutChange])
 
   const handleResizeStop = useCallback((layout: RglLayout[], oldItem: RglLayout, newItem: RglLayout) => {
     console.log('📏 [RESIZE] Stopped for widget:', newItem.i, 'final size:', newItem.w, 'x', newItem.h)
+
+    // Clean up visual feedback
+    const element = document.querySelector(`[data-grid='${newItem.i}']`)
+    if (element) {
+      element.classList.remove('resizing-active')
+    }
+
     // Trigger layout change handling
     handleLayoutChange(layout)
   }, [handleLayoutChange])
@@ -552,45 +602,32 @@ const LayoutAdminContent = memo(function LayoutAdminContent() {
 
   const rglLayout: RglLayout[] = useMemo(() => {
     if (!existingLayout?.widgets) return []
-    
+
     let invalidCount = 0
-    const validWidgets = existingLayout.widgets.filter((widget, index) => {
-      // Check if widget has valid ID
-      let widgetId: string | null = null
-      
-      if (typeof widget.widget_id === 'string') {
-        widgetId = widget.widget_id
-      } else if (widget.widget_id && typeof widget.widget_id === 'object') {
-        widgetId = (widget.widget_id as any)._id?.toString() || (widget.widget_id as any).toString()
-      }
-      
+    const validWidgets = existingLayout.widgets.filter((widget) => {
+      const widgetId = getWidgetId(widget)
       const isValid = widgetId && /^[0-9a-fA-F]{24}$/.test(widgetId)
       if (!isValid) {
         invalidCount++
+        console.warn('Invalid widget found:', widget)
       }
       return isValid
     })
-    
+
     setInvalidWidgetsCount(invalidCount)
-    
-    return validWidgets.map((widget, index) => {
-      // Get the actual widget ID to use as the grid item ID
-      let widgetId: string
-      if (typeof widget.widget_id === 'string') {
-        widgetId = widget.widget_id
-      } else {
-        widgetId = (widget.widget_id as any)._id?.toString() || (widget.widget_id as any).toString()
-      }
+
+    return validWidgets.map((widget) => {
+      const widgetId = getWidgetId(widget)!
 
       return {
-        i: widgetId, // Use actual widget ID instead of index
-        x: widget.x,
-        y: widget.y,
-        w: widget.w,
-        h: widget.h,
+        i: widgetId, // Use actual widget ID as the grid item ID
+        x: widget.x || 0,
+        y: widget.y || 0,
+        w: widget.w || 4,
+        h: widget.h || 2,
       }
     })
-  }, [existingLayout?.widgets])
+  }, [existingLayout?.widgets, getWidgetId])
 
   // Memoize choices to prevent unnecessary re-renders
   const statusBarChoices = useMemo(() =>
@@ -915,75 +952,35 @@ const LayoutAdminContent = memo(function LayoutAdminContent() {
                 isBounded={true}
                 useCSSTransforms={true}
                 transformScale={1}
-                preventCollision={true}
-                compactType='vertical'
+                preventCollision={false}
+                compactType={null}
                 maxRows={layoutData.gridConfig.rows}
                 className="react-grid-layout w-full h-full"
                 isDraggable={true}
                 isResizable={true}
+                autoSize={false}
+                verticalCompact={false}
+                allowOverlap={false}
+                containerPadding={[0, 0]}
+                draggableHandle={undefined}
+                resizeHandle={undefined}
               >
-                {existingLayout?.widgets?.filter((widget, index) => {
-                  // Pre-filter to only include widgets with valid IDs and populated data
-                  let widgetId: string | null = null
-                  let hasValidData = false
+                {existingLayout?.widgets?.filter((widget) => {
+                  const widgetId = getWidgetId(widget)
+                  const isValid = widgetId && /^[0-9a-fA-F]{24}$/.test(widgetId)
 
-                  if (typeof widget.widget_id === 'string') {
-                    widgetId = widget.widget_id
-                    // For string IDs, we can't verify if the widget exists without making an API call
-                    // So we'll allow it through and handle errors in the component
-                    hasValidData = true
-                  } else if (widget.widget_id && typeof widget.widget_id === 'object') {
-                    // If widget_id is populated, we have the widget data
-                    widgetId = (widget.widget_id as any)._id?.toString() || (widget.widget_id as any).toString()
-                    hasValidData = !!(widget.widget_id as any).type // Check if we have type data
+                  if (!isValid) {
+                    console.warn('Filtering out invalid widget:', widget)
                   }
 
-                  const isValidId = widgetId && /^[0-9a-fA-F]{24}$/.test(widgetId)
+                  return isValid
+                }).map((widget) => {
+                  const widgetId = getWidgetId(widget)!
+                  let widgetType = 'unknown'
 
-                  if (!isValidId || !hasValidData) {
-                    console.warn('Filtering out invalid widget:', { widgetId, hasValidData, widget })
-                  }
-
-                  return isValidId && hasValidData
-                }).map((widget, index) => {
-                  // Handle both populated and non-populated widget_id
-                  let widgetId: string
-                  let widgetType: string
-
-                  // Debug logging to help identify widget structure issues
-                  if (process.env.NODE_ENV === 'development') {
-                    console.log(`Widget ${index} structure:`, {
-                      widget_id: widget.widget_id,
-                      widget_id_type: typeof widget.widget_id,
-                      is_object: typeof widget.widget_id === 'object',
-                      has_id: widget.widget_id && (widget.widget_id as any)._id,
-                      has_type: widget.widget_id && (widget.widget_id as any).type
-                    })
-                  }
-
-                  if (typeof widget.widget_id === 'string') {
-                    // widget_id is just a string ID - this shouldn't happen after filtering but handle it
-                    widgetId = widget.widget_id
-                    widgetType = 'unknown' // We don't have type info when not populated
-                    console.warn('Using non-populated widget ID:', widgetId)
-                  } else if (widget.widget_id && typeof widget.widget_id === 'object') {
-                    // widget_id is a populated object - this is the preferred case
-                    const populatedWidget = widget.widget_id as any
-                    widgetId = populatedWidget._id?.toString() || populatedWidget.toString()
-                    widgetType = populatedWidget.type || 'unknown'
-
-                    // Log populated widget info for debugging
-                    if (process.env.NODE_ENV === 'development') {
-                      console.log('Using populated widget:', {
-                        widgetId,
-                        widgetType,
-                        name: populatedWidget.name
-                      })
-                    }
-                  } else {
-                    // This should not happen due to pre-filtering, but just in case
-                    console.error('Unexpected invalid widget in filtered list:', widget)
-                    return null
+                  // Extract widget type
+                  if (typeof widget.widget_id === 'object' && widget.widget_id) {
+                    widgetType = (widget.widget_id as any).type || 'unknown'
                   }
 
                   return (
@@ -996,7 +993,7 @@ const LayoutAdminContent = memo(function LayoutAdminContent() {
                       onDelete={handleDeleteWidget}
                     />
                   )
-                }).filter(Boolean)}
+                })}
               </GridLayoutWithWidth>
             )}
           </div>
