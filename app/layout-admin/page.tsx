@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useState, useEffect, useCallback, Suspense, memo, useRef, useMemo } from 'react'
-import { Grid3X3, Grid2X2, Edit, Monitor, Smartphone, Save, ArrowLeft, Eye, Maximize2 } from 'lucide-react'
+import { Grid3X3, Grid2X2, Edit, Monitor, Smartphone, Save, ArrowLeft, Eye, Maximize2, AlertCircle } from 'lucide-react'
 import GridLayout, { Layout as RglLayout } from 'react-grid-layout'
 import { useSearchParams, useRouter } from 'next/navigation'
 import { DragDropContext, Droppable, DropResult } from '@hello-pangea/dnd'
@@ -88,6 +88,7 @@ const LayoutAdminContent = memo(function LayoutAdminContent() {
 
   // State for selected layout (can be from URL or dropdown)
   const [selectedLayoutId, setSelectedLayoutId] = useState<string | null>(urlLayoutId)
+  const [invalidWidgetsCount, setInvalidWidgetsCount] = useState<number>(0)
   const isEditing = !!selectedLayoutId
 
   const { data: existingLayout, isLoading: layoutLoading, refetch: refetchLayout } = useLayout(selectedLayoutId)
@@ -460,13 +461,37 @@ const LayoutAdminContent = memo(function LayoutAdminContent() {
     }
   }
 
-  const rglLayout: RglLayout[] = existingLayout?.widgets?.map((widget, index) => ({
-    i: index.toString(),
-    x: widget.x,
-    y: widget.y,
-    w: widget.w,
-    h: widget.h,
-  })) || []
+  const rglLayout: RglLayout[] = useMemo(() => {
+    if (!existingLayout?.widgets) return []
+    
+    let invalidCount = 0
+    const validWidgets = existingLayout.widgets.filter((widget, index) => {
+      // Check if widget has valid ID
+      let widgetId: string | null = null
+      
+      if (typeof widget.widget_id === 'string') {
+        widgetId = widget.widget_id
+      } else if (widget.widget_id && typeof widget.widget_id === 'object') {
+        widgetId = (widget.widget_id as any)._id?.toString() || (widget.widget_id as any).toString()
+      }
+      
+      const isValid = widgetId && /^[0-9a-fA-F]{24}$/.test(widgetId)
+      if (!isValid) {
+        invalidCount++
+      }
+      return isValid
+    })
+    
+    setInvalidWidgetsCount(invalidCount)
+    
+    return validWidgets.map((widget, index) => ({
+      i: index.toString(),
+      x: widget.x,
+      y: widget.y,
+      w: widget.w,
+      h: widget.h,
+    }))
+  }, [existingLayout?.widgets])
 
   // Memoize choices to prevent unnecessary re-renders
   const statusBarChoices = useMemo(() =>
@@ -753,6 +778,18 @@ const LayoutAdminContent = memo(function LayoutAdminContent() {
               {layoutData.orientation === 'portrait' ? '9:16' : '16:9'} • {layoutData.gridConfig.cols}×{layoutData.gridConfig.rows}
             </div>
 
+            {/* Warning banner for invalid widgets */}
+            {invalidWidgetsCount > 0 && (
+              <div className="absolute top-12 left-2 right-2 bg-yellow-50 border border-yellow-200 rounded-lg p-3 z-20">
+                <div className="flex items-center space-x-2 text-yellow-800">
+                  <AlertCircle className="w-4 h-4" />
+                  <span className="text-sm font-medium">
+                    {invalidWidgetsCount} widget{invalidWidgetsCount > 1 ? 's' : ''} {invalidWidgetsCount > 1 ? 'have' : 'has'} invalid references and {invalidWidgetsCount > 1 ? 'are' : 'is'} not displayed
+                  </span>
+                </div>
+              </div>
+            )}
+
             {(!existingLayout?.widgets || existingLayout.widgets.length === 0) ? (
               <div className="absolute inset-0 flex items-center justify-center">
                 <div className="text-center text-gray-500">
@@ -776,7 +813,18 @@ const LayoutAdminContent = memo(function LayoutAdminContent() {
                 compactType="vertical"
                 maxRows={layoutData.gridConfig.rows}
               >
-                {existingLayout?.widgets?.map((widget, index) => {
+                {existingLayout?.widgets?.filter((widget, index) => {
+                  // Pre-filter to only include widgets with valid IDs
+                  let widgetId: string | null = null
+                  
+                  if (typeof widget.widget_id === 'string') {
+                    widgetId = widget.widget_id
+                  } else if (widget.widget_id && typeof widget.widget_id === 'object') {
+                    widgetId = (widget.widget_id as any)._id?.toString() || (widget.widget_id as any).toString()
+                  }
+                  
+                  return widgetId && /^[0-9a-fA-F]{24}$/.test(widgetId)
+                }).map((widget, index) => {
                   // Handle both populated and non-populated widget_id
                   let widgetId: string
                   let widgetType: string
@@ -801,18 +849,8 @@ const LayoutAdminContent = memo(function LayoutAdminContent() {
                     widgetId = (widget.widget_id as any)._id?.toString() || (widget.widget_id as any).toString()
                     widgetType = (widget.widget_id as any).type || 'unknown'
                   } else {
-                    // Fallback for null, undefined, or other unexpected values
-                    widgetId = widget.widget_id ? String(widget.widget_id) : `widget-${index}`
-                    widgetType = 'unknown'
-                  }
-
-                  // Ensure we have a valid widgetId
-                  if (!widgetId || widgetId === 'undefined' || widgetId === 'null') {
-                    console.error('Invalid widget ID for widget at index', index, {
-                      widget,
-                      extractedId: widgetId,
-                      widget_id_raw: widget.widget_id
-                    })
+                    // This should not happen due to pre-filtering, but just in case
+                    console.error('Unexpected invalid widget in filtered list:', widget)
                     return null
                   }
 
