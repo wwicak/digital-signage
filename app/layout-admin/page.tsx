@@ -1,7 +1,7 @@
 'use client'
 
-import React, { useState, useEffect, useCallback, Suspense, memo } from 'react'
-import { Grid3X3, Grid2X2, Edit, Monitor, Smartphone, Save, ArrowLeft, Eye } from 'lucide-react'
+import React, { useState, useEffect, useCallback, Suspense, memo, useRef, useMemo } from 'react'
+import { Grid3X3, Grid2X2, Edit, Monitor, Smartphone, Save, ArrowLeft, Eye, Maximize2 } from 'lucide-react'
 import GridLayout, { Layout as RglLayout } from 'react-grid-layout'
 import { useSearchParams, useRouter } from 'next/navigation'
 import { DragDropContext, Droppable, DropResult } from '@hello-pangea/dnd'
@@ -32,6 +32,53 @@ import { WidgetType } from '../../lib/models/Widget'
 
 const GridLayoutWithWidth = WidthProvider(GridLayout as any)
 
+// Helper function to convert string to WidgetType enum
+const getWidgetType = (typeString: string): WidgetType => {
+  // Map string types to enum values
+  const typeMap: Record<string, WidgetType> = {
+    'announcement': WidgetType.ANNOUNCEMENT,
+    'congrats': WidgetType.CONGRATS,
+    'image': WidgetType.IMAGE,
+    'list': WidgetType.LIST,
+    'media-player': WidgetType.MEDIA_PLAYER,
+    'meeting-room': WidgetType.MEETING_ROOM,
+    'slideshow': WidgetType.SLIDESHOW,
+    'weather': WidgetType.WEATHER,
+    'web': WidgetType.WEB,
+    'youtube': WidgetType.YOUTUBE,
+  }
+
+  return typeMap[typeString] || WidgetType.SLIDESHOW // Default fallback
+}
+
+// Memoized widget component to prevent unnecessary re-renders
+const LayoutWidget = memo(function LayoutWidget({
+  widgetId,
+  widgetType,
+  layoutType,
+  isDeleting,
+  onDelete
+}: {
+  widgetId: string
+  widgetType: string
+  layoutType: 'spaced' | 'compact'
+  isDeleting: boolean
+  onDelete: (id: string) => void
+}) {
+  const handleDelete = useCallback(() => onDelete(widgetId), [onDelete, widgetId])
+
+  return (
+    <div className={isDeleting ? 'opacity-50 pointer-events-none' : ''}>
+      <EditableWidget
+        id={widgetId}
+        type={getWidgetType(widgetType)}
+        layout={layoutType}
+        onDelete={handleDelete}
+      />
+    </div>
+  )
+})
+
 const LayoutAdminContent = memo(function LayoutAdminContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
@@ -41,7 +88,7 @@ const LayoutAdminContent = memo(function LayoutAdminContent() {
   const [selectedLayoutId, setSelectedLayoutId] = useState<string | null>(urlLayoutId)
   const isEditing = !!selectedLayoutId
 
-  const { data: existingLayout, isLoading: layoutLoading } = useLayout(selectedLayoutId)
+  const { data: existingLayout, isLoading: layoutLoading, refetch: refetchLayout } = useLayout(selectedLayoutId)
   const { data: layoutsResponse, isLoading: layoutsLoading } = useLayouts({ limit: 100 })
   const { createLayout, updateLayout, createLayoutAsync, updateLayoutAsync, isCreating, isUpdating } = useLayoutMutations()
   const { widgetChoices, isLoading: widgetChoicesLoading } = useWidgetChoices()
@@ -69,6 +116,13 @@ const LayoutAdminContent = memo(function LayoutAdminContent() {
   // Track if layout has been saved (needed for widget operations)
   const [savedLayoutId, setSavedLayoutId] = useState<string | null>(selectedLayoutId)
 
+  // Debouncing for layout changes to improve performance
+  const layoutChangeTimeoutRef = useRef<NodeJS.Timeout | null>(null)
+
+  // Loading states for better UX
+  const [isAddingWidget, setIsAddingWidget] = useState(false)
+  const [isDeletingWidget, setIsDeletingWidget] = useState<string | null>(null)
+
   // Load existing layout data when editing
   useEffect(() => {
     if (existingLayout && isEditing) {
@@ -90,6 +144,15 @@ const LayoutAdminContent = memo(function LayoutAdminContent() {
       setSavedLayoutId(existingLayout._id as string)
     }
   }, [existingLayout, isEditing])
+
+  // Cleanup timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (layoutChangeTimeoutRef.current) {
+        clearTimeout(layoutChangeTimeoutRef.current)
+      }
+    }
+  }, [])
 
   // Handle layout selection from dropdown
   const handleLayoutSelect = (layoutId: string) => {
@@ -124,31 +187,35 @@ const LayoutAdminContent = memo(function LayoutAdminContent() {
   }
 
   const handleAddWidget = async (type: string): Promise<void> => {
-    // If we're creating a new layout, save it first
-    if (!savedLayoutId && !isEditing) {
-      if (!layoutData.name.trim()) {
-        alert('Please enter a layout name before adding widgets')
-        return
+    if (isAddingWidget) return // Prevent multiple simultaneous additions
+
+    setIsAddingWidget(true)
+    try {
+      // If we're creating a new layout, save it first
+      if (!savedLayoutId && !isEditing) {
+        if (!layoutData.name.trim()) {
+          alert('Please enter a layout name before adding widgets')
+          return
+        }
+
+        try {
+          const newLayout = await createLayoutAsync({ ...layoutData, widgets: [] } as any)
+          setSavedLayoutId(newLayout._id as string)
+          setSelectedLayoutId(newLayout._id as string)
+          // Update URL to reflect the new layout
+          router.replace(`/layout-admin?id=${newLayout._id}`, { scroll: false })
+        } catch (error) {
+          console.error('Failed to save layout:', error)
+          alert('Failed to save layout. Please try again.')
+          return
+        }
       }
 
-      try {
-        const newLayout = await createLayoutAsync({ ...layoutData, widgets: [] } as any)
-        setSavedLayoutId(newLayout._id as string)
-        setSelectedLayoutId(newLayout._id as string)
-        // Update URL to reflect the new layout
-        router.replace(`/layout-admin?id=${newLayout._id}`, { scroll: false })
-      } catch (error) {
-        console.error('Failed to save layout:', error)
-        alert('Failed to save layout. Please try again.')
+      const currentLayoutId = savedLayoutId || selectedLayoutId
+      if (!currentLayoutId) {
+        alert('Unable to add widget. Please try again.')
         return
       }
-    }
-
-    const currentLayoutId = savedLayoutId || selectedLayoutId
-    if (!currentLayoutId) {
-      alert('Unable to add widget. Please try again.')
-      return
-    }
 
     const widgetDefinition = Widgets[type]
 
@@ -183,55 +250,104 @@ const LayoutAdminContent = memo(function LayoutAdminContent() {
         data: widgetDefinition?.defaultData || {},
       })
 
-      // Refresh layout data
-      window.location.reload() // Simple refresh for now
-    } catch (error) {
-      console.error('Failed to add widget:', error)
-      alert('Failed to add widget. Please try again.')
+        // Refresh layout data without full page reload
+        await refetchLayout()
+      } catch (error) {
+        console.error('Failed to add widget:', error)
+        alert('Failed to add widget. Please try again.')
+      }
+    } finally {
+      setIsAddingWidget(false)
     }
   }
 
   const handleDeleteWidget = async (widgetId: string): Promise<void> => {
-    if (!savedLayoutId) {
+    if (!savedLayoutId || isDeletingWidget) {
       return
     }
 
+    setIsDeletingWidget(widgetId)
     try {
       await removeWidgetFromLayout(savedLayoutId, widgetId)
-      // Refresh layout data
-      window.location.reload() // Simple refresh for now
+      // Refresh layout data without full page reload
+      await refetchLayout()
     } catch (error) {
       console.error('Failed to delete widget:', error)
       alert('Failed to delete widget. Please try again.')
+    } finally {
+      setIsDeletingWidget(null)
     }
   }
 
-  const handleLayoutChange = useCallback(async (layout: RglLayout[]): Promise<void> => {
+  // Auto-arrange widgets to optimize space usage
+  const handleAutoArrange = useCallback(async (): Promise<void> => {
+    if (!existingLayout?.widgets || existingLayout.widgets.length === 0) {
+      return
+    }
+
+    // Simple auto-arrange algorithm: pack widgets from top-left
+    const arrangedWidgets = existingLayout.widgets.map((widget, index) => {
+      const cols = layoutData.gridConfig.cols
+      const widgetWidth = widget.w
+      const widgetHeight = widget.h
+
+      // Calculate position based on index and widget size
+      const widgetsPerRow = Math.floor(cols / widgetWidth)
+      const row = Math.floor(index / widgetsPerRow)
+      const col = (index % widgetsPerRow) * widgetWidth
+
+      return {
+        widget_id: widget.widget_id._id || widget.widget_id,
+        x: col,
+        y: row * widgetHeight,
+        w: widgetWidth,
+        h: widgetHeight,
+      }
+    })
+
+    try {
+      await updateWidgetPositions(savedLayoutId!, arrangedWidgets as any)
+      await refetchLayout()
+    } catch (error) {
+      console.error('Failed to auto-arrange widgets:', error)
+      alert('Failed to auto-arrange widgets. Please try again.')
+    }
+  }, [existingLayout?.widgets, layoutData.gridConfig, savedLayoutId, refetchLayout])
+
+  const handleLayoutChange = useCallback((layout: RglLayout[]): void => {
     if (!savedLayoutId || !existingLayout?.widgets) {
       return
     }
 
-    // Prepare position updates
-    const positionUpdates = layout.map(layoutItem => {
-      const widgetIndex = parseInt(layoutItem.i)
-      const widget = existingLayout.widgets[widgetIndex]
-      if (widget) {
-        return {
-          widget_id: widget.widget_id._id || widget.widget_id,
-          x: layoutItem.x,
-          y: layoutItem.y,
-          w: layoutItem.w,
-          h: layoutItem.h,
-        }
-      }
-      return null
-    }).filter(Boolean)
-
-    try {
-      await updateWidgetPositions(savedLayoutId, positionUpdates as any)
-    } catch (error) {
-      console.error('Failed to update widget positions:', error)
+    // Clear existing timeout
+    if (layoutChangeTimeoutRef.current) {
+      clearTimeout(layoutChangeTimeoutRef.current)
     }
+
+    // Debounce the layout update to improve performance
+    layoutChangeTimeoutRef.current = setTimeout(async () => {
+      // Prepare position updates
+      const positionUpdates = layout.map(layoutItem => {
+        const widgetIndex = parseInt(layoutItem.i)
+        const widget = existingLayout.widgets[widgetIndex]
+        if (widget) {
+          return {
+            widget_id: widget.widget_id._id || widget.widget_id,
+            x: layoutItem.x,
+            y: layoutItem.y,
+            w: layoutItem.w,
+            h: layoutItem.h,
+          }
+        }
+        return null
+      }).filter(Boolean)
+
+      try {
+        await updateWidgetPositions(savedLayoutId, positionUpdates as any)
+      } catch (error) {
+        console.error('Failed to update widget positions:', error)
+      }
+    }, 500) // 500ms debounce
   }, [savedLayoutId, existingLayout?.widgets])
 
   const handleDragEnd = (result: DropResult): void => {
@@ -325,14 +441,27 @@ const LayoutAdminContent = memo(function LayoutAdminContent() {
     h: widget.h,
   })) || []
 
-  const statusBarChoices = Object.keys(StatusBarElementTypes).map(key => {
-    const elType = StatusBarElementTypes[key as keyof typeof StatusBarElementTypes]
-    return {
-      key: key,
-      name: elType.name,
-      icon: elType.icon,
-    }
-  })
+  // Memoize choices to prevent unnecessary re-renders
+  const statusBarChoices = useMemo(() =>
+    Object.keys(StatusBarElementTypes).map(key => {
+      const elType = StatusBarElementTypes[key as keyof typeof StatusBarElementTypes]
+      return {
+        key: key,
+        name: elType.name,
+        icon: elType.icon,
+      }
+    }), []
+  )
+
+  const layoutOptions = useMemo(() =>
+    layoutsResponse?.layouts?.map((layout: any) => ({
+      id: layout._id,
+      name: layout.name,
+      widgetCount: layout.widgets?.length || 0,
+      orientation: layout.orientation,
+      layoutType: layout.layoutType
+    })) || [], [layoutsResponse?.layouts]
+  )
 
   if (layoutLoading || (selectedLayoutId && layoutsLoading)) {
     return (
@@ -415,12 +544,12 @@ const LayoutAdminContent = memo(function LayoutAdminContent() {
                       <span className="font-medium">Create New Layout</span>
                     </div>
                   </SelectItem>
-                  {layoutsResponse?.layouts?.map((layout: any) => (
-                    <SelectItem key={layout._id} value={layout._id}>
+                  {layoutOptions.map((layout) => (
+                    <SelectItem key={layout.id} value={layout.id}>
                       <div className="flex flex-col">
                         <span className="font-medium">{layout.name}</span>
                         <span className="text-xs text-muted-foreground">
-                          {layout.widgets?.length || 0} widgets • {layout.orientation} • {layout.layoutType}
+                          {layout.widgetCount} widgets • {layout.orientation} • {layout.layoutType}
                         </span>
                       </div>
                     </SelectItem>
@@ -532,11 +661,25 @@ const LayoutAdminContent = memo(function LayoutAdminContent() {
         <div className="flex items-center space-x-4">
           <DropdownButton
             icon={Edit}
-            text={widgetChoicesLoading ? 'Loading Widgets...' : 'Add Widget'}
+            text={
+              isAddingWidget ? 'Adding Widget...' :
+              widgetChoicesLoading ? 'Loading Widgets...' :
+              'Add Widget'
+            }
             onSelect={handleAddWidget}
             choices={widgetChoices}
-            disabled={widgetChoicesLoading}
+            disabled={widgetChoicesLoading || isAddingWidget}
           />
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleAutoArrange}
+            disabled={!existingLayout?.widgets || existingLayout.widgets.length === 0}
+            className="flex items-center space-x-2"
+          >
+            <Maximize2 className="w-4 h-4" />
+            <span>Auto-arrange</span>
+          </Button>
           {!isEditing && !savedLayoutId && (
             <div className="text-sm text-muted-foreground bg-blue-50 px-3 py-2 rounded-md border border-blue-200">
               💡 Enter a layout name and click "Add Widget" to save and start adding widgets
@@ -606,33 +749,23 @@ const LayoutAdminContent = memo(function LayoutAdminContent() {
                 compactType="vertical"
                 maxRows={layoutData.gridConfig.rows}
               >
-                {existingLayout?.widgets?.map((widget, index) => (
-                  <div key={index}>
-                    <div className="bg-white rounded border-2 border-dashed border-gray-400 h-full flex items-center justify-center relative group">
-                      <div className="text-center">
-                        <div className="text-sm font-medium text-gray-600 mb-1">
-                          {(widget.widget_id as any)?.type || 'Unknown'}
-                        </div>
-                        <div className="text-xs text-gray-400">{widget.w}×{widget.h}</div>
-                        <div className="text-xs text-gray-500 mt-1">
-                          {(widget.widget_id as any)?.name || 'Unnamed'}
-                        </div>
-                      </div>
-                      <Button
-                        variant="destructive"
-                        size="sm"
-                        className="absolute top-1 right-1 opacity-0 group-hover:opacity-100 transition-opacity h-6 w-6 p-0"
-                        onClick={() => handleDeleteWidget(
-                          typeof widget.widget_id === 'string'
-                            ? widget.widget_id
-                            : (widget.widget_id as any)._id || widget.widget_id.toString()
-                        )}
-                      >
-                        ×
-                      </Button>
-                    </div>
-                  </div>
-                ))}
+                {existingLayout?.widgets?.map((widget, index) => {
+                  const widgetId = typeof widget.widget_id === 'string'
+                    ? widget.widget_id
+                    : (widget.widget_id as any)?._id || widget.widget_id?.toString()
+                  const widgetType = (widget.widget_id as any)?.type || 'unknown'
+
+                  return (
+                    <LayoutWidget
+                      key={`${widgetId}-${index}`}
+                      widgetId={widgetId}
+                      widgetType={widgetType}
+                      layoutType={layoutData.layoutType}
+                      isDeleting={isDeletingWidget === widgetId}
+                      onDelete={handleDeleteWidget}
+                    />
+                  )
+                })}
               </GridLayoutWithWidth>
             )}
           </div>
