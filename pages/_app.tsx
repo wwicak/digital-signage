@@ -1,6 +1,7 @@
 import { AppProps } from 'next/app'
 import React from 'react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import { ThemeProvider } from 'next-themes'
 import { DisplayProvider } from '../contexts/DisplayContext'
 import { Toaster } from 'sonner'
 
@@ -52,10 +53,18 @@ const queryClient = new QueryClient({
 export default function MyApp({ Component, pageProps }: AppProps) {
   return (
     <QueryClientProvider client={queryClient}>
-      <DisplayProvider>
-        <Component {...pageProps} />
-        <Toaster richColors position="top-right" />
-      </DisplayProvider>
+      <ThemeProvider
+        attribute="class"
+        defaultTheme="light"
+        enableSystem
+        disableTransitionOnChange
+        storageKey="digital-signage-theme"
+      >
+        <DisplayProvider>
+          <Component {...pageProps} />
+          <Toaster richColors position="top-right" />
+        </DisplayProvider>
+      </ThemeProvider>
     </QueryClientProvider>
   )
 }
