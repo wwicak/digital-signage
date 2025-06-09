@@ -1,7 +1,7 @@
 import React from 'react'
 import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import '@testing-library/jest-dom'
-import LoginPage from './page' // Import the component to test
+import LoginPage from '../../app/login/page' // Import the component to test
 
 // --- Mock Dependencies ---
 

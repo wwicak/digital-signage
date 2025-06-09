@@ -204,43 +204,50 @@ const Sidebar: React.FC<ISidebarProps> = ({ loggedIn, displayId, collapsed = fal
   }));
 
   return (
-    <div className="h-full flex flex-col bg-card">
-      {/* Display Selector */}
+    <div className="h-full flex flex-col">
+      {/* Enhanced Display Selector */}
       {loggedIn && !collapsed && (
-        <div className="p-4 border-b border-border">
-          <div className="mb-3">
-            <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
-              Current Display
-            </p>
-          </div>
-          <DropdownButton
-            onSelect={navigateToAdmin}
-            choices={dropdownChoices}
-            style={{ width: "100%" }}
-            menuStyle={{ left: 0, top: "calc(100% + 5px)", width: "100%" }}
-          >
-            <div className="flex flex-row items-center p-3 cursor-pointer border border-border rounded-lg hover:bg-accent/50 transition-colors duration-200 bg-background">
-              <div className="flex justify-center items-center pr-3">
-                <Tv className="text-primary h-4 w-4" />
-              </div>
-              <div className="flex flex-col justify-center flex-1 whitespace-nowrap overflow-hidden">
-                <span className="font-medium text-sm whitespace-nowrap overflow-hidden text-ellipsis">
-                  {context.state.name || "Select Display"}
-                </span>
-                <DisplayStatusIndicator
-                  displayId={context.state.id || undefined}
-                />
-              </div>
-              <div className="ml-auto pl-3">
-                <ChevronDown className="h-4 w-4 text-muted-foreground" />
-              </div>
+        <Card className="mx-0 mt-3 mb-4 border-border/50 bg-card/60 backdrop-blur-sm">
+          <CardContent className="p-4">
+            <div className="mb-3">
+              <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider flex items-center gap-2">
+                <Tv className="w-3 h-3" />
+                Active Display
+              </p>
             </div>
-          </DropdownButton>
-        </div>
+            <DropdownButton
+              onSelect={navigateToAdmin}
+              choices={dropdownChoices}
+              style={{ width: "100%" }}
+              menuStyle={{ left: 0, top: "calc(100% + 5px)", width: "100%" }}
+            >
+              <Card className="cursor-pointer border-border/50 bg-background/50 hover:bg-accent/30 transition-all duration-300 hover:border-primary/30 hover:shadow-sm">
+                <CardContent className="p-3">
+                  <div className="flex items-center gap-3">
+                    <div className="flex justify-center items-center">
+                      <div className="w-8 h-8 rounded-lg bg-primary/10 border border-primary/20 flex items-center justify-center">
+                        <Tv className="text-primary h-3 w-3" />
+                      </div>
+                    </div>
+                    <div className="flex flex-col justify-center flex-1 min-w-0">
+                      <span className="font-medium text-sm text-foreground truncate">
+                        {context.state.name || "Select Display"}
+                      </span>
+                      <DisplayStatusIndicator
+                        displayId={context.state.id || undefined}
+                      />
+                    </div>
+                    <ChevronDown className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+                  </div>
+                </CardContent>
+              </Card>
+            </DropdownButton>
+          </CardContent>
+        </Card>
       )}
 
-      {/* Navigation Menu */}
-      <nav className="flex-1 p-3">
+      {/* Enhanced Navigation Menu */}
+      <nav className="flex-1 px-0">
         <div className="space-y-1">
           {menu.map((item) => (
             <MenuItemWithFeatureFlag
@@ -253,26 +260,28 @@ const Sidebar: React.FC<ISidebarProps> = ({ loggedIn, displayId, collapsed = fal
         </div>
       </nav>
 
-      {/* Logout Button */}
+      {/* Enhanced Logout Section */}
       {loggedIn && (
-        <div className="p-3 border-t border-border">
-          <button
-            onClick={handleLogout}
-            className={cn(
-              "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 group w-full",
-              collapsed ? "justify-center" : "justify-start",
-              "text-destructive hover:bg-destructive/10"
-            )}
-          >
-            <LogOut className="h-5 w-5" />
-            {!collapsed && <span>Logout</span>}
-            {collapsed && (
-              <div className="absolute left-full ml-2 px-2 py-1 bg-popover text-popover-foreground text-xs rounded-md shadow-md opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-50">
-                Logout
-              </div>
-            )}
-          </button>
-        </div>
+        <Card className="mx-0 mb-3 border-border/50 bg-card/40 backdrop-blur-sm">
+          <CardContent className="p-3">
+            <Button
+              onClick={handleLogout}
+              variant="ghost"
+              className={cn(
+                "w-full justify-start gap-3 text-destructive hover:bg-destructive/10 hover:text-destructive transition-all duration-200",
+                collapsed && "justify-center px-0"
+              )}
+            >
+              <LogOut className="h-4 w-4" />
+              {!collapsed && <span>Logout</span>}
+              {collapsed && (
+                <div className="absolute left-full ml-2 px-2 py-1 bg-popover text-popover-foreground text-xs rounded-md shadow-md opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-50">
+                  Logout
+                </div>
+              )}
+            </Button>
+          </CardContent>
+        </Card>
       )}
     </div>
   );
@@ -330,26 +339,56 @@ const MenuItemWithFeatureFlag: React.FC<{
   const isActive = pathname === item.path || (pathname ? pathname.startsWith(item.path.split('?')[0]) : false);
 
   return (
-    <Link href={item.path}>
-      <div
+    <Link href={item.path} className="block mb-1">
+      <Card
         className={cn(
-          "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 group",
-          collapsed ? "justify-center" : "justify-start",
+          "transition-all duration-300 cursor-pointer group hover:shadow-sm",
+          "border-transparent hover:border-border/50",
+          collapsed ? "mx-3" : "mx-0",
           isActive
-            ? "bg-primary/10 text-primary border border-primary/20"
-            : "text-muted-foreground hover:text-foreground hover:bg-accent/50"
+            ? "bg-gradient-to-r from-primary/10 to-primary/5 border-primary/20 shadow-sm"
+            : "bg-transparent hover:bg-accent/30"
         )}
       >
-        <item.icon className={cn("h-5 w-5", isActive && "text-primary")} />
-        {!collapsed && (
-          <span className="truncate">{item.name}</span>
-        )}
-        {collapsed && (
-          <div className="absolute left-full ml-2 px-2 py-1 bg-popover text-popover-foreground text-xs rounded-md shadow-md opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-50">
-            {item.name}
+        <CardContent
+          className={cn(
+            "flex items-center transition-all duration-200",
+            collapsed ? "p-2 justify-center" : "p-3 gap-3"
+          )}
+        >
+          <div className={cn(
+            "flex items-center justify-center rounded-lg transition-all duration-200",
+            collapsed ? "w-8 h-8" : "w-9 h-9",
+            isActive
+              ? "bg-primary/15 text-primary"
+              : "bg-muted/50 text-muted-foreground group-hover:bg-primary/10 group-hover:text-primary"
+          )}>
+            <item.icon className={cn(
+              "transition-all duration-200",
+              collapsed ? "h-4 w-4" : "h-4 w-4"
+            )} />
           </div>
-        )}
-      </div>
+          
+          {!collapsed && (
+            <div className="flex-1 min-w-0">
+              <span className={cn(
+                "font-medium text-sm transition-colors duration-200 truncate block",
+                isActive
+                  ? "text-primary"
+                  : "text-foreground group-hover:text-primary"
+              )}>
+                {item.name}
+              </span>
+            </div>
+          )}
+
+          {collapsed && (
+            <div className="absolute left-full ml-3 px-3 py-2 bg-popover text-popover-foreground text-sm rounded-lg shadow-lg border border-border/50 opacity-0 group-hover:opacity-100 transition-all duration-200 pointer-events-none whitespace-nowrap z-50 backdrop-blur-sm">
+              {item.name}
+            </div>
+          )}
+        </CardContent>
+      </Card>
     </Link>
   );
 };

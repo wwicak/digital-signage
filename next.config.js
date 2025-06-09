@@ -41,9 +41,10 @@ const nextConfig = {
     unoptimized: true, // For development, can be removed in production
   },
 
-  // Enable styled-jsx
+  // Compiler optimizations for Tailwind CSS
   compiler: {
-    styledComponents: true,
+    // Remove unused imports
+    removeConsole: process.env.NODE_ENV === "production",
   },
 
   // ESLint configuration - ignore linting during builds to prevent warnings from failing builds

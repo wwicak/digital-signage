@@ -1,5 +1,4 @@
 import React from 'react'
-import StyledComponentsRegistry from './lib/registry'
 import { Providers } from './providers'
 
 // Import global styles
@@ -33,9 +32,7 @@ export default function RootLayout({
       </head>
       <body>
         <Providers>
-          <StyledComponentsRegistry>
-            {children}
-          </StyledComponentsRegistry>
+          {children}
         </Providers>
       </body>
     </html>
