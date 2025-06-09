@@ -49,7 +49,7 @@ export const useDisplayStatus = (options?: {
 }) => {
   const {
     enableRealTimeUpdates = true,
-    refreshInterval = 30000, // 30 seconds
+    refreshInterval = process.env.NODE_ENV === "development" ? 120000 : 30000, // 2 minutes in dev, 30 seconds in prod
     offlineThresholdMinutes = 5,
   } = options || {};
 
