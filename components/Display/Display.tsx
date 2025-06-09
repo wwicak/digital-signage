@@ -52,14 +52,10 @@ const Display: React.FC<IDisplayComponentProps> = React.memo(({ display }) => {
         if (data.layoutChangeRequested) {
           console.log('Layout change detected, reloading display...');
 
-          // Clear the layout change flag
+          // Clear the layout change flag using PATCH method
           await fetch(`/api/v1/displays/${display}/change-layout`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              layoutId: data.currentLayout,
-              immediate: false // Just clearing the flag
-            })
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' }
           });
 
           // Reload the page to apply the new layout

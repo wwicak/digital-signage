@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import dbConnect from "@/lib/mongodb";
 import Display from "@/lib/models/Display";
 import { requireAuth } from "@/lib/helpers/auth_helper";
+import { sendEventToDisplay } from "@/lib/sse_display_manager";
 import { z } from "zod";
 
 // Force dynamic rendering
@@ -76,17 +77,42 @@ export async function POST(
       );
     }
 
-    // If immediate change is requested, we'll send a server-sent event
+    // If immediate change is requested, send a server-sent event
     // to notify the display to reload with the new layout
     if (immediate) {
-      // In a real implementation, you would send an SSE event here
-      // For now, we'll just log it and rely on the display's periodic refresh
       console.log(
         `Layout change requested for display ${displayId} to layout ${layoutId}`
       );
 
-      // You could implement SSE broadcasting here:
-      // await broadcastLayoutChange(displayId, layoutId);
+      // Send SSE event to the specific display
+      try {
+        const eventSent = sendEventToDisplay(
+          displayId,
+          "layout_change_requested",
+          {
+            displayId,
+            newLayoutId: layoutId,
+            timestamp: new Date().toISOString(),
+            immediate: true,
+          }
+        );
+
+        if (eventSent) {
+          console.log(
+            `SSE event sent to display ${displayId} for layout change`
+          );
+        } else {
+          console.log(
+            `No SSE connections for display ${displayId}, will rely on polling`
+          );
+        }
+      } catch (error) {
+        console.error(
+          `Failed to send SSE event to display ${displayId}:`,
+          error
+        );
+        // Don't fail the request if SSE fails - the display will pick it up via polling
+      }
     }
 
     return NextResponse.json({
@@ -163,6 +189,53 @@ export async function GET(
     });
   } catch (error: any) {
     console.error("Get layout change status error:", error);
+    return NextResponse.json(
+      { error: "Internal server error", message: error.message },
+      { status: 500 }
+    );
+  }
+}
+
+// PATCH method to clear the layout change flag (called by display after applying change)
+export async function PATCH(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  try {
+    await dbConnect();
+
+    const { id: displayId } = await params;
+    if (!displayId) {
+      return NextResponse.json(
+        { error: "Display ID is required" },
+        { status: 400 }
+      );
+    }
+
+    // Clear the layout change flag
+    const updatedDisplay = await Display.findByIdAndUpdate(
+      displayId,
+      {
+        layoutChangeRequested: false,
+        layoutChangeTimestamp: null,
+        last_update: new Date(),
+      },
+      { new: true }
+    );
+
+    if (!updatedDisplay) {
+      return NextResponse.json({ error: "Display not found" }, { status: 404 });
+    }
+
+    console.log(`Layout change flag cleared for display ${displayId}`);
+
+    return NextResponse.json({
+      success: true,
+      message: "Layout change flag cleared",
+      displayId: updatedDisplay._id,
+    });
+  } catch (error: any) {
+    console.error("Clear layout change flag error:", error);
     return NextResponse.json(
       { error: "Internal server error", message: error.message },
       { status: 500 }

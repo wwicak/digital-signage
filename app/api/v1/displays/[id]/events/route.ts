@@ -1,4 +1,8 @@
 import { NextRequest } from "next/server";
+import {
+  addDisplayConnection,
+  removeDisplayConnection,
+} from "@/lib/sse_display_manager";
 
 export async function GET(
   request: NextRequest,
@@ -25,6 +29,9 @@ export async function GET(
   // Create a readable stream for SSE
   const stream = new ReadableStream({
     start(controller) {
+      // Add this connection to the global store
+      addDisplayConnection(displayId, controller);
+
       // Send initial connection event
       const encoder = new TextEncoder();
       controller.enqueue(encoder.encode(`event: connected\n`));
@@ -32,6 +39,8 @@ export async function GET(
         encoder.encode(
           `data: ${JSON.stringify({
             message: `SSE connected to display ${displayId}`,
+            displayId,
+            timestamp: new Date().toISOString(),
           })}\n\n`
         )
       );
@@ -42,12 +51,14 @@ export async function GET(
           controller.enqueue(encoder.encode(`: heartbeat\n\n`));
         } catch (error) {
           clearInterval(heartbeat);
+          removeDisplayConnection(displayId, controller);
         }
       }, 30000); // Send heartbeat every 30 seconds
 
       // Clean up on abort
       request.signal.addEventListener("abort", () => {
         clearInterval(heartbeat);
+        removeDisplayConnection(displayId, controller);
         controller.close();
       });
     },

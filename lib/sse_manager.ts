@@ -59,6 +59,24 @@ export function sendEventToDisplay(
   eventName: string,
   data: any
 ): void {
+  // Try to use the new SSE implementation first
+  try {
+    // Import the function dynamically to avoid circular dependencies
+    const {
+      sendEventToDisplay: newSendEvent,
+    } = require("../app/api/v1/displays/[id]/events/route");
+    if (newSendEvent) {
+      newSendEvent(displayId, eventName, data);
+      return;
+    }
+  } catch (error) {
+    console.warn(
+      "New SSE implementation not available, falling back to legacy:",
+      error
+    );
+  }
+
+  // Fallback to legacy implementation
   if (sseClients[displayId]) {
     sseClients[displayId].forEach((client) => {
       sendSseEvent(client, eventName, data);

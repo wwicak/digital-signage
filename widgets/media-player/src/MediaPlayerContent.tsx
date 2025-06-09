@@ -30,10 +30,15 @@ class MediaPlayerContent extends Component<IMediaPlayerContentProps, IMediaPlaye
     this.setupMediaElement();
   }
 
-  componentDidUpdate(prevProps: IMediaPlayerContentProps) {
+  componentDidUpdate(prevProps: IMediaPlayerContentProps, prevState: IMediaPlayerContentState) {
     if (prevProps.data !== this.props.data) {
       this.checkSchedule();
       this.setupMediaElement();
+    }
+
+    // Handle schedule state changes
+    if (prevState.isScheduleActive !== this.state.isScheduleActive) {
+      this.handleScheduleChange();
     }
   }
 
@@ -44,15 +49,15 @@ class MediaPlayerContent extends Component<IMediaPlayerContentProps, IMediaPlaye
   }
 
   setupScheduleCheck = () => {
-    // Check schedule every minute
+    // Check schedule every 30 seconds for more responsive scheduling
     this.scheduleCheckInterval = setInterval(() => {
       this.checkSchedule();
-    }, 60000);
+    }, 30000);
   };
 
   checkSchedule = () => {
     const { data } = this.props;
-    
+
     if (!data?.enableScheduling || !data?.schedule) {
       this.setState({ isScheduleActive: true });
       return;
@@ -64,7 +69,7 @@ class MediaPlayerContent extends Component<IMediaPlayerContentProps, IMediaPlaye
 
     // Check if current day is in allowed days
     const { daysOfWeek, timeSlots } = data.schedule;
-    
+
     if (daysOfWeek && daysOfWeek.length > 0 && !daysOfWeek.includes(currentDay)) {
       this.setState({ isScheduleActive: false });
       return;
@@ -75,9 +80,35 @@ class MediaPlayerContent extends Component<IMediaPlayerContentProps, IMediaPlaye
       const isInTimeSlot = timeSlots.some(slot => {
         return currentTime >= slot.startTime && currentTime <= slot.endTime;
       });
+
+      // Log schedule changes for debugging
+      if (this.state.isScheduleActive !== isInTimeSlot) {
+        console.log(`Media player schedule changed: ${isInTimeSlot ? 'ACTIVE' : 'INACTIVE'} at ${currentTime} on day ${currentDay}`);
+      }
+
       this.setState({ isScheduleActive: isInTimeSlot });
     } else {
       this.setState({ isScheduleActive: true });
+    }
+  };
+
+  handleScheduleChange = () => {
+    const mediaElement = this.mediaRef.current;
+    if (!mediaElement) return;
+
+    if (this.state.isScheduleActive) {
+      // Schedule became active - start playing if autoplay is enabled
+      if (this.props.data?.autoplay) {
+        const playPromise = mediaElement.play();
+        if (playPromise !== undefined) {
+          playPromise.catch(error => {
+            console.warn('Autoplay was prevented:', error);
+          });
+        }
+      }
+    } else {
+      // Schedule became inactive - pause the media
+      mediaElement.pause();
     }
   };
 
