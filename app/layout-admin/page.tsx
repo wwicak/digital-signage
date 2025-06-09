@@ -33,11 +33,11 @@ const GridLayoutWithWidth = WidthProvider(GridLayout as any)
 const LayoutAdminContent = memo(function LayoutAdminContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
-  const layoutId = searchParams?.get('id')
+  const layoutId = searchParams?.get('id') || null
   const isEditing = !!layoutId
 
   const { data: existingLayout, isLoading: layoutLoading } = useLayout(layoutId)
-  const { createLayout, updateLayout, isCreating, isUpdating } = useLayoutMutations()
+  const { createLayout, updateLayout, createLayoutAsync, updateLayoutAsync, isCreating, isUpdating } = useLayoutMutations()
   const { widgetChoices, isLoading: widgetChoicesLoading } = useWidgetChoices()
 
   // Layout state - simplified for form data
@@ -81,7 +81,7 @@ const LayoutAdminContent = memo(function LayoutAdminContent() {
           rowHeight: 60,
         },
       })
-      setSavedLayoutId(existingLayout._id)
+      setSavedLayoutId(existingLayout._id as string)
     }
   }, [existingLayout, isEditing])
 
@@ -242,11 +242,11 @@ const LayoutAdminContent = memo(function LayoutAdminContent() {
   const handleSave = async (): Promise<void> => {
     try {
       if (isEditing && layoutId) {
-        await updateLayout({ id: layoutId, data: layoutData as any })
+        updateLayout({ id: layoutId, data: layoutData as any })
         router.push('/layouts')
       } else {
-        const newLayout = await createLayout({ ...layoutData, widgets: [] } as any)
-        setSavedLayoutId(newLayout._id)
+        const newLayout = await createLayoutAsync({ ...layoutData, widgets: [] } as any)
+        setSavedLayoutId(newLayout._id as string)
         // Don't redirect immediately - let user add widgets
         alert('Layout saved! You can now add widgets to your layout.')
       }
@@ -486,18 +486,22 @@ const LayoutAdminContent = memo(function LayoutAdminContent() {
                     <div className="bg-white rounded border-2 border-dashed border-gray-400 h-full flex items-center justify-center relative group">
                       <div className="text-center">
                         <div className="text-sm font-medium text-gray-600 mb-1">
-                          {widget.widget_id?.type || 'Unknown'}
+                          {(widget.widget_id as any)?.type || 'Unknown'}
                         </div>
                         <div className="text-xs text-gray-400">{widget.w}×{widget.h}</div>
                         <div className="text-xs text-gray-500 mt-1">
-                          {widget.widget_id?.name || 'Unnamed'}
+                          {(widget.widget_id as any)?.name || 'Unnamed'}
                         </div>
                       </div>
                       <Button
                         variant="destructive"
                         size="sm"
                         className="absolute top-1 right-1 opacity-0 group-hover:opacity-100 transition-opacity h-6 w-6 p-0"
-                        onClick={() => handleDeleteWidget(widget.widget_id._id || widget.widget_id)}
+                        onClick={() => handleDeleteWidget(
+                          typeof widget.widget_id === 'string'
+                            ? widget.widget_id
+                            : (widget.widget_id as any)._id || widget.widget_id.toString()
+                        )}
                       >
                         ×
                       </Button>

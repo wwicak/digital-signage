@@ -206,7 +206,14 @@ export async function duplicateLayout(
     description: existingLayout.description,
     orientation: existingLayout.orientation,
     layoutType: existingLayout.layoutType,
-    widgets: existingLayout.widgets,
+    widgets: existingLayout.widgets.map((w) => ({
+      widget_id:
+        typeof w.widget_id === "string" ? w.widget_id : w.widget_id.toString(),
+      x: w.x,
+      y: w.y,
+      w: w.w,
+      h: w.h,
+    })),
     statusBar: existingLayout.statusBar,
     isActive: existingLayout.isActive,
     isTemplate: existingLayout.isTemplate,
@@ -310,7 +317,7 @@ export async function removeWidgetFromLayout(
 // Create a default layout template (now creates actual widgets)
 export async function createDefaultLayout(): Promise<ILayoutData> {
   // First create the layout without widgets
-  const defaultLayoutData: Omit<ILayoutCreateData, "widgets"> = {
+  const defaultLayoutData: ILayoutCreateData = {
     name: "Default Layout",
     description: "A basic layout template with essential widgets",
     orientation: "landscape",
@@ -331,7 +338,7 @@ export async function createDefaultLayout(): Promise<ILayoutData> {
     },
   };
 
-  const layout = await createLayout(defaultLayoutData as ILayoutCreateData);
+  const layout = await createLayout(defaultLayoutData);
 
   // Then add default widgets
   const defaultWidgets = [
@@ -357,9 +364,9 @@ export async function createDefaultLayout(): Promise<ILayoutData> {
   ];
 
   for (const widget of defaultWidgets) {
-    await addWidgetToLayout(layout._id, widget);
+    await addWidgetToLayout(layout._id as string, widget);
   }
 
   // Return the updated layout
-  return getLayout(layout._id);
+  return getLayout(layout._id as string);
 }

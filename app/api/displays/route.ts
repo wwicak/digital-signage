@@ -128,7 +128,7 @@ export async function GET(request: NextRequest) {
     let groupedByLayout: Record<string, any[]> = {};
     if (!layoutId) {
       enhancedDisplays.forEach((display) => {
-        const layout = display.layout || "default";
+        const layout = display.layout?.toString() || "default";
         if (!groupedByLayout[layout]) {
           groupedByLayout[layout] = [];
         }

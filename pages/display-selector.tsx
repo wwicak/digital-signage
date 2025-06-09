@@ -162,7 +162,7 @@ export default function DisplaySelector() {
             </Card>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {layouts.map((layout) => (
+              {layouts.map((layout: any) => (
                 <Card
                   key={layout._id}
                   className={cn(
@@ -206,7 +206,7 @@ export default function DisplaySelector() {
                           size="sm"
                           onClick={(e) => {
                             e.stopPropagation();
-                            handlePreview(layout._id);
+                            handlePreview(layout._id as string);
                           }}
                           className="flex-1"
                         >
@@ -218,7 +218,7 @@ export default function DisplaySelector() {
                           size="sm"
                           onClick={(e) => {
                             e.stopPropagation();
-                            handleLayoutSelect(layout._id);
+                            handleLayoutSelect(layout._id as string);
                           }}
                           className="flex-1"
                         >
@@ -243,7 +243,7 @@ export default function DisplaySelector() {
                   <div>
                     <h3 className="text-lg font-semibold text-green-900">Ready to Start</h3>
                     <p className="text-sm text-green-700">
-                      Layout "{layouts.find(l => l._id === selectedLayout)?.name}" selected
+                      Layout "{layouts.find((l: any) => l._id === selectedLayout)?.name}" selected
                     </p>
                   </div>
                 </div>

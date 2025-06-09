@@ -35,6 +35,9 @@ const LayoutsComponent = memo(function LayoutsComponent({ loggedIn }: LayoutsPro
   const { data: layoutsResponse, isLoading, error, refetch } = useLayouts(queryParams)
   const { deleteLayout, duplicateLayout, isDeleting, isDuplicating } = useLayoutMutations()
 
+  // Extract layouts array from response
+  const layouts = layoutsResponse?.layouts || []
+
   const handleCreateLayout = () => {
     // Navigate to layout creation/editor without requiring display ID
     router.push('/layout-admin');
@@ -50,7 +53,7 @@ const LayoutsComponent = memo(function LayoutsComponent({ loggedIn }: LayoutsPro
   };
 
   const handleDuplicateLayout = (layoutId: string) => {
-    const layout = layouts.find(l => l._id === layoutId);
+    const layout = layouts.find((l: any) => l._id === layoutId);
     if (layout) {
       const newName = `${layout.name} (Copy)`;
       duplicateLayout({ id: layoutId, newName });
@@ -58,7 +61,7 @@ const LayoutsComponent = memo(function LayoutsComponent({ loggedIn }: LayoutsPro
   };
 
   const handleDeleteLayout = (layoutId: string) => {
-    const layout = layouts.find(l => l._id === layoutId);
+    const layout = layouts.find((l: any) => l._id === layoutId);
     if (layout && window.confirm(`Are you sure you want to delete "${layout.name}"?`)) {
       deleteLayout(layoutId);
     }
@@ -101,7 +104,7 @@ const LayoutsComponent = memo(function LayoutsComponent({ loggedIn }: LayoutsPro
                 {isLoading ? '...' : layoutsResponse?.pagination.total || 0}
               </div>
               <p className="text-xs text-muted-foreground">
-                {isLoading ? '...' : layouts.filter(l => l.isActive).length} active
+                {isLoading ? '...' : layouts.filter((l: any) => l.isActive).length} active
               </p>
             </CardContent>
           </Card>
@@ -113,7 +116,7 @@ const LayoutsComponent = memo(function LayoutsComponent({ loggedIn }: LayoutsPro
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">
-                {isLoading ? '...' : layouts.reduce((total, layout) => total + (layout.displays?.length || 0), 0)}
+                {isLoading ? '...' : layouts.reduce((total: number, layout: any) => total + (layout.displays?.length || 0), 0)}
               </div>
               <p className="text-xs text-muted-foreground">
                 Displays using these layouts
@@ -128,7 +131,7 @@ const LayoutsComponent = memo(function LayoutsComponent({ loggedIn }: LayoutsPro
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">
-                {isLoading ? '...' : layouts.filter(l => {
+                {isLoading ? '...' : layouts.filter((l: any) => {
                   const dayAgo = new Date();
                   dayAgo.setDate(dayAgo.getDate() - 1);
                   return new Date(l.last_update) > dayAgo;
@@ -238,7 +241,7 @@ const LayoutsComponent = memo(function LayoutsComponent({ loggedIn }: LayoutsPro
             </Card>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {layouts.map((layout) => (
+              {layouts.map((layout: any) => (
                 <Card key={layout._id} className="group hover:shadow-lg transition-shadow">
                   <CardHeader>
                     <div className="flex items-center justify-between">
