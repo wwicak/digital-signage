@@ -20,7 +20,12 @@ import {
 import { cn } from "@/lib/utils";
 
 import Sidebar from "./Sidebar";
+import SystemStatusIndicator from "./SystemStatusIndicator";
+import NotificationDropdown from "./NotificationDropdown";
+import UserMenu from "./UserMenu";
+import DisplayStatusCard from "./DisplayStatusCard";
 import { useDisplayContext } from "../../contexts/DisplayContext";
+import { useQuery } from "@tanstack/react-query";
 
 // Zod schema for Frame props
 export const FramePropsSchema = z.object({
@@ -37,6 +42,19 @@ const Frame: React.FC<IFrameProps> = (props) => {
   const [collapsed, setCollapsed] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
+
+  // Fetch current user data
+  const { data: currentUser } = useQuery({
+    queryKey: ["auth-status"],
+    queryFn: async () => {
+      const response = await fetch("/api/auth/status");
+      if (!response.ok) throw new Error("Failed to fetch user");
+      const data = await response.json();
+      return data.authenticated ? data.user : null;
+    },
+    enabled: !!props.loggedIn,
+    staleTime: 5 * 60 * 1000, // 5 minutes
+  });
 
   useEffect(() => {
     setMounted(true);
@@ -186,29 +204,17 @@ const Frame: React.FC<IFrameProps> = (props) => {
             {/* Header Actions */}
             {props.loggedIn && (
               <div className="flex items-center gap-4">
-                {/* Status Indicator */}
-                <div className="hidden sm:flex items-center gap-4 px-3 py-1.5 rounded-full bg-muted/50 border border-border/50">
-                  <Activity className="w-3 h-3 text-green-500" />
-                  <span className="text-xs font-medium text-muted-foreground">
-                    System Online
-                  </span>
-                </div>
+                {/* Dynamic System Status Indicator */}
+                <SystemStatusIndicator />
 
-                {/* Notifications */}
-                <Button variant="ghost" size="icon" className="h-8 w-8 relative">
-                  <Bell className="h-4 w-4" />
-                  <Badge className="absolute -top-1 -right-1 h-4 w-4 p-0 text-[10px]">
-                    3
-                  </Badge>
-                </Button>
+                {/* Functional Notifications */}
+                <NotificationDropdown />
 
                 {/* Theme Toggle */}
                 <ThemeToggle />
 
-                {/* User Menu */}
-                <Button variant="ghost" size="icon" className="h-8 w-8">
-                  <User className="h-4 w-4" />
-                </Button>
+                {/* User Menu with Dropdown */}
+                <UserMenu user={currentUser} />
               </div>
             )}
           </CardContent>
@@ -217,6 +223,13 @@ const Frame: React.FC<IFrameProps> = (props) => {
         {/* Content Area with Enhanced Styling */}
         <div className="flex-1 overflow-y-auto">
           <Container className="py-8 px-6 max-w-7xl">
+            {/* Display Status Card - Only show on admin pages */}
+            {props.loggedIn && (
+              <div className="mb-6">
+                <DisplayStatusCard />
+              </div>
+            )}
+
             {/* Content Wrapper Card */}
             <Card className="min-h-[calc(100vh-12rem)] bg-card/40 backdrop-blur-sm border-border/50 shadow-sm">
               <CardContent className="p-8">

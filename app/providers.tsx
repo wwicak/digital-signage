@@ -3,6 +3,7 @@
 import React from 'react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
+import { ThemeProvider } from '@/components/ui/theme-provider'
 import { DisplayProvider } from '../contexts/DisplayContext'
 
 // Create a client
@@ -22,10 +23,17 @@ const queryClient = new QueryClient({
 export function Providers({ children }: { children: React.ReactNode }) {
   return (
     <QueryClientProvider client={queryClient}>
-      <DisplayProvider>
-        {children}
-        <ReactQueryDevtools initialIsOpen={false} />
-      </DisplayProvider>
+      <ThemeProvider
+        attribute="class"
+        defaultTheme="system"
+        enableSystem
+        disableTransitionOnChange
+      >
+        <DisplayProvider>
+          {children}
+          <ReactQueryDevtools initialIsOpen={false} />
+        </DisplayProvider>
+      </ThemeProvider>
     </QueryClientProvider>
   )
 }
