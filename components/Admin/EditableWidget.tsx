@@ -60,8 +60,8 @@ const EditableWidget: React.FC<IEditableWidgetProps> = memo(({
 
   return (
     <>
-      <div className='group bg-white border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow w-full h-full cursor-grab active:cursor-grabbing'>
-        <div className='absolute top-2 right-2 flex space-x-1 controls no-drag z-20 opacity-0 group-hover:opacity-100 transition-opacity'>
+      <div className='group relative bg-white border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow w-full h-full cursor-grab active:cursor-grabbing'>
+        <div className='absolute top-2 right-2 flex space-x-1 controls no-drag z-20 opacity-0 group-hover:opacity-100 transition-opacity duration-200'>
           <button
             className='p-2 rounded hover:bg-gray-100 transition-colors bg-white/90 backdrop-blur-sm shadow-sm'
             onClick={openDialog}

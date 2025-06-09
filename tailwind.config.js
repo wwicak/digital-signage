@@ -77,53 +77,6 @@ module.exports = {
     require("tailwindcss-animate"),
     function ({ addUtilities }) {
       const newUtilities = {
-        // React Grid Layout utilities
-        ".react-grid-layout": {
-          position: "relative !important",
-          transition: "height 200ms ease",
-          // Temporary debug outline
-          outline: "2px dashed rgba(0, 255, 0, 0.3)",
-        },
-        ".react-grid-item": {
-          position: "absolute !important",
-          transition: "all 150ms cubic-bezier(0.2, 0, 0.2, 1)",
-          "transition-property": "left, top, width, height",
-          "box-sizing": "border-box !important",
-          "touch-action": "none",
-          // Temporary debug outline
-          outline: "1px solid rgba(255, 0, 0, 0.5)",
-          cursor: "grab",
-        },
-        ".react-grid-item.cssTransforms": {
-          "transition-property": "transform, width, height !important",
-          "transition-timing-function": "cubic-bezier(0.2, 0, 0.2, 1)",
-        },
-        ".react-grid-item.resizing": {
-          "z-index": "999 !important",
-          "will-change": "width, height, transform",
-          transition: "none !important",
-        },
-        ".react-grid-item.react-draggable-dragging": {
-          transition: "none !important",
-          "z-index": "1000 !important",
-          "will-change": "transform",
-          cursor: "grabbing !important",
-          // Temporary debug outline for dragging
-          outline: "3px solid rgba(255, 0, 0, 0.8) !important",
-        },
-        ".react-grid-item.react-draggable-dragging *": {
-          "pointer-events": "none !important",
-          "user-select": "none !important",
-        },
-        ".react-grid-item.react-grid-placeholder": {
-          background:
-            "linear-gradient(135deg, rgba(123, 192, 67, 0.3), rgba(123, 192, 67, 0.1))",
-          border: "2px dashed rgba(123, 192, 67, 0.5)",
-          "border-radius": "8px",
-          opacity: "0.8",
-          "z-index": "2",
-          "user-select": "none",
-        },
         // Resize handles
         ".react-grid-item > .react-resizable-handle": {
           position: "absolute !important",
