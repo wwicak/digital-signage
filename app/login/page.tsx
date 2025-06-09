@@ -67,13 +67,13 @@ const LoginContent = memo(function LoginContent() {
               </span>
             </div>
           )}
-          {!alert && (
+          {/* {!alert && (
              <div className="bg-blue-500 rounded-md mb-4 p-4">
                 <span className="text-white">
                 Use the username &quot;demo&quot; and password &quot;demo&quot;
                 </span>
             </div>
-          )}
+          )} */}
           <label htmlFor='email' className="pb-4 font-sans">Email</label>
           <input
             type='email'

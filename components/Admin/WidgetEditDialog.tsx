@@ -216,37 +216,43 @@ class WidgetEditDialog
         title={dialogTitle}
         className="widget-settings-modal"
       >
-        <div className="widget-settings-content">
-          {/* Error Display */}
+        <div className="flex flex-col h-full max-h-[calc(90vh-8rem)]">
+          {/* Error Display - Fixed at top */}
           {error && (
-            <div className="flex items-center gap-4 p-4 mb-4 text-red-800 bg-red-50 border border-red-200 rounded-lg">
-              <AlertCircle className="w-5 h-5 flex-shrink-0" />
-              <div>
-                <h4 className="font-medium">Configuration Error</h4>
-                <p className="text-sm">{error}</p>
+            <div className="flex-shrink-0 mb-4">
+              <div className="flex items-center gap-4 p-4 text-red-800 bg-red-50 border border-red-200 rounded-lg">
+                <AlertCircle className="w-5 h-5 flex-shrink-0" />
+                <div>
+                  <h4 className="font-medium">Configuration Error</h4>
+                  <p className="text-sm">{error}</p>
+                </div>
               </div>
             </div>
           )}
 
-          {/* Content Area */}
-          <div className="widget-settings-body">
-            {isLoading ? (
-              <div className="flex items-center justify-center py-12">
-                <div className="flex items-center gap-3 text-gray-600">
-                  <Loader2 className="w-6 h-6 animate-spin" />
-                  <span className="text-lg">Loading widget configuration...</span>
+          {/* Scrollable Content Area */}
+          <div className="flex-1 overflow-y-auto min-h-0 pr-2 -mr-2">
+            <div className="widget-settings-body pb-6">
+              {isLoading ? (
+                <div className="flex items-center justify-center py-12">
+                  <div className="flex items-center gap-3 text-gray-600">
+                    <Loader2 className="w-6 h-6 animate-spin" />
+                    <span className="text-lg">Loading widget configuration...</span>
+                  </div>
                 </div>
-              </div>
-            ) : (
-              <OptionsComponent
-                data={widgetConfigData || {}}
-                onChange={this.handleOptionsChange}
-              />
-            )}
+              ) : (
+                <div className="space-y-6">
+                  <OptionsComponent
+                    data={widgetConfigData || {}}
+                    onChange={this.handleOptionsChange}
+                  />
+                </div>
+              )}
+            </div>
           </div>
 
-          {/* Footer */}
-          <DialogFooter className="mt-6 pt-4 border-t border-gray-200 bg-gray-50">
+          {/* Fixed Footer */}
+          <div className="flex-shrink-0 mt-4 pt-4 border-t border-gray-200 bg-white">
             <div className="flex gap-3 justify-end w-full">
               <Button
                 text="Cancel"
@@ -262,7 +268,7 @@ class WidgetEditDialog
                 className="px-6 py-2 text-white bg-green-600 hover:bg-green-700 disabled:bg-gray-400 disabled:cursor-not-allowed rounded-lg transition-colors shadow-sm"
               />
             </div>
-          </DialogFooter>
+          </div>
         </div>
       </Dialog>
     );
