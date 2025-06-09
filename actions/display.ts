@@ -29,6 +29,8 @@ export interface IDisplayData {
   description?: string;
   layout?: "spaced" | "compact"; // Assuming these are the possible layouts
   orientation?: "landscape" | "portrait"; // Display orientation
+  location?: string; // Physical location of the display
+  building?: string; // Building where the display is located
   statusBar?: IStatusBar; // Or string[] if it's just a list of element IDs/names
   widgets?: IWidget[];
   creator_id?: string; // Assuming it's part of the display data

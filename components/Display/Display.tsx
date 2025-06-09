@@ -28,6 +28,7 @@ const Display: React.FC<IDisplayComponentProps> = React.memo(({ display }) => {
   const { state, setId, refreshDisplayData } = useDisplayContext();
   const eventSourceRef = useRef<EventSource | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
+  const layoutChangeCheckRef = useRef<NodeJS.Timeout | null>(null);
 
   // Create a debounced refresh function for SSE events using React Query invalidation
   const refreshDisplay = useMemo(
@@ -37,6 +38,56 @@ const Display: React.FC<IDisplayComponentProps> = React.memo(({ display }) => {
       }, 500),
     [refreshDisplayData],
   ); // Reduced debounce time since invalidation is more efficient
+
+  // Function to check for layout changes
+  const checkForLayoutChanges = useCallback(async () => {
+    if (!display) return;
+
+    try {
+      const response = await fetch(`/api/v1/displays/${display}/change-layout`);
+      if (response.ok) {
+        const data = await response.json();
+
+        // If a layout change was requested and we haven't reloaded yet
+        if (data.layoutChangeRequested) {
+          console.log('Layout change detected, reloading display...');
+
+          // Clear the layout change flag
+          await fetch(`/api/v1/displays/${display}/change-layout`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              layoutId: data.currentLayout,
+              immediate: false // Just clearing the flag
+            })
+          });
+
+          // Reload the page to apply the new layout
+          window.location.reload();
+        }
+      }
+    } catch (error) {
+      console.error('Error checking for layout changes:', error);
+    }
+  }, [display]);
+
+  // Set up periodic layout change checking
+  useEffect(() => {
+    if (display) {
+      // Check for layout changes every 10 seconds
+      layoutChangeCheckRef.current = setInterval(checkForLayoutChanges, 10000);
+
+      // Also check immediately
+      checkForLayoutChanges();
+    }
+
+    return () => {
+      if (layoutChangeCheckRef.current) {
+        clearInterval(layoutChangeCheckRef.current);
+        layoutChangeCheckRef.current = null;
+      }
+    };
+  }, [display, checkForLayoutChanges]);
 
   const setupSSE = (): void => {
     // Close existing connection if any
@@ -54,6 +105,16 @@ const Display: React.FC<IDisplayComponentProps> = React.memo(({ display }) => {
           console.log('SSE event "display_updated" received:', event.data);
           // Trigger a refresh via the context
           refreshDisplay();
+        },
+      );
+
+      // Listen for layout change events
+      eventSourceRef.current.addEventListener(
+        "layout_change_requested",
+        (event: MessageEvent) => {
+          console.log('SSE event "layout_change_requested" received:', event.data);
+          // Immediately check for layout changes
+          checkForLayoutChanges();
         },
       );
 
@@ -89,6 +150,10 @@ const Display: React.FC<IDisplayComponentProps> = React.memo(({ display }) => {
       if (eventSourceRef.current) {
         eventSourceRef.current.close();
         eventSourceRef.current = null;
+      }
+      if (layoutChangeCheckRef.current) {
+        clearInterval(layoutChangeCheckRef.current);
+        layoutChangeCheckRef.current = null;
       }
       // Cancel any pending debounced refresh calls
       refreshDisplay.cancel();

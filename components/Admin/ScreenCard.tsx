@@ -7,12 +7,22 @@ import {
   Edit,
   Trash2,
   Cast,
+  Settings,
+  ChevronDown,
+  ChevronUp,
+  RefreshCw,
+  Check,
+  AlertTriangle,
+  Loader2,
 } from "lucide-react";
 import { useRouter } from "next/router";
 import * as z from "zod";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Separator } from "@/components/ui/separator";
 import { cn } from "@/lib/utils";
 import OrientationPreview from "./OrientationPreview";
 import DisplayEditDialog from "./DisplayEditDialog";
@@ -39,6 +49,15 @@ const ScreenCardValueSchema = z.object({
 // Import the original IDisplayData to ensure compatibility or use if it becomes a Zod type later.
 import { useDisplayMutations } from "../../hooks/useDisplayMutations";
 
+// Available layouts - in real implementation, this would come from layouts API
+const availableLayouts = [
+  { id: 'layout-1', name: 'Corporate Announcements', description: 'General corporate communications' },
+  { id: 'layout-2', name: 'Meeting Room Display', description: 'Room booking and meeting information' },
+  { id: 'layout-3', name: 'Lobby Information', description: 'Welcome messages and general information' },
+  { id: 'layout-4', name: 'Emergency Alerts', description: 'Emergency notifications and alerts' },
+  { id: 'layout-5', name: 'Digital Menu Board', description: 'Restaurant menu and pricing' },
+];
+
 // Zod schema for ScreenCard props
 export const ScreenCardPropsSchema = z.object({
   value: ScreenCardValueSchema, // Use the locally defined Zod schema for the 'value' prop
@@ -55,6 +74,13 @@ const ScreenCard: React.FC<IScreenCardProps> = ({
   const { deleteDisplay, updateDisplay } = useDisplayMutations();
   const [isUpdatingOrientation, setIsUpdatingOrientation] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [isLayoutSectionExpanded, setIsLayoutSectionExpanded] = useState(false);
+
+  // Layout change state
+  const [selectedLayout, setSelectedLayout] = useState<string>('layout-1'); // Default current layout
+  const [isChangingLayout, setIsChangingLayout] = useState(false);
+  const [layoutChangeStatus, setLayoutChangeStatus] = useState<'idle' | 'success' | 'error'>('idle');
+  const [layoutChangeError, setLayoutChangeError] = useState<string>('');
 
   const handleOrientationChange = (
     event: React.ChangeEvent<HTMLSelectElement>,
@@ -89,6 +115,67 @@ const ScreenCard: React.FC<IScreenCardProps> = ({
     event.stopPropagation();
     setIsEditDialogOpen(true);
   };
+
+  const handleLayoutSectionToggle = (event: React.MouseEvent): void => {
+    event.preventDefault();
+    event.stopPropagation();
+    setIsLayoutSectionExpanded(!isLayoutSectionExpanded);
+  };
+
+  const handleRemoteLayoutChange = async () => {
+    if (!value?._id || !selectedLayout || selectedLayout === 'layout-1') {
+      return;
+    }
+
+    setIsChangingLayout(true);
+    setLayoutChangeStatus('idle');
+    setLayoutChangeError('');
+
+    try {
+      const response = await fetch(`/api/v1/displays/${value._id}/change-layout`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          layoutId: selectedLayout,
+          immediate: true,
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to change layout');
+      }
+
+      setLayoutChangeStatus('success');
+      refresh(); // Refresh the display list
+
+      // Auto-clear success status after 3 seconds
+      setTimeout(() => {
+        setLayoutChangeStatus('idle');
+      }, 3000);
+
+    } catch (error: any) {
+      console.error('Error changing layout:', error);
+      setLayoutChangeStatus('error');
+      setLayoutChangeError(error.message || 'Failed to change layout');
+    } finally {
+      setIsChangingLayout(false);
+    }
+  };
+
+  const getCurrentLayoutName = () => {
+    const layout = availableLayouts.find(l => l.id === 'layout-1'); // Current layout
+    return layout?.name || 'Current Layout';
+  };
+
+  const getSelectedLayoutName = () => {
+    const layout = availableLayouts.find(l => l.id === selectedLayout);
+    return layout?.name || selectedLayout;
+  };
+
+  const hasLayoutChanges = selectedLayout !== 'layout-1';
 
   const handleDelete = (event: React.MouseEvent): void => {
     event.preventDefault(); // Prevent Link navigation when clicking delete icon
@@ -191,6 +278,27 @@ const ScreenCard: React.FC<IScreenCardProps> = ({
                 <Edit className="h-4 w-4" />
               </Button>
 
+              {/* Layout Control Toggle Button - only show for online displays */}
+              {value?.isOnline && (
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    handleLayoutSectionToggle(e as any);
+                  }}
+                  aria-label="Toggle Layout Controls"
+                  className="h-8 w-8"
+                >
+                  {isLayoutSectionExpanded ? (
+                    <ChevronUp className="h-4 w-4" />
+                  ) : (
+                    <Settings className="h-4 w-4" />
+                  )}
+                </Button>
+              )}
+
               <Button
                 variant="ghost"
                 size="icon"
@@ -236,6 +344,130 @@ const ScreenCard: React.FC<IScreenCardProps> = ({
           </div>
         </CardContent>
 
+        {/* Expanded Layout Control Section */}
+        {isLayoutSectionExpanded && value?.isOnline && (
+          <>
+            <Separator />
+            <CardContent className="pt-4">
+              <div className="space-y-4">
+                <div className="flex items-center gap-2 mb-3">
+                  <Layout className="h-4 w-4 text-primary" />
+                  <h4 className="font-medium text-sm">Remote Layout Control</h4>
+                  <Badge variant="outline" className="text-xs">
+                    Live
+                  </Badge>
+                </div>
+
+                {/* Current Layout Info */}
+                <div className="p-3 bg-muted/30 rounded-lg">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-medium">Current Layout</p>
+                      <p className="text-xs text-muted-foreground">{getCurrentLayoutName()}</p>
+                    </div>
+                    <Badge variant="outline" className="text-xs">
+                      Active
+                    </Badge>
+                  </div>
+                </div>
+
+                {/* Layout Selection */}
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Change to Layout</label>
+                  <Select
+                    value={selectedLayout}
+                    onValueChange={setSelectedLayout}
+                    disabled={isChangingLayout}
+                  >
+                    <SelectTrigger className="h-9">
+                      <SelectValue placeholder="Select a layout" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {availableLayouts.map((layout) => (
+                        <SelectItem key={layout.id} value={layout.id}>
+                          <div className="flex flex-col">
+                            <span className="font-medium text-sm">{layout.name}</span>
+                            <span className="text-xs text-muted-foreground">{layout.description}</span>
+                          </div>
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {/* Status Messages */}
+                {layoutChangeStatus === 'success' && (
+                  <Alert className="border-green-200 bg-green-50">
+                    <Check className="h-4 w-4 text-green-600" />
+                    <AlertDescription className="text-green-800 text-sm">
+                      Layout change sent! The display will update shortly.
+                    </AlertDescription>
+                  </Alert>
+                )}
+
+                {layoutChangeStatus === 'error' && (
+                  <Alert className="border-red-200 bg-red-50">
+                    <AlertTriangle className="h-4 w-4 text-red-600" />
+                    <AlertDescription className="text-red-800 text-sm">
+                      {layoutChangeError}
+                    </AlertDescription>
+                  </Alert>
+                )}
+
+                {/* Preview Info */}
+                {hasLayoutChanges && (
+                  <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                    <p className="text-sm font-medium text-blue-900">Preview Change</p>
+                    <p className="text-xs text-blue-700 mt-1">
+                      <span className="font-medium">{getCurrentLayoutName()}</span>
+                      {' → '}
+                      <span className="font-medium">{getSelectedLayoutName()}</span>
+                    </p>
+                  </div>
+                )}
+
+                {/* Action Buttons */}
+                <div className="flex gap-2">
+                  <Button
+                    onClick={handleRemoteLayoutChange}
+                    disabled={!hasLayoutChanges || isChangingLayout}
+                    size="sm"
+                    className="flex-1"
+                  >
+                    {isChangingLayout ? (
+                      <>
+                        <Loader2 className="h-3 w-3 mr-2 animate-spin" />
+                        Applying...
+                      </>
+                    ) : (
+                      <>
+                        <RefreshCw className="h-3 w-3 mr-2" />
+                        Apply Change
+                      </>
+                    )}
+                  </Button>
+
+                  {hasLayoutChanges && (
+                    <Button
+                      variant="outline"
+                      onClick={() => setSelectedLayout('layout-1')}
+                      disabled={isChangingLayout}
+                      size="sm"
+                    >
+                      Reset
+                    </Button>
+                  )}
+                </div>
+
+                {/* Instructions */}
+                <div className="text-xs text-muted-foreground">
+                  <p><strong>Note:</strong> The display will automatically reload with the new layout.</p>
+                </div>
+              </div>
+            </CardContent>
+          </>
+        )}
+
       {/* Edit Dialog */}
       {isEditDialogOpen && (
         <DisplayEditDialog
@@ -257,6 +489,8 @@ const ScreenCard: React.FC<IScreenCardProps> = ({
           }}
         />
       )}
+
+
     </Card>
   );
 };

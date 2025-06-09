@@ -18,6 +18,9 @@ export interface IDisplay extends Document {
     color?: string;
     elements: string[]; // e.g., ['clock', 'weather', 'logo']
   };
+  // Layout change tracking
+  layoutChangeRequested?: boolean;
+  layoutChangeTimestamp?: Date;
   // Dynamic properties (not stored in database)
   clientCount?: number;
   isOnline?: boolean;
@@ -70,6 +73,13 @@ const DisplaySchema = new Schema<IDisplay>(
       color: String, // Optional color
       elements: [{ type: String }], // Array of strings representing status bar elements
     },
+    layoutChangeRequested: {
+      type: Boolean,
+      default: false,
+    },
+    layoutChangeTimestamp: {
+      type: Date,
+    },
   },
   {
     timestamps: { createdAt: "creation_date", updatedAt: "last_update" }, // Automatically manage creation_date and last_update
@@ -113,6 +123,9 @@ export const DisplaySchemaZod = z.object({
   location: z.string().optional(),
   building: z.string().optional(),
   statusBar: StatusBarSchemaZod.default({ enabled: true, elements: [] }), // Provide default for the object itself
+  // Layout change tracking
+  layoutChangeRequested: z.boolean().optional(),
+  layoutChangeTimestamp: z.date().optional(),
   // Dynamic properties (calculated at runtime)
   clientCount: z.number().optional(),
   isOnline: z.boolean().optional(),
