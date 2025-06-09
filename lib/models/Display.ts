@@ -9,7 +9,7 @@ export interface IDisplay extends Document {
   creator_id: mongoose.Types.ObjectId; // Assuming this refers to a User ObjectId
   creation_date: Date;
   last_update: Date;
-  layout: string; // e.g., 'spaced', 'compact'
+  layout: mongoose.Types.ObjectId | string; // Reference to Layout model or legacy string
   orientation: string; // e.g., 'landscape', 'portrait'
   location?: string; // Physical location of the display
   building?: string; // Building where the display is located
@@ -53,8 +53,8 @@ const DisplaySchema = new Schema<IDisplay>(
       default: Date.now,
     },
     layout: {
-      type: String,
-      default: "spaced", // Default to 'spaced' layout
+      type: Schema.Types.Mixed, // Can be ObjectId (reference to Layout) or String (legacy)
+      default: "spaced", // Default to 'spaced' layout for backward compatibility
     },
     orientation: {
       type: String,
@@ -118,7 +118,9 @@ export const DisplaySchemaZod = z.object({
   creator_id: z.instanceof(mongoose.Types.ObjectId),
   creation_date: z.date().optional(), // Defaulted by Mongoose timestamps
   last_update: z.date().optional(), // Defaulted by Mongoose timestamps
-  layout: z.string().default("spaced"),
+  layout: z
+    .union([z.string(), z.instanceof(mongoose.Types.ObjectId)])
+    .default("spaced"),
   orientation: z.string().default("landscape"),
   location: z.string().optional(),
   building: z.string().optional(),

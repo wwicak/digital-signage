@@ -91,13 +91,6 @@ const Sidebar: React.FC<ISidebarProps> = ({ loggedIn, displayId, collapsed = fal
   const allMenuItems: IMenuItem[] = loggedIn
     ? [
         {
-          id: "dashboard",
-          name: "Dashboard",
-          path: `/dashboard`,
-          icon: BarChart3,
-          featureFlag: FeatureFlagName.MENU_DASHBOARD,
-        },
-        {
           id: "layouts",
           name: "Layouts",
           path: `/layouts`,
@@ -112,9 +105,16 @@ const Sidebar: React.FC<ISidebarProps> = ({ loggedIn, displayId, collapsed = fal
           featureFlag: FeatureFlagName.MENU_SCREENS,
         },
         {
+          id: "dashboard",
+          name: "Dashboard",
+          path: `/dashboard`,
+          icon: BarChart3,
+          featureFlag: FeatureFlagName.MENU_DASHBOARD,
+        },
+        {
           id: "layout-editor",
           name: "Layout Editor",
-          path: `/layout?display=${currentDisplayId}`,
+          path: `/layout-admin`,
           icon: Grid3X3,
           featureFlag: FeatureFlagName.MENU_LAYOUT,
         },

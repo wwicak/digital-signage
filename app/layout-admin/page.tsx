@@ -1,10 +1,11 @@
 'use client'
 
 import React, { useState, useEffect, useCallback, Suspense, memo } from 'react'
-import { Grid3X3, Grid2X2, Edit, Monitor, Smartphone } from 'lucide-react'
+import { Grid3X3, Grid2X2, Edit, Monitor, Smartphone, Save, ArrowLeft, Eye } from 'lucide-react'
 import GridLayout, { Layout as RglLayout } from 'react-grid-layout'
-import { useSearchParams } from 'next/navigation'
+import { useSearchParams, useRouter } from 'next/navigation'
 import { DragDropContext, Droppable, DropResult } from '@hello-pangea/dnd'
+import Link from 'next/link'
 
 import Frame from '../../components/Admin/Frame'
 import EditableWidget from '../../components/Admin/EditableWidget'
@@ -13,125 +14,222 @@ import WidthProvider from '../../components/Widgets/WidthProvider'
 import DropdownButton from '../../components/DropdownButton'
 import DisplayStatusCard from '../../components/Admin/DisplayStatusCard'
 import { Form, Switch } from '../../components/Form'
-import { useDisplayContext } from '../../contexts/DisplayContext'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Textarea } from '@/components/ui/textarea'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 
 import { StatusBarElementTypes } from '../../helpers/statusbar'
 import Widgets from '../../widgets'
 import { useWidgetChoices } from '../../hooks/useAvailableWidgets'
+import { useLayout } from '../../hooks/useLayout'
+import { useLayoutMutations } from '../../hooks/useLayoutMutations'
+import { ILayoutCreateData, ILayoutUpdateData } from '../../actions/layouts'
 
-import { addWidget, getWidgets, deleteWidget, updateWidget, IWidgetData, INewWidgetData, IUpdateWidgetData } from '../../actions/widgets'
 import { WidgetType } from '../../lib/models/Widget'
 
 const GridLayoutWithWidth = WidthProvider(GridLayout as any)
 
 const LayoutAdminContent = memo(function LayoutAdminContent() {
-  const [widgets, setWidgets] = useState<IWidgetData[]>([])
+  const router = useRouter()
   const searchParams = useSearchParams()
-  const context = useDisplayContext()
+  const layoutId = searchParams?.get('id')
+  const isEditing = !!layoutId
+
+  const { data: existingLayout, isLoading: layoutLoading } = useLayout(layoutId)
+  const { createLayout, updateLayout, isCreating, isUpdating } = useLayoutMutations()
   const { widgetChoices, isLoading: widgetChoicesLoading } = useWidgetChoices()
 
-  // Memoize refreshWidgets to stabilize useEffect dependency
-  const refreshWidgets = useCallback((displayId: string): Promise<void> => {
-    return getWidgets(displayId).then(apiWidgets => { // Renamed to avoid confusion with state
-      setWidgets(apiWidgets)
-    }).catch(error => {
-      console.error('Failed to refresh widgets:', error)
-      setWidgets([]) // Ensure widgets is cleared or handled on error
-    })
-  }, []) // Assuming getWidgets and setWidgets are stable or have no dependencies from component scope
+  // Layout state
+  const [layoutData, setLayoutData] = useState<ILayoutCreateData>({
+    name: '',
+    description: '',
+    orientation: 'landscape',
+    layoutType: 'spaced',
+    widgets: [],
+    statusBar: {
+      enabled: true,
+      elements: [],
+    },
+    isActive: true,
+    isTemplate: true,
+    gridConfig: {
+      cols: 16,
+      rows: 9,
+      margin: [12, 12],
+      rowHeight: 60,
+    },
+  })
 
+  // Load existing layout data when editing
   useEffect(() => {
-    // Get display ID from URL search params (e.g., ?display=ID)
-    const displayIdFromUrl = searchParams?.get('display')
-    const id = displayIdFromUrl || 'default-display-id' // Fallback to default
-    
-    // Set the display ID in context, which will trigger data fetching
-    context.setId(id)
-    refreshWidgets(id)
-  }, [searchParams, context.setId, refreshWidgets]) // Updated dependencies
+    if (existingLayout && isEditing) {
+      setLayoutData({
+        name: existingLayout.name,
+        description: existingLayout.description || '',
+        orientation: existingLayout.orientation,
+        layoutType: existingLayout.layoutType,
+        widgets: existingLayout.widgets || [],
+        statusBar: existingLayout.statusBar,
+        isActive: existingLayout.isActive,
+        isTemplate: existingLayout.isTemplate,
+        gridConfig: existingLayout.gridConfig || {
+          cols: 16,
+          rows: 9,
+          margin: [12, 12],
+          rowHeight: 60,
+        },
+      })
+    }
+  }, [existingLayout, isEditing])
 
   const handleAddWidget = (type: string): void => {
-    if (!context.state.id) {
-      console.error('Display ID not set, cannot add widget.')
-      return
-    }
     const widgetDefinition = Widgets[type]
-    const newWidgetData: INewWidgetData = {
-        type: type as WidgetType,
-        name: `${type} Widget`, // Provide a default name since it's required by the new API
-        data: widgetDefinition?.defaultData || {},
-        display_id: context.state.id, // Pass display ID to associate widget with display
+    const newWidget = {
+      type: type as WidgetType,
+      x: 0,
+      y: 0,
+      w: widgetDefinition?.defaultSize?.w || 4,
+      h: widgetDefinition?.defaultSize?.h || 2,
+      data: widgetDefinition?.defaultData || {},
     }
 
-    addWidget(newWidgetData)
-        .then(() => refreshWidgets(context.state.id!)) // context.state.id should be stable if refreshWidgets is called
-        .catch(error => console.error('Failed to add widget:', error))
-  }
+    // Find a good position for the new widget
+    const existingPositions = layoutData.widgets.map(w => ({ x: w.x, y: w.y, w: w.w, h: w.h }))
+    let bestPosition = { x: 0, y: 0 }
 
-  const handleDeleteWidget = (id: string): void => {
-    if (!context.state.id) {
-      console.error('Display ID not set, cannot delete widget.')
-      return
-    }
-    deleteWidget(id)
-        .then(() => refreshWidgets(context.state.id!)) // context.state.id should be stable
-        .catch(error => console.error('Failed to delete widget:', error))
-  }
-
-  // Debounced layout change handler for better performance
-  const debouncedLayoutUpdate = useCallback(
-    (() => {
-      let timeoutId: NodeJS.Timeout
-      return (layout: RglLayout[]) => {
-        clearTimeout(timeoutId)
-        timeoutId = setTimeout(() => {
-          console.log('[DEBUG] Batch updating layout changes')
-          for (const widgetLayout of layout) {
-            const widgetData: IUpdateWidgetData = {
-              x: widgetLayout.x,
-              y: widgetLayout.y,
-              w: widgetLayout.w,
-              h: widgetLayout.h,
-            }
-            updateWidget(widgetLayout.i, widgetData)
-              .catch(error => console.error(`Failed to update widget ${widgetLayout.i} layout:`, error))
-          }
-        }, 300) // 300ms debounce delay
+    // Simple placement algorithm - find first available spot
+    for (let y = 0; y < layoutData.gridConfig.rows; y++) {
+      for (let x = 0; x <= layoutData.gridConfig.cols - newWidget.w; x++) {
+        const wouldOverlap = existingPositions.some(pos =>
+          x < pos.x + pos.w && x + newWidget.w > pos.x &&
+          y < pos.y + pos.h && y + newWidget.h > pos.y
+        )
+        if (!wouldOverlap) {
+          bestPosition = { x, y }
+          break
+        }
       }
-    })(),
-    []
-  )
+      if (bestPosition.x !== 0 || bestPosition.y !== 0) break
+    }
+
+    setLayoutData(prev => ({
+      ...prev,
+      widgets: [...prev.widgets, { ...newWidget, x: bestPosition.x, y: bestPosition.y }]
+    }))
+  }
+
+  const handleDeleteWidget = (index: number): void => {
+    setLayoutData(prev => ({
+      ...prev,
+      widgets: prev.widgets.filter((_, i) => i !== index)
+    }))
+  }
 
   const handleLayoutChange = useCallback((layout: RglLayout[]): void => {
-    debouncedLayoutUpdate(layout)
-  }, [debouncedLayoutUpdate])
+    // Update widget positions in layout data
+    setLayoutData(prev => ({
+      ...prev,
+      widgets: prev.widgets.map((widget, index) => {
+        const layoutItem = layout.find(item => item.i === index.toString())
+        if (layoutItem) {
+          return {
+            ...widget,
+            x: layoutItem.x,
+            y: layoutItem.y,
+            w: layoutItem.w,
+            h: layoutItem.h,
+          }
+        }
+        return widget
+      })
+    }))
+  }, [])
 
   const handleDragEnd = (result: DropResult): void => {
-    if (!result.destination || !context.state.id) {
+    if (!result.destination) {
       return
     }
-    context.reorderStatusBarItems(result.source.index, result.destination.index)
+
+    const newElements = [...layoutData.statusBar.elements]
+    const [removed] = newElements.splice(result.source.index, 1)
+    newElements.splice(result.destination.index, 0, removed)
+
+    setLayoutData(prev => ({
+      ...prev,
+      statusBar: {
+        ...prev.statusBar,
+        elements: newElements
+      }
+    }))
   }
 
-  const handleTitleChange = (event: React.ChangeEvent<HTMLInputElement>): void => {
-    const title = event.target.value
-    context.updateName(title)
+  const handleAddStatusBarItem = (type: string): void => {
+    setLayoutData(prev => ({
+      ...prev,
+      statusBar: {
+        ...prev.statusBar,
+        elements: [...prev.statusBar.elements, type]
+      }
+    }))
   }
-  
+
+  const handleRemoveStatusBarItem = (index: number): void => {
+    setLayoutData(prev => ({
+      ...prev,
+      statusBar: {
+        ...prev.statusBar,
+        elements: prev.statusBar.elements.filter((_, i) => i !== index)
+      }
+    }))
+  }
+
   const handleLayoutTypeChange = (name: string, checked: boolean): void => {
-    context.updateLayout(checked ? 'spaced' : 'compact')
+    const newLayoutType = checked ? 'spaced' : 'compact'
+    setLayoutData(prev => ({
+      ...prev,
+      layoutType: newLayoutType,
+      gridConfig: {
+        ...prev.gridConfig,
+        margin: newLayoutType === 'spaced' ? [12, 12] : [6, 6]
+      }
+    }))
   }
 
   const handleOrientationChange = (name: string, checked: boolean): void => {
-    context.updateOrientation(checked ? 'portrait' : 'landscape')
+    const newOrientation = checked ? 'portrait' : 'landscape'
+    setLayoutData(prev => ({
+      ...prev,
+      orientation: newOrientation,
+      gridConfig: {
+        ...prev.gridConfig,
+        cols: newOrientation === 'portrait' ? 9 : 16,
+        rows: newOrientation === 'portrait' ? 16 : 9,
+        rowHeight: newOrientation === 'portrait' ? 40 : 60
+      }
+    }))
   }
 
-  const rglLayout: RglLayout[] = widgets.map(widget => ({
-    i: widget._id,
-    x: widget.x || 0,
-    y: widget.y || 0,
-    w: widget.w || 1,
-    h: widget.h || 1,
+  const handleSave = async (): Promise<void> => {
+    try {
+      if (isEditing && layoutId) {
+        await updateLayout({ id: layoutId, data: layoutData })
+        router.push('/layouts')
+      } else {
+        const newLayout = await createLayout(layoutData)
+        router.push('/layouts')
+      }
+    } catch (error) {
+      console.error('Failed to save layout:', error)
+    }
+  }
+
+  const rglLayout: RglLayout[] = layoutData.widgets.map((widget, index) => ({
+    i: index.toString(),
+    x: widget.x,
+    y: widget.y,
+    w: widget.w,
+    h: widget.h,
   }))
 
   const statusBarChoices = Object.keys(StatusBarElementTypes).map(key => {
@@ -143,79 +241,143 @@ const LayoutAdminContent = memo(function LayoutAdminContent() {
     }
   })
 
-  // Widget choices are now provided by the useWidgetChoices hook
-  // which filters based on feature flags
+  if (layoutLoading) {
+    return (
+      <Frame loggedIn={true}>
+        <div className="flex items-center justify-center min-h-[400px]">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+            <p className="text-muted-foreground">Loading layout...</p>
+          </div>
+        </div>
+      </Frame>
+    )
+  }
 
   return (
     <Frame loggedIn={true}>
-      <div className={'head'}>
-        <h1>Layout</h1>
-        <div className="inline-block relative ml-4 mr-4 border-b-2 border-gray-400">
-          <input
-            className='input'
-            placeholder='Unnamed display'
-            value={context.state.name || ''}
-            onChange={handleTitleChange}
-            onClick={(e: React.MouseEvent) => e.stopPropagation()}
-            size={(context.state.name && context.state.name.length > 0) ? context.state.name.length : undefined}
-          />
-          <div className='icon'>
-            <Edit className="w-4 h-4 text-gray-500" />
+      {/* Header */}
+      <div className="flex items-center justify-between mb-6">
+        <div className="flex items-center space-x-4">
+          <Link href="/layouts">
+            <Button variant="outline" size="sm">
+              <ArrowLeft className="mr-2 h-4 w-4" />
+              Back to Layouts
+            </Button>
+          </Link>
+          <div>
+            <h1 className="text-3xl font-bold">
+              {isEditing ? 'Edit Layout' : 'Create Layout'}
+            </h1>
+            <p className="text-muted-foreground">
+              {isEditing ? 'Modify your layout template' : 'Design a new layout template for your displays'}
+            </p>
           </div>
+        </div>
+
+        <div className="flex items-center space-x-2">
+          {isEditing && (
+            <Button
+              variant="outline"
+              onClick={() => window.open(`/layout-preview?id=${layoutId}`, '_blank')}
+            >
+              <Eye className="mr-2 h-4 w-4" />
+              Preview
+            </Button>
+          )}
+          <Button
+            onClick={handleSave}
+            disabled={isCreating || isUpdating || !layoutData.name.trim()}
+          >
+            <Save className="mr-2 h-4 w-4" />
+            {isCreating || isUpdating ? 'Saving...' : 'Save Layout'}
+          </Button>
         </div>
       </div>
 
-      {/* Display Status Card - Shows displays using this layout */}
-      <DisplayStatusCard
-        layoutId={context.state.id || undefined}
-        title="Displays Using This Layout"
-        className="mb-6"
-      />
+      {/* Layout Settings */}
+      <Card className="mb-6">
+        <CardHeader>
+          <CardTitle>Layout Settings</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="text-sm font-medium mb-2 block">Layout Name</label>
+              <Input
+                placeholder="Enter layout name"
+                value={layoutData.name}
+                onChange={(e) => setLayoutData(prev => ({ ...prev, name: e.target.value }))}
+              />
+            </div>
+            <div>
+              <label className="text-sm font-medium mb-2 block">Description</label>
+              <Input
+                placeholder="Enter description (optional)"
+                value={layoutData.description}
+                onChange={(e) => setLayoutData(prev => ({ ...prev, description: e.target.value }))}
+              />
+            </div>
+          </div>
+        </CardContent>
+      </Card>
 
-      <div className="flex flex-row items-center justify-between mb-4">
-        <DropdownButton
-          icon={Edit}
-          text='Add Status Bar Item'
-          onSelect={context.addStatusBarItem}
-          choices={statusBarChoices}
-        />
-      </div>
-
-      {context.state.statusBar && context.state.statusBar.elements && context.state.statusBar.elements.length > 0 && (
-          <div className="bg-gray-300 rounded-lg flex-1 mb-4 h-16 min-h-16">
+      {/* Status Bar Configuration */}
+      <Card className="mb-6">
+        <CardHeader>
+          <div className="flex items-center justify-between">
+            <CardTitle>Status Bar</CardTitle>
+            <DropdownButton
+              icon={Edit}
+              text='Add Status Bar Item'
+              onSelect={handleAddStatusBarItem}
+              choices={statusBarChoices}
+            />
+          </div>
+        </CardHeader>
+        <CardContent>
+          {layoutData.statusBar.elements.length > 0 ? (
+            <div className="bg-gray-300 rounded-lg h-16 min-h-16">
               <DragDropContext onDragEnd={handleDragEnd}>
-              <Droppable droppableId='droppable-statusbar' direction='horizontal'>
+                <Droppable droppableId='droppable-statusbar' direction='horizontal'>
                   {(provided) => (
-                  <div
+                    <div
                       ref={provided.innerRef}
                       style={{
-                      display: 'flex',
-                      paddingTop: 8,
-                      paddingBottom: 8,
-                      paddingRight: 4,
-                      paddingLeft: 4,
-                      overflow: 'auto',
-                      height: '100%',
-                      boxSizing: 'border-box',
+                        display: 'flex',
+                        paddingTop: 8,
+                        paddingBottom: 8,
+                        paddingRight: 4,
+                        paddingLeft: 4,
+                        overflow: 'auto',
+                        height: '100%',
+                        boxSizing: 'border-box',
                       }}
                       {...provided.droppableProps}
-                  >
-                      {context.state.statusBar.elements!.map((item: string, index: number) => (
-                      <StatusBarElement
-                          key={item}
+                    >
+                      {layoutData.statusBar.elements.map((item: string, index: number) => (
+                        <StatusBarElement
+                          key={`${item}-${index}`}
                           item={item}
                           index={index}
-                          onDelete={() => context.removeStatusBarItem(index)}
-                      />
+                          onDelete={() => handleRemoveStatusBarItem(index)}
+                        />
                       ))}
                       {provided.placeholder}
-                  </div>
+                    </div>
                   )}
-              </Droppable>
+                </Droppable>
               </DragDropContext>
-          </div>
-      )}
+            </div>
+          ) : (
+            <p className="text-muted-foreground text-center py-4">
+              No status bar items added. Click "Add Status Bar Item" to get started.
+            </p>
+          )}
+        </CardContent>
+      </Card>
 
+      {/* Layout Controls */}
       <div className="flex flex-row items-center justify-between mb-4">
         <DropdownButton
           icon={Edit}
@@ -231,7 +393,7 @@ const LayoutAdminContent = memo(function LayoutAdminContent() {
             uncheckedLabel={'Spaced'}
             checkedIcon={Grid2X2}
             uncheckedIcon={Grid3X3}
-            checked={context.state.layout === 'spaced'}
+            checked={layoutData.layoutType === 'spaced'}
             onValueChange={handleLayoutTypeChange}
           />
           <Switch
@@ -240,57 +402,92 @@ const LayoutAdminContent = memo(function LayoutAdminContent() {
             uncheckedLabel={'Landscape'}
             checkedIcon={Smartphone}
             uncheckedIcon={Monitor}
-            checked={context.state.orientation === 'portrait'}
+            checked={layoutData.orientation === 'portrait'}
             onValueChange={handleOrientationChange}
           />
         </Form>
       </div>
 
-      <div className="bg-gray-300 relative" style={{
-        borderRadius: context.state.layout === 'spaced' ? '8px' : '0px',
-        aspectRatio: context.state.orientation === 'portrait' ? '9/16' : '16/9',
-        maxWidth: context.state.orientation === 'portrait' ? '600px' : '100%',
-        minHeight: context.state.orientation === 'portrait' ? '800px' : '450px',
-        margin: context.state.orientation === 'portrait' ? '0 auto' : '0'
-      }}>
-        {/* Aspect ratio indicator */}
-        <div className="absolute top-2 left-2 bg-black/20 text-white text-xs px-2 py-1 rounded backdrop-blur-sm z-10">
-          {context.state.orientation === 'portrait' ? '9:16' : '16:9'} • {context.state.orientation === 'portrait' ? '9×16' : '16×9'}
-        </div>
-        <GridLayoutWithWidth
-          layout={rglLayout}
-          cols={context.state.orientation === 'portrait' ? 9 : 16}
-          onLayoutChange={handleLayoutChange}
-          draggableCancel={'.ReactModalPortal,.controls,button'}
-          margin={context.state.layout === 'spaced' ? [12, 12] : [6, 6]}
-          rowHeight={context.state.orientation === 'portrait' ? 40 : 60}
-          isBounded={true}
-          useCSSTransforms={true}
-          transformScale={1}
-          preventCollision={true}
-          compactType="vertical"
-          maxRows={context.state.orientation === 'portrait' ? 16 : 9}
-        >
-          {widgets.map(widget => (
-            <div key={widget._id}>
-              <EditableWidget
-                id={widget._id}
-                type={widget.type as WidgetType}
-                onDelete={() => handleDeleteWidget(widget._id)}
-                layout={context.state.layout || 'compact'}
-              />
+      {/* Layout Canvas */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Layout Canvas</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="bg-gray-300 relative" style={{
+            borderRadius: layoutData.layoutType === 'spaced' ? '8px' : '0px',
+            aspectRatio: layoutData.orientation === 'portrait' ? '9/16' : '16/9',
+            maxWidth: layoutData.orientation === 'portrait' ? '600px' : '100%',
+            minHeight: layoutData.orientation === 'portrait' ? '800px' : '450px',
+            margin: layoutData.orientation === 'portrait' ? '0 auto' : '0'
+          }}>
+            {/* Aspect ratio indicator */}
+            <div className="absolute top-2 left-2 bg-black/20 text-white text-xs px-2 py-1 rounded backdrop-blur-sm z-10">
+              {layoutData.orientation === 'portrait' ? '9:16' : '16:9'} • {layoutData.gridConfig.cols}×{layoutData.gridConfig.rows}
             </div>
-          ))}
-        </GridLayoutWithWidth>
-      </div>
-      
+
+            {layoutData.widgets.length === 0 ? (
+              <div className="absolute inset-0 flex items-center justify-center">
+                <div className="text-center text-gray-500">
+                  <Grid3X3 className="mx-auto h-12 w-12 mb-4 opacity-50" />
+                  <p className="text-lg font-medium">No widgets added yet</p>
+                  <p className="text-sm">Click "Add Widget" to start designing your layout</p>
+                </div>
+              </div>
+            ) : (
+              <GridLayoutWithWidth
+                layout={rglLayout}
+                cols={layoutData.gridConfig.cols}
+                onLayoutChange={handleLayoutChange}
+                draggableCancel={'.ReactModalPortal,.controls,button'}
+                margin={layoutData.gridConfig.margin}
+                rowHeight={layoutData.gridConfig.rowHeight}
+                isBounded={true}
+                useCSSTransforms={true}
+                transformScale={1}
+                preventCollision={true}
+                compactType="vertical"
+                maxRows={layoutData.gridConfig.rows}
+              >
+                {layoutData.widgets.map((widget, index) => (
+                  <div key={index}>
+                    <div className="bg-white rounded border-2 border-dashed border-gray-400 h-full flex items-center justify-center relative group">
+                      <div className="text-center">
+                        <div className="text-sm font-medium text-gray-600 mb-1">{widget.type}</div>
+                        <div className="text-xs text-gray-400">{widget.w}×{widget.h}</div>
+                      </div>
+                      <Button
+                        variant="destructive"
+                        size="sm"
+                        className="absolute top-1 right-1 opacity-0 group-hover:opacity-100 transition-opacity h-6 w-6 p-0"
+                        onClick={() => handleDeleteWidget(index)}
+                      >
+                        ×
+                      </Button>
+                    </div>
+                  </div>
+                ))}
+              </GridLayoutWithWidth>
+            )}
+          </div>
+        </CardContent>
+      </Card>
     </Frame>
   )
 })
 
 export default function LayoutAdminPage() {
   return (
-    <Suspense fallback={<div>Loading...</div>}>
+    <Suspense fallback={
+      <Frame loggedIn={true}>
+        <div className="flex items-center justify-center min-h-[400px]">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+            <p className="text-muted-foreground">Loading layout editor...</p>
+          </div>
+        </div>
+      </Frame>
+    }>
       <LayoutAdminContent />
     </Suspense>
   )
