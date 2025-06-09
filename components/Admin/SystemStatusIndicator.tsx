@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Tooltip,
@@ -28,6 +28,8 @@ const SystemStatusIndicator: React.FC<SystemStatusIndicatorProps> = ({
   showText = true,
   showTooltip = true,
 }) => {
+  const [mounted, setMounted] = useState(false);
+  
   const {
     isDatabaseConnected,
     isSystemHealthy,
@@ -41,6 +43,33 @@ const SystemStatusIndicator: React.FC<SystemStatusIndicatorProps> = ({
     refreshInterval: 30000,
     enableRealTimeUpdates: true,
   });
+
+  // Fix hydration mismatch by ensuring component is mounted
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  // Show loading state until mounted to prevent hydration mismatch
+  if (!mounted) {
+    return (
+      <div
+        className={cn(
+          "hidden sm:flex items-center gap-3 px-3 py-1.5 rounded-full bg-muted/50 border border-border/50",
+          className
+        )}
+      >
+        <div className="relative flex items-center">
+          <Loader2 className="w-3 h-3 animate-spin" />
+          <div className="absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full bg-gray-500 animate-pulse" />
+        </div>
+        {showText && (
+          <span className="text-xs font-medium text-muted-foreground">
+            Loading...
+          </span>
+        )}
+      </div>
+    );
+  }
 
   const statusColor = getStatusColor();
   const statusText = getStatusText();
@@ -123,9 +152,9 @@ const SystemStatusIndicator: React.FC<SystemStatusIndicatorProps> = ({
     <TooltipProvider>
       <Tooltip>
         <TooltipTrigger asChild>
-          <button className="focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 rounded-full">
+          <div className="focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 rounded-full">
             <StatusIndicator />
-          </button>
+          </div>
         </TooltipTrigger>
         <TooltipContent side="bottom" className="max-w-xs">
           <div className="space-y-2">
@@ -137,8 +166,8 @@ const SystemStatusIndicator: React.FC<SystemStatusIndicatorProps> = ({
                   <span>Database:</span>
                   <span className={cn(
                     "font-medium",
-                    statusDetails.database.status === "Connected" 
-                      ? "text-green-600" 
+                    statusDetails.database.status === "Connected"
+                      ? "text-green-600"
                       : "text-red-600"
                   )}>
                     {statusDetails.database.status}
@@ -158,8 +187,8 @@ const SystemStatusIndicator: React.FC<SystemStatusIndicatorProps> = ({
                   <span>Server:</span>
                   <span className={cn(
                     "font-medium capitalize",
-                    statusDetails.server.status === "online" 
-                      ? "text-green-600" 
+                    statusDetails.server.status === "online"
+                      ? "text-green-600"
                       : "text-red-600"
                   )}>
                     {statusDetails.server.status}

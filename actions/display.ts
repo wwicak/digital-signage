@@ -54,15 +54,25 @@ export const getDisplays = (host: string = ""): Promise<IDisplayData[]> => {
   }
 
   return axios
-    .get<IDisplayData[]>(`${host}/api/displays`)
-    .then((res: AxiosResponse<IDisplayData[]>) => {
-      // Ensure we have valid response data and it's an array
+    .get(`${host}/api/displays`)
+    .then((res: AxiosResponse<any>) => {
+      // The API returns {displays: [...], ...} structure
+      if (
+        res &&
+        res.data &&
+        res.data.displays &&
+        Array.isArray(res.data.displays)
+      ) {
+        return res.data.displays;
+      }
+      // Fallback: check if data is directly an array (for backwards compatibility)
       if (res && res.data && Array.isArray(res.data)) {
         return res.data;
       }
       if (process.env.NODE_ENV !== "production") {
         console.warn(
-          "getDisplays: Invalid response data, returning empty array"
+          "getDisplays: Invalid response data, returning empty array",
+          res?.data
         );
       }
       return []; // Return empty array if data is not valid
