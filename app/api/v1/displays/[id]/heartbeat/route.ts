@@ -36,12 +36,12 @@ const HeartbeatRequestSchema = z.object({
 
 export async function POST(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     await dbConnect();
 
-    const displayId = params.id;
+    const { id: displayId } = await params;
     if (!displayId) {
       return NextResponse.json(
         { error: "Display ID is required" },
@@ -159,12 +159,12 @@ export async function POST(
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     await dbConnect();
 
-    const displayId = params.id;
+    const { id: displayId } = await params;
     if (!displayId) {
       return NextResponse.json(
         { error: "Display ID is required" },
