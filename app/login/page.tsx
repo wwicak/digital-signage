@@ -6,7 +6,7 @@ import { useRouter, useSearchParams } from 'next/navigation'
 
 import Frame from '../../components/Admin/Frame'
 import { login } from '../../helpers/auth'
-import { Tv, Check, X, ChevronLeft } from 'lucide-react'
+import { Tv, Check, X, ChevronLeft, Eye, EyeOff } from 'lucide-react'
 
 const LoginContent = memo(function LoginContent() {
   const router = useRouter()
@@ -15,6 +15,7 @@ const LoginContent = memo(function LoginContent() {
 
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [showPassword, setShowPassword] = useState(false)
   const [alert, setAlert] = useState<'success' | 'error' | 'info' | null>(null)
 
   const performLogin = async () => {
@@ -77,22 +78,35 @@ const LoginContent = memo(function LoginContent() {
           <label htmlFor='email' className="pb-4 font-sans">Email</label>
           <input
             type='email'
-            className="outline-none bg-gray-200 rounded-lg font-sans font-normal text-base text-gray-500 border-0 p-2 h-8 min-w-64 align-middle appearance-none mb-4"
+            className="outline-none bg-gray-200 rounded-lg font-sans font-normal text-base text-gray-500 border-0 p-2 h-10 min-w-64 align-middle appearance-none mb-4"
             id='email'
-            placeholder='Enter your email...'
+            placeholder='Email'
             value={email}
             onChange={(e) => setEmail(e.target.value)}
           />
           <label htmlFor='password' className="pb-4 font-sans">Password</label>
-          <input
-            type='password'
-            className="outline-none bg-gray-200 rounded-lg font-sans font-normal text-base text-gray-500 border-0 p-2 h-8 min-w-64 align-middle appearance-none mb-4"
-            id='password'
-            placeholder='Enter your password...'
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-          />
-          <button type='submit' className="outline-none bg-primary rounded-lg font-sans font-semibold text-lg text-white text-center border-0 p-1 h-12 align-middle pl-4 pr-4 appearance-none hover:bg-green-600 transition-colors">Log In.</button>
+          <div className="relative mb-4">
+            <input
+              type={showPassword ? 'text' : 'password'}
+              className="outline-none bg-gray-200 rounded-lg font-sans font-normal text-base text-gray-500 border-0 p-2 pr-10 h-10 min-w-64 align-middle appearance-none w-full"
+              id='password'
+              placeholder='Password'
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+            />
+            <button
+              type="button"
+              className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700 focus:outline-none"
+              onClick={() => setShowPassword(!showPassword)}
+            >
+              {showPassword ? (
+                <EyeOff className="w-4 h-4" />
+              ) : (
+                <Eye className="w-4 h-4" />
+              )}
+            </button>
+          </div>
+          <button type='submit' className="outline-none bg-primary rounded-lg font-sans font-semibold text-lg text-white text-center border-0 p-1 h-12 align-middle pl-4 pr-4 w-1/3 mx-auto appearance-none hover:bg-green-600 transition-colors">Log In.</button>
         </form>
         <Link href='/'>
           <span className="inline-block m-4 font-sans text-gray-500 text-sm cursor-pointer">
