@@ -187,16 +187,12 @@
 /* React Grid Layout - Critical CSS for drag and drop functionality */
 .react-grid-layout {
   position: relative !important;
-  transition: height 200ms ease;
   background: transparent;
 }
 
 .react-grid-item {
   position: absolute !important;
-  transition: all 150ms cubic-bezier(0.2, 0, 0.2, 1);
-  transition-property: left, top, width, height;
   box-sizing: border-box !important;
-  touch-action: none !important;
   cursor: grab !important;
   border: 2px solid transparent;
   border-radius: 8px;
@@ -213,8 +209,7 @@
 }
 
 .react-grid-item.cssTransforms {
-  transition-property: transform, width, height !important;
-  transition-timing-function: cubic-bezier(0.2, 0, 0.2, 1);
+  transition-property: transform !important;
 }
 
 .react-grid-item.resizing {
@@ -228,11 +223,9 @@
 .react-grid-item.react-draggable-dragging {
   transition: none !important;
   z-index: 1000 !important;
-  will-change: transform;
   cursor: grabbing !important;
   border-color: rgba(239, 68, 68, 0.8) !important;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
-  transform: scale(1.02) !important;
 }
 
 .react-grid-item.react-draggable-dragging * {
@@ -388,13 +381,8 @@
 /* Widget controls visibility fix */
 .react-grid-item .controls {
   pointer-events: auto !important;
-  opacity: 1 !important;
   position: relative;
   z-index: 25 !important;
-}
-
-.react-grid-item .no-drag {
-  pointer-events: auto !important;
 }
 
 /* Ensure controls are above everything */
@@ -402,6 +390,16 @@
   pointer-events: auto !important;
   z-index: 30 !important;
   position: relative;
+}
+
+/* Remove conflicting styles that might prevent drag */
+.react-grid-item * {
+  touch-action: inherit !important;
+}
+
+.react-grid-item > div:first-child {
+  pointer-events: auto !important;
+  touch-action: none !important;
 }
 
 @utility container {

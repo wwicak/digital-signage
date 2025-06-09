@@ -61,7 +61,7 @@ const EditableWidget: React.FC<IEditableWidgetProps> = memo(({
   return (
     <>
       <div
-        className='group relative bg-white border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow w-full h-full cursor-grab active:cursor-grabbing'
+        className='group relative bg-white border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow w-full h-full'
         onMouseDown={(e) => {
           console.log('[DEBUG] EditableWidget mouseDown event:', { target: e.target, currentTarget: e.currentTarget });
           // Only prevent for control buttons
@@ -70,12 +70,8 @@ const EditableWidget: React.FC<IEditableWidgetProps> = memo(({
             e.preventDefault();
             return;
           }
-          // For drag events, don't interfere
+          // For drag events, don't interfere at all
           console.log('[DEBUG] Allowing drag event to bubble up');
-        }}
-        style={{
-          touchAction: 'none',
-          userSelect: 'none'
         }}
       >
         <div className='absolute top-2 right-2 flex space-x-1 controls z-20 opacity-0 group-hover:opacity-100 transition-opacity duration-200'>
@@ -119,8 +115,8 @@ const EditableWidget: React.FC<IEditableWidgetProps> = memo(({
           </button>
         </div>
         <div
-          className='flex flex-col items-center justify-center h-full min-h-24 select-none'
-          style={{ pointerEvents: 'none' }}
+          className='flex flex-col items-center justify-center h-full min-h-24'
+          style={{ pointerEvents: 'none', userSelect: 'none' }}
         >
           <div className='mb-2'>
             <WidgetIcon className='w-8 h-8 text-primary' />

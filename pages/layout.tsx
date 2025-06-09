@@ -220,8 +220,9 @@ const LayoutPage: React.FC<ILayoutPageProps> = ({ loggedIn, displayId }) => {
   // Optimized drag start handler
   const handleDragStart = useCallback((layout: RglLayout[], oldItem: RglLayout, newItem: RglLayout) => {
     try {
-      console.log('[DEBUG] Drag start event triggered for widget:', newItem.i)
-      console.log('[DEBUG] Mouse event details:', { x: newItem.x, y: newItem.y, w: newItem.w, h: newItem.h })
+      console.log('[DEBUG] ✅ DRAG START HANDLER CALLED for widget:', newItem.i)
+      console.log('[DEBUG] Old position:', { x: oldItem.x, y: oldItem.y })
+      console.log('[DEBUG] New position:', { x: newItem.x, y: newItem.y })
       setIsDragging(true)
       setDraggedWidgetId(newItem.i)
       startMonitoring()
@@ -233,7 +234,7 @@ const LayoutPage: React.FC<ILayoutPageProps> = ({ loggedIn, displayId }) => {
 
   // Optimized drag handler with boundary validation using utility
   const handleDrag = useCallback((layout: RglLayout[], oldItem: RglLayout, newItem: RglLayout) => {
-    console.log('[DEBUG] Drag event for widget:', newItem.i, 'from', oldItem.x, oldItem.y, 'to', newItem.x, newItem.y)
+    console.log('[DEBUG] ✅ DRAG HANDLER CALLED for widget:', newItem.i, 'from', oldItem.x, oldItem.y, 'to', newItem.x, newItem.y)
 
     // Validate boundaries using utility function
     const validated = validateWidgetDimensions(
@@ -307,8 +308,9 @@ const LayoutPage: React.FC<ILayoutPageProps> = ({ loggedIn, displayId }) => {
   // Optimized resize handlers
   const handleResizeStart = useCallback((layout: RglLayout[], oldItem: RglLayout, newItem: RglLayout) => {
     try {
-      console.log('[DEBUG] Resize start event triggered for widget:', newItem.i)
-      console.log('[DEBUG] Resize handles available:', ['se', 'sw', 'ne', 'nw', 's', 'n', 'e', 'w'])
+      console.log('[DEBUG] ✅ RESIZE START HANDLER CALLED for widget:', newItem.i)
+      console.log('[DEBUG] Old size:', { w: oldItem.w, h: oldItem.h })
+      console.log('[DEBUG] New size:', { w: newItem.w, h: newItem.h })
       setIsDragging(true)
       setDraggedWidgetId(newItem.i)
       startMonitoring()
@@ -792,23 +794,22 @@ const LayoutPage: React.FC<ILayoutPageProps> = ({ loggedIn, displayId }) => {
               onResizeStart={handleResizeStart}
               onResize={handleResize}
               onResizeStop={handleResizeStop}
-              draggableCancel={'.controls,button'}
+              draggableCancel=".controls"
               resizeHandles={['se']}
-              margin={gridConstraints.recommendedMargin}
-              rowHeight={gridConstraints.recommendedRowHeight}
-              isBounded={true}
-              containerPadding={[12, 12]}
+              margin={[10, 10]}
+              rowHeight={60}
+              isBounded={false}
+              containerPadding={[0, 0]}
               isDraggable={true}
               isResizable={true}
-              useCSSTransforms={false}
+              useCSSTransforms={true}
               transformScale={1}
               preventCollision={false}
               compactType={null}
               autoSize={true}
               verticalCompact={false}
               allowOverlap={false}
-              maxRows={gridConstraints.rows}
-              className="react-grid-layout w-full h-full"
+              className="react-grid-layout"
               style={{
                 minHeight: '400px',
                 position: 'relative'
