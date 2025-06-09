@@ -15,10 +15,28 @@ export async function GET(
     const user = await requireAuth(request);
     const { id } = await context.params;
 
-    const widget = await Widget.findOne({
+    // First try to find widget by creator_id
+    let widget = await Widget.findOne({
       _id: id,
       creator_id: user._id,
     });
+
+    // If not found, check if user has access through layouts
+    if (!widget) {
+      // Import Layout model
+      const Layout = (await import("@/lib/models/Layout")).default;
+
+      // Check if widget exists in any layout owned by the user
+      const layoutWithWidget = await Layout.findOne({
+        "widgets.widget_id": id,
+        creator_id: user._id,
+      });
+
+      if (layoutWithWidget) {
+        // User has access to this widget through their layout
+        widget = await Widget.findById(id);
+      }
+    }
 
     if (!widget) {
       return NextResponse.json(
@@ -53,10 +71,28 @@ export async function PUT(
 
     const { type, data, ...widgetUpdateData } = body;
 
-    const widgetToUpdate = await Widget.findOne({
+    // First try to find widget by creator_id
+    let widgetToUpdate = await Widget.findOne({
       _id: id,
       creator_id: user._id,
     });
+
+    // If not found, check if user has access through layouts
+    if (!widgetToUpdate) {
+      // Import Layout model
+      const Layout = (await import("@/lib/models/Layout")).default;
+
+      // Check if widget exists in any layout owned by the user
+      const layoutWithWidget = await Layout.findOne({
+        "widgets.widget_id": id,
+        creator_id: user._id,
+      });
+
+      if (layoutWithWidget) {
+        // User has access to this widget through their layout
+        widgetToUpdate = await Widget.findById(id);
+      }
+    }
 
     if (!widgetToUpdate) {
       return NextResponse.json(

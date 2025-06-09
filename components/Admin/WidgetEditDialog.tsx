@@ -7,6 +7,27 @@ import { WidgetDataZod, WidgetTypeZod } from "@/lib/models/Widget"; // Import Zo
 import { DialogFooter } from "../ui/dialog";
 import { Loader2, AlertCircle } from "lucide-react";
 
+// Widget data cache to avoid repeated API calls
+const widgetDataCache = new Map<string, { data: IWidgetData; timestamp: number }>();
+const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
+
+// Helper function to get cached widget data
+const getCachedWidgetData = (widgetId: string): IWidgetData | null => {
+  const cached = widgetDataCache.get(widgetId);
+  if (cached && Date.now() - cached.timestamp < CACHE_DURATION) {
+    return cached.data;
+  }
+  if (cached) {
+    widgetDataCache.delete(widgetId); // Remove expired cache
+  }
+  return null;
+};
+
+// Helper function to cache widget data
+const setCachedWidgetData = (widgetId: string, data: IWidgetData): void => {
+  widgetDataCache.set(widgetId, { data, timestamp: Date.now() });
+};
+
 // Interface for methods exposed via ref - Zod not directly applicable
 export interface IWidgetEditDialog {
   open: (e?: React.MouseEvent) => void;
@@ -93,7 +114,7 @@ class WidgetEditDialog
 
   fetchWidgetData = (): void => {
     const { widgetId } = this.props;
-    
+
     if (!widgetId) {
       this.setState({
         error: "Widget ID is missing.",
@@ -102,6 +123,25 @@ class WidgetEditDialog
       });
       return;
     }
+
+    // Check cache first
+    const cachedData = getCachedWidgetData(widgetId);
+    if (cachedData) {
+      console.log(`Using cached widget data for ${widgetId}`);
+      const parsedFullData = LocalFullWidgetDataSchema.safeParse(cachedData);
+      if (parsedFullData.success) {
+        this.setState({
+          widgetConfigData:
+            typeof parsedFullData.data.data === "object"
+              ? parsedFullData.data.data
+              : {},
+          initialWidgetData: parsedFullData.data,
+          error: null,
+        });
+        return;
+      }
+    }
+
     this.setState({
       error: null,
       widgetConfigData: undefined,
@@ -110,6 +150,9 @@ class WidgetEditDialog
 
     getWidget(widgetId)
       .then((widgetFullData: IWidgetData) => {
+        // Cache the successful response
+        setCachedWidgetData(widgetId, widgetFullData);
+
         // IWidgetData is from actions, potentially an interface
         // Attempt to parse with our local Zod schema for safety before setting state
         const parsedFullData =
@@ -140,10 +183,19 @@ class WidgetEditDialog
       })
       .catch((error) => {
         console.error(`Failed to fetch widget data for ${widgetId}:`, error);
-        this.setState({
-          error: `Failed to load widget configuration: ${error.message || error}`,
-          initialWidgetData: null,
-        });
+
+        // Check if it's a 404 error and provide better error message
+        if (error.message?.includes('404') || error.message?.includes('not found')) {
+          this.setState({
+            error: "Widget not found. This widget may have been deleted or you may not have permission to access it.",
+            initialWidgetData: null,
+          });
+        } else {
+          this.setState({
+            error: `Failed to load widget configuration: ${error.message || error}`,
+            initialWidgetData: null,
+          });
+        }
       });
   };
 
@@ -176,6 +228,10 @@ class WidgetEditDialog
     try {
       // We only update the 'data' field (widget-specific config) of the widget
       await updateWidget(widgetId, { data: widgetConfigData || {} });
+
+      // Invalidate cache for this widget
+      widgetDataCache.delete(widgetId);
+
       this.close(); // Close the dialog on successful save
     } catch (error) {
       console.error("Failed to save widget data:", error);
@@ -237,7 +293,10 @@ class WidgetEditDialog
                 <div className="flex items-center justify-center py-12">
                   <div className="flex items-center gap-3 text-gray-600">
                     <Loader2 className="w-6 h-6 animate-spin" />
-                    <span className="text-lg">Loading widget configuration...</span>
+                    <div className="flex flex-col">
+                      <span className="text-lg">Loading widget configuration...</span>
+                      <span className="text-sm text-gray-500 mt-1">This should only take a moment</span>
+                    </div>
                   </div>
                 </div>
               ) : (

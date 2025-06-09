@@ -27,6 +27,7 @@ import { useLayouts } from '../../hooks/useLayouts'
 import { useLayoutMutations } from '../../hooks/useLayoutMutations'
 import { ILayoutCreateData, ILayoutUpdateData, addWidgetToLayout, updateWidgetPositions, removeWidgetFromLayout } from '../../actions/layouts'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { getWidget } from '../../actions/widgets'
 
 import { WidgetType } from '../../lib/models/Widget'
 
@@ -142,8 +143,33 @@ const LayoutAdminContent = memo(function LayoutAdminContent() {
         },
       })
       setSavedLayoutId(existingLayout._id as string)
+
+      // Preload widget data for faster configuration dialog opening
+      preloadWidgetData(existingLayout.widgets || [])
     }
   }, [existingLayout, isEditing])
+
+  // Preload widget data to cache for faster configuration dialog opening
+  const preloadWidgetData = useCallback(async (widgets: any[]) => {
+    const preloadPromises = widgets.map(async (widget) => {
+      const widgetId = typeof widget.widget_id === 'string'
+        ? widget.widget_id
+        : (widget.widget_id as any)?._id || widget.widget_id?.toString()
+
+      if (widgetId) {
+        try {
+          // This will cache the widget data
+          await getWidget(widgetId)
+        } catch (error) {
+          // Silently fail for preloading - user will see error when they actually open the dialog
+          console.warn(`Failed to preload widget data for ${widgetId}:`, error)
+        }
+      }
+    })
+
+    // Don't await all - let them load in background
+    Promise.allSettled(preloadPromises)
+  }, [])
 
   // Cleanup timeout on unmount
   useEffect(() => {
