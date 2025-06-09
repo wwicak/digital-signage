@@ -783,7 +783,7 @@ const LayoutPage: React.FC<ILayoutPageProps> = ({ loggedIn, displayId }) => {
               {displayInfo.isPortrait ? '📱 Portrait Display' : '📺 TV/Monitor'}
             </div>
             <GridLayoutWithWidth
-              layout={rglLayout}
+              layout={optimisticLayout.length > 0 ? optimisticLayout : rglLayout}
               cols={gridConstraints.cols}
               onLayoutChange={handleLayoutChange}
               onDragStart={handleDragStart}
@@ -792,20 +792,20 @@ const LayoutPage: React.FC<ILayoutPageProps> = ({ loggedIn, displayId }) => {
               onResizeStart={handleResizeStart}
               onResize={handleResize}
               onResizeStop={handleResizeStop}
-              draggableCancel={'.ReactModalPortal,.controls,button'}
-              resizeHandles={['se', 'sw', 'ne', 'nw', 's', 'n', 'e', 'w']}
+              draggableCancel={'.controls,button'}
+              resizeHandles={['se']}
               margin={gridConstraints.recommendedMargin}
               rowHeight={gridConstraints.recommendedRowHeight}
               isBounded={true}
               containerPadding={[12, 12]}
               isDraggable={true}
               isResizable={true}
-              useCSSTransforms={true}
+              useCSSTransforms={false}
               transformScale={1}
-              preventCollision={true}
-              compactType='vertical'
+              preventCollision={false}
+              compactType={null}
               autoSize={true}
-              verticalCompact={true}
+              verticalCompact={false}
               allowOverlap={false}
               maxRows={gridConstraints.rows}
               className="react-grid-layout w-full h-full"
