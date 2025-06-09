@@ -21,7 +21,7 @@ const MeetingRoomOptions: React.FC<IWidgetOptionsEditorProps<IMeetingRoomData>> 
   onChange,
 }) => {
   const [buildings, setBuildings] = useState<IBuilding[]>([])
-  const [loading, setLoading] = useState(true)
+  const [_loading, setLoading] = useState(true)
 
   useEffect(() => {
     fetchBuildings()
@@ -58,56 +58,56 @@ const MeetingRoomOptions: React.FC<IWidgetOptionsEditorProps<IMeetingRoomData>> 
   ]
 
   return (
-    <div className="space-y-4">
+    <div className='space-y-4'>
       <Input
-        type="text"
-        name="title"
-        label="Widget Title"
+        type='text'
+        name='title'
+        label='Widget Title'
         value={data.title || "Today's Meetings"}
         onChange={handleChange}
-        placeholder="Enter widget title"
-        helpText="Title displayed at the top of the widget"
+        placeholder='Enter widget title'
+        helpText='Title displayed at the top of the widget'
       />
 
       <Input
-        type="select"
-        name="buildingId"
-        label="Building Filter"
+        type='select'
+        name='buildingId'
+        label='Building Filter'
         value={data.buildingId || ''}
         onChange={handleChange}
         choices={buildingChoices}
-        helpText="Select a specific building or show all buildings"
+        helpText='Select a specific building or show all buildings'
       />
 
       <Input
-        type="number"
-        name="refreshInterval"
-        label="Refresh Interval (seconds)"
+        type='number'
+        name='refreshInterval'
+        label='Refresh Interval (seconds)'
         value={Math.floor((data.refreshInterval || 30000) / 1000)}
         onChange={(name, value) => handleChange(name, value * 1000)}
         min={5}
         max={300}
-        helpText="How often to refresh the meeting data (5-300 seconds)"
+        helpText='How often to refresh the meeting data (5-300 seconds)'
       />
 
       <Input
-        type="number"
-        name="maxReservations"
-        label="Maximum Reservations"
+        type='number'
+        name='maxReservations'
+        label='Maximum Reservations'
         value={data.maxReservations || 10}
         onChange={handleChange}
         min={1}
         max={50}
-        helpText="Maximum number of reservations to display"
+        helpText='Maximum number of reservations to display'
       />
 
       <Input
-        type="checkbox"
-        name="showUpcoming"
-        label="Show Upcoming Meetings"
+        type='checkbox'
+        name='showUpcoming'
+        label='Show Upcoming Meetings'
         checked={data.showUpcoming !== false}
         onChange={(name, value) => handleChange(name, !!value)}
-        helpText="Display upcoming meetings in addition to current ones"
+        helpText='Display upcoming meetings in addition to current ones'
       />
     </div>
   )

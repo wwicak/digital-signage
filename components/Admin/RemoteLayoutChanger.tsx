@@ -101,50 +101,50 @@ export const RemoteLayoutChanger: React.FC<RemoteLayoutChangerProps> = ({
   return (
     <Card className={cn("w-full", className)}>
       <CardHeader>
-        <CardTitle className="flex items-center gap-2 text-lg">
-          <Layout className="h-5 w-5" />
+        <CardTitle className='flex items-center gap-2 text-lg'>
+          <Layout className='h-5 w-5' />
           Remote Layout Control
         </CardTitle>
-        <div className="flex items-center gap-2">
-          <Monitor className="h-4 w-4 text-muted-foreground" />
-          <span className="text-sm text-muted-foreground">{displayName}</span>
-          <Badge variant={isOnline ? "default" : "destructive"} className="text-xs">
+        <div className='flex items-center gap-2'>
+          <Monitor className='h-4 w-4 text-muted-foreground' />
+          <span className='text-sm text-muted-foreground'>{displayName}</span>
+          <Badge variant={isOnline ? "default" : "destructive"} className='text-xs'>
             {isOnline ? "Online" : "Offline"}
           </Badge>
         </div>
       </CardHeader>
 
-      <CardContent className="space-y-4">
+      <CardContent className='space-y-4'>
         {/* Current Layout Info */}
-        <div className="p-3 bg-muted/30 rounded-lg">
-          <div className="flex items-center justify-between">
+        <div className='p-3 bg-muted/30 rounded-lg'>
+          <div className='flex items-center justify-between'>
             <div>
-              <p className="text-sm font-medium">Current Layout</p>
-              <p className="text-xs text-muted-foreground">{getCurrentLayoutName()}</p>
+              <p className='text-sm font-medium'>Current Layout</p>
+              <p className='text-xs text-muted-foreground'>{getCurrentLayoutName()}</p>
             </div>
-            <Badge variant="outline" className="text-xs">
+            <Badge variant='outline' className='text-xs'>
               Active
             </Badge>
           </div>
         </div>
 
         {/* Layout Selection */}
-        <div className="space-y-2">
-          <label className="text-sm font-medium">Change to Layout</label>
+        <div className='space-y-2'>
+          <label className='text-sm font-medium'>Change to Layout</label>
           <Select
             value={selectedLayout}
             onValueChange={setSelectedLayout}
             disabled={!isOnline || isChanging}
           >
             <SelectTrigger>
-              <SelectValue placeholder="Select a layout" />
+              <SelectValue placeholder='Select a layout' />
             </SelectTrigger>
             <SelectContent>
               {availableLayouts.map((layout) => (
                 <SelectItem key={layout.id} value={layout.id}>
-                  <div className="flex flex-col">
-                    <span className="font-medium">{layout.name}</span>
-                    <span className="text-xs text-muted-foreground">{layout.description}</span>
+                  <div className='flex flex-col'>
+                    <span className='font-medium'>{layout.name}</span>
+                    <span className='text-xs text-muted-foreground'>{layout.description}</span>
                   </div>
                 </SelectItem>
               ))}
@@ -155,7 +155,7 @@ export const RemoteLayoutChanger: React.FC<RemoteLayoutChangerProps> = ({
         {/* Status Messages */}
         {!isOnline && (
           <Alert>
-            <AlertTriangle className="h-4 w-4" />
+            <AlertTriangle className='h-4 w-4' />
             <AlertDescription>
               Display is offline. Layout changes will be applied when the display comes back online.
             </AlertDescription>
@@ -163,38 +163,38 @@ export const RemoteLayoutChanger: React.FC<RemoteLayoutChangerProps> = ({
         )}
 
         {changeStatus === 'success' && (
-          <Alert className="border-green-200 bg-green-50">
-            <Check className="h-4 w-4 text-green-600" />
-            <AlertDescription className="text-green-800">
+          <Alert className='border-green-200 bg-green-50'>
+            <Check className='h-4 w-4 text-green-600' />
+            <AlertDescription className='text-green-800'>
               Layout change request sent successfully! The display should update shortly.
             </AlertDescription>
           </Alert>
         )}
 
         {changeStatus === 'error' && (
-          <Alert className="border-red-200 bg-red-50">
-            <AlertTriangle className="h-4 w-4 text-red-600" />
-            <AlertDescription className="text-red-800">
+          <Alert className='border-red-200 bg-red-50'>
+            <AlertTriangle className='h-4 w-4 text-red-600' />
+            <AlertDescription className='text-red-800'>
               {errorMessage}
             </AlertDescription>
           </Alert>
         )}
 
         {/* Action Buttons */}
-        <div className="flex gap-2 pt-2">
+        <div className='flex gap-2 pt-2'>
           <Button
             onClick={handleLayoutChange}
             disabled={!hasChanges || isChanging || !isOnline}
-            className="flex-1"
+            className='flex-1'
           >
             {isChanging ? (
               <>
-                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                <Loader2 className='h-4 w-4 mr-2 animate-spin' />
                 Changing Layout...
               </>
             ) : (
               <>
-                <RefreshCw className="h-4 w-4 mr-2" />
+                <RefreshCw className='h-4 w-4 mr-2' />
                 Apply Layout Change
               </>
             )}
@@ -202,7 +202,7 @@ export const RemoteLayoutChanger: React.FC<RemoteLayoutChangerProps> = ({
 
           {hasChanges && (
             <Button
-              variant="outline"
+              variant='outline'
               onClick={() => setSelectedLayout(currentLayout)}
               disabled={isChanging}
             >
@@ -213,25 +213,25 @@ export const RemoteLayoutChanger: React.FC<RemoteLayoutChangerProps> = ({
 
         {/* Preview Info */}
         {hasChanges && (
-          <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg">
-            <p className="text-sm font-medium text-blue-900">Preview Change</p>
-            <p className="text-xs text-blue-700 mt-1">
-              <span className="font-medium">{getCurrentLayoutName()}</span>
+          <div className='p-3 bg-blue-50 border border-blue-200 rounded-lg'>
+            <p className='text-sm font-medium text-blue-900'>Preview Change</p>
+            <p className='text-xs text-blue-700 mt-1'>
+              <span className='font-medium'>{getCurrentLayoutName()}</span>
               {' → '}
-              <span className="font-medium">{getSelectedLayoutName()}</span>
+              <span className='font-medium'>{getSelectedLayoutName()}</span>
             </p>
-            <p className="text-xs text-blue-600 mt-2">
+            <p className='text-xs text-blue-600 mt-2'>
               The display will automatically reload with the new layout when you apply the change.
             </p>
           </div>
         )}
 
         {/* Instructions */}
-        <div className="text-xs text-muted-foreground space-y-1">
+        <div className='text-xs text-muted-foreground space-y-1'>
           <p><strong>How it works:</strong></p>
-          <ul className="list-disc list-inside space-y-1 ml-2">
+          <ul className='list-disc list-inside space-y-1 ml-2'>
             <li>Select a new layout from the dropdown above</li>
-            <li>Click "Apply Layout Change" to send the command</li>
+            <li>Click &quot;Apply Layout Change&quot; to send the command</li>
             <li>The display will automatically reload with the new layout</li>
             <li>Changes are applied immediately for online displays</li>
           </ul>

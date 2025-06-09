@@ -23,27 +23,27 @@ const UsersComponent = memo(function UsersComponent({ loggedIn }: UsersProps) {
 
   return (
     <Frame loggedIn={loggedIn}>
-      <div className="space-y-8">
+      <div className='space-y-8'>
         {/* Header Section */}
-        <div className="flex flex-col space-y-4 sm:flex-row sm:items-center sm:justify-between sm:space-y-0">
+        <div className='flex flex-col space-y-4 sm:flex-row sm:items-center sm:justify-between sm:space-y-0'>
           <div>
-            <h1 className="text-3xl font-bold tracking-tight">Users</h1>
-            <p className="text-muted-foreground">
+            <h1 className='text-3xl font-bold tracking-tight'>Users</h1>
+            <p className='text-muted-foreground'>
               Manage user accounts and permissions for your digital signage system.
             </p>
           </div>
           <Button
             onClick={handleAddUser}
-            size="lg"
-            className="w-full sm:w-auto"
+            size='lg'
+            className='w-full sm:w-auto'
           >
-            <Users className="mr-2 h-5 w-5" />
+            <Users className='mr-2 h-5 w-5' />
             Add New User
           </Button>
         </div>
 
         {/* Users List */}
-        <div className="space-y-6">
+        <div className='space-y-6'>
           <UserList ref={userListRef} />
         </div>
         

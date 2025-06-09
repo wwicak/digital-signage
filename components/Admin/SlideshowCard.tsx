@@ -4,7 +4,6 @@ import Link from "next/link";
 import * as z from "zod";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
 
 import {
   deleteSlideshow,
@@ -74,52 +73,52 @@ const SlideshowCard: React.FC<ISlideshowCardProps> = ({
   const slideshowTitle = value.name || "Untitled Slideshow";
 
   return (
-    <Card className="group my-4 transition-all duration-200 hover:shadow-lg cursor-pointer">
+    <Card className='group my-4 transition-all duration-200 hover:shadow-lg cursor-pointer'>
       <Link
         href={`/slideshow/${value._id}?display=${displayId}`}
-        className="block"
+        className='block'
       >
-        <CardContent className="p-4">
-          <div className="flex items-center space-x-4">
+        <CardContent className='p-4'>
+          <div className='flex items-center space-x-4'>
             {/* Slideshow Thumbnail */}
-            <div className="flex-shrink-0">
-              <div className="h-12 w-12 rounded-lg bg-blue-500 flex items-center justify-center">
-                <Play className="h-6 w-6 text-white" />
+            <div className='flex-shrink-0'>
+              <div className='h-12 w-12 rounded-lg bg-blue-500 flex items-center justify-center'>
+                <Play className='h-6 w-6 text-white' />
               </div>
             </div>
 
             {/* Slideshow Info */}
-            <div className="flex-1 min-w-0">
-              <h3 className="text-base font-semibold text-foreground truncate mb-2">
+            <div className='flex-1 min-w-0'>
+              <h3 className='text-base font-semibold text-foreground truncate mb-2'>
                 {slideshowTitle}
               </h3>
 
-              <div className="flex items-center space-x-4 text-sm text-muted-foreground">
-                <div className="flex items-center gap-1">
-                  <Clock className="h-4 w-4" />
+              <div className='flex items-center space-x-4 text-sm text-muted-foreground'>
+                <div className='flex items-center gap-1'>
+                  <Clock className='h-4 w-4' />
                   <span>{totalDuration}s</span>
                 </div>
-                <div className="flex items-center gap-1">
-                  <Images className="h-4 w-4" />
+                <div className='flex items-center gap-1'>
+                  <Images className='h-4 w-4' />
                   <span>{slideCount} slides</span>
                 </div>
               </div>
             </div>
 
             {/* Action Button */}
-            <div className="flex-shrink-0 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+            <div className='flex-shrink-0 opacity-0 group-hover:opacity-100 transition-opacity duration-200'>
               <Button
-                variant="ghost"
-                size="icon"
+                variant='ghost'
+                size='icon'
                 onClick={(e) => {
                   e.preventDefault();
                   e.stopPropagation();
                   handleDelete(e as any);
                 }}
-                aria-label="Delete Slideshow"
-                className="h-8 w-8 text-destructive hover:text-destructive"
+                aria-label='Delete Slideshow'
+                className='h-8 w-8 text-destructive hover:text-destructive'
               >
-                <Trash2 className="h-4 w-4" />
+                <Trash2 className='h-4 w-4' />
               </Button>
             </div>
           </div>

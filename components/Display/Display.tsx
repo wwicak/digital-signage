@@ -251,7 +251,7 @@ const Display: React.FC<IDisplayComponentProps> = React.memo(({ display }) => {
         }}
       >
         <RglComponent
-          className="layout" // Default class, react-grid-layout uses this
+          className='layout' // Default class, react-grid-layout uses this
           isDraggable={false} // From original JS
           isResizable={false} // From original JS
           layout={rglWidgetLayout}

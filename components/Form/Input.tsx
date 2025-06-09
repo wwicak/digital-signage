@@ -268,18 +268,18 @@ class Input extends Component<IInputProps> {
               <div {...getRootProps()} className={`flex flex-col items-center justify-center cursor-pointer outline-none border-2 border-dashed border-gray-300 bg-gray-50 text-center min-h-[80px] p-4 rounded transition-colors duration-200 ${isDragActive ? 'border-blue-500 bg-blue-50' : ''} ${hasError ? 'border-red-500' : ''}`}>
                 <input {...getInputProps()} />
                 {isDragActive ? (
-                  <div className="font-sans text-gray-600">Drop the photo here...</div>
+                  <div className='font-sans text-gray-600'>Drop the photo here...</div>
                 ) : (value && typeof value === 'string') ? ( // If value is a URL string
-                  <div className="flex flex-col items-center text-center">
-                    <div className="h-16 w-16 rounded border border-gray-300 mb-2 bg-contain bg-no-repeat bg-center" style={{ backgroundImage: `url(${value})` }} />
-                    <span className="mt-2 overflow-hidden whitespace-nowrap text-ellipsis max-w-full text-sm text-gray-800">{value}</span>
+                  <div className='flex flex-col items-center text-center'>
+                    <div className='h-16 w-16 rounded border border-gray-300 mb-2 bg-contain bg-no-repeat bg-center' style={{ backgroundImage: `url(${value})` }} />
+                    <span className='mt-2 overflow-hidden whitespace-nowrap text-ellipsis max-w-full text-sm text-gray-800'>{value}</span>
                   </div>
                 ) : (value && value instanceof File) ? ( // If value is a File object (preview usually handled by parent or via FileReader)
-                     <div className="flex flex-col items-center text-center">
-                        <span className="mt-2 overflow-hidden whitespace-nowrap text-ellipsis max-w-full text-sm text-gray-800">{(value as File).name} (New)</span>
+                     <div className='flex flex-col items-center text-center'>
+                        <span className='mt-2 overflow-hidden whitespace-nowrap text-ellipsis max-w-full text-sm text-gray-800'>{(value as File).name} (New)</span>
                      </div>
                 ) : (
-                  <div className="font-sans text-gray-600">Drag &apos;n&apos; drop a photo here, or click to select</div>
+                  <div className='font-sans text-gray-600'>Drag &apos;n&apos; drop a photo here, or click to select</div>
                 )}
               </div>
             )}
@@ -321,8 +321,8 @@ class Input extends Component<IInputProps> {
         )}
         <div className={`flex flex-col ${expand ? 'flex-1' : ''}`}>
           {this.renderInput()}
-          {helpText && !hasError && <small className="text-sm text-gray-500 mt-1 block">{helpText}</small>}
-          {typeof error === 'string' && hasError && <small className="text-sm text-red-500 mt-1 block">{error}</small>}
+          {helpText && !hasError && <small className='text-sm text-gray-500 mt-1 block'>{helpText}</small>}
+          {typeof error === 'string' && hasError && <small className='text-sm text-red-500 mt-1 block'>{error}</small>}
         </div>
 
       </div>

@@ -24,22 +24,26 @@ class Progress extends Component<ProgressProps, ProgressState> {
   render() {
     const { current, defaultDuration, orderedSlides, ready } = this.props
     return (
-      <div className="flex flex-row w-full absolute">
+      <div className='flex flex-row w-full absolute bottom-0 left-0 h-1 bg-black bg-opacity-30'>
         {orderedSlides.map((slide, i) => (
-          <div key={`slide-${i}`} className={`progress-segment ${i < current ? 'active' : ''}`}>
+          <div
+            key={`slide-${i}`}
+            className={`flex-1 h-full relative overflow-hidden ${i < current ? 'bg-white' : 'bg-transparent'}`}
+          >
             <div
-              className={'progress-segment-content'}
+              className={`h-full bg-white transition-all ease-linear ${i === current && ready ? 'w-full' : 'w-0'}`}
               style={{
-                width: i === current && ready ? '100%' : '0%',
-                transition:
-                  i === current && ready
-                    ? `all linear ${slide.duration || defaultDuration / 1000}s`
-                    : 'none',
+                transitionDuration: i === current && ready
+                  ? `${slide.duration || defaultDuration / 1000}s`
+                  : '0s',
               }}
             />
+            {/* Separator line between segments */}
+            {i < orderedSlides.length - 1 && (
+              <div className='absolute top-0 right-0 w-px h-full bg-black bg-opacity-50' />
+            )}
           </div>
         ))}
-        
       </div>
     )
   }

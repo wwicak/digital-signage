@@ -41,8 +41,8 @@ export async function GET(request: NextRequest) {
       totalReservationsToday,
       totalReservationsThisWeek,
       totalReservationsThisMonth,
-      totalCalendarLinks,
-      activeCalendarLinks,
+      _totalCalendarLinks,
+      _activeCalendarLinks,
       currentMeetings,
       upcomingMeetingsToday,
     ] = await Promise.all([
@@ -280,7 +280,7 @@ export async function GET(request: NextRequest) {
         "title organizer start_time end_time creation_date room_id sourceCalendarType"
       );
 
-    const upcomingMeetings = await Reservation.find({
+    const _upcomingMeetings = await Reservation.find({
       start_time: { $gt: now },
     })
       .populate({

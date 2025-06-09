@@ -196,7 +196,7 @@ class SlideList extends Component<ISlideListProps, ISlideListState> {
     const { slides, error } = this.state;
 
     if (error) {
-      return <div className="error-message">{error}</div>;
+      return <div className='error-message'>{error}</div>;
     }
 
     return slides ? (
@@ -214,14 +214,14 @@ class SlideList extends Component<ISlideListProps, ISlideListState> {
             height={100}
             width={640}
             speed={2}
-            backgroundColor="#f3f3f3"
-            foregroundColor="#ecebeb"
+            backgroundColor='#f3f3f3'
+            foregroundColor='#ecebeb'
           >
-            <rect x="0" y="10" rx="4" ry="4" width="50" height="50" />
-            <rect x="60" y="10" rx="3" ry="3" width="300" height="15" />
-            <rect x="60" y="30" rx="3" ry="3" width="80" height="10" />
-            <rect x="580" y="25" rx="3" ry="3" width="20" height="20" />
-            <rect x="610" y="25" rx="3" ry="3" width="20" height="20" />
+            <rect x='0' y='10' rx='4' ry='4' width='50' height='50' />
+            <rect x='60' y='10' rx='3' ry='3' width='300' height='15' />
+            <rect x='60' y='30' rx='3' ry='3' width='80' height='10' />
+            <rect x='580' y='25' rx='3' ry='3' width='20' height='20' />
+            <rect x='610' y='25' rx='3' ry='3' width='20' height='20' />
           </ContentLoader>
         ))
     );

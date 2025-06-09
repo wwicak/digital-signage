@@ -27,7 +27,7 @@ const EditableWidget: React.FC<IEditableWidgetProps> = memo(({
   id,
   type = WidgetType.SLIDESHOW,
   onDelete,
-  layout = "spaced",
+  layout: _layout = "spaced",
 }) => {
   // Using useRef hook instead of createRef
   const dialogRef = useRef<WidgetEditDialog>(null);
@@ -59,32 +59,32 @@ const EditableWidget: React.FC<IEditableWidgetProps> = memo(({
 
   return (
     <>
-      <div className="group relative bg-white border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow h-full">
-        <div className="absolute top-2 right-2 flex space-x-1 controls z-10">
+      <div className='group relative bg-white border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow h-full'>
+        <div className='absolute top-2 right-2 flex space-x-1 controls z-10'>
           <button
-            className="p-2 rounded hover:bg-gray-100 transition-colors opacity-0 group-hover:opacity-100 md:opacity-0 touch:opacity-100 bg-white/90 backdrop-blur-sm shadow-sm"
+            className='p-2 rounded hover:bg-gray-100 transition-colors opacity-0 group-hover:opacity-100 md:opacity-0 touch:opacity-100 bg-white/90 backdrop-blur-sm shadow-sm'
             onClick={openDialog}
-            aria-label="Edit widget"
+            aria-label='Edit widget'
             onMouseDown={(e) => e.stopPropagation()}
             onTouchStart={(e) => e.stopPropagation()}
           >
-            <Settings className="w-4 h-4 text-gray-500" />
+            <Settings className='w-4 h-4 text-gray-500' />
           </button>
           <button
-            className="p-2 rounded hover:bg-gray-100 transition-colors opacity-0 group-hover:opacity-100 md:opacity-0 touch:opacity-100 bg-white/90 backdrop-blur-sm shadow-sm hover:bg-red-50 hover:text-red-600"
+            className='p-2 rounded hover:bg-gray-100 transition-colors opacity-0 group-hover:opacity-100 md:opacity-0 touch:opacity-100 bg-white/90 backdrop-blur-sm shadow-sm hover:bg-red-50 hover:text-red-600'
             onClick={handleDeleteClick}
-            aria-label="Delete widget"
+            aria-label='Delete widget'
             onMouseDown={(e) => e.stopPropagation()}
             onTouchStart={(e) => e.stopPropagation()}
           >
-            <X className="w-4 h-4 text-gray-500" />
+            <X className='w-4 h-4 text-gray-500' />
           </button>
         </div>
-        <div className="flex flex-col items-center justify-center h-full min-h-24 pointer-events-none">
-          <div className="mb-2">
-            <WidgetIcon className="w-8 h-8 text-primary" />
+        <div className='flex flex-col items-center justify-center h-full min-h-24 pointer-events-none'>
+          <div className='mb-2'>
+            <WidgetIcon className='w-8 h-8 text-primary' />
           </div>
-          <span className="text-sm font-medium text-gray-600 text-center">
+          <span className='text-sm font-medium text-gray-600 text-center'>
             {widgetName}
           </span>
         </div>
@@ -107,5 +107,7 @@ const EditableWidget: React.FC<IEditableWidgetProps> = memo(({
     </>
   );
 });
+
+EditableWidget.displayName = 'EditableWidget';
 
 export default EditableWidget;

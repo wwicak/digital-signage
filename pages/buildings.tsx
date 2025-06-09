@@ -6,7 +6,6 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Badge } from "@/components/ui/badge";
 import {
   Dialog,
   DialogContent,
@@ -165,11 +164,11 @@ const BuildingsPage = () => {
 
   return (
     <Frame loggedIn={true}>
-      <div className="space-y-6">
-        <div className="flex items-center justify-between">
+      <div className='space-y-6'>
+        <div className='flex items-center justify-between'>
           <div>
-            <h1 className="text-3xl font-bold tracking-tight">Buildings</h1>
-            <p className="text-muted-foreground">
+            <h1 className='text-3xl font-bold tracking-tight'>Buildings</h1>
+            <p className='text-muted-foreground'>
               Manage buildings for your meeting room system
             </p>
           </div>
@@ -182,7 +181,7 @@ const BuildingsPage = () => {
           >
             <DialogTrigger asChild>
               <Button>
-                <Plus className="mr-2 h-4 w-4" />
+                <Plus className='mr-2 h-4 w-4' />
                 Add Building
               </Button>
             </DialogTrigger>
@@ -190,40 +189,40 @@ const BuildingsPage = () => {
               <DialogHeader>
                 <DialogTitle>Create New Building</DialogTitle>
               </DialogHeader>
-              <form onSubmit={handleCreateBuilding} className="space-y-4">
+              <form onSubmit={handleCreateBuilding} className='space-y-4'>
                 <div>
-                  <Label htmlFor="name">Building Name</Label>
+                  <Label htmlFor='name'>Building Name</Label>
                   <Input
-                    id="name"
+                    id='name'
                     value={formData.name}
                     onChange={(e) =>
                       setFormData({ ...formData, name: e.target.value })
                     }
-                    placeholder="Enter building name"
+                    placeholder='Enter building name'
                     required
                   />
                 </div>
                 <div>
-                  <Label htmlFor="address">Address</Label>
+                  <Label htmlFor='address'>Address</Label>
                   <Input
-                    id="address"
+                    id='address'
                     value={formData.address}
                     onChange={(e) =>
                       setFormData({ ...formData, address: e.target.value })
                     }
-                    placeholder="Enter building address"
+                    placeholder='Enter building address'
                     required
                   />
                 </div>
-                <div className="flex justify-end space-x-2">
+                <div className='flex justify-end space-x-2'>
                   <Button
-                    type="button"
-                    variant="outline"
+                    type='button'
+                    variant='outline'
                     onClick={() => setIsCreateDialogOpen(false)}
                   >
                     Cancel
                   </Button>
-                  <Button type="submit">Create Building</Button>
+                  <Button type='submit'>Create Building</Button>
                 </div>
               </form>
             </DialogContent>
@@ -232,16 +231,16 @@ const BuildingsPage = () => {
 
         <Card>
           <CardHeader>
-            <CardTitle className="flex items-center">
-              <Building className="mr-2 h-5 w-5" />
+            <CardTitle className='flex items-center'>
+              <Building className='mr-2 h-5 w-5' />
               Buildings List
             </CardTitle>
           </CardHeader>
           <CardContent>
             {loading ? (
-              <div className="text-center py-8">Loading buildings...</div>
+              <div className='text-center py-8'>Loading buildings...</div>
             ) : buildings.length === 0 ? (
-              <div className="text-center py-8 text-muted-foreground">
+              <div className='text-center py-8 text-muted-foreground'>
                 No buildings found. Create your first building to get started.
               </div>
             ) : (
@@ -257,12 +256,12 @@ const BuildingsPage = () => {
                 <TableBody>
                   {buildings.map((building) => (
                     <TableRow key={building._id}>
-                      <TableCell className="font-medium">
+                      <TableCell className='font-medium'>
                         {building.name}
                       </TableCell>
                       <TableCell>
-                        <div className="flex items-center">
-                          <MapPin className="mr-1 h-4 w-4 text-muted-foreground" />
+                        <div className='flex items-center'>
+                          <MapPin className='mr-1 h-4 w-4 text-muted-foreground' />
                           {building.address}
                         </div>
                       </TableCell>
@@ -270,20 +269,20 @@ const BuildingsPage = () => {
                         {new Date(building.creation_date).toLocaleDateString()}
                       </TableCell>
                       <TableCell>
-                        <div className="flex space-x-2">
+                        <div className='flex space-x-2'>
                           <Button
-                            variant="outline"
-                            size="sm"
+                            variant='outline'
+                            size='sm'
                             onClick={() => openEditDialog(building)}
                           >
-                            <Edit className="h-4 w-4" />
+                            <Edit className='h-4 w-4' />
                           </Button>
                           <Button
-                            variant="outline"
-                            size="sm"
+                            variant='outline'
+                            size='sm'
                             onClick={() => handleDeleteBuilding(building)}
                           >
-                            <Trash2 className="h-4 w-4" />
+                            <Trash2 className='h-4 w-4' />
                           </Button>
                         </div>
                       </TableCell>
@@ -307,40 +306,40 @@ const BuildingsPage = () => {
             <DialogHeader>
               <DialogTitle>Edit Building</DialogTitle>
             </DialogHeader>
-            <form onSubmit={handleEditBuilding} className="space-y-4">
+            <form onSubmit={handleEditBuilding} className='space-y-4'>
               <div>
-                <Label htmlFor="edit-name">Building Name</Label>
+                <Label htmlFor='edit-name'>Building Name</Label>
                 <Input
-                  id="edit-name"
+                  id='edit-name'
                   value={formData.name}
                   onChange={(e) =>
                     setFormData({ ...formData, name: e.target.value })
                   }
-                  placeholder="Enter building name"
+                  placeholder='Enter building name'
                   required
                 />
               </div>
               <div>
-                <Label htmlFor="edit-address">Address</Label>
+                <Label htmlFor='edit-address'>Address</Label>
                 <Input
-                  id="edit-address"
+                  id='edit-address'
                   value={formData.address}
                   onChange={(e) =>
                     setFormData({ ...formData, address: e.target.value })
                   }
-                  placeholder="Enter building address"
+                  placeholder='Enter building address'
                   required
                 />
               </div>
-              <div className="flex justify-end space-x-2">
+              <div className='flex justify-end space-x-2'>
                 <Button
-                  type="button"
-                  variant="outline"
+                  type='button'
+                  variant='outline'
                   onClick={() => setIsEditDialogOpen(false)}
                 >
                   Cancel
                 </Button>
-                <Button type="submit">Update Building</Button>
+                <Button type='submit'>Update Building</Button>
               </div>
             </form>
           </DialogContent>

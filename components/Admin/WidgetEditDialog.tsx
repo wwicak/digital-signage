@@ -1,10 +1,9 @@
 import React, { Component, ComponentType } from "react";
 import Dialog, { DialogMethods } from "../Dialog";
-import { Form, Button, ButtonGroup } from "../Form";
+import { Form, Button } from "../Form";
 import { getWidget, updateWidget, IWidgetData } from "../../actions/widgets"; // IWidgetData is likely an interface
 import * as z from "zod";
 import { WidgetDataZod, WidgetTypeZod } from "@/lib/models/Widget"; // Import Zod schema for widget's 'data' field and type
-import { DialogFooter } from "../ui/dialog";
 import { Loader2, AlertCircle } from "lucide-react";
 
 // Widget data cache to avoid repeated API calls
@@ -289,37 +288,37 @@ class WidgetEditDialog
       <Dialog
         ref={this.dialogRef}
         title={dialogTitle}
-        className="widget-settings-modal"
+        className='widget-settings-modal'
       >
-        <div className="flex flex-col h-full max-h-[calc(90vh-8rem)]">
+        <div className='flex flex-col h-full max-h-[calc(90vh-8rem)]'>
           {/* Error Display - Fixed at top */}
           {error && (
-            <div className="flex-shrink-0 mb-4">
-              <div className="flex items-center gap-4 p-4 text-red-800 bg-red-50 border border-red-200 rounded-lg">
-                <AlertCircle className="w-5 h-5 flex-shrink-0" />
+            <div className='flex-shrink-0 mb-4'>
+              <div className='flex items-center gap-4 p-4 text-red-800 bg-red-50 border border-red-200 rounded-lg'>
+                <AlertCircle className='w-5 h-5 flex-shrink-0' />
                 <div>
-                  <h4 className="font-medium">Configuration Error</h4>
-                  <p className="text-sm">{error}</p>
+                  <h4 className='font-medium'>Configuration Error</h4>
+                  <p className='text-sm'>{error}</p>
                 </div>
               </div>
             </div>
           )}
 
           {/* Scrollable Content Area */}
-          <div className="flex-1 overflow-y-auto min-h-0 pr-2 -mr-2">
-            <div className="widget-settings-body pb-6">
+          <div className='flex-1 overflow-y-auto min-h-0 pr-2 -mr-2'>
+            <div className='widget-settings-body pb-6'>
               {isLoading ? (
-                <div className="flex items-center justify-center py-12">
-                  <div className="flex items-center gap-3 text-gray-600">
-                    <Loader2 className="w-6 h-6 animate-spin" />
-                    <div className="flex flex-col">
-                      <span className="text-lg">Loading widget configuration...</span>
-                      <span className="text-sm text-gray-500 mt-1">This should only take a moment</span>
+                <div className='flex items-center justify-center py-12'>
+                  <div className='flex items-center gap-3 text-gray-600'>
+                    <Loader2 className='w-6 h-6 animate-spin' />
+                    <div className='flex flex-col'>
+                      <span className='text-lg'>Loading widget configuration...</span>
+                      <span className='text-sm text-gray-500 mt-1'>This should only take a moment</span>
                     </div>
                   </div>
                 </div>
               ) : (
-                <div className="space-y-6">
+                <div className='space-y-6'>
                   <OptionsComponent
                     data={widgetConfigData || {}}
                     onChange={this.handleOptionsChange}
@@ -330,20 +329,20 @@ class WidgetEditDialog
           </div>
 
           {/* Fixed Footer */}
-          <div className="flex-shrink-0 mt-4 pt-4 border-t border-gray-200 bg-white">
-            <div className="flex gap-3 justify-end w-full">
+          <div className='flex-shrink-0 mt-4 pt-4 border-t border-gray-200 bg-white'>
+            <div className='flex gap-3 justify-end w-full'>
               <Button
-                text="Cancel"
-                color="#6b7280"
+                text='Cancel'
+                color='#6b7280'
                 onClick={this.close}
-                className="px-6 py-2 text-gray-700 bg-white hover:bg-gray-50 border border-gray-300 rounded-lg transition-colors shadow-sm"
+                className='px-6 py-2 text-gray-700 bg-white hover:bg-gray-50 border border-gray-300 rounded-lg transition-colors shadow-sm'
               />
               <Button
                 text={isLoading ? "Saving..." : "Save Changes"}
-                color="#10b981"
+                color='#10b981'
                 onClick={this.handleSave}
                 disabled={isLoading || !!error}
-                className="px-6 py-2 text-white bg-green-600 hover:bg-green-700 disabled:bg-gray-400 disabled:cursor-not-allowed rounded-lg transition-colors shadow-sm"
+                className='px-6 py-2 text-white bg-green-600 hover:bg-green-700 disabled:bg-gray-400 disabled:cursor-not-allowed rounded-lg transition-colors shadow-sm'
               />
             </div>
           </div>

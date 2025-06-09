@@ -82,9 +82,9 @@ const DisplayTestPage: React.FC = () => {
   return (
     <div style={{ width: '100vw', height: '100vh', display: 'flex', flexDirection: 'column' }}>
       {/* Control Panel */}
-      <div style={{ 
-        padding: '10px', 
-        background: '#f8f9fa', 
+      <div style={{
+        padding: '10px',
+        background: '#f8f9fa',
         borderBottom: '1px solid #dee2e6',
         display: 'flex',
         alignItems: 'center',
@@ -130,8 +130,8 @@ const DisplayTestPage: React.FC = () => {
       </div>
 
       {/* Display Area */}
-      <div style={{ 
-        flex: 1, 
+      <div style={{
+        flex: 1,
         position: 'relative',
         overflow: 'hidden',
         background: '#000'

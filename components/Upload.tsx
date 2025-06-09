@@ -19,10 +19,10 @@ const DropzoneWithNoSSR = dynamic(
         height={120}
         width={640}
         speed={2}
-        backgroundColor="#f3f3f3"
-        foregroundColor="#ecebeb"
+        backgroundColor='#f3f3f3'
+        foregroundColor='#ecebeb'
       >
-        <rect x="0" y="0" rx="5" ry="5" width="100%" height="100" />
+        <rect x='0' y='0' rx='5' ry='5' width='100%' height='100' />
       </ContentLoader>
     ),
   },
@@ -174,11 +174,11 @@ class Upload extends Component<IUploadProps, IUploadState> {
               >
                 <input {...getInputProps()} />
                 {isDragActive ? (
-                  <p className="m-0 text-gray-600">
+                  <p className='m-0 text-gray-600'>
                     Drop files here to add to the slideshow...
                   </p>
                 ) : (
-                  <p className="m-0 text-gray-600">
+                  <p className='m-0 text-gray-600'>
                     Drag &apos;n&apos; drop some files here, or click to select
                     files to add to the slideshow.
                   </p>

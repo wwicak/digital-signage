@@ -89,10 +89,10 @@ const WebContent: React.FC<IWebContentProps> = React.memo(({ data, isPreview }) 
   , [allowInteraction])
 
   return (
-    <div className="relative box-border h-full w-full flex-1 font-sans flex flex-col text-white" style={{ background: color }}>
+    <div className='relative box-border h-full w-full flex-1 font-sans flex flex-col text-white' style={{ background: color }}>
       {title && (
-        <div className="p-3">
-          <div className="font-sans text-base pl-3 font-semibold uppercase">{title}</div>
+        <div className='p-3'>
+          <div className='font-sans text-base pl-3 font-semibold uppercase'>{title}</div>
         </div>
       )}
       <div className='iframe-area' style={iframeContainerStyle}>
@@ -109,7 +109,7 @@ const WebContent: React.FC<IWebContentProps> = React.memo(({ data, isPreview }) 
             console.error('This might be due to X-Frame-Options or CSP restrictions');
           }}
           onLoad={() => {
-            console.log('WebContent iframe loaded successfully:', url);
+            // iframe loaded successfully
           }}
         />
       </div>

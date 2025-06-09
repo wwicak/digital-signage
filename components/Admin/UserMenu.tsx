@@ -218,21 +218,21 @@ const UserMenu: React.FC<UserMenuProps> = ({ className, user }) => {
     <>
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button variant="ghost" size="icon" className={cn("h-8 w-8", className)}>
-            <User className="h-4 w-4" />
+          <Button variant='ghost' size='icon' className={cn("h-8 w-8", className)}>
+            <User className='h-4 w-4' />
           </Button>
         </DropdownMenuTrigger>
-        <DropdownMenuContent align="end" className="w-56">
-          <DropdownMenuLabel className="font-normal">
-            <div className="flex flex-col space-y-1">
-              <p className="text-sm font-medium leading-none">
+        <DropdownMenuContent align='end' className='w-56'>
+          <DropdownMenuLabel className='font-normal'>
+            <div className='flex flex-col space-y-1'>
+              <p className='text-sm font-medium leading-none'>
                 {safeGetString(user?.name, "User")}
               </p>
-              <p className="text-xs leading-none text-muted-foreground">
+              <p className='text-xs leading-none text-muted-foreground'>
                 {user?.email || "user@example.com"}
               </p>
               {user?.role && (
-                <p className="text-xs leading-none text-muted-foreground capitalize">
+                <p className='text-xs leading-none text-muted-foreground capitalize'>
                   {safeGetString(user.role, "User")}
                 </p>
               )}
@@ -240,20 +240,20 @@ const UserMenu: React.FC<UserMenuProps> = ({ className, user }) => {
           </DropdownMenuLabel>
           <DropdownMenuSeparator />
           <DropdownMenuItem onClick={() => setIsPasswordDialogOpen(true)}>
-            <Key className="mr-2 h-4 w-4" />
+            <Key className='mr-2 h-4 w-4' />
             <span>Change Password</span>
           </DropdownMenuItem>
           <DropdownMenuItem>
-            <Settings className="mr-2 h-4 w-4" />
+            <Settings className='mr-2 h-4 w-4' />
             <span>Settings</span>
           </DropdownMenuItem>
           <DropdownMenuSeparator />
-          <DropdownMenuItem 
+          <DropdownMenuItem
             onClick={handleLogout}
             disabled={isLoggingOut}
-            className="text-red-600 focus:text-red-600"
+            className='text-red-600 focus:text-red-600'
           >
-            <LogOut className="mr-2 h-4 w-4" />
+            <LogOut className='mr-2 h-4 w-4' />
             <span>{isLoggingOut ? "Logging out..." : "Log out"}</span>
           </DropdownMenuItem>
         </DropdownMenuContent>
@@ -264,7 +264,7 @@ const UserMenu: React.FC<UserMenuProps> = ({ className, user }) => {
         setIsPasswordDialogOpen(open);
         if (!open) resetPasswordDialog();
       }}>
-        <DialogContent className="sm:max-w-[425px]">
+        <DialogContent className='sm:max-w-[425px]'>
           <DialogHeader>
             <DialogTitle>Change Password</DialogTitle>
             <DialogDescription>
@@ -272,124 +272,124 @@ const UserMenu: React.FC<UserMenuProps> = ({ className, user }) => {
             </DialogDescription>
           </DialogHeader>
           
-          <div className="grid gap-4 py-4">
+          <div className='grid gap-4 py-4'>
             {passwordError && (
-              <Alert variant="destructive">
-                <AlertTriangle className="h-4 w-4" />
+              <Alert variant='destructive'>
+                <AlertTriangle className='h-4 w-4' />
                 <AlertDescription>{passwordError}</AlertDescription>
               </Alert>
             )}
             
             {passwordSuccess && (
               <Alert>
-                <AlertDescription className="text-green-600">
+                <AlertDescription className='text-green-600'>
                   {passwordSuccess}
                 </AlertDescription>
               </Alert>
             )}
 
-            <div className="grid gap-2">
-              <Label htmlFor="current-password">Current Password</Label>
-              <div className="relative">
+            <div className='grid gap-2'>
+              <Label htmlFor='current-password'>Current Password</Label>
+              <div className='relative'>
                 <Input
-                  id="current-password"
+                  id='current-password'
                   type={showPasswords.current ? "text" : "password"}
                   value={passwordForm.currentPassword}
                   onChange={(e) => setPasswordForm(prev => ({
                     ...prev,
                     currentPassword: e.target.value
                   }))}
-                  className="pr-10"
+                  className='pr-10'
                 />
                 <Button
-                  type="button"
-                  variant="ghost"
-                  size="icon"
-                  className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                  type='button'
+                  variant='ghost'
+                  size='icon'
+                  className='absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent'
                   onClick={() => togglePasswordVisibility("current")}
                 >
                   {showPasswords.current ? (
-                    <EyeOff className="h-4 w-4" />
+                    <EyeOff className='h-4 w-4' />
                   ) : (
-                    <Eye className="h-4 w-4" />
+                    <Eye className='h-4 w-4' />
                   )}
                 </Button>
               </div>
             </div>
 
-            <div className="grid gap-2">
-              <Label htmlFor="new-password">New Password</Label>
-              <div className="relative">
+            <div className='grid gap-2'>
+              <Label htmlFor='new-password'>New Password</Label>
+              <div className='relative'>
                 <Input
-                  id="new-password"
+                  id='new-password'
                   type={showPasswords.new ? "text" : "password"}
                   value={passwordForm.newPassword}
                   onChange={(e) => setPasswordForm(prev => ({
                     ...prev,
                     newPassword: e.target.value
                   }))}
-                  className="pr-10"
+                  className='pr-10'
                 />
                 <Button
-                  type="button"
-                  variant="ghost"
-                  size="icon"
-                  className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                  type='button'
+                  variant='ghost'
+                  size='icon'
+                  className='absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent'
                   onClick={() => togglePasswordVisibility("new")}
                 >
                   {showPasswords.new ? (
-                    <EyeOff className="h-4 w-4" />
+                    <EyeOff className='h-4 w-4' />
                   ) : (
-                    <Eye className="h-4 w-4" />
+                    <Eye className='h-4 w-4' />
                   )}
                 </Button>
               </div>
             </div>
 
-            <div className="grid gap-2">
-              <Label htmlFor="confirm-password">Confirm New Password</Label>
-              <div className="relative">
+            <div className='grid gap-2'>
+              <Label htmlFor='confirm-password'>Confirm New Password</Label>
+              <div className='relative'>
                 <Input
-                  id="confirm-password"
+                  id='confirm-password'
                   type={showPasswords.confirm ? "text" : "password"}
                   value={passwordForm.confirmPassword}
                   onChange={(e) => setPasswordForm(prev => ({
                     ...prev,
                     confirmPassword: e.target.value
                   }))}
-                  className="pr-10"
+                  className='pr-10'
                 />
                 <Button
-                  type="button"
-                  variant="ghost"
-                  size="icon"
-                  className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                  type='button'
+                  variant='ghost'
+                  size='icon'
+                  className='absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent'
                   onClick={() => togglePasswordVisibility("confirm")}
                 >
                   {showPasswords.confirm ? (
-                    <EyeOff className="h-4 w-4" />
+                    <EyeOff className='h-4 w-4' />
                   ) : (
-                    <Eye className="h-4 w-4" />
+                    <Eye className='h-4 w-4' />
                   )}
                 </Button>
               </div>
             </div>
 
-            <div className="text-xs text-muted-foreground">
+            <div className='text-xs text-muted-foreground'>
               Password must be at least 8 characters and include uppercase, lowercase, number, and special character.
             </div>
           </div>
 
           <DialogFooter>
             <Button
-              type="button"
-              variant="outline"
+              type='button'
+              variant='outline'
               onClick={() => setIsPasswordDialogOpen(false)}
             >
               Cancel
             </Button>
             <Button
-              type="button"
+              type='button'
               onClick={handlePasswordChange}
               disabled={isChangingPassword}
             >

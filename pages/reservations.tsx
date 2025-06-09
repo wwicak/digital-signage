@@ -318,20 +318,20 @@ const ReservationsPage = () => {
     if (reservation.isExternallyManaged) {
       switch (reservation.sourceCalendarType) {
         case "google":
-          return <Badge variant="outline" className="text-blue-600">Google</Badge>;
+          return <Badge variant='outline' className='text-blue-600'>Google</Badge>;
         case "outlook":
-          return <Badge variant="outline" className="text-orange-600">Outlook</Badge>;
+          return <Badge variant='outline' className='text-orange-600'>Outlook</Badge>;
         default:
-          return <Badge variant="outline">External</Badge>;
+          return <Badge variant='outline'>External</Badge>;
       }
     }
-    return <Badge variant="secondary">Internal</Badge>;
+    return <Badge variant='secondary'>Internal</Badge>;
   };
 
   const formatTime = (dateString: string) => {
-    return new Date(dateString).toLocaleTimeString([], { 
-      hour: '2-digit', 
-      minute: '2-digit' 
+    return new Date(dateString).toLocaleTimeString([], {
+      hour: '2-digit',
+      minute: '2-digit'
     });
   };
 
@@ -341,29 +341,29 @@ const ReservationsPage = () => {
 
   return (
     <Frame loggedIn={true}>
-      <div className="space-y-6">
-        <div className="flex items-center justify-between">
+      <div className='space-y-6'>
+        <div className='flex items-center justify-between'>
           <div>
-            <h1 className="text-3xl font-bold tracking-tight">Reservations</h1>
-            <p className="text-muted-foreground">
+            <h1 className='text-3xl font-bold tracking-tight'>Reservations</h1>
+            <p className='text-muted-foreground'>
               Manage meeting room reservations and calendar sync
             </p>
           </div>
-          <div className="flex items-center space-x-2">
-            <div className="flex items-center space-x-1 bg-muted rounded-lg p-1">
+          <div className='flex items-center space-x-2'>
+            <div className='flex items-center space-x-1 bg-muted rounded-lg p-1'>
               <Button
                 variant={viewMode === "list" ? "default" : "ghost"}
-                size="sm"
+                size='sm'
                 onClick={() => setViewMode("list")}
               >
-                <List className="h-4 w-4" />
+                <List className='h-4 w-4' />
               </Button>
               <Button
                 variant={viewMode === "calendar" ? "default" : "ghost"}
-                size="sm"
+                size='sm'
                 onClick={() => setViewMode("calendar")}
               >
-                <CalendarDays className="h-4 w-4" />
+                <CalendarDays className='h-4 w-4' />
               </Button>
             </div>
             <Dialog
@@ -375,43 +375,43 @@ const ReservationsPage = () => {
             >
               <DialogTrigger asChild>
                 <Button>
-                  <Plus className="mr-2 h-4 w-4" />
+                  <Plus className='mr-2 h-4 w-4' />
                   Add Reservation
                 </Button>
               </DialogTrigger>
-              <DialogContent className="max-w-2xl">
+              <DialogContent className='max-w-2xl'>
                 <DialogHeader>
                   <DialogTitle>Create New Reservation</DialogTitle>
                 </DialogHeader>
-                <form onSubmit={handleCreateReservation} className="space-y-4">
-                  <div className="grid grid-cols-2 gap-4">
+                <form onSubmit={handleCreateReservation} className='space-y-4'>
+                  <div className='grid grid-cols-2 gap-4'>
                     <div>
-                      <Label htmlFor="title">Meeting Title</Label>
+                      <Label htmlFor='title'>Meeting Title</Label>
                       <Input
-                        id="title"
+                        id='title'
                         value={formData.title}
                         onChange={(e) =>
                           setFormData({ ...formData, title: e.target.value })
                         }
-                        placeholder="Enter meeting title"
+                        placeholder='Enter meeting title'
                         required
                       />
                     </div>
                     <div>
-                      <Label htmlFor="organizer">Organizer</Label>
+                      <Label htmlFor='organizer'>Organizer</Label>
                       <Input
-                        id="organizer"
+                        id='organizer'
                         value={formData.organizer}
                         onChange={(e) =>
                           setFormData({ ...formData, organizer: e.target.value })
                         }
-                        placeholder="Enter organizer name"
+                        placeholder='Enter organizer name'
                         required
                       />
                     </div>
                   </div>
                   <div>
-                    <Label htmlFor="room">Room</Label>
+                    <Label htmlFor='room'>Room</Label>
                     <Select
                       value={formData.room_id}
                       onValueChange={(value) =>
@@ -420,7 +420,7 @@ const ReservationsPage = () => {
                       required
                     >
                       <SelectTrigger>
-                        <SelectValue placeholder="Select a room" />
+                        <SelectValue placeholder='Select a room' />
                       </SelectTrigger>
                       <SelectContent>
                         {rooms.map((room) => (
@@ -431,12 +431,12 @@ const ReservationsPage = () => {
                       </SelectContent>
                     </Select>
                   </div>
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className='grid grid-cols-2 gap-4'>
                     <div>
-                      <Label htmlFor="start_time">Start Time</Label>
+                      <Label htmlFor='start_time'>Start Time</Label>
                       <Input
-                        id="start_time"
-                        type="datetime-local"
+                        id='start_time'
+                        type='datetime-local'
                         value={formData.start_time}
                         onChange={(e) =>
                           setFormData({ ...formData, start_time: e.target.value })
@@ -445,10 +445,10 @@ const ReservationsPage = () => {
                       />
                     </div>
                     <div>
-                      <Label htmlFor="end_time">End Time</Label>
+                      <Label htmlFor='end_time'>End Time</Label>
                       <Input
-                        id="end_time"
-                        type="datetime-local"
+                        id='end_time'
+                        type='datetime-local'
                         value={formData.end_time}
                         onChange={(e) =>
                           setFormData({ ...formData, end_time: e.target.value })
@@ -458,37 +458,37 @@ const ReservationsPage = () => {
                     </div>
                   </div>
                   <div>
-                    <Label htmlFor="attendees">Attendees (comma-separated)</Label>
+                    <Label htmlFor='attendees'>Attendees (comma-separated)</Label>
                     <Input
-                      id="attendees"
+                      id='attendees'
                       value={formData.attendees}
                       onChange={(e) =>
                         setFormData({ ...formData, attendees: e.target.value })
                       }
-                      placeholder="john@example.com, jane@example.com"
+                      placeholder='john@example.com, jane@example.com'
                     />
                   </div>
                   <div>
-                    <Label htmlFor="agenda">Agenda</Label>
+                    <Label htmlFor='agenda'>Agenda</Label>
                     <Textarea
-                      id="agenda"
+                      id='agenda'
                       value={formData.agenda_meeting}
                       onChange={(e) =>
                         setFormData({ ...formData, agenda_meeting: e.target.value })
                       }
-                      placeholder="Enter meeting agenda"
+                      placeholder='Enter meeting agenda'
                       rows={3}
                     />
                   </div>
-                  <div className="flex justify-end space-x-2">
+                  <div className='flex justify-end space-x-2'>
                     <Button
-                      type="button"
-                      variant="outline"
+                      type='button'
+                      variant='outline'
                       onClick={() => setIsCreateDialogOpen(false)}
                     >
                       Cancel
                     </Button>
-                    <Button type="submit">Create Reservation</Button>
+                    <Button type='submit'>Create Reservation</Button>
                   </div>
                 </form>
               </DialogContent>
@@ -497,25 +497,25 @@ const ReservationsPage = () => {
         </div>
 
         {/* Filters */}
-        <div className="flex items-center space-x-4">
+        <div className='flex items-center space-x-4'>
           <div>
-            <Label htmlFor="date-filter">Date:</Label>
+            <Label htmlFor='date-filter'>Date:</Label>
             <Input
-              id="date-filter"
-              type="date"
+              id='date-filter'
+              type='date'
               value={dateFilter}
               onChange={(e) => setDateFilter(e.target.value)}
-              className="w-40"
+              className='w-40'
             />
           </div>
           <div>
-            <Label htmlFor="building-filter">Building:</Label>
+            <Label htmlFor='building-filter'>Building:</Label>
             <Select value={selectedBuilding} onValueChange={setSelectedBuilding}>
-              <SelectTrigger className="w-[200px]">
+              <SelectTrigger className='w-[200px]'>
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">All Buildings</SelectItem>
+                <SelectItem value='all'>All Buildings</SelectItem>
                 {buildings.map((building) => (
                   <SelectItem key={building._id} value={building._id}>
                     {building.name}
@@ -525,13 +525,13 @@ const ReservationsPage = () => {
             </Select>
           </div>
           <div>
-            <Label htmlFor="room-filter">Room:</Label>
+            <Label htmlFor='room-filter'>Room:</Label>
             <Select value={selectedRoom} onValueChange={setSelectedRoom}>
-              <SelectTrigger className="w-[200px]">
+              <SelectTrigger className='w-[200px]'>
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">All Rooms</SelectItem>
+                <SelectItem value='all'>All Rooms</SelectItem>
                 {rooms.map((room) => (
                   <SelectItem key={room._id} value={room._id}>
                     {room.name}
@@ -556,16 +556,16 @@ const ReservationsPage = () => {
         ) : (
           <Card>
             <CardHeader>
-              <CardTitle className="flex items-center">
-                <Calendar className="mr-2 h-5 w-5" />
+              <CardTitle className='flex items-center'>
+                <Calendar className='mr-2 h-5 w-5' />
                 Reservations List
               </CardTitle>
             </CardHeader>
             <CardContent>
               {loading ? (
-                <div className="text-center py-8">Loading reservations...</div>
+                <div className='text-center py-8'>Loading reservations...</div>
               ) : reservations.length === 0 ? (
-                <div className="text-center py-8 text-muted-foreground">
+                <div className='text-center py-8 text-muted-foreground'>
                   No reservations found for the selected filters.
                 </div>
               ) : (
@@ -585,42 +585,42 @@ const ReservationsPage = () => {
                       <TableRow key={reservation._id}>
                         <TableCell>
                           <div>
-                            <div className="font-medium">{reservation.title}</div>
+                            <div className='font-medium'>{reservation.title}</div>
                             {reservation.agenda_meeting && (
-                              <div className="text-sm text-muted-foreground">
+                              <div className='text-sm text-muted-foreground'>
                                 {reservation.agenda_meeting}
                               </div>
                             )}
                           </div>
                         </TableCell>
                         <TableCell>
-                          <div className="flex items-center">
-                            <Building className="mr-1 h-4 w-4 text-muted-foreground" />
-                            <span className="text-sm">{reservation.room_id.building_id.name}</span>
+                          <div className='flex items-center'>
+                            <Building className='mr-1 h-4 w-4 text-muted-foreground' />
+                            <span className='text-sm'>{reservation.room_id.building_id.name}</span>
                           </div>
-                          <div className="flex items-center">
-                            <DoorOpen className="mr-1 h-4 w-4 text-muted-foreground" />
-                            <span className="font-medium">{reservation.room_id.name}</span>
+                          <div className='flex items-center'>
+                            <DoorOpen className='mr-1 h-4 w-4 text-muted-foreground' />
+                            <span className='font-medium'>{reservation.room_id.name}</span>
                           </div>
                         </TableCell>
                         <TableCell>
-                          <div className="flex items-center">
-                            <Clock className="mr-1 h-4 w-4 text-muted-foreground" />
+                          <div className='flex items-center'>
+                            <Clock className='mr-1 h-4 w-4 text-muted-foreground' />
                             <div>
-                              <div className="text-sm">{formatDate(reservation.start_time)}</div>
-                              <div className="text-sm font-medium">
+                              <div className='text-sm'>{formatDate(reservation.start_time)}</div>
+                              <div className='text-sm font-medium'>
                                 {formatTime(reservation.start_time)} - {formatTime(reservation.end_time)}
                               </div>
                             </div>
                           </div>
                         </TableCell>
                         <TableCell>
-                          <div className="flex items-center">
-                            <User className="mr-1 h-4 w-4 text-muted-foreground" />
+                          <div className='flex items-center'>
+                            <User className='mr-1 h-4 w-4 text-muted-foreground' />
                             <span>{reservation.organizer}</span>
                           </div>
                           {reservation.attendees.length > 0 && (
-                            <div className="text-sm text-muted-foreground">
+                            <div className='text-sm text-muted-foreground'>
                               +{reservation.attendees.length} attendees
                             </div>
                           )}
@@ -629,22 +629,22 @@ const ReservationsPage = () => {
                           {getSourceBadge(reservation)}
                         </TableCell>
                         <TableCell>
-                          <div className="flex space-x-2">
+                          <div className='flex space-x-2'>
                             <Button
-                              variant="outline"
-                              size="sm"
+                              variant='outline'
+                              size='sm'
                               onClick={() => openEditDialog(reservation)}
                               disabled={reservation.isExternallyManaged}
                             >
-                              <Edit className="h-4 w-4" />
+                              <Edit className='h-4 w-4' />
                             </Button>
                             <Button
-                              variant="outline"
-                              size="sm"
+                              variant='outline'
+                              size='sm'
                               onClick={() => handleDeleteReservation(reservation)}
                               disabled={reservation.isExternallyManaged}
                             >
-                              <Trash2 className="h-4 w-4" />
+                              <Trash2 className='h-4 w-4' />
                             </Button>
                           </div>
                         </TableCell>
@@ -665,39 +665,39 @@ const ReservationsPage = () => {
             if (!open) resetForm();
           }}
         >
-          <DialogContent className="max-w-2xl">
+          <DialogContent className='max-w-2xl'>
             <DialogHeader>
               <DialogTitle>Edit Reservation</DialogTitle>
             </DialogHeader>
-            <form onSubmit={handleEditReservation} className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
+            <form onSubmit={handleEditReservation} className='space-y-4'>
+              <div className='grid grid-cols-2 gap-4'>
                 <div>
-                  <Label htmlFor="edit-title">Meeting Title</Label>
+                  <Label htmlFor='edit-title'>Meeting Title</Label>
                   <Input
-                    id="edit-title"
+                    id='edit-title'
                     value={formData.title}
                     onChange={(e) =>
                       setFormData({ ...formData, title: e.target.value })
                     }
-                    placeholder="Enter meeting title"
+                    placeholder='Enter meeting title'
                     required
                   />
                 </div>
                 <div>
-                  <Label htmlFor="edit-organizer">Organizer</Label>
+                  <Label htmlFor='edit-organizer'>Organizer</Label>
                   <Input
-                    id="edit-organizer"
+                    id='edit-organizer'
                     value={formData.organizer}
                     onChange={(e) =>
                       setFormData({ ...formData, organizer: e.target.value })
                     }
-                    placeholder="Enter organizer name"
+                    placeholder='Enter organizer name'
                     required
                   />
                 </div>
               </div>
               <div>
-                <Label htmlFor="edit-room">Room</Label>
+                <Label htmlFor='edit-room'>Room</Label>
                 <Select
                   value={formData.room_id}
                   onValueChange={(value) =>
@@ -706,7 +706,7 @@ const ReservationsPage = () => {
                   required
                 >
                   <SelectTrigger>
-                    <SelectValue placeholder="Select a room" />
+                    <SelectValue placeholder='Select a room' />
                   </SelectTrigger>
                   <SelectContent>
                     {rooms.map((room) => (
@@ -717,12 +717,12 @@ const ReservationsPage = () => {
                   </SelectContent>
                 </Select>
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className='grid grid-cols-2 gap-4'>
                 <div>
-                  <Label htmlFor="edit-start_time">Start Time</Label>
+                  <Label htmlFor='edit-start_time'>Start Time</Label>
                   <Input
-                    id="edit-start_time"
-                    type="datetime-local"
+                    id='edit-start_time'
+                    type='datetime-local'
                     value={formData.start_time}
                     onChange={(e) =>
                       setFormData({ ...formData, start_time: e.target.value })
@@ -731,10 +731,10 @@ const ReservationsPage = () => {
                   />
                 </div>
                 <div>
-                  <Label htmlFor="edit-end_time">End Time</Label>
+                  <Label htmlFor='edit-end_time'>End Time</Label>
                   <Input
-                    id="edit-end_time"
-                    type="datetime-local"
+                    id='edit-end_time'
+                    type='datetime-local'
                     value={formData.end_time}
                     onChange={(e) =>
                       setFormData({ ...formData, end_time: e.target.value })
@@ -744,37 +744,37 @@ const ReservationsPage = () => {
                 </div>
               </div>
               <div>
-                <Label htmlFor="edit-attendees">Attendees (comma-separated)</Label>
+                <Label htmlFor='edit-attendees'>Attendees (comma-separated)</Label>
                 <Input
-                  id="edit-attendees"
+                  id='edit-attendees'
                   value={formData.attendees}
                   onChange={(e) =>
                     setFormData({ ...formData, attendees: e.target.value })
                   }
-                  placeholder="john@example.com, jane@example.com"
+                  placeholder='john@example.com, jane@example.com'
                 />
               </div>
               <div>
-                <Label htmlFor="edit-agenda">Agenda</Label>
+                <Label htmlFor='edit-agenda'>Agenda</Label>
                 <Textarea
-                  id="edit-agenda"
+                  id='edit-agenda'
                   value={formData.agenda_meeting}
                   onChange={(e) =>
                     setFormData({ ...formData, agenda_meeting: e.target.value })
                   }
-                  placeholder="Enter meeting agenda"
+                  placeholder='Enter meeting agenda'
                   rows={3}
                 />
               </div>
-              <div className="flex justify-end space-x-2">
+              <div className='flex justify-end space-x-2'>
                 <Button
-                  type="button"
-                  variant="outline"
+                  type='button'
+                  variant='outline'
                   onClick={() => setIsEditDialogOpen(false)}
                 >
                   Cancel
                 </Button>
-                <Button type="submit">Update Reservation</Button>
+                <Button type='submit'>Update Reservation</Button>
               </div>
             </form>
           </DialogContent>

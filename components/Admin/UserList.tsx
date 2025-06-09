@@ -52,8 +52,8 @@ const UserCard: React.FC<UserCardProps> = ({ user, onEdit, onDelete }) => {
   };
 
   return (
-    <div className="p-3 font-sans rounded bg-white my-3 flex flex-row items-center relative z-10 shadow-sm hover:shadow-md transition-shadow duration-200">
-      <div className="flex justify-center items-center pr-3">
+    <div className='p-3 font-sans rounded bg-white my-3 flex flex-row items-center relative z-10 shadow-sm hover:shadow-md transition-shadow duration-200'>
+      <div className='flex justify-center items-center pr-3'>
         <div
           className={`h-12 w-12 rounded flex justify-center items-center ${getRoleColor(user.role.name)}`}
         >
@@ -62,11 +62,11 @@ const UserCard: React.FC<UserCardProps> = ({ user, onEdit, onDelete }) => {
           })}
         </div>
       </div>
-      <div className="font-sans flex flex-col justify-center pr-2 flex-1 min-w-0">
-        <div className="font-sans text-base overflow-hidden whitespace-nowrap text-ellipsis text-gray-600 mb-1">
+      <div className='font-sans flex flex-col justify-center pr-2 flex-1 min-w-0'>
+        <div className='font-sans text-base overflow-hidden whitespace-nowrap text-ellipsis text-gray-600 mb-1'>
           {user.name || "Unnamed User"}
         </div>
-        <div className="font-sans text-sm text-gray-500 flex items-center flex-wrap gap-4">
+        <div className='font-sans text-sm text-gray-500 flex items-center flex-wrap gap-4'>
           <span>{user.email}</span>
           <span
             className={`inline-block px-2 py-1 rounded text-xs font-medium text-white ${getRoleColor(user.role.name)}`}
@@ -76,30 +76,30 @@ const UserCard: React.FC<UserCardProps> = ({ user, onEdit, onDelete }) => {
           <span>Created: {formatDate(user.createdAt)}</span>
         </div>
       </div>
-      <div className="flex flex-row font-sans items-center">
+      <div className='flex flex-row font-sans items-center'>
         <div
-          className="ml-2 p-2 rounded-full cursor-pointer transition-colors duration-200 hover:bg-gray-100"
+          className='ml-2 p-2 rounded-full cursor-pointer transition-colors duration-200 hover:bg-gray-100'
           onClick={() => onEdit(user)}
-          role="button"
+          role='button'
           tabIndex={0}
           onKeyPress={(e) => {
             if (e.key === "Enter" || e.key === " ") onEdit(user);
           }}
-          aria-label="Edit user"
+          aria-label='Edit user'
         >
-          <Edit className="w-4 h-4 text-gray-500" />
+          <Edit className='w-4 h-4 text-gray-500' />
         </div>
         <div
-          className="ml-2 p-2 rounded-full cursor-pointer transition-colors duration-200 hover:bg-gray-100"
+          className='ml-2 p-2 rounded-full cursor-pointer transition-colors duration-200 hover:bg-gray-100'
           onClick={() => onDelete(user)}
-          role="button"
+          role='button'
           tabIndex={0}
           onKeyPress={(e) => {
             if (e.key === "Enter" || e.key === " ") onDelete(user);
           }}
-          aria-label="Delete user"
+          aria-label='Delete user'
         >
-          <Trash2 className="w-4 h-4 text-gray-500" />
+          <Trash2 className='w-4 h-4 text-gray-500' />
         </div>
       </div>
     </div>
@@ -155,11 +155,11 @@ const UserList = forwardRef<IUserListRef>((props, ref) => {
   };
 
   if (loading) {
-    return <div className="text-center text-gray-600">Loading users...</div>;
+    return <div className='text-center text-gray-600'>Loading users...</div>;
   }
 
   if (error) {
-    return <div className="text-center text-red-600">Error: {error}</div>;
+    return <div className='text-center text-red-600'>Error: {error}</div>;
   }
 
   return (
@@ -175,14 +175,14 @@ const UserList = forwardRef<IUserListRef>((props, ref) => {
       ))}
 
       {users.length === 0 && (
-        <div className="text-center py-12 text-gray-500 font-sans">
+        <div className='text-center py-12 text-gray-500 font-sans'>
           No users found. Create your first user to get started.
         </div>
       )}
 
       {/* Pagination */}
       {pagination.pages > 1 && (
-        <div className="flex justify-center gap-2 mt-6">
+        <div className='flex justify-center gap-2 mt-6'>
           {Array.from({ length: pagination.pages }, (_, i) => i + 1).map(
             (page) => (
               <button
@@ -202,7 +202,7 @@ const UserList = forwardRef<IUserListRef>((props, ref) => {
       )}
 
       {/* Stats */}
-      <div className="text-center text-sm text-gray-500 mt-6 font-sans">
+      <div className='text-center text-sm text-gray-500 mt-6 font-sans'>
         Showing {users.length} of {pagination.total} users
       </div>
 

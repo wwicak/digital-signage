@@ -12,7 +12,7 @@ export async function GET(request: NextRequest) {
     const layoutId = searchParams.get("layoutId");
 
     // Build query for displays
-    let query: any = {};
+    const query: any = {};
     if (layoutId) {
       query.layout = layoutId;
     }

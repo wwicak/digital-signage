@@ -66,7 +66,7 @@ class WeatherIcon extends Component<Weathers, WeatherIconState> {
   render() {
     const { icon } = this.props
     const IconComponent = this.convertIcon(icon)
-    return <IconComponent className="w-8 h-8" />
+    return <IconComponent className='w-8 h-8' />
   }
 }
 

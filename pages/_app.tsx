@@ -54,15 +54,15 @@ export default function MyApp({ Component, pageProps }: AppProps) {
   return (
     <QueryClientProvider client={queryClient}>
       <ThemeProvider
-        attribute="class"
-        defaultTheme="light"
+        attribute='class'
+        defaultTheme='light'
         enableSystem
         disableTransitionOnChange
-        storageKey="digital-signage-theme"
+        storageKey='digital-signage-theme'
       >
         <DisplayProvider>
           <Component {...pageProps} />
-          <Toaster richColors position="top-right" />
+          <Toaster richColors position='top-right' />
         </DisplayProvider>
       </ThemeProvider>
     </QueryClientProvider>

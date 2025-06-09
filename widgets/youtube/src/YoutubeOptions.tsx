@@ -186,7 +186,7 @@ class YoutubeOptions extends Component<IYoutubeOptionsProps, IYoutubeOptionsComp
                 {video_id ? (
                     <YoutubeContent data={previewData} isPreview={true} />
                 ) : (
-                    <div className="flex items-center justify-center h-full text-center">Enter a valid YouTube URL or Video ID</div>
+                    <div className='flex items-center justify-center h-full text-center'>Enter a valid YouTube URL or Video ID</div>
                 )}
             </div>
         </div>

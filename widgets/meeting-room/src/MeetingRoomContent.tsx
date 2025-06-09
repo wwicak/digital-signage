@@ -19,7 +19,7 @@ const MeetingRoomContent: React.FC<IWidgetContentProps<IMeetingRoomData>> = ({ d
   } = data
 
   return (
-    <div className="w-full h-full">
+    <div className='w-full h-full'>
       <MeetingRoomDisplay
         buildingId={buildingId}
         refreshInterval={refreshInterval}

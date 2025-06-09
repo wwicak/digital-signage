@@ -15,7 +15,6 @@ import {
   DoorOpen,
   Calendar,
   Clock,
-  Users,
   TrendingUp,
   Activity,
   CalendarDays,
@@ -115,10 +114,10 @@ const DashboardPage = () => {
   if (loading && !data) {
     return (
       <Frame loggedIn={true}>
-        <div className="flex items-center justify-center h-64">
-          <div className="text-center">
-            <RefreshCw className="h-8 w-8 animate-spin mx-auto mb-2" />
-            <p className="text-muted-foreground">Loading dashboard...</p>
+        <div className='flex items-center justify-center h-64'>
+          <div className='text-center'>
+            <RefreshCw className='h-8 w-8 animate-spin mx-auto mb-2' />
+            <p className='text-muted-foreground'>Loading dashboard...</p>
           </div>
         </div>
       </Frame>
@@ -128,10 +127,10 @@ const DashboardPage = () => {
   if (error) {
     return (
       <Frame loggedIn={true}>
-        <div className="text-center py-8">
-          <p className="text-destructive">{error}</p>
-          <Button onClick={fetchDashboardData} className="mt-4">
-            <RefreshCw className="mr-2 h-4 w-4" />
+        <div className='text-center py-8'>
+          <p className='text-destructive'>{error}</p>
+          <Button onClick={fetchDashboardData} className='mt-4'>
+            <RefreshCw className='mr-2 h-4 w-4' />
             Retry
           </Button>
         </div>
@@ -143,104 +142,104 @@ const DashboardPage = () => {
 
   return (
     <Frame loggedIn={true}>
-      <div className="space-y-6">
-        <div className="flex items-center justify-between">
+      <div className='space-y-6'>
+        <div className='flex items-center justify-between'>
           <div>
-            <h1 className="text-3xl font-bold tracking-tight">Dashboard</h1>
-            <p className="text-muted-foreground">
+            <h1 className='text-3xl font-bold tracking-tight'>Dashboard</h1>
+            <p className='text-muted-foreground'>
               Meeting room system overview and statistics
             </p>
           </div>
-          <div className="flex items-center space-x-2">
-            <span className="text-sm text-muted-foreground">
+          <div className='flex items-center space-x-2'>
+            <span className='text-sm text-muted-foreground'>
               Last updated: {formatTime(data.lastUpdated)}
             </span>
             <Button
-              variant="outline"
-              size="sm"
+              variant='outline'
+              size='sm'
               onClick={fetchDashboardData}
               disabled={loading}
             >
               {loading ? (
-                <RefreshCw className="h-4 w-4 animate-spin" />
+                <RefreshCw className='h-4 w-4 animate-spin' />
               ) : (
-                <RefreshCw className="h-4 w-4" />
+                <RefreshCw className='h-4 w-4' />
               )}
             </Button>
           </div>
         </div>
 
         {/* Overview Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6'>
           <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Buildings</CardTitle>
-              <Building className="h-4 w-4 text-muted-foreground" />
+            <CardHeader className='flex flex-row items-center justify-between space-y-0 pb-2'>
+              <CardTitle className='text-sm font-medium'>Buildings</CardTitle>
+              <Building className='h-4 w-4 text-muted-foreground' />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{data.overview?.totalBuildings || 0}</div>
-              <p className="text-xs text-muted-foreground">Total buildings</p>
+              <div className='text-2xl font-bold'>{data.overview?.totalBuildings || 0}</div>
+              <p className='text-xs text-muted-foreground'>Total buildings</p>
             </CardContent>
           </Card>
 
           <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Meeting Rooms</CardTitle>
-              <DoorOpen className="h-4 w-4 text-muted-foreground" />
+            <CardHeader className='flex flex-row items-center justify-between space-y-0 pb-2'>
+              <CardTitle className='text-sm font-medium'>Meeting Rooms</CardTitle>
+              <DoorOpen className='h-4 w-4 text-muted-foreground' />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{data.overview?.totalRooms || 0}</div>
-              <p className="text-xs text-muted-foreground">Available rooms</p>
+              <div className='text-2xl font-bold'>{data.overview?.totalRooms || 0}</div>
+              <p className='text-xs text-muted-foreground'>Available rooms</p>
             </CardContent>
           </Card>
 
           <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Today's Meetings</CardTitle>
-              <Calendar className="h-4 w-4 text-muted-foreground" />
+            <CardHeader className='flex flex-row items-center justify-between space-y-0 pb-2'>
+              <CardTitle className='text-sm font-medium'>Today&apos;s Meetings</CardTitle>
+              <Calendar className='h-4 w-4 text-muted-foreground' />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{data.overview?.totalReservationsToday || 0}</div>
-              <p className="text-xs text-muted-foreground">
+              <div className='text-2xl font-bold'>{data.overview?.totalReservationsToday || 0}</div>
+              <p className='text-xs text-muted-foreground'>
                 {data.overview?.currentMeetings || 0} in progress, {data.overview?.upcomingMeetingsToday || 0} upcoming
               </p>
             </CardContent>
           </Card>
 
           <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Room Utilization</CardTitle>
-              <BarChart3 className="h-4 w-4 text-muted-foreground" />
+            <CardHeader className='flex flex-row items-center justify-between space-y-0 pb-2'>
+              <CardTitle className='text-sm font-medium'>Room Utilization</CardTitle>
+              <BarChart3 className='h-4 w-4 text-muted-foreground' />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{data.overview?.roomUtilizationRate || 0}%</div>
-              <p className="text-xs text-muted-foreground">Rooms used today</p>
+              <div className='text-2xl font-bold'>{data.overview?.roomUtilizationRate || 0}%</div>
+              <p className='text-xs text-muted-foreground'>Rooms used today</p>
             </CardContent>
           </Card>
         </div>
 
         {/* Statistics Cards */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className='grid grid-cols-1 lg:grid-cols-2 gap-6'>
           <Card>
             <CardHeader>
-              <CardTitle className="flex items-center">
-                <TrendingUp className="mr-2 h-5 w-5" />
+              <CardTitle className='flex items-center'>
+                <TrendingUp className='mr-2 h-5 w-5' />
                 Monthly Statistics
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="space-y-4">
-                <div className="flex justify-between">
-                  <span className="text-sm text-muted-foreground">This Week</span>
-                  <span className="font-medium">{data.overview?.totalReservationsThisWeek || 0} meetings</span>
+              <div className='space-y-4'>
+                <div className='flex justify-between'>
+                  <span className='text-sm text-muted-foreground'>This Week</span>
+                  <span className='font-medium'>{data.overview?.totalReservationsThisWeek || 0} meetings</span>
                 </div>
-                <div className="flex justify-between">
-                  <span className="text-sm text-muted-foreground">This Month</span>
-                  <span className="font-medium">{data.overview?.totalReservationsThisMonth || 0} meetings</span>
+                <div className='flex justify-between'>
+                  <span className='text-sm text-muted-foreground'>This Month</span>
+                  <span className='font-medium'>{data.overview?.totalReservationsThisMonth || 0} meetings</span>
                 </div>
-                <div className="flex justify-between">
-                  <span className="text-sm text-muted-foreground">Daily Average</span>
-                  <span className="font-medium">{data.overview?.averageReservationsPerDay || 0} meetings</span>
+                <div className='flex justify-between'>
+                  <span className='text-sm text-muted-foreground'>Daily Average</span>
+                  <span className='font-medium'>{data.overview?.averageReservationsPerDay || 0} meetings</span>
                 </div>
               </div>
             </CardContent>
@@ -248,23 +247,23 @@ const DashboardPage = () => {
 
           <Card>
             <CardHeader>
-              <CardTitle className="flex items-center">
-                <CalendarDays className="mr-2 h-5 w-5" />
+              <CardTitle className='flex items-center'>
+                <CalendarDays className='mr-2 h-5 w-5' />
                 Calendar Integration
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="space-y-4">
-                <div className="flex justify-between">
-                  <span className="text-sm text-muted-foreground">Total Connections</span>
-                  <span className="font-medium">{data.calendarIntegration?.totalConnections || 0}</span>
+              <div className='space-y-4'>
+                <div className='flex justify-between'>
+                  <span className='text-sm text-muted-foreground'>Total Connections</span>
+                  <span className='font-medium'>{data.calendarIntegration?.totalConnections || 0}</span>
                 </div>
-                <div className="flex justify-between">
-                  <span className="text-sm text-muted-foreground">Active Connections</span>
-                  <span className="font-medium">{data.calendarIntegration?.activeConnections || 0}</span>
+                <div className='flex justify-between'>
+                  <span className='text-sm text-muted-foreground'>Active Connections</span>
+                  <span className='font-medium'>{data.calendarIntegration?.activeConnections || 0}</span>
                 </div>
-                <div className="flex justify-between">
-                  <span className="text-sm text-muted-foreground">Sync Success Rate</span>
+                <div className='flex justify-between'>
+                  <span className='text-sm text-muted-foreground'>Sync Success Rate</span>
                   <Badge variant={(data.calendarIntegration?.syncSuccessRate || 0) > 80 ? "default" : "destructive"}>
                     {data.calendarIntegration?.syncSuccessRate || 0}%
                   </Badge>
@@ -275,18 +274,18 @@ const DashboardPage = () => {
         </div>
 
         {/* Tables */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className='grid grid-cols-1 lg:grid-cols-2 gap-6'>
           {/* Room Utilization */}
           <Card>
             <CardHeader>
-              <CardTitle className="flex items-center">
-                <Activity className="mr-2 h-5 w-5" />
+              <CardTitle className='flex items-center'>
+                <Activity className='mr-2 h-5 w-5' />
                 Top Room Utilization Today
               </CardTitle>
             </CardHeader>
             <CardContent>
               {!data.roomUtilization || data.roomUtilization.length === 0 ? (
-                <p className="text-center text-muted-foreground py-4">
+                <p className='text-center text-muted-foreground py-4'>
                   No room usage data for today
                 </p>
               ) : (
@@ -301,12 +300,12 @@ const DashboardPage = () => {
                   <TableBody>
                     {data.roomUtilization.map((room, index) => (
                       <TableRow key={index}>
-                        <TableCell className="font-medium">{room.roomName || 'Unknown Room'}</TableCell>
+                        <TableCell className='font-medium'>{room.roomName || 'Unknown Room'}</TableCell>
                         <TableCell>{room.buildingName || 'Unknown Building'}</TableCell>
                         <TableCell>
-                          <div className="flex items-center space-x-2">
-                            <span className="text-sm">{room.utilizationPercentage || 0}%</span>
-                            <Badge variant="outline" className="text-xs">
+                          <div className='flex items-center space-x-2'>
+                            <span className='text-sm'>{room.utilizationPercentage || 0}%</span>
+                            <Badge variant='outline' className='text-xs'>
                               {room.totalDuration || 0}h
                             </Badge>
                           </div>
@@ -322,14 +321,14 @@ const DashboardPage = () => {
           {/* Recent Activity */}
           <Card>
             <CardHeader>
-              <CardTitle className="flex items-center">
-                <Clock className="mr-2 h-5 w-5" />
+              <CardTitle className='flex items-center'>
+                <Clock className='mr-2 h-5 w-5' />
                 Recent Reservations
               </CardTitle>
             </CardHeader>
             <CardContent>
               {!data.recentActivity || data.recentActivity.length === 0 ? (
-                <p className="text-center text-muted-foreground py-4">
+                <p className='text-center text-muted-foreground py-4'>
                   No recent reservations
                 </p>
               ) : (
@@ -346,23 +345,23 @@ const DashboardPage = () => {
                       <TableRow key={reservation._id}>
                         <TableCell>
                           <div>
-                            <div className="font-medium text-sm">{reservation.title || 'Untitled Meeting'}</div>
-                            <div className="text-xs text-muted-foreground">{reservation.organizer || 'Unknown Organizer'}</div>
+                            <div className='font-medium text-sm'>{reservation.title || 'Untitled Meeting'}</div>
+                            <div className='text-xs text-muted-foreground'>{reservation.organizer || 'Unknown Organizer'}</div>
                           </div>
                         </TableCell>
                         <TableCell>
                           <div>
-                            <div className="text-sm">{reservation.room_id?.name || 'Unknown Room'}</div>
-                            <div className="text-xs text-muted-foreground">
+                            <div className='text-sm'>{reservation.room_id?.name || 'Unknown Room'}</div>
+                            <div className='text-xs text-muted-foreground'>
                               {reservation.room_id?.building_id?.name || 'Unknown Building'}
                             </div>
                           </div>
                         </TableCell>
                         <TableCell>
-                          <div className="text-sm">
+                          <div className='text-sm'>
                             {formatDate(reservation.start_time)}
                           </div>
-                          <div className="text-xs text-muted-foreground">
+                          <div className='text-xs text-muted-foreground'>
                             {formatTime(reservation.start_time)} - {formatTime(reservation.end_time)}
                           </div>
                         </TableCell>
@@ -379,8 +378,8 @@ const DashboardPage = () => {
         {data.buildingStats && data.buildingStats.length > 0 && (
           <Card>
             <CardHeader>
-              <CardTitle className="flex items-center">
-                <Building className="mr-2 h-5 w-5" />
+              <CardTitle className='flex items-center'>
+                <Building className='mr-2 h-5 w-5' />
                 Building Usage This Month
               </CardTitle>
             </CardHeader>
@@ -396,12 +395,12 @@ const DashboardPage = () => {
                 <TableBody>
                   {data.buildingStats.map((building, index) => (
                     <TableRow key={index}>
-                      <TableCell className="font-medium">{building.buildingName || 'Unknown Building'}</TableCell>
+                      <TableCell className='font-medium'>{building.buildingName || 'Unknown Building'}</TableCell>
                       <TableCell>{building.reservationCount || 0}</TableCell>
                       <TableCell>
-                        <div className="w-full bg-muted rounded-full h-2">
+                        <div className='w-full bg-muted rounded-full h-2'>
                           <div
-                            className="bg-primary h-2 rounded-full"
+                            className='bg-primary h-2 rounded-full'
                             style={{
                               width: `${Math.min(
                                 ((building.reservationCount || 0) / Math.max(...data.buildingStats.map(b => b.reservationCount || 0), 1)) * 100,

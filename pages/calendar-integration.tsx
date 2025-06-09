@@ -163,39 +163,39 @@ const CalendarIntegrationPage = () => {
 
   const getStatusBadge = (link: ICalendarLink) => {
     if (!link.isActive) {
-      return <Badge variant="destructive">Inactive</Badge>;
+      return <Badge variant='destructive'>Inactive</Badge>;
     }
 
     if (!link.lastSyncStatus) {
-      return <Badge variant="secondary">Not Synced</Badge>;
+      return <Badge variant='secondary'>Not Synced</Badge>;
     }
 
     switch (link.lastSyncStatus) {
       case "success":
-        return <Badge variant="default" className="bg-green-500">Connected</Badge>;
+        return <Badge variant='default' className='bg-green-500'>Connected</Badge>;
       case "failed":
-        return <Badge variant="destructive">Sync Failed</Badge>;
+        return <Badge variant='destructive'>Sync Failed</Badge>;
       default:
-        return <Badge variant="secondary">Unknown</Badge>;
+        return <Badge variant='secondary'>Unknown</Badge>;
     }
   };
 
   const getStatusIcon = (link: ICalendarLink) => {
     if (!link.isActive) {
-      return <XCircle className="h-4 w-4 text-destructive" />;
+      return <XCircle className='h-4 w-4 text-destructive' />;
     }
 
     if (!link.lastSyncStatus) {
-      return <AlertCircle className="h-4 w-4 text-muted-foreground" />;
+      return <AlertCircle className='h-4 w-4 text-muted-foreground' />;
     }
 
     switch (link.lastSyncStatus) {
       case "success":
-        return <CheckCircle className="h-4 w-4 text-green-500" />;
+        return <CheckCircle className='h-4 w-4 text-green-500' />;
       case "failed":
-        return <XCircle className="h-4 w-4 text-destructive" />;
+        return <XCircle className='h-4 w-4 text-destructive' />;
       default:
-        return <AlertCircle className="h-4 w-4 text-muted-foreground" />;
+        return <AlertCircle className='h-4 w-4 text-muted-foreground' />;
     }
   };
 
@@ -216,48 +216,48 @@ const CalendarIntegrationPage = () => {
 
   return (
     <Frame loggedIn={true}>
-      <div className="space-y-6">
+      <div className='space-y-6'>
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Calendar Integration</h1>
-          <p className="text-muted-foreground">
+          <h1 className='text-3xl font-bold tracking-tight'>Calendar Integration</h1>
+          <p className='text-muted-foreground'>
             Connect your Google and Outlook calendars to sync meeting room reservations
           </p>
         </div>
 
         {/* Connection Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
           {/* Google Calendar */}
           <Card>
             <CardHeader>
-              <CardTitle className="flex items-center">
-                <span className="mr-2 text-2xl">{getProviderLogo("google")}</span>
+              <CardTitle className='flex items-center'>
+                <span className='mr-2 text-2xl'>{getProviderLogo("google")}</span>
                 Google Calendar
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="space-y-4">
-                <p className="text-sm text-muted-foreground">
+              <div className='space-y-4'>
+                <p className='text-sm text-muted-foreground'>
                   Sync your Google Calendar events with meeting room reservations
                 </p>
                 {hasProvider("google") ? (
-                  <div className="flex items-center space-x-2">
-                    <CheckCircle className="h-5 w-5 text-green-500" />
-                    <span className="text-sm font-medium">Connected</span>
+                  <div className='flex items-center space-x-2'>
+                    <CheckCircle className='h-5 w-5 text-green-500' />
+                    <span className='text-sm font-medium'>Connected</span>
                   </div>
                 ) : (
                   <Button
                     onClick={handleConnectGoogle}
                     disabled={connectingProvider === "google"}
-                    className="w-full"
+                    className='w-full'
                   >
                     {connectingProvider === "google" ? (
                       <>
-                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        <Loader2 className='mr-2 h-4 w-4 animate-spin' />
                         Connecting...
                       </>
                     ) : (
                       <>
-                        <ExternalLink className="mr-2 h-4 w-4" />
+                        <ExternalLink className='mr-2 h-4 w-4' />
                         Connect Google Calendar
                       </>
                     )}
@@ -270,35 +270,35 @@ const CalendarIntegrationPage = () => {
           {/* Outlook Calendar */}
           <Card>
             <CardHeader>
-              <CardTitle className="flex items-center">
-                <span className="mr-2 text-2xl">{getProviderLogo("outlook")}</span>
+              <CardTitle className='flex items-center'>
+                <span className='mr-2 text-2xl'>{getProviderLogo("outlook")}</span>
                 Outlook Calendar
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="space-y-4">
-                <p className="text-sm text-muted-foreground">
+              <div className='space-y-4'>
+                <p className='text-sm text-muted-foreground'>
                   Sync your Outlook Calendar events with meeting room reservations
                 </p>
                 {hasProvider("outlook") ? (
-                  <div className="flex items-center space-x-2">
-                    <CheckCircle className="h-5 w-5 text-green-500" />
-                    <span className="text-sm font-medium">Connected</span>
+                  <div className='flex items-center space-x-2'>
+                    <CheckCircle className='h-5 w-5 text-green-500' />
+                    <span className='text-sm font-medium'>Connected</span>
                   </div>
                 ) : (
                   <Button
                     onClick={handleConnectOutlook}
                     disabled={connectingProvider === "outlook"}
-                    className="w-full"
+                    className='w-full'
                   >
                     {connectingProvider === "outlook" ? (
                       <>
-                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        <Loader2 className='mr-2 h-4 w-4 animate-spin' />
                         Connecting...
                       </>
                     ) : (
                       <>
-                        <ExternalLink className="mr-2 h-4 w-4" />
+                        <ExternalLink className='mr-2 h-4 w-4' />
                         Connect Outlook Calendar
                       </>
                     )}
@@ -312,19 +312,19 @@ const CalendarIntegrationPage = () => {
         {/* Connected Calendars List */}
         <Card>
           <CardHeader>
-            <CardTitle className="flex items-center">
-              <CalendarDays className="mr-2 h-5 w-5" />
+            <CardTitle className='flex items-center'>
+              <CalendarDays className='mr-2 h-5 w-5' />
               Connected Calendars
             </CardTitle>
           </CardHeader>
           <CardContent>
             {loading ? (
-              <div className="text-center py-8">
-                <Loader2 className="h-6 w-6 animate-spin mx-auto mb-2" />
+              <div className='text-center py-8'>
+                <Loader2 className='h-6 w-6 animate-spin mx-auto mb-2' />
                 Loading calendar connections...
               </div>
             ) : calendarLinks.length === 0 ? (
-              <div className="text-center py-8 text-muted-foreground">
+              <div className='text-center py-8 text-muted-foreground'>
                 No calendars connected. Connect your first calendar to get started.
               </div>
             ) : (
@@ -342,21 +342,21 @@ const CalendarIntegrationPage = () => {
                   {calendarLinks.map((link) => (
                     <TableRow key={link._id}>
                       <TableCell>
-                        <div className="flex items-center">
-                          <span className="mr-2 text-lg">{getProviderLogo(link.provider)}</span>
-                          <span className="font-medium capitalize">{link.provider}</span>
+                        <div className='flex items-center'>
+                          <span className='mr-2 text-lg'>{getProviderLogo(link.provider)}</span>
+                          <span className='font-medium capitalize'>{link.provider}</span>
                         </div>
                       </TableCell>
                       <TableCell>
-                        <div className="flex items-center space-x-2">
+                        <div className='flex items-center space-x-2'>
                           {getStatusIcon(link)}
                           {getStatusBadge(link)}
                         </div>
                         {link.lastSyncError && (
-                          <div className="mt-1">
-                            <Alert className="p-2">
-                              <AlertCircle className="h-3 w-3" />
-                              <AlertDescription className="text-xs">
+                          <div className='mt-1'>
+                            <Alert className='p-2'>
+                              <AlertCircle className='h-3 w-3' />
+                              <AlertDescription className='text-xs'>
                                 {link.lastSyncError}
                               </AlertDescription>
                             </Alert>
@@ -365,38 +365,38 @@ const CalendarIntegrationPage = () => {
                       </TableCell>
                       <TableCell>
                         {link.lastSyncedAt ? (
-                          <span className="text-sm">
+                          <span className='text-sm'>
                             {new Date(link.lastSyncedAt).toLocaleString()}
                           </span>
                         ) : (
-                          <span className="text-sm text-muted-foreground">Never</span>
+                          <span className='text-sm text-muted-foreground'>Never</span>
                         )}
                       </TableCell>
                       <TableCell>
-                        <span className="text-sm">
+                        <span className='text-sm'>
                           {new Date(link.createdAt).toLocaleDateString()}
                         </span>
                       </TableCell>
                       <TableCell>
-                        <div className="flex space-x-2">
+                        <div className='flex space-x-2'>
                           <Button
-                            variant="outline"
-                            size="sm"
+                            variant='outline'
+                            size='sm'
                             onClick={() => handleManualSync(link._id, link.provider)}
                             disabled={syncingLinkId === link._id}
                           >
                             {syncingLinkId === link._id ? (
-                              <Loader2 className="h-4 w-4 animate-spin" />
+                              <Loader2 className='h-4 w-4 animate-spin' />
                             ) : (
-                              <RefreshCw className="h-4 w-4" />
+                              <RefreshCw className='h-4 w-4' />
                             )}
                           </Button>
                           <Button
-                            variant="outline"
-                            size="sm"
+                            variant='outline'
+                            size='sm'
                             onClick={() => handleDisconnectCalendar(link._id, link.provider)}
                           >
-                            <Trash2 className="h-4 w-4" />
+                            <Trash2 className='h-4 w-4' />
                           </Button>
                         </div>
                       </TableCell>
@@ -414,14 +414,14 @@ const CalendarIntegrationPage = () => {
             <CardTitle>Sync Information</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="space-y-4">
+            <div className='space-y-4'>
               <Alert>
-                <AlertCircle className="h-4 w-4" />
+                <AlertCircle className='h-4 w-4' />
                 <AlertDescription>
                   Calendar sync runs automatically every 15 minutes. You can also trigger manual sync using the refresh button.
                 </AlertDescription>
               </Alert>
-              <div className="text-sm text-muted-foreground space-y-2">
+              <div className='text-sm text-muted-foreground space-y-2'>
                 <p>• External calendar events will be imported as reservations</p>
                 <p>• Reservations created in the system will be synced to connected calendars</p>
                 <p>• Changes made in external calendars will be reflected in the system</p>

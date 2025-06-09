@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { UserRoleName, IUserRole } from "@/lib/models/User";
+import { IUserRole } from "@/lib/models/User";
 
 export interface User {
   _id: string;

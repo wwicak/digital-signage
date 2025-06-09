@@ -53,7 +53,7 @@ class SlideshowList extends Component<
     const { slideshows, error } = this.state;
 
     if (error) {
-      return <div className="text-center p-5 font-sans">{error}</div>;
+      return <div className='text-center p-5 font-sans'>{error}</div>;
     }
 
     return (
@@ -81,53 +81,53 @@ class SlideshowList extends Component<
                   height={100} // Height of one SlideshowCard placeholder
                   width={640} // Max width of card or list area
                   speed={2}
-                  backgroundColor="#f3f3f3"
-                  foregroundColor="#ecebeb"
+                  backgroundColor='#f3f3f3'
+                  foregroundColor='#ecebeb'
                 >
                   {/* Placeholder for SlideshowCard structure */}
                   <rect
-                    x="0"
-                    y="10"
-                    rx="4"
-                    ry="4"
-                    width="50"
-                    height="50"
+                    x='0'
+                    y='10'
+                    rx='4'
+                    ry='4'
+                    width='50'
+                    height='50'
                   />{" "}
                   {/* Thumbnail */}
                   <rect
-                    x="60"
-                    y="10"
-                    rx="3"
-                    ry="3"
-                    width="300"
-                    height="15"
+                    x='60'
+                    y='10'
+                    rx='3'
+                    ry='3'
+                    width='300'
+                    height='15'
                   />{" "}
                   {/* Title */}
                   <rect
-                    x="60"
-                    y="30"
-                    rx="3"
-                    ry="3"
-                    width="80"
-                    height="10"
+                    x='60'
+                    y='30'
+                    rx='3'
+                    ry='3'
+                    width='80'
+                    height='10'
                   />{" "}
                   {/* Duration Info */}
                   <rect
-                    x="150"
-                    y="30"
-                    rx="3"
-                    ry="3"
-                    width="80"
-                    height="10"
+                    x='150'
+                    y='30'
+                    rx='3'
+                    ry='3'
+                    width='80'
+                    height='10'
                   />{" "}
                   {/* Slide Num Info */}
                   <rect
-                    x="600"
-                    y="25"
-                    rx="3"
-                    ry="3"
-                    width="20"
-                    height="20"
+                    x='600'
+                    y='25'
+                    rx='3'
+                    ry='3'
+                    width='20'
+                    height='20'
                   />{" "}
                   {/* Delete Icon */}
                 </ContentLoader>

@@ -12,7 +12,7 @@ export enum FeatureFlagType {
 export enum FeatureFlagName {
   // Menu items
   MENU_BUILDINGS = "menu_buildings",
-  MENU_ROOMS = "menu_rooms", 
+  MENU_ROOMS = "menu_rooms",
   MENU_RESERVATIONS = "menu_reservations",
   MENU_CALENDAR_INTEGRATION = "menu_calendar_integration",
   MENU_USERS = "menu_users",
@@ -21,7 +21,7 @@ export enum FeatureFlagName {
   MENU_LAYOUT = "menu_layout",
   MENU_PREVIEW = "menu_preview",
   MENU_SLIDESHOWS = "menu_slideshows",
-  
+
   // Widgets
   WIDGET_MEETING_ROOM = "widget_meeting_room",
   WIDGET_ANNOUNCEMENT = "widget_announcement",
@@ -33,7 +33,7 @@ export enum FeatureFlagName {
   WIDGET_WEB = "widget_web",
   WIDGET_YOUTUBE = "widget_youtube",
   WIDGET_MEDIA_PLAYER = "widget_media_player",
-  
+
   // Features
   FEATURE_MEETING_ROOMS = "feature_meeting_rooms",
   FEATURE_CALENDAR_SYNC = "feature_calendar_sync",

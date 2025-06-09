@@ -55,13 +55,13 @@ class ListContent extends Component<IListContentProps> {
     }
 
     return (
-      <div className="box-border h-full w-full flex flex-col overflow-hidden" style={{ background: color, color: textColor }}> {/* Renamed class */}
+      <div className='box-border h-full w-full flex flex-col overflow-hidden' style={{ background: color, color: textColor }}> {/* Renamed class */}
         {title && (
           <div className='title-container'> {/* Renamed class */}
             <div className='title-text'>{title}</div> {/* Renamed class */}
           </div>
         )}
-        <div className="pl-3 flex"> {/* Renamed class */}
+        <div className='pl-3 flex'> {/* Renamed class */}
           <AutoScroll
             style={{
               display: 'block', // Changed to block for AutoScroll to manage its own layout
@@ -74,7 +74,7 @@ class ListContent extends Component<IListContentProps> {
           >
             <ListTag className={`list-tag ${ordered ? 'ordered' : 'unordered'}`}>
               {list.map((item, index) => (
-                <li key={`list-item-${index}-${item.text.slice(0,10)}`} className="flex-row justify-between items-center rounded w-full box-border" style={itemStyle}> {/* Renamed class */}
+                <li key={`list-item-${index}-${item.text.slice(0,10)}`} className='flex-row justify-between items-center rounded w-full box-border' style={itemStyle}> {/* Renamed class */}
                   <span className='text-content'>{item.text || 'Insert some text ...'}</span> {/* Renamed class */}
                   {item.label && <div className='label-tag'>{item.label}</div>} {/* Renamed class */}
                 </li>

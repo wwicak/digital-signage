@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-import { Form, Input, IChoice, InlineInputGroup } from '../../../components/Form' // Assuming Form components are/will be typed
+import { Form, Input, IChoice } from '../../../components/Form' // Assuming Form components are/will be typed
 import * as z from 'zod'
 
 // IWeatherDefaultData is interface
@@ -85,53 +85,53 @@ class WeatherOptions extends Component<IWeatherOptionsProps, IWeatherOptionsStat
     } = this.state
 
     return (
-      <div className="space-y-8">
+      <div className='space-y-8'>
         {/* Configuration Section */}
-        <div className="bg-white rounded-lg border border-gray-200 p-6">
-          <div className="mb-6">
-            <h3 className="text-lg font-semibold text-gray-900 mb-2">Weather Widget Configuration</h3>
-            <p className="text-gray-600">Configure your weather display settings and data source.</p>
+        <div className='bg-white rounded-lg border border-gray-200 p-6'>
+          <div className='mb-6'>
+            <h3 className='text-lg font-semibold text-gray-900 mb-2'>Weather Widget Configuration</h3>
+            <p className='text-gray-600'>Configure your weather display settings and data source.</p>
           </div>
 
           <Form>
-            <div className="space-y-6">
+            <div className='space-y-6'>
               {/* API Key */}
               <div>
                 <Input
-                  label="OpenWeatherMap API Key"
-                  type="text"
-                  name="apiKey"
+                  label='OpenWeatherMap API Key'
+                  type='text'
+                  name='apiKey'
                   value={apiKey}
-                  placeholder="Enter your OpenWeatherMap API Key"
+                  placeholder='Enter your OpenWeatherMap API Key'
                   onChange={this.handleChange}
                 />
-                <p className="text-sm text-gray-500 mt-1">
+                <p className='text-sm text-gray-500 mt-1'>
                   Get your free API key from{' '}
-                  <a href="https://openweathermap.org/api" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:text-blue-800">
+                  <a href='https://openweathermap.org/api' target='_blank' rel='noopener noreferrer' className='text-blue-600 hover:text-blue-800'>
                     OpenWeatherMap
                   </a>
                 </p>
               </div>
 
               {/* Location and Unit Settings */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
                 <div>
                   <Input
-                    label="Location"
-                    type="text"
-                    name="zip"
+                    label='Location'
+                    type='text'
+                    name='zip'
                     value={zip}
-                    placeholder="e.g., 90210 or London"
+                    placeholder='e.g., 90210 or London'
                     onChange={this.handleChange}
                     expand={true}
                   />
-                  <p className="text-sm text-gray-500 mt-1">Enter zip code or city name</p>
+                  <p className='text-sm text-gray-500 mt-1'>Enter zip code or city name</p>
                 </div>
                 <div>
                   <Input
-                    label="Temperature Unit"
-                    type="select"
-                    name="unit"
+                    label='Temperature Unit'
+                    type='select'
+                    name='unit'
                     value={unit}
                     choices={unitChoices}
                     onChange={this.handleChange}
@@ -141,12 +141,12 @@ class WeatherOptions extends Component<IWeatherOptionsProps, IWeatherOptionsStat
               </div>
 
               {/* Display Options */}
-              <div className="space-y-4">
-                <div className="flex items-center">
+              <div className='space-y-4'>
+                <div className='flex items-center'>
                   <Input
-                    type="checkbox"
-                    name="showForecast"
-                    label="Show Multi-day Forecast"
+                    type='checkbox'
+                    name='showForecast'
+                    label='Show Multi-day Forecast'
                     checked={showForecast}
                     onChange={(name, checked) => this.handleChange(name as keyof IWeatherOptionsState, checked)}
                   />
@@ -154,14 +154,14 @@ class WeatherOptions extends Component<IWeatherOptionsProps, IWeatherOptionsStat
 
                 <div>
                   <Input
-                    label="Custom Location Name (Optional)"
-                    type="text"
-                    name="locationName"
+                    label='Custom Location Name (Optional)'
+                    type='text'
+                    name='locationName'
                     value={locationName}
-                    placeholder="e.g., New York City"
+                    placeholder='e.g., New York City'
                     onChange={this.handleChange}
                   />
-                  <p className="text-sm text-gray-500 mt-1">Override the auto-detected location name</p>
+                  <p className='text-sm text-gray-500 mt-1'>Override the auto-detected location name</p>
                 </div>
               </div>
             </div>

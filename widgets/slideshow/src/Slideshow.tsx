@@ -3,6 +3,7 @@ import React, { Component, ComponentType, JSX } from 'react'
 // Assuming these will be migrated or are usable as JS with appropriate typings/shims
 import GenericSlide from './Slide/Generic'
 import PhotoSlide from './Slide/Photo'
+import VideoSlide from './Slide/Video'
 import YoutubeSlide from './Slide/Youtube'
 import WebSlide from './Slide/Web'
 import Progress from './Progress'
@@ -148,8 +149,11 @@ class Slideshow extends Component<ISlideshowWidgetContentProps, ISlideshowWidget
     const prevSlideIndex = currentSlideIndex
     const nextSlideIndex = (currentSlideIndex + 1) % slides.length
 
+    // Stop the current slide first
+    this.slideRefs[prevSlideIndex]?.stop()
+
     this.setState({ currentSlideIndex: nextSlideIndex, isCurrentSlideReady: false }, () => {
-      this.slideRefs[prevSlideIndex]?.stop()
+      // Start the new slide after state update
       this.slideRefs[nextSlideIndex]?.play()
       this.waitForNextSlide() // Schedule next advance
     })
@@ -204,7 +208,11 @@ class Slideshow extends Component<ISlideshowWidgetContentProps, ISlideshowWidget
     let component: ComponentType<any>
     switch (type) {
       case 'photo':
+      case 'image':
         component = PhotoSlide
+        break
+      case 'video':
+        component = VideoSlide
         break
       case 'youtube':
         component = YoutubeSlide
@@ -212,7 +220,7 @@ class Slideshow extends Component<ISlideshowWidgetContentProps, ISlideshowWidget
       case 'web':
         component = WebSlide
         break
-      // Add cases for 'announcement', 'list', 'congrats', 'image' etc. if they can be part of a slideshow
+      // Add cases for 'announcement', 'list', 'congrats' etc. if they can be part of a slideshow
       default:
         component = GenericSlide // Fallback for unknown or generic types
     }
@@ -237,25 +245,56 @@ class Slideshow extends Component<ISlideshowWidgetContentProps, ISlideshowWidget
   }
 
   render() {
-    const { data, defaultDuration = DEFAULT_SLIDE_DURATION_MS } = this.props
+    const { defaultDuration = DEFAULT_SLIDE_DURATION_MS } = this.props
     const { currentSlideIndex, slides, isCurrentSlideReady, isLoading, error } = this.state
 
     if (isLoading) {
-      return <div className='slideshow-loading'>Loading Slideshow...</div> // Or a spinner
+      return (
+        <div className='flex items-center justify-center h-full w-full bg-gray-100'>
+          <div className='text-center'>
+            <div className='animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4'></div>
+            <p className='text-gray-600'>Loading Slideshow...</p>
+          </div>
+        </div>
+      )
     }
     if (error) {
-        return <div className='slideshow-error'>Error: {error}</div>
+      return (
+        <div className='flex items-center justify-center h-full w-full bg-red-50'>
+          <div className='text-center p-6'>
+            <div className='text-red-600 text-4xl mb-4'>⚠️</div>
+            <h3 className='text-lg font-semibold text-red-800 mb-2'>Slideshow Error</h3>
+            <p className='text-red-600'>{error}</p>
+          </div>
+        </div>
+      )
     }
     if (slides.length === 0 && !this.props.data?.slideshow_id) {
-        return <div className='slideshow-notice'>No slideshow configured for this widget.</div>
+      return (
+        <div className='flex items-center justify-center h-full w-full bg-yellow-50'>
+          <div className='text-center p-6'>
+            <div className='text-yellow-600 text-4xl mb-4'>📋</div>
+            <h3 className='text-lg font-semibold text-yellow-800 mb-2'>No Slideshow Configured</h3>
+            <p className='text-yellow-600'>Please configure a slideshow for this widget.</p>
+          </div>
+        </div>
+      )
     }
     if (slides.length === 0) {
-        return <div className='slideshow-notice'>This slideshow has no slides.</div>
+      return (
+        <div className='flex items-center justify-center h-full w-full bg-blue-50'>
+          <div className='text-center p-6'>
+            <div className='text-blue-600 text-4xl mb-4'>📷</div>
+            <h3 className='text-lg font-semibold text-blue-800 mb-2'>Empty Slideshow</h3>
+            <p className='text-blue-600'>This slideshow has no slides. Add some content to get started.</p>
+          </div>
+        </div>
+      )
     }
 
     return (
-      <div className="flex-1 w-full h-full"> {/* Renamed class */}
-        <div className="relative w-full h-full overflow-hidden">
+      <div className='flex-1 w-full h-full'> {/* Renamed class */}
+        <div className='relative w-full h-full overflow-hidden'>
           {this.orderedSlides.map((slide, index) => this.renderSlide(slide, index))}
         </div>
         {this.props.data?.show_progressbar !== false && currentSlideIndex !== null && (

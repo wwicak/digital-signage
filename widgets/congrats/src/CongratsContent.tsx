@@ -43,7 +43,7 @@ class CongratsContent extends Component<ICongratsContentProps> {
     }
 
     return (
-      <div className="relative box-border h-full w-full">
+      <div className='relative box-border h-full w-full'>
         {animationData && (
           <div className='background-animation'>
             <Lottie options={lottieOptions} height={'100%'} width={'100%'} />

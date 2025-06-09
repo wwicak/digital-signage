@@ -31,7 +31,7 @@ export const YoutubeContentPropsSchema = z.object({
 export type IYoutubeContentProps = z.infer<typeof YoutubeContentPropsSchema>;
 
 // Default values from original JS, though IYoutubeDefaultData has its own defaults
-const DEFAULT_YT_URL_FOR_ID_EXTRACTION = 'https://www.youtube.com/watch?v=uyyLot4PLXM'
+// const DEFAULT_YT_URL_FOR_ID_EXTRACTION = 'https://www.youtube.com/watch?v=uyyLot4PLXM'
 // const DEFAULT_BG_COLOR = '#95a5a6'; // This color was for the widget frame, not really for YT player area
 
 class YoutubeContent extends Component<IYoutubeContentProps> {
@@ -115,13 +115,13 @@ class YoutubeContent extends Component<IYoutubeContentProps> {
      */
 
     return (
-      <div className="relative box-border h-full w-full overflow-hidden">
+      <div className='relative box-border h-full w-full overflow-hidden'>
         {/* Optional: Title bar if needed, similar to other widgets */}
         {/* {data.title && <div className="p-3 font-sans text-base font-semibold text-white uppercase">{data.title}</div>} */}
 
-        <div className="overflow-hidden"> {/* Renamed class */}
+        <div className='overflow-hidden'> {/* Renamed class */}
           {!currentVideoId ? (
-            <div className="flex items-center justify-center h-full text-white font-sans p-5 text-center">Invalid or missing YouTube Video ID.</div>
+            <div className='flex items-center justify-center h-full text-white font-sans p-5 text-center'>Invalid or missing YouTube Video ID.</div>
           ) : (
             <YouTube
               videoId={currentVideoId}

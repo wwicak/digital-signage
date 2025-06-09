@@ -22,7 +22,7 @@ const MonitoringPage = () => {
 
   return (
     <Frame loggedIn={true}>
-      <div className="container mx-auto py-6">
+      <div className='container mx-auto py-6'>
         <DisplayMonitoringDashboard />
       </div>
     </Frame>

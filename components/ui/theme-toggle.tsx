@@ -31,13 +31,13 @@ export function ThemeToggle() {
   if (!mounted) {
     return (
       <Button
-        variant="ghost"
-        size="icon"
-        className="h-8 w-8"
+        variant='ghost'
+        size='icon'
+        className='h-8 w-8'
         disabled
       >
-        <Sun className="h-4 w-4" />
-        <span className="sr-only">Toggle theme</span>
+        <Sun className='h-4 w-4' />
+        <span className='sr-only'>Toggle theme</span>
       </Button>
     );
   }
@@ -47,12 +47,12 @@ export function ThemeToggle() {
 
   return (
     <Button
-      variant="ghost"
-      size="icon"
+      variant='ghost'
+      size='icon'
       onClick={handleToggle}
-      className="h-8 w-8 relative"
+      className='h-8 w-8 relative'
       title={`Switch to ${isDark ? "light" : "dark"} mode`}
-      type="button"
+      type='button'
     >
       <Sun
         className={`h-4 w-4 transition-all duration-300 ${
@@ -64,7 +64,7 @@ export function ThemeToggle() {
           isDark ? "rotate-0 scale-100" : "-rotate-90 scale-0"
         }`}
       />
-      <span className="sr-only">Toggle theme</span>
+      <span className='sr-only'>Toggle theme</span>
     </Button>
   );
 }

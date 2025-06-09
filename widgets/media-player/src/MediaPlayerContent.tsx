@@ -155,13 +155,13 @@ class MediaPlayerContent extends Component<IMediaPlayerContentProps, IMediaPlaye
     const fallbackMessage = error || data?.fallbackContent?.message || 'Media content is not available';
 
     return (
-      <div 
-        className="flex items-center justify-center w-full h-full text-white text-center p-4"
+      <div
+        className='flex items-center justify-center w-full h-full text-white text-center p-4'
         style={{ backgroundColor: fallbackBg }}
       >
         <div>
-          <div className="text-lg mb-2">📺</div>
-          <div className="text-sm">{fallbackMessage}</div>
+          <div className='text-lg mb-2'>📺</div>
+          <div className='text-sm'>{fallbackMessage}</div>
         </div>
       </div>
     );
@@ -193,11 +193,11 @@ class MediaPlayerContent extends Component<IMediaPlayerContentProps, IMediaPlaye
 
     if (data.mediaType === 'audio') {
       return (
-        <div className="flex items-center justify-center w-full h-full" style={{ backgroundColor: data.backgroundColor || '#000000' }}>
-          <div className="text-center text-white">
-            <div className="text-4xl mb-4">🎵</div>
-            {data.title && <div className="text-lg mb-4">{data.title}</div>}
-            <audio {...commonProps} className="w-full max-w-md" />
+        <div className='flex items-center justify-center w-full h-full' style={{ backgroundColor: data.backgroundColor || '#000000' }}>
+          <div className='text-center text-white'>
+            <div className='text-4xl mb-4'>🎵</div>
+            {data.title && <div className='text-lg mb-4'>{data.title}</div>}
+            <audio {...commonProps} className='w-full max-w-md' />
           </div>
         </div>
       );
@@ -221,18 +221,18 @@ class MediaPlayerContent extends Component<IMediaPlayerContentProps, IMediaPlaye
     }
 
     return (
-      <div className="relative w-full h-full overflow-hidden">
+      <div className='relative w-full h-full overflow-hidden'>
         {isLoading && (
-          <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 text-white z-10">
-            <div className="text-center">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white mx-auto mb-2"></div>
+          <div className='absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 text-white z-10'>
+            <div className='text-center'>
+              <div className='animate-spin rounded-full h-8 w-8 border-b-2 border-white mx-auto mb-2'></div>
               <div>Loading media...</div>
             </div>
           </div>
         )}
         
         {data?.title && (
-          <div className="absolute top-0 left-0 right-0 bg-black bg-opacity-50 text-white p-2 text-sm z-20">
+          <div className='absolute top-0 left-0 right-0 bg-black bg-opacity-50 text-white p-2 text-sm z-20'>
             {data.title}
           </div>
         )}

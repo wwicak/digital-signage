@@ -28,35 +28,55 @@ class WebSlide extends GenericSlide {
    */
   renderSlideContent(data: string): React.ReactElement {
     return (
-      <iframe
-        width="100%"
-        height="100%"
-        src={data}
-        frameBorder="0"
-        allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture"
-        allowFullScreen
-        title="Web content"
-        onError={(e) => {
-          console.error('WebSlide iframe error:', e);
-          console.error('Failed to load URL in slide:', data);
-          console.error('This might be due to X-Frame-Options or CSP restrictions');
-        }}
-        onLoad={() => {
-          console.log('WebSlide iframe loaded successfully:', data);
-        }}
-      />
+      <div className='w-full h-full relative'>
+        <iframe
+          width='100%'
+          height='100%'
+          src={data}
+          frameBorder='0'
+          allow='accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture'
+          allowFullScreen
+          title='Web content'
+          className='absolute top-0 left-0 w-full h-full'
+          onError={() => {
+            // iframe error - might be due to X-Frame-Options or CSP restrictions
+          }}
+          onLoad={() => {
+            // iframe loaded successfully
+            if (this.state.loading.resolve) {
+              this.state.loading.resolve();
+            }
+          }}
+        />
+      </div>
     )
   }
 
   /**
    * Stops the slide's content from playing when the slide is out of focus
    */
-  stop = (): void => {}
+  stop = (): void => {
+    // For web slides, we can pause the iframe by temporarily removing and restoring the src
+    const iframe = document.querySelector('.slide-content iframe') as HTMLIFrameElement;
+    if (iframe) {
+      // Store the current src for restoration
+      iframe.dataset.originalSrc = iframe.src;
+      // Temporarily clear the src to stop any playing content
+      iframe.src = 'about:blank';
+    }
+  }
 
   /**
    * Starts or resumes the slide's content when the slide is in focus
    */
-  play = (): void => {}
+  play = (): void => {
+    // For web slides, restore the iframe src to resume content
+    const iframe = document.querySelector('.slide-content iframe') as HTMLIFrameElement;
+    if (iframe && iframe.dataset.originalSrc) {
+      iframe.src = iframe.dataset.originalSrc;
+      delete iframe.dataset.originalSrc;
+    }
+  }
 }
 
 export default WebSlide

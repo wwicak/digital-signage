@@ -56,9 +56,9 @@ class YoutubeSlide extends GenericSlide {
     if (!id || service !== 'youtube') console.error('Failed to parse Youtube URL')
     
     return (
-      <div className="w-full h-full min-h-full">
+      <div className='w-full h-full min-h-full'>
         <YouTube
-          containerClassName="w-full h-full min-h-full"
+          containerClassName='w-full h-full min-h-full'
           videoId={id || ''}
           opts={{
             /* eslint-disable camelcase */

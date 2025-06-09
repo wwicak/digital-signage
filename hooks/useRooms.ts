@@ -27,8 +27,8 @@ export interface IRoomsResponse {
 }
 
 export const useRooms = (
-  page: number = 1, 
-  limit: number = 10, 
+  page: number = 1,
+  limit: number = 10,
   buildingId?: string
 ) => {
   const [data, setData] = useState<IRoom[]>([]);
@@ -45,17 +45,17 @@ export const useRooms = (
     try {
       setIsLoading(true);
       setError(null);
-      
+
       let url = `/api/v1/rooms?page=${page}&limit=${limit}`;
       if (buildingId && buildingId !== "all") {
         url += `&building_id=${buildingId}`;
       }
-      
+
       const response = await fetch(url);
       if (!response.ok) {
         throw new Error("Failed to fetch rooms");
       }
-      
+
       const result: IRoomsResponse = await response.json();
       setData(result.rooms);
       setPagination(result.pagination);

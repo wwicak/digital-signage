@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-import { Form, Input, InlineInputGroup } from '../../../components/Form' // Assuming Form components are/will be typed
+import { Form, Input } from '../../../components/Form' // Assuming Form components are/will be typed
 import * as z from 'zod'
 
 import { IWebDefaultData } from '../index' // This is an interface
@@ -94,76 +94,76 @@ class WebOptions extends Component<IWebOptionsProps, IWebOptionsState> {
     const previewData: IWebDefaultData = { title, url, color, refreshInterval, scale, allowInteraction }
 
     return (
-      <div className="space-y-8">
+      <div className='space-y-8'>
         {/* Configuration Section */}
-        <div className="bg-white rounded-lg border border-gray-200 p-6">
-          <div className="mb-6">
-            <h3 className="text-lg font-semibold text-gray-900 mb-2">Web Page Widget Configuration</h3>
-            <p className="text-gray-600">Configure how your web page will be displayed in the widget.</p>
+        <div className='bg-white rounded-lg border border-gray-200 p-6'>
+          <div className='mb-6'>
+            <h3 className='text-lg font-semibold text-gray-900 mb-2'>Web Page Widget Configuration</h3>
+            <p className='text-gray-600'>Configure how your web page will be displayed in the widget.</p>
           </div>
 
           <Form>
-            <div className="space-y-6">
+            <div className='space-y-6'>
               {/* URL Input */}
               <div>
                 <Input
-                  label="Webpage URL"
-                  type="text"
-                  name="url"
+                  label='Webpage URL'
+                  type='text'
+                  name='url'
                   value={url}
-                  placeholder="https://example.com"
+                  placeholder='https://example.com'
                   onChange={this.handleChange}
                 />
-                <p className="text-sm text-gray-500 mt-1">Enter the full URL of the webpage you want to display</p>
+                <p className='text-sm text-gray-500 mt-1'>Enter the full URL of the webpage you want to display</p>
               </div>
 
               {/* Title Input */}
               <div>
                 <Input
-                  label="Widget Title (Optional)"
-                  placeholder="Optional title for the frame..."
-                  type="text"
-                  name="title"
+                  label='Widget Title (Optional)'
+                  placeholder='Optional title for the frame...'
+                  type='text'
+                  name='title'
                   value={title || ''}
                   onChange={this.handleChange}
                 />
               </div>
 
               {/* Color and Refresh Settings */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
                 <div>
                   <Input
-                    label="Background Color"
-                    type="color"
-                    name="color"
+                    label='Background Color'
+                    type='color'
+                    name='color'
                     value={color}
                     onChange={this.handleChange}
                     expand={false}
                   />
-                  <p className="text-sm text-gray-500 mt-1">Frame background color</p>
+                  <p className='text-sm text-gray-500 mt-1'>Frame background color</p>
                 </div>
                 <div>
                   <Input
-                    label="Refresh Interval (seconds)"
-                    type="number"
-                    name="refreshInterval"
+                    label='Refresh Interval (seconds)'
+                    type='number'
+                    name='refreshInterval'
                     value={refreshInterval}
                     min={0}
                     step={10}
                     onChange={this.handleChange}
                     expand={true}
                   />
-                  <p className="text-sm text-gray-500 mt-1">Set to 0 to disable auto-refresh</p>
+                  <p className='text-sm text-gray-500 mt-1'>Set to 0 to disable auto-refresh</p>
                 </div>
               </div>
 
               {/* Scale and Interaction Settings */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
                 <div>
                   <Input
-                    label="Scale Factor"
-                    type="number"
-                    name="scale"
+                    label='Scale Factor'
+                    type='number'
+                    name='scale'
                     value={scale}
                     min={0.1}
                     max={5}
@@ -171,13 +171,13 @@ class WebOptions extends Component<IWebOptionsProps, IWebOptionsState> {
                     onChange={this.handleChange}
                     expand={true}
                   />
-                  <p className="text-sm text-gray-500 mt-1">1.0 = 100%, 0.8 = 80%, etc.</p>
+                  <p className='text-sm text-gray-500 mt-1'>1.0 = 100%, 0.8 = 80%, etc.</p>
                 </div>
-                <div className="flex items-center pt-6">
+                <div className='flex items-center pt-6'>
                   <Input
-                    type="checkbox"
-                    name="allowInteraction"
-                    label="Allow User Interaction"
+                    type='checkbox'
+                    name='allowInteraction'
+                    label='Allow User Interaction'
                     checked={allowInteraction}
                     onChange={(name, checked) => this.handleChange(name as keyof IWebOptionsState, checked)}
                     expand={false}
@@ -189,12 +189,12 @@ class WebOptions extends Component<IWebOptionsProps, IWebOptionsState> {
         </div>
 
         {/* Preview Section */}
-        <div className="bg-white rounded-lg border border-gray-200 p-6">
-          <div className="mb-4">
-            <h4 className="text-lg font-semibold text-gray-900 mb-2">Live Preview</h4>
-            <p className="text-gray-600">See how your web page widget will appear</p>
+        <div className='bg-white rounded-lg border border-gray-200 p-6'>
+          <div className='mb-4'>
+            <h4 className='text-lg font-semibold text-gray-900 mb-2'>Live Preview</h4>
+            <p className='text-gray-600'>See how your web page widget will appear</p>
           </div>
-          <div className="border border-gray-300 rounded-lg overflow-hidden bg-gray-50 min-h-[300px]">
+          <div className='border border-gray-300 rounded-lg overflow-hidden bg-gray-50 min-h-[300px]'>
             <WebContent data={previewData} isPreview={true} />
           </div>
         </div>

@@ -71,7 +71,7 @@ class GenericSlide extends Component<GenericSlideProps, GenericSlideState> {
    */
   renderSlideContent(data: string): React.ReactElement {
     return (
-      <div className="w-full h-full text-center flex items-center justify-center">
+      <div className='w-full h-full text-center flex items-center justify-center'>
         {`Unknown slide type with data: ${data}`}
         
       </div>
@@ -117,8 +117,8 @@ class GenericSlide extends Component<GenericSlideProps, GenericSlideState> {
       // Play videos
       const videos = slideElement.querySelectorAll('video');
       videos.forEach(video => {
-        video.play().catch(error => {
-          console.log('Video autoplay prevented:', error);
+        video.play().catch(() => {
+          // Video autoplay prevented
         });
       });
       
@@ -139,17 +139,15 @@ class GenericSlide extends Component<GenericSlideProps, GenericSlideState> {
   render(): React.ReactElement {
     const { slide, show = false } = this.props
     const { data, title, description } = slide
-    const { loaded } = this.state
     return (
-      <div className="inline-block h-full w-full absolute">
+      <div className={`slide-content inline-block h-full w-full absolute transition-opacity duration-500 ${show ? 'opacity-100 z-10' : 'opacity-0 z-0'}`}>
         {this.renderSlideContent(data)}
         {(title || description) && (
-          <div className="w-full absolute p-3 box-border pt-10">
-            {title && <h1>{title}</h1>}
-            {description && <p>{description}</p>}
+          <div className='w-full absolute p-3 box-border pt-10 bg-black bg-opacity-50 text-white'>
+            {title && <h1 className='text-2xl font-bold mb-2'>{title}</h1>}
+            {description && <p className='text-lg'>{description}</p>}
           </div>
         )}
-        
       </div>
     )
   }

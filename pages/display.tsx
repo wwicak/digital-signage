@@ -75,11 +75,11 @@ const DisplayPageComponent = memo(function DisplayPageComponent({
   // Show registration loading state
   if (isRegistering) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-100">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <h2 className="text-xl font-semibold text-gray-900 mb-2">Registering Display...</h2>
-          <p className="text-gray-600">Setting up your display with the selected layout</p>
+      <div className='min-h-screen flex items-center justify-center bg-gray-100'>
+        <div className='text-center'>
+          <div className='animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4'></div>
+          <h2 className='text-xl font-semibold text-gray-900 mb-2'>Registering Display...</h2>
+          <p className='text-gray-600'>Setting up your display with the selected layout</p>
         </div>
       </div>
     );
@@ -88,13 +88,13 @@ const DisplayPageComponent = memo(function DisplayPageComponent({
   // Show layout selection if no display ID and no layout ID
   if (!actualDisplayId && !layoutId) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-100">
-        <div className="text-center">
-          <h2 className="text-2xl font-semibold text-gray-900 mb-4">Display Setup Required</h2>
-          <p className="text-gray-600 mb-6">Please select a layout for this display</p>
+      <div className='min-h-screen flex items-center justify-center bg-gray-100'>
+        <div className='text-center'>
+          <h2 className='text-2xl font-semibold text-gray-900 mb-4'>Display Setup Required</h2>
+          <p className='text-gray-600 mb-6'>Please select a layout for this display</p>
           <button
             onClick={() => router.push('/display-selector')}
-            className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors"
+            className='bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors'
           >
             Choose Layout
           </button>
@@ -110,7 +110,7 @@ const DisplayPageComponent = memo(function DisplayPageComponent({
       {actualDisplayId ? (
         <DisplayComponent display={actualDisplayId} />
       ) : (
-        <div className="min-h-screen flex items-center justify-center">
+        <div className='min-h-screen flex items-center justify-center'>
           <div>Loading display information...</div>
         </div>
       )}

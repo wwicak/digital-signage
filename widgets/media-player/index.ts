@@ -2,7 +2,6 @@ import { ComponentType } from "react";
 import { Play } from "lucide-react";
 import BaseWidget, { IWidgetDefinitionArgs } from "../base_widget";
 import { MediaPlayerContent, MediaPlayerOptions } from "./src";
-import { MediaPlayerWidgetData } from "@/lib/models/Widget";
 
 // Define the default data interface for the Media Player widget
 interface IMediaPlayerDefaultData {

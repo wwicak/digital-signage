@@ -22,7 +22,7 @@ const CreateUserRequestSchema = z.object({
 });
 
 // Request schema for updating user role
-const UpdateUserRoleSchema = z.object({
+const _UpdateUserRoleSchema = z.object({
   role: z.object({
     name: z.nativeEnum(UserRoleName),
     associatedBuildingIds: z.array(z.string()).optional(),

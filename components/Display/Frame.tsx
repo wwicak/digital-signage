@@ -43,7 +43,7 @@ const Frame: React.FC<IDisplayFrameProps> = React.memo(
             );
           case "connection":
             return (
-              <Wifi key={`${type}-${index}`} className="w-4 h-4 text-white" />
+              <Wifi key={`${type}-${index}`} className='w-4 h-4 text-white' />
             );
           case "time":
             return (
@@ -79,7 +79,7 @@ const Frame: React.FC<IDisplayFrameProps> = React.memo(
             ))}
           </div>
         )}
-        <div className="flex-1 flex flex-col overflow-hidden">{children}</div>
+        <div className='flex-1 flex flex-col overflow-hidden'>{children}</div>
       </div>
     );
   },

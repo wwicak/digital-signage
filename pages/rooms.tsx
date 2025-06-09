@@ -91,8 +91,8 @@ const RoomsPage = () => {
   const fetchRooms = async () => {
     try {
       setLoading(true);
-      const url = selectedBuilding === "all" 
-        ? "/api/v1/rooms?limit=100" 
+      const url = selectedBuilding === "all"
+        ? "/api/v1/rooms?limit=100"
         : `/api/v1/rooms?building_id=${selectedBuilding}&limit=100`;
       
       const response = await fetch(url);
@@ -218,11 +218,11 @@ const RoomsPage = () => {
 
   return (
     <Frame loggedIn={true}>
-      <div className="space-y-6">
-        <div className="flex items-center justify-between">
+      <div className='space-y-6'>
+        <div className='flex items-center justify-between'>
           <div>
-            <h1 className="text-3xl font-bold tracking-tight">Meeting Rooms</h1>
-            <p className="text-muted-foreground">
+            <h1 className='text-3xl font-bold tracking-tight'>Meeting Rooms</h1>
+            <p className='text-muted-foreground'>
               Manage meeting rooms across your buildings
             </p>
           </div>
@@ -235,7 +235,7 @@ const RoomsPage = () => {
           >
             <DialogTrigger asChild>
               <Button>
-                <Plus className="mr-2 h-4 w-4" />
+                <Plus className='mr-2 h-4 w-4' />
                 Add Room
               </Button>
             </DialogTrigger>
@@ -243,21 +243,21 @@ const RoomsPage = () => {
               <DialogHeader>
                 <DialogTitle>Create New Room</DialogTitle>
               </DialogHeader>
-              <form onSubmit={handleCreateRoom} className="space-y-4">
+              <form onSubmit={handleCreateRoom} className='space-y-4'>
                 <div>
-                  <Label htmlFor="name">Room Name</Label>
+                  <Label htmlFor='name'>Room Name</Label>
                   <Input
-                    id="name"
+                    id='name'
                     value={formData.name}
                     onChange={(e) =>
                       setFormData({ ...formData, name: e.target.value })
                     }
-                    placeholder="Enter room name"
+                    placeholder='Enter room name'
                     required
                   />
                 </div>
                 <div>
-                  <Label htmlFor="building">Building</Label>
+                  <Label htmlFor='building'>Building</Label>
                   <Select
                     value={formData.building_id}
                     onValueChange={(value) =>
@@ -266,7 +266,7 @@ const RoomsPage = () => {
                     required
                   >
                     <SelectTrigger>
-                      <SelectValue placeholder="Select a building" />
+                      <SelectValue placeholder='Select a building' />
                     </SelectTrigger>
                     <SelectContent>
                       {buildings.map((building) => (
@@ -278,11 +278,11 @@ const RoomsPage = () => {
                   </Select>
                 </div>
                 <div>
-                  <Label htmlFor="capacity">Capacity</Label>
+                  <Label htmlFor='capacity'>Capacity</Label>
                   <Input
-                    id="capacity"
-                    type="number"
-                    min="1"
+                    id='capacity'
+                    type='number'
+                    min='1'
                     value={formData.capacity}
                     onChange={(e) =>
                       setFormData({ ...formData, capacity: parseInt(e.target.value) || 1 })
@@ -291,42 +291,42 @@ const RoomsPage = () => {
                   />
                 </div>
                 <div>
-                  <Label htmlFor="facilities">Facilities (comma-separated)</Label>
+                  <Label htmlFor='facilities'>Facilities (comma-separated)</Label>
                   <Input
-                    id="facilities"
+                    id='facilities'
                     value={formData.facilities}
                     onChange={(e) =>
                       setFormData({ ...formData, facilities: e.target.value })
                     }
-                    placeholder="Projector, Whiteboard, Video Conference"
+                    placeholder='Projector, Whiteboard, Video Conference'
                   />
                 </div>
-                <div className="flex justify-end space-x-2">
+                <div className='flex justify-end space-x-2'>
                   <Button
-                    type="button"
-                    variant="outline"
+                    type='button'
+                    variant='outline'
                     onClick={() => setIsCreateDialogOpen(false)}
                   >
                     Cancel
                   </Button>
-                  <Button type="submit">Create Room</Button>
+                  <Button type='submit'>Create Room</Button>
                 </div>
               </form>
             </DialogContent>
           </Dialog>
         </div>
 
-        <div className="flex items-center space-x-4">
-          <Label htmlFor="building-filter">Filter by Building:</Label>
+        <div className='flex items-center space-x-4'>
+          <Label htmlFor='building-filter'>Filter by Building:</Label>
           <Select
             value={selectedBuilding}
             onValueChange={setSelectedBuilding}
           >
-            <SelectTrigger className="w-[200px]">
+            <SelectTrigger className='w-[200px]'>
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">All Buildings</SelectItem>
+              <SelectItem value='all'>All Buildings</SelectItem>
               {buildings.map((building) => (
                 <SelectItem key={building._id} value={building._id}>
                   {building.name}
@@ -338,16 +338,16 @@ const RoomsPage = () => {
 
         <Card>
           <CardHeader>
-            <CardTitle className="flex items-center">
-              <DoorOpen className="mr-2 h-5 w-5" />
+            <CardTitle className='flex items-center'>
+              <DoorOpen className='mr-2 h-5 w-5' />
               Rooms List
             </CardTitle>
           </CardHeader>
           <CardContent>
             {loading ? (
-              <div className="text-center py-8">Loading rooms...</div>
+              <div className='text-center py-8'>Loading rooms...</div>
             ) : rooms.length === 0 ? (
-              <div className="text-center py-8 text-muted-foreground">
+              <div className='text-center py-8 text-muted-foreground'>
                 No rooms found. Create your first room to get started.
               </div>
             ) : (
@@ -364,43 +364,43 @@ const RoomsPage = () => {
                 <TableBody>
                   {rooms.map((room) => (
                     <TableRow key={room._id}>
-                      <TableCell className="font-medium">{room.name}</TableCell>
+                      <TableCell className='font-medium'>{room.name}</TableCell>
                       <TableCell>
-                        <div className="flex items-center">
-                          <Building className="mr-1 h-4 w-4 text-muted-foreground" />
+                        <div className='flex items-center'>
+                          <Building className='mr-1 h-4 w-4 text-muted-foreground' />
                           {room.building_id.name}
                         </div>
                       </TableCell>
                       <TableCell>
-                        <div className="flex items-center">
-                          <Users className="mr-1 h-4 w-4 text-muted-foreground" />
+                        <div className='flex items-center'>
+                          <Users className='mr-1 h-4 w-4 text-muted-foreground' />
                           {room.capacity}
                         </div>
                       </TableCell>
                       <TableCell>
-                        <div className="flex flex-wrap gap-1">
+                        <div className='flex flex-wrap gap-1'>
                           {room.facilities.map((facility, index) => (
-                            <Badge key={index} variant="secondary" className="text-xs">
+                            <Badge key={index} variant='secondary' className='text-xs'>
                               {facility}
                             </Badge>
                           ))}
                         </div>
                       </TableCell>
                       <TableCell>
-                        <div className="flex space-x-2">
+                        <div className='flex space-x-2'>
                           <Button
-                            variant="outline"
-                            size="sm"
+                            variant='outline'
+                            size='sm'
                             onClick={() => openEditDialog(room)}
                           >
-                            <Edit className="h-4 w-4" />
+                            <Edit className='h-4 w-4' />
                           </Button>
                           <Button
-                            variant="outline"
-                            size="sm"
+                            variant='outline'
+                            size='sm'
                             onClick={() => handleDeleteRoom(room)}
                           >
-                            <Trash2 className="h-4 w-4" />
+                            <Trash2 className='h-4 w-4' />
                           </Button>
                         </div>
                       </TableCell>
@@ -424,21 +424,21 @@ const RoomsPage = () => {
             <DialogHeader>
               <DialogTitle>Edit Room</DialogTitle>
             </DialogHeader>
-            <form onSubmit={handleEditRoom} className="space-y-4">
+            <form onSubmit={handleEditRoom} className='space-y-4'>
               <div>
-                <Label htmlFor="edit-name">Room Name</Label>
+                <Label htmlFor='edit-name'>Room Name</Label>
                 <Input
-                  id="edit-name"
+                  id='edit-name'
                   value={formData.name}
                   onChange={(e) =>
                     setFormData({ ...formData, name: e.target.value })
                   }
-                  placeholder="Enter room name"
+                  placeholder='Enter room name'
                   required
                 />
               </div>
               <div>
-                <Label htmlFor="edit-building">Building</Label>
+                <Label htmlFor='edit-building'>Building</Label>
                 <Select
                   value={formData.building_id}
                   onValueChange={(value) =>
@@ -447,7 +447,7 @@ const RoomsPage = () => {
                   required
                 >
                   <SelectTrigger>
-                    <SelectValue placeholder="Select a building" />
+                    <SelectValue placeholder='Select a building' />
                   </SelectTrigger>
                   <SelectContent>
                     {buildings.map((building) => (
@@ -459,11 +459,11 @@ const RoomsPage = () => {
                 </Select>
               </div>
               <div>
-                <Label htmlFor="edit-capacity">Capacity</Label>
+                <Label htmlFor='edit-capacity'>Capacity</Label>
                 <Input
-                  id="edit-capacity"
-                  type="number"
-                  min="1"
+                  id='edit-capacity'
+                  type='number'
+                  min='1'
                   value={formData.capacity}
                   onChange={(e) =>
                     setFormData({ ...formData, capacity: parseInt(e.target.value) || 1 })
@@ -472,25 +472,25 @@ const RoomsPage = () => {
                 />
               </div>
               <div>
-                <Label htmlFor="edit-facilities">Facilities (comma-separated)</Label>
+                <Label htmlFor='edit-facilities'>Facilities (comma-separated)</Label>
                 <Input
-                  id="edit-facilities"
+                  id='edit-facilities'
                   value={formData.facilities}
                   onChange={(e) =>
                     setFormData({ ...formData, facilities: e.target.value })
                   }
-                  placeholder="Projector, Whiteboard, Video Conference"
+                  placeholder='Projector, Whiteboard, Video Conference'
                 />
               </div>
-              <div className="flex justify-end space-x-2">
+              <div className='flex justify-end space-x-2'>
                 <Button
-                  type="button"
-                  variant="outline"
+                  type='button'
+                  variant='outline'
                   onClick={() => setIsEditDialogOpen(false)}
                 >
                   Cancel
                 </Button>
-                <Button type="submit">Update Room</Button>
+                <Button type='submit'>Update Room</Button>
               </div>
             </form>
           </DialogContent>

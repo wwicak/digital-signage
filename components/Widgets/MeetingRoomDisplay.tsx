@@ -156,21 +156,21 @@ const MeetingRoomDisplay: React.FC<IMeetingRoomDisplayProps> = ({
 
   const getStatusIcon = (reservation: IReservation) => {
     if (isCurrentMeeting(reservation)) {
-      return <CheckCircle className="h-4 w-4 text-green-500" />;
+      return <CheckCircle className='h-4 w-4 text-green-500' />;
     } else if (isUpcomingMeeting(reservation)) {
-      return <Clock className="h-4 w-4 text-blue-500" />;
+      return <Clock className='h-4 w-4 text-blue-500' />;
     } else {
-      return <XCircle className="h-4 w-4 text-gray-400" />;
+      return <XCircle className='h-4 w-4 text-gray-400' />;
     }
   };
 
   const getStatusBadge = (reservation: IReservation) => {
     if (isCurrentMeeting(reservation)) {
-      return <Badge className="bg-green-500">In Progress</Badge>;
+      return <Badge className='bg-green-500'>In Progress</Badge>;
     } else if (isUpcomingMeeting(reservation)) {
-      return <Badge variant="outline">Upcoming</Badge>;
+      return <Badge variant='outline'>Upcoming</Badge>;
     } else {
-      return <Badge variant="secondary">Completed</Badge>;
+      return <Badge variant='secondary'>Completed</Badge>;
     }
   };
 
@@ -178,14 +178,14 @@ const MeetingRoomDisplay: React.FC<IMeetingRoomDisplayProps> = ({
     if (reservation.isExternallyManaged) {
       switch (reservation.sourceCalendarType) {
         case "google":
-          return <Badge variant="outline" className="text-blue-600 text-xs">Google</Badge>;
+          return <Badge variant='outline' className='text-blue-600 text-xs'>Google</Badge>;
         case "outlook":
-          return <Badge variant="outline" className="text-orange-600 text-xs">Outlook</Badge>;
+          return <Badge variant='outline' className='text-orange-600 text-xs'>Outlook</Badge>;
         default:
-          return <Badge variant="outline" className="text-xs">External</Badge>;
+          return <Badge variant='outline' className='text-xs'>External</Badge>;
       }
     }
-    return <Badge variant="secondary" className="text-xs">Internal</Badge>;
+    return <Badge variant='secondary' className='text-xs'>Internal</Badge>;
   };
 
   const currentReservations = reservations.filter(isCurrentMeeting);
@@ -194,11 +194,11 @@ const MeetingRoomDisplay: React.FC<IMeetingRoomDisplayProps> = ({
 
   if (loading) {
     return (
-      <Card className="w-full h-full">
-        <CardContent className="flex items-center justify-center h-full">
-          <div className="text-center">
-            <Clock className="h-8 w-8 animate-spin mx-auto mb-2" />
-            <p className="text-muted-foreground">Loading reservations...</p>
+      <Card className='w-full h-full'>
+        <CardContent className='flex items-center justify-center h-full'>
+          <div className='text-center'>
+            <Clock className='h-8 w-8 animate-spin mx-auto mb-2' />
+            <p className='text-muted-foreground'>Loading reservations...</p>
           </div>
         </CardContent>
       </Card>
@@ -207,20 +207,20 @@ const MeetingRoomDisplay: React.FC<IMeetingRoomDisplayProps> = ({
 
   if (error) {
     return (
-      <Card className="w-full h-full">
-        <CardHeader className="pb-3">
-          <CardTitle className="flex items-center">
-            <Calendar className="mr-2 h-5 w-5" />
+      <Card className='w-full h-full'>
+        <CardHeader className='pb-3'>
+          <CardTitle className='flex items-center'>
+            <Calendar className='mr-2 h-5 w-5' />
             <span>Meeting Room Display</span>
           </CardTitle>
         </CardHeader>
-        <CardContent className="flex items-center justify-center h-full">
-          <div className="text-center">
-            <AlertCircle className="h-8 w-8 text-muted-foreground mx-auto mb-4" />
-            <p className="text-muted-foreground mb-2">{error}</p>
-            <p className="text-xs text-muted-foreground">
+        <CardContent className='flex items-center justify-center h-full'>
+          <div className='text-center'>
+            <AlertCircle className='h-8 w-8 text-muted-foreground mx-auto mb-4' />
+            <p className='text-muted-foreground mb-2'>{error}</p>
+            <p className='text-xs text-muted-foreground'>
               The meeting room system is being configured. This widget will display
-              today's meetings once the API is set up.
+              today&apos;s meetings once the API is set up.
             </p>
           </div>
         </CardContent>
@@ -229,21 +229,21 @@ const MeetingRoomDisplay: React.FC<IMeetingRoomDisplayProps> = ({
   }
 
   return (
-    <Card className="w-full h-full">
-      <CardHeader className="pb-3">
-        <CardTitle className="flex items-center justify-between">
-          <div className="flex items-center">
-            <Calendar className="mr-2 h-5 w-5" />
-            <span>Today's Meetings</span>
+    <Card className='w-full h-full'>
+      <CardHeader className='pb-3'>
+        <CardTitle className='flex items-center justify-between'>
+          <div className='flex items-center'>
+            <Calendar className='mr-2 h-5 w-5' />
+            <span>Today&apos;s Meetings</span>
             {buildingName && (
               <>
-                <Separator orientation="vertical" className="mx-2 h-4" />
-                <Building className="mr-1 h-4 w-4 text-muted-foreground" />
-                <span className="text-sm text-muted-foreground">{buildingName}</span>
+                <Separator orientation='vertical' className='mx-2 h-4' />
+                <Building className='mr-1 h-4 w-4 text-muted-foreground' />
+                <span className='text-sm text-muted-foreground'>{buildingName}</span>
               </>
             )}
           </div>
-          <div className="text-sm text-muted-foreground">
+          <div className='text-sm text-muted-foreground'>
             {currentTime.toLocaleTimeString([], {
               hour: "2-digit",
               minute: "2-digit",
@@ -252,23 +252,23 @@ const MeetingRoomDisplay: React.FC<IMeetingRoomDisplayProps> = ({
           </div>
         </CardTitle>
       </CardHeader>
-      <CardContent className="space-y-4">
+      <CardContent className='space-y-4'>
         {reservations.length === 0 ? (
-          <div className="text-center py-8 text-muted-foreground">
-            <Calendar className="h-12 w-12 mx-auto mb-4 opacity-50" />
-            <p className="text-lg font-medium">No meetings scheduled</p>
-            <p className="text-sm">Enjoy your free day!</p>
+          <div className='text-center py-8 text-muted-foreground'>
+            <Calendar className='h-12 w-12 mx-auto mb-4 opacity-50' />
+            <p className='text-lg font-medium'>No meetings scheduled</p>
+            <p className='text-sm'>Enjoy your free day!</p>
           </div>
         ) : (
-          <div className="space-y-4">
+          <div className='space-y-4'>
             {/* Current Meetings */}
             {currentReservations.length > 0 && (
               <div>
-                <h3 className="text-sm font-semibold text-green-600 mb-2 flex items-center">
-                  <CheckCircle className="mr-1 h-4 w-4" />
+                <h3 className='text-sm font-semibold text-green-600 mb-2 flex items-center'>
+                  <CheckCircle className='mr-1 h-4 w-4' />
                   Currently In Progress ({currentReservations.length})
                 </h3>
-                <div className="space-y-2">
+                <div className='space-y-2'>
                   {currentReservations.map((reservation) => (
                     <ReservationCard
                       key={reservation._id}
@@ -288,11 +288,11 @@ const MeetingRoomDisplay: React.FC<IMeetingRoomDisplayProps> = ({
             {/* Upcoming Meetings */}
             {upcomingReservations.length > 0 && showUpcoming && (
               <div>
-                <h3 className="text-sm font-semibold text-blue-600 mb-2 flex items-center">
-                  <Clock className="mr-1 h-4 w-4" />
+                <h3 className='text-sm font-semibold text-blue-600 mb-2 flex items-center'>
+                  <Clock className='mr-1 h-4 w-4' />
                   Upcoming ({upcomingReservations.length})
                 </h3>
-                <div className="space-y-2">
+                <div className='space-y-2'>
                   {upcomingReservations.slice(0, 5).map((reservation) => (
                     <ReservationCard
                       key={reservation._id}
@@ -311,11 +311,11 @@ const MeetingRoomDisplay: React.FC<IMeetingRoomDisplayProps> = ({
             {/* Past Meetings */}
             {pastReservations.length > 0 && (
               <div>
-                <h3 className="text-sm font-semibold text-gray-500 mb-2 flex items-center">
-                  <XCircle className="mr-1 h-4 w-4" />
+                <h3 className='text-sm font-semibold text-gray-500 mb-2 flex items-center'>
+                  <XCircle className='mr-1 h-4 w-4' />
                   Completed ({pastReservations.length})
                 </h3>
-                <div className="space-y-2">
+                <div className='space-y-2'>
                   {pastReservations.slice(0, 3).map((reservation) => (
                     <ReservationCard
                       key={reservation._id}
@@ -361,47 +361,47 @@ const ReservationCard: React.FC<IReservationCardProps> = ({
 }) => {
   return (
     <Card className={`p-3 ${isHighlighted ? "border-green-200 bg-green-50" : ""} ${isCompleted ? "opacity-60" : ""}`}>
-      <div className="space-y-2">
-        <div className="flex items-start justify-between">
-          <div className="flex-1">
-            <div className="flex items-center space-x-2">
+      <div className='space-y-2'>
+        <div className='flex items-start justify-between'>
+          <div className='flex-1'>
+            <div className='flex items-center space-x-2'>
               {getStatusIcon(reservation)}
-              <h4 className="font-medium text-sm">{reservation.title}</h4>
+              <h4 className='font-medium text-sm'>{reservation.title}</h4>
               {getStatusBadge(reservation)}
             </div>
-            <div className="flex items-center space-x-4 mt-1 text-xs text-muted-foreground">
-              <div className="flex items-center">
-                <DoorOpen className="mr-1 h-3 w-3" />
+            <div className='flex items-center space-x-4 mt-1 text-xs text-muted-foreground'>
+              <div className='flex items-center'>
+                <DoorOpen className='mr-1 h-3 w-3' />
                 <span>{reservation.room_id.name}</span>
               </div>
-              <div className="flex items-center">
-                <Clock className="mr-1 h-3 w-3" />
+              <div className='flex items-center'>
+                <Clock className='mr-1 h-3 w-3' />
                 <span>
                   {formatTime(reservation.start_time)} - {formatTime(reservation.end_time)}
                 </span>
               </div>
             </div>
           </div>
-          <div className="flex flex-col items-end space-y-1">
+          <div className='flex flex-col items-end space-y-1'>
             {getSourceBadge(reservation)}
           </div>
         </div>
         
-        <div className="flex items-center justify-between text-xs">
-          <div className="flex items-center">
-            <User className="mr-1 h-3 w-3 text-muted-foreground" />
-            <span className="text-muted-foreground">{reservation.organizer}</span>
+        <div className='flex items-center justify-between text-xs'>
+          <div className='flex items-center'>
+            <User className='mr-1 h-3 w-3 text-muted-foreground' />
+            <span className='text-muted-foreground'>{reservation.organizer}</span>
             {reservation.attendees.length > 0 && (
               <>
-                <Users className="ml-2 mr-1 h-3 w-3 text-muted-foreground" />
-                <span className="text-muted-foreground">+{reservation.attendees.length}</span>
+                <Users className='ml-2 mr-1 h-3 w-3 text-muted-foreground' />
+                <span className='text-muted-foreground'>+{reservation.attendees.length}</span>
               </>
             )}
           </div>
         </div>
         
         {reservation.agenda_meeting && (
-          <div className="text-xs text-muted-foreground bg-muted/50 p-2 rounded">
+          <div className='text-xs text-muted-foreground bg-muted/50 p-2 rounded'>
             <strong>Agenda:</strong> {reservation.agenda_meeting}
           </div>
         )}

@@ -22,8 +22,6 @@ import {
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Separator } from "@/components/ui/separator";
-import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { cn } from "@/lib/utils";
 import DropdownButton, { IDropdownChoice } from "../DropdownButton";
 
@@ -213,14 +211,14 @@ const Sidebar: React.FC<ISidebarProps> = ({ loggedIn, displayId, collapsed = fal
   }));
 
   return (
-    <div className="h-full flex flex-col">
+    <div className='h-full flex flex-col'>
       {/* Enhanced Display Selector */}
       {loggedIn && !collapsed && (
-        <Card className="mx-0 mt-3 mb-4 border-border/50 bg-card/60 backdrop-blur-sm">
-          <CardContent className="p-4">
-            <div className="mb-3">
-              <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider flex items-center gap-4">
-                <Tv className="w-3 h-3" />
+        <Card className='mx-0 mt-3 mb-4 border-border/50 bg-card/60 backdrop-blur-sm'>
+          <CardContent className='p-4'>
+            <div className='mb-3'>
+              <p className='text-xs font-semibold text-muted-foreground uppercase tracking-wider flex items-center gap-4'>
+                <Tv className='w-3 h-3' />
                 Active Display
               </p>
             </div>
@@ -230,23 +228,23 @@ const Sidebar: React.FC<ISidebarProps> = ({ loggedIn, displayId, collapsed = fal
               style={{ width: "100%" }}
               menuStyle={{ left: 0, top: "calc(100% + 5px)", width: "100%" }}
             >
-              <Card className="cursor-pointer border-border/50 bg-background/50 hover:bg-accent/30 transition-all duration-300 hover:border-primary/30 hover:shadow-sm">
-                <CardContent className="p-3">
-                  <div className="flex items-center gap-3">
-                    <div className="flex justify-center items-center">
-                      <div className="w-8 h-8 rounded-lg bg-primary/10 border border-primary/20 flex items-center justify-center">
-                        <Tv className="text-primary h-3 w-3" />
+              <Card className='cursor-pointer border-border/50 bg-background/50 hover:bg-accent/30 transition-all duration-300 hover:border-primary/30 hover:shadow-sm'>
+                <CardContent className='p-3'>
+                  <div className='flex items-center gap-3'>
+                    <div className='flex justify-center items-center'>
+                      <div className='w-8 h-8 rounded-lg bg-primary/10 border border-primary/20 flex items-center justify-center'>
+                        <Tv className='text-primary h-3 w-3' />
                       </div>
                     </div>
-                    <div className="flex flex-col justify-center flex-1 min-w-0">
-                      <span className="font-medium text-sm text-foreground whitespace-normal">
+                    <div className='flex flex-col justify-center flex-1 min-w-0'>
+                      <span className='font-medium text-sm text-foreground whitespace-normal'>
                         {context.state.name || "Select Display"}
                       </span>
                       <DisplayStatusIndicator
                         displayId={context.state.id || undefined}
                       />
                     </div>
-                    <ChevronDown className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+                    <ChevronDown className='h-4 w-4 text-muted-foreground flex-shrink-0' />
                   </div>
                 </CardContent>
               </Card>
@@ -256,8 +254,8 @@ const Sidebar: React.FC<ISidebarProps> = ({ loggedIn, displayId, collapsed = fal
       )}
 
       {/* Enhanced Navigation Menu */}
-      <nav className="flex-1 px-0">
-        <div className="space-y-1">
+      <nav className='flex-1 px-0'>
+        <div className='space-y-1'>
           {menu.map((item) => (
             <MenuItemWithFeatureFlag
               key={item.id}
@@ -271,20 +269,20 @@ const Sidebar: React.FC<ISidebarProps> = ({ loggedIn, displayId, collapsed = fal
 
       {/* Enhanced Logout Section */}
       {loggedIn && (
-        <Card className="mx-0 mb-3 border-border/50 bg-card/40 backdrop-blur-sm">
-          <CardContent className="p-3">
+        <Card className='mx-0 mb-3 border-border/50 bg-card/40 backdrop-blur-sm'>
+          <CardContent className='p-3'>
             <Button
               onClick={handleLogout}
-              variant="ghost"
+              variant='ghost'
               className={cn(
                 "w-full justify-start gap-3 text-destructive hover:bg-destructive/10 hover:text-destructive transition-all duration-200",
                 collapsed && "justify-center px-0"
               )}
             >
-              <LogOut className="h-4 w-4" />
+              <LogOut className='h-4 w-4' />
               {!collapsed && <span>Logout</span>}
               {collapsed && (
-                <div className="absolute left-full ml-2 px-2 py-1 bg-popover text-popover-foreground text-xs rounded-md shadow-md opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-50">
+                <div className='absolute left-full ml-2 px-2 py-1 bg-popover text-popover-foreground text-xs rounded-md shadow-md opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-50'>
                   Logout
                 </div>
               )}
@@ -304,7 +302,7 @@ const DisplayStatusIndicator: React.FC<{ displayId?: string }> = ({
 
   if (!displayId) {
     return (
-      <Badge variant="destructive" className="text-xs">
+      <Badge variant='destructive' className='text-xs'>
         Offline
       </Badge>
     );
@@ -314,7 +312,7 @@ const DisplayStatusIndicator: React.FC<{ displayId?: string }> = ({
   const isOnline = status.isOnline;
 
   return (
-    <Badge variant={isOnline ? "success" : "destructive"} className="text-xs">
+    <Badge variant={isOnline ? "success" : "destructive"} className='text-xs'>
       {isOnline ? "Online" : "Offline"}
     </Badge>
   );
@@ -338,9 +336,9 @@ const MenuItemWithFeatureFlag: React.FC<{
   // Show loading state for items with feature flags
   if (item.featureFlag && isLoading) {
     return (
-      <div className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium opacity-50">
-        <div className="h-5 w-5 bg-muted animate-pulse rounded" />
-        {!collapsed && <div className="h-4 bg-muted animate-pulse rounded flex-1" />}
+      <div className='flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium opacity-50'>
+        <div className='h-5 w-5 bg-muted animate-pulse rounded' />
+        {!collapsed && <div className='h-4 bg-muted animate-pulse rounded flex-1' />}
       </div>
     );
   }
@@ -348,7 +346,7 @@ const MenuItemWithFeatureFlag: React.FC<{
   const isActive = pathname === item.path || (pathname ? pathname.startsWith(item.path.split('?')[0]) : false);
 
   return (
-    <Link href={item.path} className="block mb-1">
+    <Link href={item.path} className='block mb-1'>
       <Card
         className={cn(
           "transition-all duration-300 cursor-pointer group hover:shadow-sm",
@@ -379,7 +377,7 @@ const MenuItemWithFeatureFlag: React.FC<{
           </div>
           
           {!collapsed && (
-            <div className="flex-1 min-w-0">
+            <div className='flex-1 min-w-0'>
               <span className={cn(
                 "font-medium text-sm transition-colors duration-200 truncate block",
                 isActive
@@ -392,7 +390,7 @@ const MenuItemWithFeatureFlag: React.FC<{
           )}
 
           {collapsed && (
-            <div className="absolute left-full ml-3 px-3 py-2 bg-popover text-popover-foreground text-sm rounded-lg shadow-lg border border-border/50 opacity-0 group-hover:opacity-100 transition-all duration-200 pointer-events-none whitespace-nowrap z-50 backdrop-blur-sm">
+            <div className='absolute left-full ml-3 px-3 py-2 bg-popover text-popover-foreground text-sm rounded-lg shadow-lg border border-border/50 opacity-0 group-hover:opacity-100 transition-all duration-200 pointer-events-none whitespace-nowrap z-50 backdrop-blur-sm'>
               {item.name}
             </div>
           )}

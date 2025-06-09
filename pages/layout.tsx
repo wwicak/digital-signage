@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useCallback, useMemo, useRef } from 'react'
 import GridLayout, { Layout as RglLayout } from 'react-grid-layout'
 import { DragDropContext, Droppable, DropResult, DroppableProvided } from '@hello-pangea/dnd'
-import { Edit, Grid2X2, Grid3X3, Monitor, Smartphone, RotateCcw, Maximize2 } from 'lucide-react'
+import { Edit, Grid2X2, Grid3X3, Monitor, Smartphone, Maximize2 } from 'lucide-react'
 
 import Frame from '../components/Admin/Frame' // Assuming .js or .tsx
 import EditableWidget from '../components/Admin/EditableWidget' // Assuming .js or .tsx
@@ -465,19 +465,19 @@ const LayoutPage: React.FC<ILayoutPageProps> = ({ loggedIn, displayId }) => {
   if (!displayContext.state.id && !displayId) {
     return (
       <Frame loggedIn={loggedIn}>
-        <div className="flex items-center justify-center min-h-screen">
-          <div className="text-center space-y-6 max-w-md">
-            <h2 className="text-2xl font-bold">Select a Display</h2>
-            <p className="text-muted-foreground">
+        <div className='flex items-center justify-center min-h-screen'>
+          <div className='text-center space-y-6 max-w-md'>
+            <h2 className='text-2xl font-bold'>Select a Display</h2>
+            <p className='text-muted-foreground'>
               Choose a display to start designing its layout with widgets.
             </p>
 
             {displaysLoading ? (
               <div>Loading displays...</div>
             ) : displays && displays.length > 0 ? (
-              <div className="space-y-3">
-                <h3 className="text-lg font-semibold">Available Displays:</h3>
-                <div className="grid gap-2">
+              <div className='space-y-3'>
+                <h3 className='text-lg font-semibold'>Available Displays:</h3>
+                <div className='grid gap-2'>
                   {displays.map((display) => (
                     <button
                       key={display._id}
@@ -485,10 +485,10 @@ const LayoutPage: React.FC<ILayoutPageProps> = ({ loggedIn, displayId }) => {
                         console.log('[DEBUG] Selected display:', display._id)
                         displayContext.setId(display._id)
                       }}
-                      className="p-3 border rounded-lg hover:bg-gray-50 transition-colors text-left"
+                      className='p-3 border rounded-lg hover:bg-gray-50 transition-colors text-left'
                     >
-                      <div className="font-medium">{display.name || 'Unnamed Display'}</div>
-                      <div className="text-sm text-muted-foreground">
+                      <div className='font-medium'>{display.name || 'Unnamed Display'}</div>
+                      <div className='text-sm text-muted-foreground'>
                         {display.orientation} • {display.layout}
                       </div>
                     </button>
@@ -496,11 +496,11 @@ const LayoutPage: React.FC<ILayoutPageProps> = ({ loggedIn, displayId }) => {
                 </div>
               </div>
             ) : (
-              <div className="space-y-4">
+              <div className='space-y-4'>
                 <p>No displays found. Create a display first.</p>
                 <button
                   onClick={() => window.location.href = '/screens'}
-                  className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+                  className='px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600'
                 >
                   Go to Displays
                 </button>
@@ -582,26 +582,26 @@ const LayoutPage: React.FC<ILayoutPageProps> = ({ loggedIn, displayId }) => {
 
   return (
     <Frame loggedIn={loggedIn}>
-      <div className="space-y-8">
+      <div className='space-y-8'>
         {/* Header Section */}
-        <div className="space-y-6">
-          <div className="flex flex-col space-y-4 sm:flex-row sm:items-center sm:justify-between sm:space-y-0">
+        <div className='space-y-6'>
+          <div className='flex flex-col space-y-4 sm:flex-row sm:items-center sm:justify-between sm:space-y-0'>
             <div>
-              <h1 className="text-3xl font-bold tracking-tight">Layout Designer</h1>
-              <p className="text-muted-foreground">
+              <h1 className='text-3xl font-bold tracking-tight'>Layout Designer</h1>
+              <p className='text-muted-foreground'>
                 Design and customize your display layout with widgets and status bar elements.
               </p>
             </div>
           </div>
 
           {/* Display Name Editor */}
-          <div className="flex items-center space-x-3 p-4 bg-card border rounded-lg">
-            <Edit className="w-5 h-5 text-muted-foreground" />
-            <div className="flex-1">
-              <label className="text-sm font-medium text-muted-foreground">Display Name</label>
+          <div className='flex items-center space-x-3 p-4 bg-card border rounded-lg'>
+            <Edit className='w-5 h-5 text-muted-foreground' />
+            <div className='flex-1'>
+              <label className='text-sm font-medium text-muted-foreground'>Display Name</label>
               <input
-                className="block w-full mt-1 text-lg font-semibold bg-transparent border-none outline-none focus:ring-0 p-0"
-                placeholder="Unnamed display"
+                className='block w-full mt-1 text-lg font-semibold bg-transparent border-none outline-none focus:ring-0 p-0'
+                placeholder='Unnamed display'
                 value={displayContext.state.name || ''}
                 onChange={handleTitleChange}
                 onClick={(e: React.MouseEvent) => e.stopPropagation()}
@@ -613,19 +613,19 @@ const LayoutPage: React.FC<ILayoutPageProps> = ({ loggedIn, displayId }) => {
         {/* Display Status Card - Shows displays using this layout */}
         <DisplayStatusCard
           layoutId={displayId}
-          title="Displays Using This Layout"
-          className="mb-6"
+          title='Displays Using This Layout'
+          className='mb-6'
         />
 
         {/* Controls Section */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className='grid grid-cols-1 lg:grid-cols-2 gap-6'>
           {/* Status Bar Controls */}
-          <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <h3 className="text-lg font-semibold">Status Bar</h3>
+          <div className='space-y-4'>
+            <div className='flex items-center justify-between'>
+              <h3 className='text-lg font-semibold'>Status Bar</h3>
               <DropdownButton
                 icon={Edit}
-                text="Add Status Item"
+                text='Add Status Item'
                 onSelect={displayContext.addStatusBarItem}
                 choices={statusBarChoices}
                 style={{
@@ -639,13 +639,13 @@ const LayoutPage: React.FC<ILayoutPageProps> = ({ loggedIn, displayId }) => {
             </div>
 
             {displayContext.state.statusBar && displayContext.state.statusBar.elements && displayContext.state.statusBar.elements.length > 0 && (
-              <div className="bg-muted/50 rounded-lg p-4 min-h-[80px] border-2 border-dashed border-muted-foreground/25">
+              <div className='bg-muted/50 rounded-lg p-4 min-h-[80px] border-2 border-dashed border-muted-foreground/25'>
                 <DragDropContext onDragEnd={handleDragEnd}>
-                  <Droppable droppableId="droppable-statusbar" direction="horizontal">
+                  <Droppable droppableId='droppable-statusbar' direction='horizontal'>
                     {(provided: DroppableProvided) => (
                       <div
                         ref={provided.innerRef}
-                        className="flex gap-2 overflow-auto h-full"
+                        className='flex gap-2 overflow-auto h-full'
                         {...provided.droppableProps}
                       >
                         {displayContext.state.statusBar.elements!.map((item: string, index: number) => (
@@ -666,10 +666,10 @@ const LayoutPage: React.FC<ILayoutPageProps> = ({ loggedIn, displayId }) => {
           </div>
 
           {/* Widget Controls */}
-          <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <h3 className="text-lg font-semibold">Widgets</h3>
-              <div className="flex items-center space-x-3">
+          <div className='space-y-4'>
+            <div className='flex items-center justify-between'>
+              <h3 className='text-lg font-semibold'>Widgets</h3>
+              <div className='flex items-center space-x-3'>
                 <DropdownButton
                   icon={Edit}
                   text={widgetChoicesLoading ? "Loading Widgets..." : "Add Widget"}
@@ -687,26 +687,26 @@ const LayoutPage: React.FC<ILayoutPageProps> = ({ loggedIn, displayId }) => {
                 <button
                   onClick={handleManualRearrange}
                   disabled={widgets.length === 0}
-                  className="flex items-center space-x-2 px-3 py-2 text-sm border border-border rounded-md hover:bg-accent hover:text-accent-foreground disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                  title="Auto-arrange widgets to maximize space"
+                  className='flex items-center space-x-2 px-3 py-2 text-sm border border-border rounded-md hover:bg-accent hover:text-accent-foreground disabled:opacity-50 disabled:cursor-not-allowed transition-colors'
+                  title='Auto-arrange widgets to maximize space'
                 >
-                  <Maximize2 className="w-4 h-4" />
+                  <Maximize2 className='w-4 h-4' />
                   <span>Auto-arrange</span>
                 </button>
                 <Form>
                   <Switch
-                    name="layoutStyle"
-                    checkedLabel="Compact"
-                    uncheckedLabel="Spaced"
+                    name='layoutStyle'
+                    checkedLabel='Compact'
+                    uncheckedLabel='Spaced'
                     checkedIcon={Grid2X2}
                     uncheckedIcon={Grid3X3}
                     checked={displayContext.state.layout === 'spaced'}
                     onValueChange={handleLayoutTypeChange}
                   />
                   <Switch
-                    name="orientation"
-                    checkedLabel="Portrait"
-                    uncheckedLabel="Landscape"
+                    name='orientation'
+                    checkedLabel='Portrait'
+                    uncheckedLabel='Landscape'
                     checkedIcon={Smartphone}
                     uncheckedIcon={Monitor}
                     checked={displayContext.state.orientation === 'portrait'}
@@ -719,15 +719,15 @@ const LayoutPage: React.FC<ILayoutPageProps> = ({ loggedIn, displayId }) => {
         </div>
 
         {/* Layout Grid */}
-        <div className="space-y-4">
-          <div className="flex items-center justify-between">
+        <div className='space-y-4'>
+          <div className='flex items-center justify-between'>
             <div>
-              <h3 className="text-lg font-semibold">Layout Preview</h3>
-              <p className="text-sm text-muted-foreground mt-1">
+              <h3 className='text-lg font-semibold'>Layout Preview</h3>
+              <p className='text-sm text-muted-foreground mt-1'>
                 {displayInfo.description}
               </p>
             </div>
-            <div className="flex items-center space-x-4 text-sm text-muted-foreground">
+            <div className='flex items-center space-x-4 text-sm text-muted-foreground'>
               <span>
                 Aspect Ratio: {displayInfo.aspectRatio}
               </span>
@@ -743,7 +743,7 @@ const LayoutPage: React.FC<ILayoutPageProps> = ({ loggedIn, displayId }) => {
             </div>
           </div>
           <div
-            className="bg-muted/30 border-2 border-dashed border-muted-foreground/25 rounded-lg overflow-hidden relative"
+            className='bg-muted/30 border-2 border-dashed border-muted-foreground/25 rounded-lg overflow-hidden relative'
             style={{
               ...containerStyles,
               background: displayContext.state.layout === 'spaced'
@@ -752,12 +752,12 @@ const LayoutPage: React.FC<ILayoutPageProps> = ({ loggedIn, displayId }) => {
             }}
           >
             {/* Aspect ratio indicator */}
-            <div className="absolute top-2 left-2 bg-black/20 text-white text-xs px-2 py-1 rounded backdrop-blur-sm">
+            <div className='absolute top-2 left-2 bg-black/20 text-white text-xs px-2 py-1 rounded backdrop-blur-sm'>
               {displayInfo.aspectRatio} • {displayInfo.gridSize}
             </div>
 
             {/* Display type indicator */}
-            <div className="absolute top-2 right-2 bg-primary/20 text-primary text-xs px-2 py-1 rounded backdrop-blur-sm">
+            <div className='absolute top-2 right-2 bg-primary/20 text-primary text-xs px-2 py-1 rounded backdrop-blur-sm'>
               {displayInfo.isPortrait ? '📱 Portrait Display' : '📺 TV/Monitor'}
             </div>
             <GridLayoutWithWidth
@@ -780,7 +780,7 @@ const LayoutPage: React.FC<ILayoutPageProps> = ({ loggedIn, displayId }) => {
               useCSSTransforms={true}
               transformScale={1}
               preventCollision={true}
-              compactType="vertical"
+              compactType='vertical'
               autoSize={true}
               verticalCompact={true}
               allowOverlap={false}
@@ -812,13 +812,13 @@ const LayoutPage: React.FC<ILayoutPageProps> = ({ loggedIn, displayId }) => {
             </GridLayoutWithWidth>
             
             {widgets.length === 0 && (
-              <div className="flex items-center justify-center h-full text-center p-8">
-                <div className="space-y-3">
-                  <div className="w-16 h-16 mx-auto bg-muted rounded-full flex items-center justify-center">
-                    <Grid3X3 className="w-8 h-8 text-muted-foreground" />
+              <div className='flex items-center justify-center h-full text-center p-8'>
+                <div className='space-y-3'>
+                  <div className='w-16 h-16 mx-auto bg-muted rounded-full flex items-center justify-center'>
+                    <Grid3X3 className='w-8 h-8 text-muted-foreground' />
                   </div>
-                  <h4 className="text-lg font-medium">No widgets added yet</h4>
-                  <p className="text-muted-foreground">
+                  <h4 className='text-lg font-medium'>No widgets added yet</h4>
+                  <p className='text-muted-foreground'>
                     Start building your layout by adding widgets from the controls above.
                   </p>
                 </div>

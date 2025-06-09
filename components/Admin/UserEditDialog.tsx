@@ -146,107 +146,107 @@ const UserEditDialog: React.FC<UserEditDialogProps> = ({
 
   return (
     <div
-      className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+      className='fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50'
       onClick={onClose}
     >
       <div
-        className="bg-white rounded-lg w-full max-w-lg max-h-[90vh] overflow-y-auto shadow-xl"
+        className='bg-white rounded-lg w-full max-w-lg max-h-[90vh] overflow-y-auto shadow-xl'
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="flex justify-between items-center p-6 border-b border-gray-200">
-          <h2 className="text-2xl font-semibold text-gray-800">
+        <div className='flex justify-between items-center p-6 border-b border-gray-200'>
+          <h2 className='text-2xl font-semibold text-gray-800'>
             {isCreateMode ? "Create New User" : "Edit User"}
           </h2>
           <button
-            className="text-gray-500 hover:text-gray-700 p-1"
+            className='text-gray-500 hover:text-gray-700 p-1'
             onClick={onClose}
           >
-            <X className="w-5 h-5" />
+            <X className='w-5 h-5' />
           </button>
         </div>
 
         <form onSubmit={handleSubmit}>
-          <div className="p-6">
+          <div className='p-6'>
             {error && (
-              <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-6">
+              <div className='bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-6'>
                 {error}
               </div>
             )}
 
-            <div className="mb-6">
+            <div className='mb-6'>
               <label
-                htmlFor="name"
-                className="block text-sm font-medium text-gray-700 mb-2"
+                htmlFor='name'
+                className='block text-sm font-medium text-gray-700 mb-2'
               >
                 Name
               </label>
               <input
-                type="text"
-                id="name"
-                name="name"
+                type='text'
+                id='name'
+                name='name'
                 value={formData.name}
                 onChange={handleInputChange}
                 required
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                className='w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent'
               />
             </div>
 
-            <div className="mb-6">
+            <div className='mb-6'>
               <label
-                htmlFor="email"
-                className="block text-sm font-medium text-gray-700 mb-2"
+                htmlFor='email'
+                className='block text-sm font-medium text-gray-700 mb-2'
               >
                 Email
               </label>
               <input
-                type="email"
-                id="email"
-                name="email"
+                type='email'
+                id='email'
+                name='email'
                 value={formData.email}
                 onChange={handleInputChange}
                 required
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                className='w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent'
               />
             </div>
 
             {isCreateMode && (
-              <div className="mb-6">
+              <div className='mb-6'>
                 <label
-                  htmlFor="password"
-                  className="block text-sm font-medium text-gray-700 mb-2"
+                  htmlFor='password'
+                  className='block text-sm font-medium text-gray-700 mb-2'
                 >
                   Password
                 </label>
                 <input
-                  type="password"
-                  id="password"
-                  name="password"
+                  type='password'
+                  id='password'
+                  name='password'
                   value={formData.password}
                   onChange={handleInputChange}
                   required
                   minLength={6}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                  className='w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent'
                 />
-                <p className="text-xs text-gray-500 mt-1">
+                <p className='text-xs text-gray-500 mt-1'>
                   Minimum 6 characters
                 </p>
               </div>
             )}
 
-            <div className="mb-6">
+            <div className='mb-6'>
               <label
-                htmlFor="roleName"
-                className="block text-sm font-medium text-gray-700 mb-2"
+                htmlFor='roleName'
+                className='block text-sm font-medium text-gray-700 mb-2'
               >
                 Role
               </label>
               <select
-                id="roleName"
-                name="roleName"
+                id='roleName'
+                name='roleName'
                 value={formData.roleName}
                 onChange={handleInputChange}
                 required
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                className='w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent'
               >
                 {Object.values(UserRoleName).map((role) => (
                   <option key={role} value={role}>
@@ -254,7 +254,7 @@ const UserEditDialog: React.FC<UserEditDialogProps> = ({
                   </option>
                 ))}
               </select>
-              <p className="text-xs text-gray-500 mt-1">
+              <p className='text-xs text-gray-500 mt-1'>
                 {roleDescriptions[formData.roleName]}
               </p>
             </div>
@@ -262,23 +262,23 @@ const UserEditDialog: React.FC<UserEditDialogProps> = ({
             {(formData.roleName === UserRoleName.RESOURCE_MANAGER ||
               formData.roleName === UserRoleName.DISPLAY_MANAGER ||
               formData.roleName === UserRoleName.VIEWER) && (
-              <div className="mb-6">
+              <div className='mb-6'>
                 <label
-                  htmlFor="associatedDisplayIds"
-                  className="block text-sm font-medium text-gray-700 mb-2"
+                  htmlFor='associatedDisplayIds'
+                  className='block text-sm font-medium text-gray-700 mb-2'
                 >
                   Assigned Displays
                 </label>
                 <select
-                  id="associatedDisplayIds"
-                  name="associatedDisplayIds"
+                  id='associatedDisplayIds'
+                  name='associatedDisplayIds'
                   multiple
                   value={formData.associatedDisplayIds}
                   onChange={(e) =>
                     handleMultiSelectChange(e, "associatedDisplayIds")
                   }
                   size={Math.min(displays.length, 6)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                  className='w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent'
                 >
                   {displays.map((display: any) => (
                     <option key={display._id} value={display._id}>
@@ -286,7 +286,7 @@ const UserEditDialog: React.FC<UserEditDialogProps> = ({
                     </option>
                   ))}
                 </select>
-                <p className="text-xs text-gray-500 mt-1">
+                <p className='text-xs text-gray-500 mt-1'>
                   Hold Ctrl/Cmd to select multiple displays
                 </p>
               </div>
@@ -294,23 +294,23 @@ const UserEditDialog: React.FC<UserEditDialogProps> = ({
 
             {formData.roleName === UserRoleName.RESOURCE_MANAGER &&
               buildings.length > 0 && (
-                <div className="mb-6">
+                <div className='mb-6'>
                   <label
-                    htmlFor="associatedBuildingIds"
-                    className="block text-sm font-medium text-gray-700 mb-2"
+                    htmlFor='associatedBuildingIds'
+                    className='block text-sm font-medium text-gray-700 mb-2'
                   >
                     Assigned Buildings
                   </label>
                   <select
-                    id="associatedBuildingIds"
-                    name="associatedBuildingIds"
+                    id='associatedBuildingIds'
+                    name='associatedBuildingIds'
                     multiple
                     value={formData.associatedBuildingIds}
                     onChange={(e) =>
                       handleMultiSelectChange(e, "associatedBuildingIds")
                     }
                     size={Math.min(buildings.length, 6)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                    className='w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent'
                   >
                     {buildings.map((building) => (
                       <option key={building._id} value={building._id}>
@@ -318,24 +318,24 @@ const UserEditDialog: React.FC<UserEditDialogProps> = ({
                       </option>
                     ))}
                   </select>
-                  <p className="text-xs text-gray-500 mt-1">
+                  <p className='text-xs text-gray-500 mt-1'>
                     Hold Ctrl/Cmd to select multiple buildings
                   </p>
                 </div>
               )}
           </div>
 
-          <div className="flex justify-end gap-3 p-6 border-t border-gray-200">
+          <div className='flex justify-end gap-3 p-6 border-t border-gray-200'>
             <button
-              type="button"
-              className="px-4 py-2 text-gray-700 bg-gray-200 hover:bg-gray-300 rounded-md transition-colors"
+              type='button'
+              className='px-4 py-2 text-gray-700 bg-gray-200 hover:bg-gray-300 rounded-md transition-colors'
               onClick={onClose}
             >
               Cancel
             </button>
             <button
-              type="submit"
-              className="px-4 py-2 bg-green-600 text-white hover:bg-green-700 rounded-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              type='submit'
+              className='px-4 py-2 bg-green-600 text-white hover:bg-green-700 rounded-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed'
               disabled={loading}
             >
               {loading

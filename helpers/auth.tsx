@@ -16,7 +16,7 @@ type NextPageWithInitialProps<P = {}> = ComponentType<P> & {
   getInitialProps?: (ctx: PageContext) => Promise<P> | P;
 };
 
-import { getDisplays, IDisplayData } from '../actions/display' // Assuming IDisplayData is the type for display items
+// Assuming IDisplayData is the type for display items
 
 // --- Interfaces ---
 

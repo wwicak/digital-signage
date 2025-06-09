@@ -11,7 +11,7 @@ const OrientationPreview: React.FC<OrientationPreviewProps> = ({
   const isPortrait = orientation === "portrait";
 
   return (
-    <div className="flex items-center justify-center my-1">
+    <div className='flex items-center justify-center my-1'>
       <div
         className={`border-2 border-gray-300 rounded bg-gray-50 flex items-center justify-center transition-all duration-200 relative hover:border-green-500 hover:bg-green-50 ${
           isPortrait ? "w-6 h-10" : "w-10 h-6"

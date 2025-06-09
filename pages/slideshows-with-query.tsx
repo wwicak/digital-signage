@@ -34,7 +34,7 @@ const SlideshowsWithQuery: React.FC<SlideshowsWithQueryProps> = ({ loggedIn, dis
   return (
     <Frame loggedIn={loggedIn}>
       <h1>Slideshows (with TanStack Query)</h1>
-      <div className="max-w-2xl">
+      <div className='max-w-2xl'>
         <SlideshowListWithQuery />
         <Dialog><div></div></Dialog>
         <Button

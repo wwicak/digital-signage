@@ -28,7 +28,7 @@ export async function GET(request: NextRequest) {
     const endDate = searchParams.get("end_date");
     const skip = (page - 1) * limit;
 
-    let query: any = {};
+    const query: any = {};
 
     if (roomId && mongoose.Types.ObjectId.isValid(roomId)) {
       query.room_id = roomId;
@@ -36,7 +36,7 @@ export async function GET(request: NextRequest) {
 
     if (buildingId && mongoose.Types.ObjectId.isValid(buildingId)) {
       const rooms = await Room.find({ building_id: buildingId }).select("_id");
-      const roomIds = rooms.map(room => room._id);
+      const roomIds = rooms.map((room) => room._id);
       query.room_id = { $in: roomIds };
     }
 
@@ -55,8 +55,8 @@ export async function GET(request: NextRequest) {
         path: "room_id",
         populate: {
           path: "building_id",
-          select: "name address"
-        }
+          select: "name address",
+        },
       })
       .skip(skip)
       .limit(limit)
@@ -106,14 +106,19 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const { title, room_id, start_time, end_time, organizer, attendees, agenda_meeting } = validation.data;
+    const {
+      title,
+      room_id,
+      start_time,
+      end_time,
+      organizer,
+      attendees,
+      agenda_meeting,
+    } = validation.data;
 
     const room = await Room.findById(room_id);
     if (!room) {
-      return NextResponse.json(
-        { message: "Room not found" },
-        { status: 404 }
-      );
+      return NextResponse.json({ message: "Room not found" }, { status: 404 });
     }
 
     // Check for conflicts
@@ -122,9 +127,9 @@ export async function POST(request: NextRequest) {
       $or: [
         {
           start_time: { $lt: end_time },
-          end_time: { $gt: start_time }
-        }
-      ]
+          end_time: { $gt: start_time },
+        },
+      ],
     });
 
     if (conflictingReservations.length > 0) {
@@ -152,8 +157,8 @@ export async function POST(request: NextRequest) {
       path: "room_id",
       populate: {
         path: "building_id",
-        select: "name address"
-      }
+        select: "name address",
+      },
     });
 
     sendEventToDisplay("all", "reservationCreated", reservation);

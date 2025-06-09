@@ -21,17 +21,17 @@ const FormField = React.forwardRef<HTMLDivElement, FormFieldProps>(
         {label && (
           <Label className={cn(hasError && "text-destructive")}>
             {label}
-            {required && <span className="text-destructive ml-1">*</span>}
+            {required && <span className='text-destructive ml-1'>*</span>}
           </Label>
         )}
         <div className={cn(hasError && "[&>*]:border-destructive [&>*]:focus-visible:ring-destructive")}>
           {children}
         </div>
         {errorMessage && (
-          <p className="text-sm text-destructive">{errorMessage}</p>
+          <p className='text-sm text-destructive'>{errorMessage}</p>
         )}
         {helpText && !hasError && (
-          <p className="text-sm text-muted-foreground">{helpText}</p>
+          <p className='text-sm text-muted-foreground'>{helpText}</p>
         )}
       </div>
     )

@@ -28,7 +28,7 @@ const PreviewPage = ({ host, loggedIn, displayId: initialDisplayId }: PreviewPro
     <Frame loggedIn={loggedIn}>
       <h1>Preview</h1>
       <p>Below is a preview of the display as it will appear on the TV.</p>
-      <div className="mt-5 rounded overflow-hidden">
+      <div className='mt-5 rounded overflow-hidden'>
         <div className='content'>
           <DisplayComponent display={displayId} />
         </div>

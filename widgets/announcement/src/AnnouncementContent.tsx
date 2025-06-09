@@ -36,7 +36,7 @@ const AnnouncementContent: React.FC<IAnnouncementContentProps> = React.memo(({ d
   const accentColor = data.accentColor ?? DEFAULT_ACCENT_COLOR
 
   return (
-    <div className="relative box-border h-full w-full">
+    <div className='relative box-border h-full w-full'>
       <div className='title-bar'>
         <div className='icon'>
           <AlertTriangle style={{ fontSize: '0.9em' }} className={accentColor} />

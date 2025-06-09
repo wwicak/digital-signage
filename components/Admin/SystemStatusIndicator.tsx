@@ -7,7 +7,6 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import {
-  Activity,
   Database,
   AlertTriangle,
   CheckCircle,
@@ -58,12 +57,12 @@ const SystemStatusIndicator: React.FC<SystemStatusIndicatorProps> = ({
           className
         )}
       >
-        <div className="relative flex items-center">
-          <Loader2 className="w-3 h-3 animate-spin" />
-          <div className="absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full bg-gray-500 animate-pulse" />
+        <div className='relative flex items-center'>
+          <Loader2 className='w-3 h-3 animate-spin' />
+          <div className='absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full bg-gray-500 animate-pulse' />
         </div>
         {showText && (
-          <span className="text-xs font-medium text-muted-foreground">
+          <span className='text-xs font-medium text-muted-foreground'>
             Loading...
           </span>
         )}
@@ -77,18 +76,18 @@ const SystemStatusIndicator: React.FC<SystemStatusIndicatorProps> = ({
 
   const getStatusIcon = () => {
     if (isLoading) {
-      return <Loader2 className="w-3 h-3 animate-spin" />;
+      return <Loader2 className='w-3 h-3 animate-spin' />;
     }
 
     if (isSystemHealthy) {
-      return <CheckCircle className="w-3 h-3 text-green-500" />;
+      return <CheckCircle className='w-3 h-3 text-green-500' />;
     }
 
     if (!isDatabaseConnected) {
-      return <Database className="w-3 h-3 text-red-500" />;
+      return <Database className='w-3 h-3 text-red-500' />;
     }
 
-    return <AlertTriangle className="w-3 h-3 text-yellow-500" />;
+    return <AlertTriangle className='w-3 h-3 text-yellow-500' />;
   };
 
   const getIndicatorColor = () => {
@@ -111,7 +110,7 @@ const SystemStatusIndicator: React.FC<SystemStatusIndicatorProps> = ({
         className
       )}
     >
-      <div className="relative flex items-center">
+      <div className='relative flex items-center'>
         {getStatusIcon()}
         <div
           className={cn(
@@ -123,21 +122,21 @@ const SystemStatusIndicator: React.FC<SystemStatusIndicatorProps> = ({
       </div>
 
       {showText && (
-        <span className="text-xs font-medium text-muted-foreground">
+        <span className='text-xs font-medium text-muted-foreground'>
           {statusText}
         </span>
       )}
 
       <Button
-        variant="ghost"
-        size="icon"
-        className="h-6 w-6 p-1 hover:bg-muted-foreground/20 rounded-full"
+        variant='ghost'
+        size='icon'
+        className='h-6 w-6 p-1 hover:bg-muted-foreground/20 rounded-full'
         onClick={(e) => {
           e.stopPropagation();
           refreshStatus();
         }}
         disabled={isLoading}
-        title="Refresh system status"
+        title='Refresh system status'
       >
         <RefreshCw className={cn("h-3 w-3", isLoading && "animate-spin")} />
       </Button>
@@ -152,17 +151,17 @@ const SystemStatusIndicator: React.FC<SystemStatusIndicatorProps> = ({
     <TooltipProvider>
       <Tooltip>
         <TooltipTrigger asChild>
-          <div className="focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 rounded-full">
+          <div className='focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 rounded-full'>
             <StatusIndicator />
           </div>
         </TooltipTrigger>
-        <TooltipContent side="bottom" className="max-w-xs">
-          <div className="space-y-2">
-            <div className="font-medium text-sm">System Status</div>
+        <TooltipContent side='bottom' className='max-w-xs'>
+          <div className='space-y-2'>
+            <div className='font-medium text-sm'>System Status</div>
             
             {statusDetails && (
-              <div className="space-y-1 text-xs">
-                <div className="flex items-center justify-between">
+              <div className='space-y-1 text-xs'>
+                <div className='flex items-center justify-between'>
                   <span>Database:</span>
                   <span className={cn(
                     "font-medium",
@@ -175,15 +174,15 @@ const SystemStatusIndicator: React.FC<SystemStatusIndicatorProps> = ({
                 </div>
                 
                 {statusDetails.database.responseTime && (
-                  <div className="flex items-center justify-between">
+                  <div className='flex items-center justify-between'>
                     <span>Response:</span>
-                    <span className="font-medium">
+                    <span className='font-medium'>
                       {statusDetails.database.responseTime}ms
                     </span>
                   </div>
                 )}
                 
-                <div className="flex items-center justify-between">
+                <div className='flex items-center justify-between'>
                   <span>Server:</span>
                   <span className={cn(
                     "font-medium capitalize",
@@ -196,17 +195,17 @@ const SystemStatusIndicator: React.FC<SystemStatusIndicatorProps> = ({
                 </div>
                 
                 {statusDetails.server.uptime && (
-                  <div className="flex items-center justify-between">
+                  <div className='flex items-center justify-between'>
                     <span>Uptime:</span>
-                    <span className="font-medium">
+                    <span className='font-medium'>
                       {Math.floor(statusDetails.server.uptime / 3600)}h {Math.floor((statusDetails.server.uptime % 3600) / 60)}m
                     </span>
                   </div>
                 )}
                 
-                <div className="flex items-center justify-between">
+                <div className='flex items-center justify-between'>
                   <span>Checked:</span>
-                  <span className="font-medium">
+                  <span className='font-medium'>
                     {new Date(statusDetails.lastChecked).toLocaleTimeString()}
                   </span>
                 </div>
@@ -214,13 +213,13 @@ const SystemStatusIndicator: React.FC<SystemStatusIndicatorProps> = ({
             )}
 
             {error && (
-              <div className="text-xs text-red-600 mt-2">
+              <div className='text-xs text-red-600 mt-2'>
                 Error: {error.message}
               </div>
             )}
 
             {statusDetails?.database.error && (
-              <div className="text-xs text-red-600 mt-2">
+              <div className='text-xs text-red-600 mt-2'>
                 DB Error: {statusDetails.database.error}
               </div>
             )}

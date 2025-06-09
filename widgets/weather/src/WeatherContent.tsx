@@ -171,21 +171,21 @@ const WeatherContent: React.FC<IWeatherContentProps> = React.memo(({ data, isPre
   }
 
   return (
-    <div className="relative box-border h-full w-full text-white flex-1 p-4 font-sans flex flex-row justify-between overflow-hidden">
-      {iconCode && <div className="absolute -5 -0">
+    <div className='relative box-border h-full w-full text-white flex-1 p-4 font-sans flex flex-row justify-between overflow-hidden'>
+      {iconCode && <div className='absolute -5 -0'>
         <WeatherIcon icon={iconCode} />
       </div>}
-      <div className="flex flex-col justify-end">
+      <div className='flex flex-col justify-end'>
         <div className='temp'>{Math.round(temperature || 0)}°</div>
         <div className='desc'>{description}</div>
-        <div className="flex flex-row items-center">
+        <div className='flex flex-row items-center'>
           <div className='marker-icon'>
-            <MapPin className="w-4 h-4 text-gray-500" />
+            <MapPin className='w-4 h-4 text-gray-500' />
           </div>
           <div className='name-text'>{locationName}</div>
         </div>
       </div>
-      {iconCode && <div className="flex flex-col justify-start scale-200">
+      {iconCode && <div className='flex flex-col justify-start scale-200'>
         <WeatherIcon icon={iconCode} />
       </div>}
       

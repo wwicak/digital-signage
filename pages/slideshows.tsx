@@ -44,27 +44,27 @@ const Slideshows: React.FC<SlideshowsProps> = ({ loggedIn, displayId }) => {
 
   return (
     <Frame loggedIn={loggedIn}>
-      <div className="space-y-8">
+      <div className='space-y-8'>
         {/* Header Section */}
-        <div className="flex flex-col space-y-4 sm:flex-row sm:items-center sm:justify-between sm:space-y-0">
+        <div className='flex flex-col space-y-4 sm:flex-row sm:items-center sm:justify-between sm:space-y-0'>
           <div>
-            <h1 className="text-3xl font-bold tracking-tight">Slideshows</h1>
-            <p className="text-muted-foreground">
+            <h1 className='text-3xl font-bold tracking-tight'>Slideshows</h1>
+            <p className='text-muted-foreground'>
               Create and manage image slideshows for your digital displays.
             </p>
           </div>
           <Button
             onClick={add}
-            size="lg"
-            className="w-full sm:w-auto"
+            size='lg'
+            className='w-full sm:w-auto'
           >
-            <Images className="mr-2 h-5 w-5" />
+            <Images className='mr-2 h-5 w-5' />
             Add New Slideshow
           </Button>
         </div>
 
         {/* Slideshows List */}
-        <div className="space-y-6">
+        <div className='space-y-6'>
           <SlideshowListComponent ref={slideshowList as any} />
         </div>
         

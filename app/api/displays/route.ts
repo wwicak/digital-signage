@@ -125,7 +125,7 @@ export async function GET(request: NextRequest) {
     });
 
     // Group by layout if no specific layout requested
-    let groupedByLayout: Record<string, any[]> = {};
+    const groupedByLayout: Record<string, any[]> = {};
     if (!layoutId) {
       enhancedDisplays.forEach((display) => {
         const layout = display.layout?.toString() || "default";

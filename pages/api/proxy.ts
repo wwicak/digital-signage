@@ -1,5 +1,3 @@
-import { NextRequest, NextResponse } from "next/server";
-
 /**
  * Simple proxy endpoint to help bypass X-Frame-Options restrictions
  * Note: This is a basic implementation. In production, you should add:

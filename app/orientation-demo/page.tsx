@@ -12,7 +12,7 @@ const mockDisplays = [
     widgets: ['widget1', 'widget2', 'widget3']
   },
   {
-    _id: '2', 
+    _id: '2',
     name: 'Conference Room Display',
     orientation: 'portrait' as const,
     widgets: ['widget1', 'widget2']
@@ -36,18 +36,18 @@ export default function OrientationDemo() {
 
   return (
     <div style={{ padding: '40px', maxWidth: '800px', margin: '0 auto' }}>
-      <h1 style={{ 
-        fontFamily: 'Open Sans, sans-serif', 
-        fontSize: '24px', 
+      <h1 style={{
+        fontFamily: 'Open Sans, sans-serif',
+        fontSize: '24px',
         color: '#4f4f4f',
         marginBottom: '40px'
       }}>
         Display Orientation Demo
       </h1>
       
-      <p style={{ 
-        fontFamily: 'Open Sans, sans-serif', 
-        fontSize: '16px', 
+      <p style={{
+        fontFamily: 'Open Sans, sans-serif',
+        fontSize: '16px',
         color: '#666',
         marginBottom: '40px',
         lineHeight: '1.5'
@@ -55,9 +55,9 @@ export default function OrientationDemo() {
         This demo showcases the new orientation controls for displays. Each screen card now includes:
       </p>
       
-      <ul style={{ 
-        fontFamily: 'Open Sans, sans-serif', 
-        fontSize: '14px', 
+      <ul style={{
+        fontFamily: 'Open Sans, sans-serif',
+        fontSize: '14px',
         color: '#666',
         marginBottom: '40px',
         lineHeight: '1.6'
@@ -77,10 +77,10 @@ export default function OrientationDemo() {
         ))}
       </div>
 
-      <div style={{ 
-        marginTop: '40px', 
-        padding: '20px', 
-        backgroundColor: '#f8f9fa', 
+      <div style={{
+        marginTop: '40px',
+        padding: '20px',
+        backgroundColor: '#f8f9fa',
         borderRadius: '8px',
         fontFamily: 'Open Sans, sans-serif',
         fontSize: '14px',

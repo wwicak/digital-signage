@@ -27,7 +27,6 @@ import {
   Edit,
   Trash2,
   Users,
-  Shield,
   AlertTriangle,
   Save,
   X
@@ -39,8 +38,7 @@ import {
 } from "@/hooks/useFeatureFlags";
 import {
   IFeatureFlag,
-  FeatureFlagType,
-  FeatureFlagName
+  FeatureFlagType
 } from "@/lib/types/feature-flags";
 import { UserRoleName } from "@/lib/models/User";
 import { toast } from "sonner";
@@ -68,7 +66,7 @@ const FeatureFlagsPage: React.FC = () => {
   const deleteFeatureFlag = useDeleteFeatureFlag();
 
   // Filter feature flags by type
-  const filteredFlags = featureFlags?.filter(flag => 
+  const filteredFlags = featureFlags?.filter(flag =>
     selectedType === "all" || flag.type === selectedType
   ) || [];
 
@@ -174,13 +172,13 @@ const FeatureFlagsPage: React.FC = () => {
   const getTypeIcon = (type: FeatureFlagType) => {
     switch (type) {
       case FeatureFlagType.MENU_ITEM:
-        return <Menu className="h-4 w-4" />;
+        return <Menu className='h-4 w-4' />;
       case FeatureFlagType.WIDGET:
-        return <Puzzle className="h-4 w-4" />;
+        return <Puzzle className='h-4 w-4' />;
       case FeatureFlagType.FEATURE:
-        return <Star className="h-4 w-4" />;
+        return <Star className='h-4 w-4' />;
       default:
-        return <Settings className="h-4 w-4" />;
+        return <Settings className='h-4 w-4' />;
     }
   };
 
@@ -214,16 +212,16 @@ const FeatureFlagsPage: React.FC = () => {
 
   if (isLoading) {
     return (
-      <Frame loggedIn={true} title="Feature Flags">
-        <div className="grid gap-4">
+      <Frame loggedIn={true} title='Feature Flags'>
+        <div className='grid gap-4'>
           {[1, 2, 3].map(i => (
-            <Card key={i} className="animate-pulse">
+            <Card key={i} className='animate-pulse'>
               <CardHeader>
-                <div className="h-4 bg-muted rounded w-1/3"></div>
-                <div className="h-3 bg-muted rounded w-2/3"></div>
+                <div className='h-4 bg-muted rounded w-1/3'></div>
+                <div className='h-3 bg-muted rounded w-2/3'></div>
               </CardHeader>
               <CardContent>
-                <div className="h-8 bg-muted rounded"></div>
+                <div className='h-8 bg-muted rounded'></div>
               </CardContent>
             </Card>
           ))}
@@ -234,12 +232,12 @@ const FeatureFlagsPage: React.FC = () => {
 
   if (error) {
     return (
-      <Frame loggedIn={true} title="Feature Flags">
-        <Card className="border-destructive">
-          <CardContent className="pt-6">
-            <div className="flex items-center gap-4">
-              <AlertTriangle className="h-5 w-5 text-destructive" />
-              <p className="text-destructive">Failed to load feature flags. Please try again.</p>
+      <Frame loggedIn={true} title='Feature Flags'>
+        <Card className='border-destructive'>
+          <CardContent className='pt-6'>
+            <div className='flex items-center gap-4'>
+              <AlertTriangle className='h-5 w-5 text-destructive' />
+              <p className='text-destructive'>Failed to load feature flags. Please try again.</p>
             </div>
           </CardContent>
         </Card>
@@ -248,17 +246,17 @@ const FeatureFlagsPage: React.FC = () => {
   }
 
   return (
-    <Frame loggedIn={true} title="Feature Flags">
-      <div className="flex items-center justify-between mb-6">
+    <Frame loggedIn={true} title='Feature Flags'>
+      <div className='flex items-center justify-between mb-6'>
         <Button>
-          <Plus className="h-4 w-4 mr-2" />
+          <Plus className='h-4 w-4 mr-2' />
           Add Feature Flag
         </Button>
       </div>
 
       <Tabs value={selectedType} onValueChange={(value: string) => setSelectedType(value as FeatureFlagType | "all")}>
-        <TabsList className="grid w-full grid-cols-4">
-          <TabsTrigger value="all">All ({featureFlags?.length || 0})</TabsTrigger>
+        <TabsList className='grid w-full grid-cols-4'>
+          <TabsTrigger value='all'>All ({featureFlags?.length || 0})</TabsTrigger>
           <TabsTrigger value={FeatureFlagType.MENU_ITEM}>
             Menu Items ({flagsByType[FeatureFlagType.MENU_ITEM].length})
           </TabsTrigger>
@@ -270,16 +268,16 @@ const FeatureFlagsPage: React.FC = () => {
           </TabsTrigger>
         </TabsList>
 
-        <TabsContent value={selectedType} className="mt-6">
-          <div className="grid gap-4">
+        <TabsContent value={selectedType} className='mt-6'>
+          <div className='grid gap-4'>
             {filteredFlags.map((flag) => (
               <Card key={flag._id} className={cn(
                 "transition-all duration-200",
                 !flag.enabled && "opacity-60"
               )}>
-                <CardHeader className="pb-3">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
+                <CardHeader className='pb-3'>
+                  <div className='flex items-center justify-between'>
+                    <div className='flex items-center gap-3'>
                       <div className={cn(
                         "p-2 rounded-lg border",
                         getTypeColor(flag.type)
@@ -287,13 +285,13 @@ const FeatureFlagsPage: React.FC = () => {
                         {getTypeIcon(flag.type)}
                       </div>
                       <div>
-                        <CardTitle className="text-lg">{flag.displayName}</CardTitle>
-                        <CardDescription className="text-sm">
+                        <CardTitle className='text-lg'>{flag.displayName}</CardTitle>
+                        <CardDescription className='text-sm'>
                           {flag.description || "No description provided"}
                         </CardDescription>
                       </div>
                     </div>
-                    <div className="flex items-center gap-4">
+                    <div className='flex items-center gap-4'>
                       <Switch
                         checked={flag.enabled}
                         onCheckedChange={() => handleToggleEnabled(flag)}
@@ -301,42 +299,42 @@ const FeatureFlagsPage: React.FC = () => {
                         title={`Toggle ${flag.displayName} ${flag.enabled ? 'off' : 'on'}`}
                       />
                       <Button
-                        variant="ghost"
-                        size="sm"
+                        variant='ghost'
+                        size='sm'
                         onClick={() => handleEditFlag(flag)}
                         title={`Edit ${flag.displayName}`}
                       >
-                        <Edit className="h-4 w-4" />
+                        <Edit className='h-4 w-4' />
                       </Button>
                       <Button
-                        variant="ghost"
-                        size="sm"
+                        variant='ghost'
+                        size='sm'
                         onClick={() => handleDeleteFlag(flag)}
                         disabled={deleteFeatureFlag.isPending}
                         title={`Delete ${flag.displayName}`}
                       >
-                        <Trash2 className="h-4 w-4" />
+                        <Trash2 className='h-4 w-4' />
                       </Button>
                     </div>
                   </div>
                 </CardHeader>
                 <CardContent>
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-4">
-                      <Badge variant="outline" className={getTypeColor(flag.type)}>
+                  <div className='flex items-center justify-between'>
+                    <div className='flex items-center gap-4'>
+                      <Badge variant='outline' className={getTypeColor(flag.type)}>
                         {flag.type.replace('_', ' ')}
                       </Badge>
                       <Badge variant={flag.enabled ? "default" : "secondary"}>
                         {flag.enabled ? "Enabled" : "Disabled"}
                       </Badge>
                     </div>
-                    <div className="flex items-center gap-4">
-                      <Users className="h-4 w-4 text-muted-foreground" />
-                      <div className="flex gap-1">
+                    <div className='flex items-center gap-4'>
+                      <Users className='h-4 w-4 text-muted-foreground' />
+                      <div className='flex gap-1'>
                         {flag.allowedRoles.map((role) => (
-                          <Badge 
-                            key={role} 
-                            variant="outline" 
+                          <Badge
+                            key={role}
+                            variant='outline'
                             className={cn("text-xs", getRoleColor(role))}
                           >
                             {role.replace('_', ' ')}
@@ -354,7 +352,7 @@ const FeatureFlagsPage: React.FC = () => {
 
       {/* Edit Feature Flag Dialog */}
       <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
-        <DialogContent className="sm:max-w-[600px] max-w-[95vw] w-full max-h-[90vh] overflow-y-auto bg-background border border-border shadow-lg">
+        <DialogContent className='sm:max-w-[600px] max-w-[95vw] w-full max-h-[90vh] overflow-y-auto bg-background border border-border shadow-lg'>
           <DialogHeader>
             <DialogTitle>Edit Feature Flag</DialogTitle>
             <DialogDescription>
@@ -362,48 +360,48 @@ const FeatureFlagsPage: React.FC = () => {
             </DialogDescription>
           </DialogHeader>
 
-          <div className="grid gap-4 py-4">
-            <div className="grid gap-2">
-              <Label htmlFor="displayName">Display Name</Label>
+          <div className='grid gap-4 py-4'>
+            <div className='grid gap-2'>
+              <Label htmlFor='displayName'>Display Name</Label>
               <Input
-                id="displayName"
+                id='displayName'
                 value={editFormData.displayName}
                 onChange={(e) => setEditFormData(prev => ({ ...prev, displayName: e.target.value }))}
-                placeholder="Enter display name"
+                placeholder='Enter display name'
               />
             </div>
 
-            <div className="grid gap-2">
-              <Label htmlFor="description">Description</Label>
+            <div className='grid gap-2'>
+              <Label htmlFor='description'>Description</Label>
               <Textarea
-                id="description"
+                id='description'
                 value={editFormData.description}
                 onChange={(e) => setEditFormData(prev => ({ ...prev, description: e.target.value }))}
-                placeholder="Enter description (optional)"
+                placeholder='Enter description (optional)'
                 rows={3}
               />
             </div>
 
-            <div className="flex items-center space-x-2">
+            <div className='flex items-center space-x-2'>
               <Switch
-                id="enabled"
+                id='enabled'
                 checked={editFormData.enabled}
                 onCheckedChange={(checked) => setEditFormData(prev => ({ ...prev, enabled: checked }))}
               />
-              <Label htmlFor="enabled">Enabled</Label>
+              <Label htmlFor='enabled'>Enabled</Label>
             </div>
 
-            <div className="grid gap-2">
+            <div className='grid gap-2'>
               <Label>Allowed Roles</Label>
-              <div className="grid grid-cols-2 gap-2">
+              <div className='grid grid-cols-2 gap-2'>
                 {Object.values(UserRoleName).map((role) => (
-                  <div key={role} className="flex items-center space-x-2">
+                  <div key={role} className='flex items-center space-x-2'>
                     <Checkbox
                       id={role}
                       checked={editFormData.allowedRoles.includes(role)}
                       onCheckedChange={(checked) => handleRoleToggle(role, checked as boolean)}
                     />
-                    <Label htmlFor={role} className="text-sm">
+                    <Label htmlFor={role} className='text-sm'>
                       {role.replace('_', ' ')}
                     </Label>
                   </div>
@@ -413,15 +411,15 @@ const FeatureFlagsPage: React.FC = () => {
           </div>
 
           <DialogFooter>
-            <Button variant="outline" onClick={handleCancelEdit}>
-              <X className="h-4 w-4 mr-2" />
+            <Button variant='outline' onClick={handleCancelEdit}>
+              <X className='h-4 w-4 mr-2' />
               Cancel
             </Button>
             <Button
               onClick={handleSaveEdit}
               disabled={updateFeatureFlag.isPending || !editFormData.displayName.trim()}
             >
-              <Save className="h-4 w-4 mr-2" />
+              <Save className='h-4 w-4 mr-2' />
               {updateFeatureFlag.isPending ? 'Saving...' : 'Save Changes'}
             </Button>
           </DialogFooter>

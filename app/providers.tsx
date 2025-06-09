@@ -48,11 +48,11 @@ export function Providers({ children }: { children: React.ReactNode }) {
   return (
     <QueryClientProvider client={queryClient}>
       <ThemeProvider
-        attribute="class"
-        defaultTheme="light"
+        attribute='class'
+        defaultTheme='light'
         enableSystem
         disableTransitionOnChange
-        storageKey="digital-signage-theme"
+        storageKey='digital-signage-theme'
       >
         <DisplayProvider>
           {children}

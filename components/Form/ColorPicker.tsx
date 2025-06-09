@@ -111,12 +111,12 @@ class ColorPicker extends Component<IColorPickerProps, IColorPickerState> {
         <div
           style={styles.swatch}
           onClick={this.handleClick}
-          role="button"
+          role='button'
           tabIndex={0}
           onKeyPress={(e) => {
             if (e.key === "Enter" || e.key === " ") this.handleClick();
           }}
-          aria-label="Open color picker"
+          aria-label='Open color picker'
         >
           <div style={colorPreviewStyle} />
         </div>
@@ -125,8 +125,8 @@ class ColorPicker extends Component<IColorPickerProps, IColorPickerState> {
             <div
               style={styles.cover}
               onClick={this.handleClose}
-              role="button"
-              aria-label="Close color picker"
+              role='button'
+              aria-label='Close color picker'
             />
             <SketchPicker {...sketchPickerProps} />
           </div>

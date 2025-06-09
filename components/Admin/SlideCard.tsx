@@ -105,15 +105,15 @@ const SlideCard: React.FC<ISlideCardProps> = ({
   };
 
   return (
-    <div className="p-3 font-sans rounded bg-white my-3 flex flex-row items-center relative z-10 shadow-sm hover:shadow-md transition-shadow duration-200">
+    <div className='p-3 font-sans rounded bg-white my-3 flex flex-row items-center relative z-10 shadow-sm hover:shadow-md transition-shadow duration-200'>
       {typeof value.order === "number" && (
-        <div className="absolute -top-1 -left-1 bg-gray-600 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold z-20">
+        <div className='absolute -top-1 -left-1 bg-gray-600 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold z-20'>
           {value.order}
         </div>
       )}
-      <div className="justify-center pr-3">
+      <div className='justify-center pr-3'>
         <div
-          className="h-12 w-12 rounded bg-cover bg-center flex justify-center items-center border border-gray-200"
+          className='h-12 w-12 rounded bg-cover bg-center flex justify-center items-center border border-gray-200'
           style={thumbnailStyle}
         >
           {!showBackgroundImage &&
@@ -122,43 +122,43 @@ const SlideCard: React.FC<ISlideCardProps> = ({
             })}
         </div>
       </div>
-      <div className="font-sans flex flex-col justify-center pr-2 flex-1 min-w-0">
-        <div className="font-sans text-base overflow-hidden whitespace-nowrap text-ellipsis text-gray-600 mb-1">
+      <div className='font-sans flex flex-col justify-center pr-2 flex-1 min-w-0'>
+        <div className='font-sans text-base overflow-hidden whitespace-nowrap text-ellipsis text-gray-600 mb-1'>
           {slideTitle}
         </div>
-        <div className="font-sans text-sm text-gray-500 flex items-center">
-          <div className="mr-1">
-            <Clock className="w-4 h-4 text-gray-500" />
+        <div className='font-sans text-sm text-gray-500 flex items-center'>
+          <div className='mr-1'>
+            <Clock className='w-4 h-4 text-gray-500' />
           </div>
           <span>{value.duration || 0}s</span>
         </div>
       </div>
-      <div className="flex flex-row font-sans items-center">
+      <div className='flex flex-row font-sans items-center'>
         <div
-          className="ml-2 p-2 rounded-full cursor-pointer transition-colors duration-200 hover:bg-gray-100"
+          className='ml-2 p-2 rounded-full cursor-pointer transition-colors duration-200 hover:bg-gray-100'
           onClick={handleEdit}
-          role="button"
+          role='button'
           tabIndex={0}
           onKeyPress={(e) => {
             if (e.key === "Enter" || e.key === " ") handleEdit();
           }}
-          aria-label="Edit slide"
+          aria-label='Edit slide'
         >
-          <Edit className="w-4 h-4 text-gray-500" />
+          <Edit className='w-4 h-4 text-gray-500' />
         </div>
         <div
           className={`ml-2 p-2 rounded-full transition-colors duration-200 ${loading ? "cursor-not-allowed" : "cursor-pointer hover:bg-gray-100"}`}
           onClick={!loading ? handleDelete : undefined}
-          role="button"
+          role='button'
           tabIndex={!loading ? 0 : -1}
           onKeyPress={(e) => {
             if (!loading && (e.key === "Enter" || e.key === " "))
               handleDelete();
           }}
-          aria-label="Delete slide"
+          aria-label='Delete slide'
           aria-disabled={loading}
         >
-          <Trash2 className="w-4 h-4" />
+          <Trash2 className='w-4 h-4' />
         </div>
       </div>
       <SlideEditDialog ref={dialogRef} slideId={value._id} refresh={refresh} />

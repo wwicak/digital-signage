@@ -24,7 +24,7 @@ export async function GET(request: NextRequest) {
     const buildingId = searchParams.get("building_id");
     const skip = (page - 1) * limit;
 
-    let query: any = {};
+    const query: any = {};
     if (buildingId && mongoose.Types.ObjectId.isValid(buildingId)) {
       query.building_id = buildingId;
     }

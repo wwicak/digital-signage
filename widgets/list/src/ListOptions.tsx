@@ -192,9 +192,9 @@ class ListOptions extends Component<IListOptionsProps, IListOptionsState> {
                 onChange={(name, value) => this.handleChange('ordered', value === 'ordered')}
             />
           </InlineInputGroup>
-          <hr className="border-0 w-full mt-4" />
-          <span className="font-sans font-semibold block pb-2">List Items</span>
-          <div className="flex-col"> {/* Renamed class */}
+          <hr className='border-0 w-full mt-4' />
+          <span className='font-sans font-semibold block pb-2'>List Items</span>
+          <div className='flex-col'> {/* Renamed class */}
             {list.map((item, index) => (
               <InlineInputGroup key={`list-item-edit-${index}`}>
                 <Input
@@ -216,7 +216,7 @@ class ListOptions extends Component<IListOptionsProps, IListOptionsState> {
                   expand={false}
                 />
                 <div className={'deleteBtn'} onClick={() => this.deleteItem(index)} role='button' tabIndex={0} onKeyPress={(e) => {if(e.key === 'Enter' || e.key === ' ') this.deleteItem(index)}} aria-label='Delete item'>
-                  <Trash2 className="w-4 h-4 text-gray-500" />
+                  <Trash2 className='w-4 h-4 text-gray-500' />
                 </div>
               </InlineInputGroup>
             ))}

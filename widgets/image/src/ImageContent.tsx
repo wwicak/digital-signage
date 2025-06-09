@@ -75,7 +75,7 @@ class ImageContent extends Component<IImageContentProps> {
      */
 
     return (
-      <div className="box-border h-full w-full" aria-label={altText || title || 'Image widget'}> {/* Renamed class */}
+      <div className='box-border h-full w-full' aria-label={altText || title || 'Image widget'}> {/* Renamed class */}
         {title && (
           <div className='title-container'> {/* Renamed class */}
             <div className='title-text'>{title}</div> {/* Renamed class */}
@@ -83,8 +83,8 @@ class ImageContent extends Component<IImageContentProps> {
         )}
         {url ? (
           <div className='content-area' style={contentStyle}> {/* Renamed class */}
-            <div className="absolute" style={photoCoverStyle} /> {/* Renamed class */}
-            <div className="h-full absolute" style={photoStyle} /> {/* Renamed class */}
+            <div className='absolute' style={photoCoverStyle} /> {/* Renamed class */}
+            <div className='h-full absolute' style={photoStyle} /> {/* Renamed class */}
           </div>
         ) : (
           <div className='content-area placeholder-content' style={contentStyle}> {/* Placeholder if no URL */}

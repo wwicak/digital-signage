@@ -2,21 +2,23 @@ import FeatureFlag from "../models/FeatureFlag";
 import {
   IFeatureFlag,
   FeatureFlagName,
-  FeatureFlagType
+  FeatureFlagType,
 } from "../types/feature-flags";
 import { AuthenticatedUser } from "../auth";
 import { UserRoleName } from "../models/User";
 import dbConnect from "../mongodb";
 
 // Cache for feature flags to avoid database queries on every check
-let featureFlagCache: Map<FeatureFlagName, IFeatureFlag> = new Map();
+const featureFlagCache: Map<FeatureFlagName, IFeatureFlag> = new Map();
 let cacheLastUpdated: Date | null = null;
 const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
 
 /**
  * Initialize default feature flags if they don't exist
  */
-export async function initializeDefaultFeatureFlags(createdBy: string): Promise<void> {
+export async function initializeDefaultFeatureFlags(
+  createdBy: string
+): Promise<void> {
   await dbConnect();
 
   const defaultFlags = [
@@ -27,7 +29,11 @@ export async function initializeDefaultFeatureFlags(createdBy: string): Promise<
       description: "Access to the dashboard page",
       type: FeatureFlagType.MENU_ITEM,
       enabled: true,
-      allowedRoles: [UserRoleName.SUPER_ADMIN, UserRoleName.RESOURCE_MANAGER, UserRoleName.DISPLAY_MANAGER],
+      allowedRoles: [
+        UserRoleName.SUPER_ADMIN,
+        UserRoleName.RESOURCE_MANAGER,
+        UserRoleName.DISPLAY_MANAGER,
+      ],
     },
     {
       name: FeatureFlagName.MENU_SCREENS,
@@ -35,7 +41,11 @@ export async function initializeDefaultFeatureFlags(createdBy: string): Promise<
       description: "Access to the screens management page",
       type: FeatureFlagType.MENU_ITEM,
       enabled: true,
-      allowedRoles: [UserRoleName.SUPER_ADMIN, UserRoleName.RESOURCE_MANAGER, UserRoleName.DISPLAY_MANAGER],
+      allowedRoles: [
+        UserRoleName.SUPER_ADMIN,
+        UserRoleName.RESOURCE_MANAGER,
+        UserRoleName.DISPLAY_MANAGER,
+      ],
     },
     {
       name: FeatureFlagName.MENU_LAYOUT,
@@ -43,7 +53,11 @@ export async function initializeDefaultFeatureFlags(createdBy: string): Promise<
       description: "Access to the layout editor page",
       type: FeatureFlagType.MENU_ITEM,
       enabled: true,
-      allowedRoles: [UserRoleName.SUPER_ADMIN, UserRoleName.RESOURCE_MANAGER, UserRoleName.DISPLAY_MANAGER],
+      allowedRoles: [
+        UserRoleName.SUPER_ADMIN,
+        UserRoleName.RESOURCE_MANAGER,
+        UserRoleName.DISPLAY_MANAGER,
+      ],
     },
     {
       name: FeatureFlagName.MENU_PREVIEW,
@@ -51,7 +65,12 @@ export async function initializeDefaultFeatureFlags(createdBy: string): Promise<
       description: "Access to the preview page",
       type: FeatureFlagType.MENU_ITEM,
       enabled: true,
-      allowedRoles: [UserRoleName.SUPER_ADMIN, UserRoleName.RESOURCE_MANAGER, UserRoleName.DISPLAY_MANAGER, UserRoleName.VIEWER],
+      allowedRoles: [
+        UserRoleName.SUPER_ADMIN,
+        UserRoleName.RESOURCE_MANAGER,
+        UserRoleName.DISPLAY_MANAGER,
+        UserRoleName.VIEWER,
+      ],
     },
     {
       name: FeatureFlagName.MENU_SLIDESHOWS,
@@ -59,7 +78,11 @@ export async function initializeDefaultFeatureFlags(createdBy: string): Promise<
       description: "Access to the slideshows management page",
       type: FeatureFlagType.MENU_ITEM,
       enabled: true,
-      allowedRoles: [UserRoleName.SUPER_ADMIN, UserRoleName.RESOURCE_MANAGER, UserRoleName.DISPLAY_MANAGER],
+      allowedRoles: [
+        UserRoleName.SUPER_ADMIN,
+        UserRoleName.RESOURCE_MANAGER,
+        UserRoleName.DISPLAY_MANAGER,
+      ],
     },
     {
       name: FeatureFlagName.MENU_BUILDINGS,
@@ -101,7 +124,7 @@ export async function initializeDefaultFeatureFlags(createdBy: string): Promise<
       enabled: true,
       allowedRoles: [UserRoleName.SUPER_ADMIN, UserRoleName.RESOURCE_MANAGER],
     },
-    
+
     // Widgets
     {
       name: FeatureFlagName.WIDGET_MEETING_ROOM,
@@ -109,7 +132,11 @@ export async function initializeDefaultFeatureFlags(createdBy: string): Promise<
       description: "Meeting room display widget",
       type: FeatureFlagType.WIDGET,
       enabled: true,
-      allowedRoles: [UserRoleName.SUPER_ADMIN, UserRoleName.RESOURCE_MANAGER, UserRoleName.DISPLAY_MANAGER],
+      allowedRoles: [
+        UserRoleName.SUPER_ADMIN,
+        UserRoleName.RESOURCE_MANAGER,
+        UserRoleName.DISPLAY_MANAGER,
+      ],
     },
     {
       name: FeatureFlagName.WIDGET_ANNOUNCEMENT,
@@ -117,7 +144,11 @@ export async function initializeDefaultFeatureFlags(createdBy: string): Promise<
       description: "Announcement display widget",
       type: FeatureFlagType.WIDGET,
       enabled: true,
-      allowedRoles: [UserRoleName.SUPER_ADMIN, UserRoleName.RESOURCE_MANAGER, UserRoleName.DISPLAY_MANAGER],
+      allowedRoles: [
+        UserRoleName.SUPER_ADMIN,
+        UserRoleName.RESOURCE_MANAGER,
+        UserRoleName.DISPLAY_MANAGER,
+      ],
     },
     {
       name: FeatureFlagName.WIDGET_CONGRATS,
@@ -125,7 +156,11 @@ export async function initializeDefaultFeatureFlags(createdBy: string): Promise<
       description: "Congratulations display widget",
       type: FeatureFlagType.WIDGET,
       enabled: true,
-      allowedRoles: [UserRoleName.SUPER_ADMIN, UserRoleName.RESOURCE_MANAGER, UserRoleName.DISPLAY_MANAGER],
+      allowedRoles: [
+        UserRoleName.SUPER_ADMIN,
+        UserRoleName.RESOURCE_MANAGER,
+        UserRoleName.DISPLAY_MANAGER,
+      ],
     },
     {
       name: FeatureFlagName.WIDGET_IMAGE,
@@ -133,7 +168,11 @@ export async function initializeDefaultFeatureFlags(createdBy: string): Promise<
       description: "Image display widget",
       type: FeatureFlagType.WIDGET,
       enabled: true,
-      allowedRoles: [UserRoleName.SUPER_ADMIN, UserRoleName.RESOURCE_MANAGER, UserRoleName.DISPLAY_MANAGER],
+      allowedRoles: [
+        UserRoleName.SUPER_ADMIN,
+        UserRoleName.RESOURCE_MANAGER,
+        UserRoleName.DISPLAY_MANAGER,
+      ],
     },
     {
       name: FeatureFlagName.WIDGET_LIST,
@@ -141,7 +180,11 @@ export async function initializeDefaultFeatureFlags(createdBy: string): Promise<
       description: "List display widget",
       type: FeatureFlagType.WIDGET,
       enabled: true,
-      allowedRoles: [UserRoleName.SUPER_ADMIN, UserRoleName.RESOURCE_MANAGER, UserRoleName.DISPLAY_MANAGER],
+      allowedRoles: [
+        UserRoleName.SUPER_ADMIN,
+        UserRoleName.RESOURCE_MANAGER,
+        UserRoleName.DISPLAY_MANAGER,
+      ],
     },
     {
       name: FeatureFlagName.WIDGET_SLIDESHOW,
@@ -149,7 +192,11 @@ export async function initializeDefaultFeatureFlags(createdBy: string): Promise<
       description: "Slideshow display widget",
       type: FeatureFlagType.WIDGET,
       enabled: true,
-      allowedRoles: [UserRoleName.SUPER_ADMIN, UserRoleName.RESOURCE_MANAGER, UserRoleName.DISPLAY_MANAGER],
+      allowedRoles: [
+        UserRoleName.SUPER_ADMIN,
+        UserRoleName.RESOURCE_MANAGER,
+        UserRoleName.DISPLAY_MANAGER,
+      ],
     },
     {
       name: FeatureFlagName.WIDGET_WEATHER,
@@ -157,7 +204,11 @@ export async function initializeDefaultFeatureFlags(createdBy: string): Promise<
       description: "Weather display widget",
       type: FeatureFlagType.WIDGET,
       enabled: true,
-      allowedRoles: [UserRoleName.SUPER_ADMIN, UserRoleName.RESOURCE_MANAGER, UserRoleName.DISPLAY_MANAGER],
+      allowedRoles: [
+        UserRoleName.SUPER_ADMIN,
+        UserRoleName.RESOURCE_MANAGER,
+        UserRoleName.DISPLAY_MANAGER,
+      ],
     },
     {
       name: FeatureFlagName.WIDGET_WEB,
@@ -165,7 +216,11 @@ export async function initializeDefaultFeatureFlags(createdBy: string): Promise<
       description: "Web page display widget",
       type: FeatureFlagType.WIDGET,
       enabled: true,
-      allowedRoles: [UserRoleName.SUPER_ADMIN, UserRoleName.RESOURCE_MANAGER, UserRoleName.DISPLAY_MANAGER],
+      allowedRoles: [
+        UserRoleName.SUPER_ADMIN,
+        UserRoleName.RESOURCE_MANAGER,
+        UserRoleName.DISPLAY_MANAGER,
+      ],
     },
     {
       name: FeatureFlagName.WIDGET_YOUTUBE,
@@ -173,7 +228,11 @@ export async function initializeDefaultFeatureFlags(createdBy: string): Promise<
       description: "YouTube video display widget",
       type: FeatureFlagType.WIDGET,
       enabled: true,
-      allowedRoles: [UserRoleName.SUPER_ADMIN, UserRoleName.RESOURCE_MANAGER, UserRoleName.DISPLAY_MANAGER],
+      allowedRoles: [
+        UserRoleName.SUPER_ADMIN,
+        UserRoleName.RESOURCE_MANAGER,
+        UserRoleName.DISPLAY_MANAGER,
+      ],
     },
     {
       name: FeatureFlagName.WIDGET_MEDIA_PLAYER,
@@ -181,9 +240,13 @@ export async function initializeDefaultFeatureFlags(createdBy: string): Promise<
       description: "Audio and video media player widget",
       type: FeatureFlagType.WIDGET,
       enabled: true,
-      allowedRoles: [UserRoleName.SUPER_ADMIN, UserRoleName.RESOURCE_MANAGER, UserRoleName.DISPLAY_MANAGER],
+      allowedRoles: [
+        UserRoleName.SUPER_ADMIN,
+        UserRoleName.RESOURCE_MANAGER,
+        UserRoleName.DISPLAY_MANAGER,
+      ],
     },
-    
+
     // Features
     {
       name: FeatureFlagName.FEATURE_MEETING_ROOMS,
@@ -227,26 +290,31 @@ export async function initializeDefaultFeatureFlags(createdBy: string): Promise<
  */
 export async function refreshFeatureFlagCache(): Promise<void> {
   await dbConnect();
-  
+
   const flags = await FeatureFlag.find({});
   featureFlagCache.clear();
-  
+
   for (const flag of flags) {
     featureFlagCache.set(flag.name, flag as any);
   }
-  
+
   cacheLastUpdated = new Date();
 }
 
 /**
  * Get feature flag from cache or database
  */
-async function getFeatureFlag(flagName: FeatureFlagName): Promise<IFeatureFlag | null> {
+async function getFeatureFlag(
+  flagName: FeatureFlagName
+): Promise<IFeatureFlag | null> {
   // Check if cache needs refresh
-  if (!cacheLastUpdated || Date.now() - cacheLastUpdated.getTime() > CACHE_DURATION) {
+  if (
+    !cacheLastUpdated ||
+    Date.now() - cacheLastUpdated.getTime() > CACHE_DURATION
+  ) {
     await refreshFeatureFlagCache();
   }
-  
+
   return featureFlagCache.get(flagName) || null;
 }
 
@@ -263,17 +331,17 @@ export async function hasFeatureFlagAccess(
   }
 
   const flag = await getFeatureFlag(flagName);
-  
+
   if (!flag) {
     // If flag doesn't exist, deny access by default
     return false;
   }
-  
+
   // Check if flag is enabled
   if (!flag.enabled) {
     return false;
   }
-  
+
   // Check if user's role is in allowed roles
   return flag.allowedRoles.includes(user.role.name);
 }
@@ -286,23 +354,23 @@ export async function getUserAccessibleFeatureFlags(
   type?: FeatureFlagType
 ): Promise<any[]> {
   await dbConnect();
-  
+
   // Super admins can see all flags
   if (user.role.name === UserRoleName.SUPER_ADMIN) {
     const query = type ? { type } : {};
     return await FeatureFlag.find(query);
   }
-  
+
   // For other users, filter by their role and enabled status
   const query: any = {
     enabled: true,
     allowedRoles: { $in: [user.role.name] },
   };
-  
+
   if (type) {
     query.type = type;
   }
-  
+
   return await FeatureFlag.find(query);
 }
 

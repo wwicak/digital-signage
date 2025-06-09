@@ -6,7 +6,6 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuTrigger,
-  DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import {
@@ -18,11 +17,7 @@ import {
 } from "@/components/ui/select";
 import {
   Bell,
-  Monitor,
-  Wifi,
   WifiOff,
-  Clock,
-  Filter,
   RefreshCw,
   AlertTriangle,
   CheckCircle,
@@ -73,7 +68,7 @@ const NotificationDropdown: React.FC<NotificationDropdownProps> = ({
       const offlineDisplays = getOfflineDisplays();
 
       // Add online display notifications
-      onlineDisplays.forEach((displayId, index) => {
+      onlineDisplays.forEach((displayId) => {
         mockNotifications.push({
           id: `online-${displayId}-${Date.now()}`,
           displayId: displayId,
@@ -86,7 +81,7 @@ const NotificationDropdown: React.FC<NotificationDropdownProps> = ({
       });
 
       // Add offline display notifications
-      offlineDisplays.forEach((displayId, index) => {
+      offlineDisplays.forEach((displayId) => {
         mockNotifications.push({
           id: `offline-${displayId}-${Date.now()}`,
           displayId: displayId,
@@ -131,7 +126,7 @@ const NotificationDropdown: React.FC<NotificationDropdownProps> = ({
 
     // Filter by search term
     if (searchTerm) {
-      filtered = filtered.filter(n => 
+      filtered = filtered.filter(n =>
         n.displayName.toLowerCase().includes(searchTerm.toLowerCase()) ||
         n.message.toLowerCase().includes(searchTerm.toLowerCase())
       );
@@ -140,7 +135,7 @@ const NotificationDropdown: React.FC<NotificationDropdownProps> = ({
     // Filter by date
     if (dateFilter) {
       const filterDate = new Date(dateFilter);
-      filtered = filtered.filter(n => 
+      filtered = filtered.filter(n =>
         n.timestamp.toDateString() === filterDate.toDateString()
       );
     }
@@ -151,13 +146,13 @@ const NotificationDropdown: React.FC<NotificationDropdownProps> = ({
   const getNotificationIcon = (type: string) => {
     switch (type) {
       case "online":
-        return <CheckCircle className="w-4 h-4 text-green-500" />;
+        return <CheckCircle className='w-4 h-4 text-green-500' />;
       case "offline":
-        return <WifiOff className="w-4 h-4 text-red-500" />;
+        return <WifiOff className='w-4 h-4 text-red-500' />;
       case "alert":
-        return <AlertTriangle className="w-4 h-4 text-yellow-500" />;
+        return <AlertTriangle className='w-4 h-4 text-yellow-500' />;
       default:
-        return <Bell className="w-4 h-4" />;
+        return <Bell className='w-4 h-4' />;
     }
   };
 
@@ -180,75 +175,75 @@ const NotificationDropdown: React.FC<NotificationDropdownProps> = ({
   return (
     <DropdownMenu open={isOpen} onOpenChange={setIsOpen}>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" size="icon" className={cn("h-8 w-8 relative", className)}>
-          <Bell className="h-4 w-4" />
+        <Button variant='ghost' size='icon' className={cn("h-8 w-8 relative", className)}>
+          <Bell className='h-4 w-4' />
           {unreadCount > 0 && (
-            <Badge className="absolute -top-1 -right-1 h-4 w-4 p-0 text-[10px] bg-primary">
+            <Badge className='absolute -top-1 -right-1 h-4 w-4 p-0 text-[10px] bg-primary'>
               {onlineCount}
             </Badge>
           )}
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-96 p-0">
-        <Card className="border-0 shadow-none">
-          <CardHeader className="pb-3">
-            <div className="flex items-center justify-between">
-              <CardTitle className="text-sm font-medium">
+      <DropdownMenuContent align='end' className='w-96 p-0'>
+        <Card className='border-0 shadow-none'>
+          <CardHeader className='pb-3'>
+            <div className='flex items-center justify-between'>
+              <CardTitle className='text-sm font-medium'>
                 Notifications
               </CardTitle>
-              <div className="flex items-center gap-2">
-                <Badge variant="secondary" className="text-xs">
+              <div className='flex items-center gap-2'>
+                <Badge variant='secondary' className='text-xs'>
                   {onlineCount} Online
                 </Badge>
                 <Button
-                  variant="ghost"
-                  size="icon"
-                  className="h-6 w-6"
+                  variant='ghost'
+                  size='icon'
+                  className='h-6 w-6'
                   onClick={refreshStatus}
                 >
-                  <RefreshCw className="h-3 w-3" />
+                  <RefreshCw className='h-3 w-3' />
                 </Button>
               </div>
             </div>
             
             {/* Filters */}
-            <div className="space-y-2">
-              <div className="flex gap-2">
+            <div className='space-y-2'>
+              <div className='flex gap-2'>
                 <Select value={filterType} onValueChange={(value: any) => setFilterType(value)}>
-                  <SelectTrigger className="h-8 text-xs">
+                  <SelectTrigger className='h-8 text-xs'>
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="all">All Events</SelectItem>
-                    <SelectItem value="online">Online</SelectItem>
-                    <SelectItem value="offline">Offline</SelectItem>
-                    <SelectItem value="alert">Alerts</SelectItem>
+                    <SelectItem value='all'>All Events</SelectItem>
+                    <SelectItem value='online'>Online</SelectItem>
+                    <SelectItem value='offline'>Offline</SelectItem>
+                    <SelectItem value='alert'>Alerts</SelectItem>
                   </SelectContent>
                 </Select>
                 <Input
-                  placeholder="Search..."
+                  placeholder='Search...'
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="h-8 text-xs"
+                  className='h-8 text-xs'
                 />
               </div>
               <Input
-                type="date"
+                type='date'
                 value={dateFilter}
                 onChange={(e) => setDateFilter(e.target.value)}
-                className="h-8 text-xs"
+                className='h-8 text-xs'
               />
             </div>
           </CardHeader>
           
-          <CardContent className="p-0">
-            <div className="max-h-80 overflow-y-auto">
+          <CardContent className='p-0'>
+            <div className='max-h-80 overflow-y-auto'>
               {filteredNotifications.length === 0 ? (
-                <div className="p-4 text-center text-sm text-muted-foreground">
+                <div className='p-4 text-center text-sm text-muted-foreground'>
                   No notifications found
                 </div>
               ) : (
-                <div className="space-y-1">
+                <div className='space-y-1'>
                   {filteredNotifications.map((notification) => (
                     <div
                       key={notification.id}
@@ -257,18 +252,18 @@ const NotificationDropdown: React.FC<NotificationDropdownProps> = ({
                         getSeverityColor(notification.severity)
                       )}
                     >
-                      <div className="flex items-start gap-3">
+                      <div className='flex items-start gap-3'>
                         {getNotificationIcon(notification.type)}
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center justify-between">
-                            <p className="text-sm font-medium truncate">
+                        <div className='flex-1 min-w-0'>
+                          <div className='flex items-center justify-between'>
+                            <p className='text-sm font-medium truncate'>
                               {notification.displayName}
                             </p>
-                            <span className="text-xs text-muted-foreground">
+                            <span className='text-xs text-muted-foreground'>
                               {notification.timestamp.toLocaleTimeString()}
                             </span>
                           </div>
-                          <p className="text-xs text-muted-foreground mt-1">
+                          <p className='text-xs text-muted-foreground mt-1'>
                             {notification.message}
                           </p>
                         </div>

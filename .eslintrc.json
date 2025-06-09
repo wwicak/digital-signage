@@ -86,6 +86,8 @@
     "dist/",
     "build/",
     "uploads/",
-    "*.config.js"
+    "*.config.js",
+    "__tests__/**/*",
+    "scripts/**/*"
   ]
 }

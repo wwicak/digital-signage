@@ -4,7 +4,6 @@ import {
   updateLayout,
   deleteLayout,
   duplicateLayout,
-  ILayoutCreateData,
   ILayoutUpdateData,
 } from "../actions/layouts";
 

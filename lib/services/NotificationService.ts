@@ -1,5 +1,4 @@
 import DisplayAlert from "../models/DisplayAlert";
-import Display from "../models/Display";
 import dbConnect from "../mongodb";
 
 export interface NotificationConfig {

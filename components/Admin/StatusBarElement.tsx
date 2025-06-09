@@ -57,20 +57,20 @@ class StatusBarElement extends Component<IStatusBarElementProps> {
               ...provided.draggableProps.style,
             }}
           >
-            <div className="absolute top-1 right-1 opacity-0 group-hover:opacity-100 transition-opacity">
+            <div className='absolute top-1 right-1 opacity-0 group-hover:opacity-100 transition-opacity'>
               <button
-                className="p-1 rounded hover:bg-gray-100 transition-colors"
+                className='p-1 rounded hover:bg-gray-100 transition-colors'
                 onClick={this.handleDeleteClick}
-                aria-label="Delete item"
+                aria-label='Delete item'
               >
-                <X className="w-3 h-3 text-gray-500" />
+                <X className='w-3 h-3 text-gray-500' />
               </button>
             </div>
-            <div className="flex flex-col items-center justify-center p-2 min-h-12">
-              <div className="mb-1">
-                <IconComponent className="w-4 h-4 text-primary" />
+            <div className='flex flex-col items-center justify-center p-2 min-h-12'>
+              <div className='mb-1'>
+                <IconComponent className='w-4 h-4 text-primary' />
               </div>
-              <span className="text-xs font-medium text-gray-600 text-center">
+              <span className='text-xs font-medium text-gray-600 text-center'>
                 {typeName}
               </span>
             </div>

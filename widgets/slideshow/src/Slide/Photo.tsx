@@ -41,15 +41,9 @@ class PhotoSlide extends GenericSlide {
    */
   renderSlideContent(data: string): React.ReactElement {
     return (
-      <div className="w-full h-full relative">
+      <div className='w-full h-full relative overflow-hidden'>
         <div
-          className="absolute"
-          style={{
-            backgroundImage: `url(${data})`
-          }}
-        />
-        <div
-          className="w-full h-full absolute"
+          className='w-full h-full absolute bg-cover bg-center bg-no-repeat'
           style={{
             backgroundImage: `url(${data})`
           }}
@@ -59,13 +53,12 @@ class PhotoSlide extends GenericSlide {
           alt='Slide photo'
           width={1}
           height={1}
-          className="w-0 h-0 hidden"
+          className='w-0 h-0 hidden'
           onLoad={this.handleImageLoaded.bind(this)}
           onError={this.handleImageErrored.bind(this)}
           ref={this.image}
           unoptimized={true}
         />
-        
       </div>
     )
   }
@@ -73,12 +66,30 @@ class PhotoSlide extends GenericSlide {
   /**
    * Stops the slide's content from playing when the slide is out of focus
    */
-  stop = (): void => {}
+  stop = (): void => {
+    // For photo slides, we can pause any CSS animations or transitions
+    const slideElement = this.image.current?.parentElement;
+    if (slideElement) {
+      const animatedElements = slideElement.querySelectorAll('*');
+      animatedElements.forEach(element => {
+        (element as HTMLElement).style.animationPlayState = 'paused';
+      });
+    }
+  }
 
   /**
    * Starts or resumes the slide's content when the slide is in focus
    */
-  play = (): void => {}
+  play = (): void => {
+    // For photo slides, we can resume any CSS animations or transitions
+    const slideElement = this.image.current?.parentElement;
+    if (slideElement) {
+      const animatedElements = slideElement.querySelectorAll('*');
+      animatedElements.forEach(element => {
+        (element as HTMLElement).style.animationPlayState = 'running';
+      });
+    }
+  }
 }
 
 export default PhotoSlide

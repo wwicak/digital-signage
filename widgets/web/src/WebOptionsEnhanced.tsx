@@ -54,15 +54,15 @@ class WebOptionsEnhanced extends Component<IWebOptionsProps, IWebOptionsState> {
         useProxy = this.state.useProxy,
         showErrorMessage = this.state.showErrorMessage,
       } = this.props.data
-      this.setState({ 
-        title, 
-        url, 
-        color, 
-        refreshInterval, 
-        scale, 
-        allowInteraction, 
-        useProxy, 
-        showErrorMessage 
+      this.setState({
+        title,
+        url,
+        color,
+        refreshInterval,
+        scale,
+        allowInteraction,
+        useProxy,
+        showErrorMessage
       })
     }
   }
@@ -100,12 +100,12 @@ class WebOptionsEnhanced extends Component<IWebOptionsProps, IWebOptionsState> {
       showErrorMessage = true,
     } = this.state
     
-    const previewData: IWebDefaultData = { 
-      title, 
-      url, 
-      color, 
-      refreshInterval, 
-      scale, 
+    const previewData: IWebDefaultData = {
+      title,
+      url,
+      color,
+      refreshInterval,
+      scale,
       allowInteraction,
       useProxy,
       showErrorMessage,
@@ -179,8 +179,8 @@ class WebOptionsEnhanced extends Component<IWebOptionsProps, IWebOptionsState> {
           </InlineInputGroup>
 
           {/* Enhanced Options Section */}
-          <div className="border-t border-gray-200 pt-4 mt-4">
-            <h4 className="text-sm font-semibold text-gray-700 mb-3">Advanced Error Handling</h4>
+          <div className='border-t border-gray-200 pt-4 mt-4'>
+            <h4 className='text-sm font-semibold text-gray-700 mb-3'>Advanced Error Handling</h4>
             
             <InlineInputGroup>
               <Input
@@ -201,9 +201,9 @@ class WebOptionsEnhanced extends Component<IWebOptionsProps, IWebOptionsState> {
               />
             </InlineInputGroup>
 
-            <div className="mt-3 p-3 bg-blue-50 border border-blue-200 rounded-lg">
-              <h5 className="text-sm font-medium text-blue-800 mb-2">About X-Frame-Options Issues:</h5>
-              <ul className="text-xs text-blue-700 space-y-1 list-disc list-inside">
+            <div className='mt-3 p-3 bg-blue-50 border border-blue-200 rounded-lg'>
+              <h5 className='text-sm font-medium text-blue-800 mb-2'>About X-Frame-Options Issues:</h5>
+              <ul className='text-xs text-blue-700 space-y-1 list-disc list-inside'>
                 <li><strong>Show Error Messages:</strong> Display user-friendly error messages when websites cannot be embedded</li>
                 <li><strong>Use Proxy:</strong> Attempt to load blocked websites through a proxy service (requires backend support)</li>
                 <li>Some websites (like {url.includes('plnindonesiapower.co.id') ? 'PLN Indonesia Power' : 'banks, government sites'}) block iframe embedding for security</li>

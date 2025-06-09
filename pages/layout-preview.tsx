@@ -41,10 +41,10 @@ const LayoutPreviewComponent: React.FC<LayoutPreviewProps> = ({ loggedIn }) => {
   if (isLoading) {
     return (
       <Frame loggedIn={loggedIn}>
-        <div className="flex items-center justify-center min-h-[400px]">
-          <div className="text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
-            <p className="text-muted-foreground">Loading layout preview...</p>
+        <div className='flex items-center justify-center min-h-[400px]'>
+          <div className='text-center'>
+            <div className='animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4'></div>
+            <p className='text-muted-foreground'>Loading layout preview...</p>
           </div>
         </div>
       </Frame>
@@ -54,14 +54,14 @@ const LayoutPreviewComponent: React.FC<LayoutPreviewProps> = ({ loggedIn }) => {
   if (error || !layout) {
     return (
       <Frame loggedIn={loggedIn}>
-        <div className="text-center py-12">
-          <h1 className="text-2xl font-bold text-destructive mb-4">Layout Not Found</h1>
-          <p className="text-muted-foreground mb-6">
+        <div className='text-center py-12'>
+          <h1 className='text-2xl font-bold text-destructive mb-4'>Layout Not Found</h1>
+          <p className='text-muted-foreground mb-6'>
             {error?.message || 'The requested layout could not be found.'}
           </p>
-          <Link href="/layouts">
+          <Link href='/layouts'>
             <Button>
-              <ArrowLeft className="mr-2 h-4 w-4" />
+              <ArrowLeft className='mr-2 h-4 w-4' />
               Back to Layouts
             </Button>
           </Link>
@@ -74,73 +74,73 @@ const LayoutPreviewComponent: React.FC<LayoutPreviewProps> = ({ loggedIn }) => {
 
   return (
     <Frame loggedIn={loggedIn}>
-      <div className="space-y-6">
+      <div className='space-y-6'>
         {/* Header */}
-        <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-4">
-            <Link href="/layouts">
-              <Button variant="outline" size="sm">
-                <ArrowLeft className="mr-2 h-4 w-4" />
+        <div className='flex items-center justify-between'>
+          <div className='flex items-center space-x-4'>
+            <Link href='/layouts'>
+              <Button variant='outline' size='sm'>
+                <ArrowLeft className='mr-2 h-4 w-4' />
                 Back to Layouts
               </Button>
             </Link>
             <div>
-              <h1 className="text-3xl font-bold">{layout.name}</h1>
-              <p className="text-muted-foreground">{layout.description || 'No description'}</p>
+              <h1 className='text-3xl font-bold'>{layout.name}</h1>
+              <p className='text-muted-foreground'>{layout.description || 'No description'}</p>
             </div>
           </div>
           
-          <div className="flex items-center space-x-2">
+          <div className='flex items-center space-x-2'>
             <Badge variant={layout.isActive ? "default" : "secondary"}>
               {layout.isActive ? "Active" : "Inactive"}
             </Badge>
-            <Badge variant="outline">
+            <Badge variant='outline'>
               {layout.orientation === 'portrait' ? (
-                <><Smartphone className="mr-1 h-3 w-3" /> Portrait</>
+                <><Smartphone className='mr-1 h-3 w-3' /> Portrait</>
               ) : (
-                <><Monitor className="mr-1 h-3 w-3" /> Landscape</>
+                <><Monitor className='mr-1 h-3 w-3' /> Landscape</>
               )}
             </Badge>
           </div>
         </div>
 
         {/* Layout Info */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div className='grid grid-cols-1 md:grid-cols-4 gap-4'>
           <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm">Widgets</CardTitle>
+            <CardHeader className='pb-2'>
+              <CardTitle className='text-sm'>Widgets</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{layout.widgets?.length || 0}</div>
+              <div className='text-2xl font-bold'>{layout.widgets?.length || 0}</div>
             </CardContent>
           </Card>
           
           <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm">Layout Type</CardTitle>
+            <CardHeader className='pb-2'>
+              <CardTitle className='text-sm'>Layout Type</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-lg font-medium capitalize">{layout.layoutType}</div>
+              <div className='text-lg font-medium capitalize'>{layout.layoutType}</div>
             </CardContent>
           </Card>
           
           <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm">Grid Size</CardTitle>
+            <CardHeader className='pb-2'>
+              <CardTitle className='text-sm'>Grid Size</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-lg font-medium">
+              <div className='text-lg font-medium'>
                 {layout.gridConfig?.cols || 16} × {layout.gridConfig?.rows || 9}
               </div>
             </CardContent>
           </Card>
           
           <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm">Displays Using</CardTitle>
+            <CardHeader className='pb-2'>
+              <CardTitle className='text-sm'>Displays Using</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{layout.displays?.length || 0}</div>
+              <div className='text-2xl font-bold'>{layout.displays?.length || 0}</div>
             </CardContent>
           </Card>
         </div>
@@ -148,55 +148,55 @@ const LayoutPreviewComponent: React.FC<LayoutPreviewProps> = ({ loggedIn }) => {
         {/* Preview */}
         <Card>
           <CardHeader>
-            <div className="flex items-center justify-between">
-              <CardTitle className="flex items-center">
-                <Eye className="mr-2 h-5 w-5" />
+            <div className='flex items-center justify-between'>
+              <CardTitle className='flex items-center'>
+                <Eye className='mr-2 h-5 w-5' />
                 Layout Preview
               </CardTitle>
-              <div className="flex items-center space-x-2">
+              <div className='flex items-center space-x-2'>
                 <Button
-                  variant="outline"
-                  size="sm"
+                  variant='outline'
+                  size='sm'
                   onClick={() => window.open(`/layout-admin?id=${layout._id}`, '_blank')}
                 >
                   Edit Layout
                 </Button>
                 <Button
-                  variant="outline"
-                  size="sm"
+                  variant='outline'
+                  size='sm'
                   onClick={() => window.open(displayUrl, '_blank')}
                 >
-                  <ExternalLink className="mr-2 h-4 w-4" />
+                  <ExternalLink className='mr-2 h-4 w-4' />
                   Open Display URL
                 </Button>
               </div>
             </div>
           </CardHeader>
           <CardContent>
-            <div className="bg-muted/30 p-6 rounded-lg">
-              <div className="text-center mb-4">
-                <p className="text-sm text-muted-foreground">
+            <div className='bg-muted/30 p-6 rounded-lg'>
+              <div className='text-center mb-4'>
+                <p className='text-sm text-muted-foreground'>
                   Preview of how this layout will appear on displays
                 </p>
               </div>
               
               {/* Mock Preview Container */}
-              <div 
-                className="mx-auto bg-black rounded-lg shadow-lg overflow-hidden"
+              <div
+                className='mx-auto bg-black rounded-lg shadow-lg overflow-hidden'
                 style={{
                   width: layout.orientation === 'portrait' ? `${720 * previewScale}px` : `${1280 * previewScale}px`,
                   height: layout.orientation === 'portrait' ? `${1280 * previewScale}px` : `${720 * previewScale}px`,
                   minHeight: '300px',
                 }}
               >
-                <div className="w-full h-full bg-gradient-to-br from-blue-900 to-purple-900 flex items-center justify-center">
-                  <div className="text-center text-white">
-                    <Monitor className="mx-auto h-16 w-16 mb-4 opacity-50" />
-                    <h3 className="text-xl font-semibold mb-2">{layout.name}</h3>
-                    <p className="text-sm opacity-75">
+                <div className='w-full h-full bg-gradient-to-br from-blue-900 to-purple-900 flex items-center justify-center'>
+                  <div className='text-center text-white'>
+                    <Monitor className='mx-auto h-16 w-16 mb-4 opacity-50' />
+                    <h3 className='text-xl font-semibold mb-2'>{layout.name}</h3>
+                    <p className='text-sm opacity-75'>
                       {layout.widgets?.length || 0} widgets • {layout.orientation} • {layout.layoutType}
                     </p>
-                    <p className="text-xs opacity-50 mt-2">
+                    <p className='text-xs opacity-50 mt-2'>
                       Live preview coming soon
                     </p>
                   </div>
@@ -212,17 +212,17 @@ const LayoutPreviewComponent: React.FC<LayoutPreviewProps> = ({ loggedIn }) => {
             <CardTitle>Display URL</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="space-y-4">
-              <p className="text-sm text-muted-foreground">
+            <div className='space-y-4'>
+              <p className='text-sm text-muted-foreground'>
                 Use this URL to display this layout on physical devices. The device will automatically register with the admin panel.
               </p>
-              <div className="flex items-center space-x-2">
-                <code className="flex-1 p-3 bg-muted rounded border text-sm break-all">
+              <div className='flex items-center space-x-2'>
+                <code className='flex-1 p-3 bg-muted rounded border text-sm break-all'>
                   {displayUrl}
                 </code>
                 <Button
-                  variant="outline"
-                  size="sm"
+                  variant='outline'
+                  size='sm'
                   onClick={() => navigator.clipboard.writeText(displayUrl)}
                 >
                   Copy
@@ -239,12 +239,12 @@ const LayoutPreviewComponent: React.FC<LayoutPreviewProps> = ({ loggedIn }) => {
               <CardTitle>Connected Displays</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="space-y-2">
+              <div className='space-y-2'>
                 {layout.displays.map((display) => (
-                  <div key={display._id} className="flex items-center justify-between p-3 border rounded">
+                  <div key={display._id} className='flex items-center justify-between p-3 border rounded'>
                     <div>
-                      <p className="font-medium">{display.name}</p>
-                      <p className="text-sm text-muted-foreground">
+                      <p className='font-medium'>{display.name}</p>
+                      <p className='text-sm text-muted-foreground'>
                         {display.location} • {display.building}
                       </p>
                     </div>

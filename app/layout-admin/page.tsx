@@ -12,11 +12,9 @@ import EditableWidget from '../../components/Admin/EditableWidget'
 import StatusBarElement from '../../components/Admin/StatusBarElement'
 import WidthProvider from '../../components/Widgets/WidthProvider'
 import DropdownButton from '../../components/DropdownButton'
-import DisplayStatusCard from '../../components/Admin/DisplayStatusCard'
 import { Form, Switch } from '../../components/Form'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Textarea } from '@/components/ui/textarea'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 
 import { StatusBarElementTypes } from '../../helpers/statusbar'
@@ -25,7 +23,7 @@ import { useWidgetChoices } from '../../hooks/useAvailableWidgets'
 import { useLayout } from '../../hooks/useLayout'
 import { useLayouts } from '../../hooks/useLayouts'
 import { useLayoutMutations } from '../../hooks/useLayoutMutations'
-import { ILayoutCreateData, ILayoutUpdateData, addWidgetToLayout, updateWidgetPositions, removeWidgetFromLayout } from '../../actions/layouts'
+import { addWidgetToLayout, updateWidgetPositions, removeWidgetFromLayout } from '../../actions/layouts'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { getWidget } from '../../actions/widgets'
 
@@ -518,10 +516,10 @@ const LayoutAdminContent = memo(function LayoutAdminContent() {
   if (layoutLoading || (selectedLayoutId && layoutsLoading)) {
     return (
       <Frame loggedIn={true}>
-        <div className="flex items-center justify-center min-h-[400px]">
-          <div className="text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
-            <p className="text-muted-foreground">
+        <div className='flex items-center justify-center min-h-[400px]'>
+          <div className='text-center'>
+            <div className='animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4'></div>
+            <p className='text-muted-foreground'>
               {layoutLoading ? 'Loading layout...' : 'Loading layouts...'}
             </p>
           </div>
@@ -533,31 +531,31 @@ const LayoutAdminContent = memo(function LayoutAdminContent() {
   return (
     <Frame loggedIn={true}>
       {/* Header */}
-      <div className="flex items-center justify-between mb-6">
-        <div className="flex items-center space-x-4">
-          <Link href="/layouts">
-            <Button variant="outline" size="sm">
-              <ArrowLeft className="mr-2 h-4 w-4" />
+      <div className='flex items-center justify-between mb-6'>
+        <div className='flex items-center space-x-4'>
+          <Link href='/layouts'>
+            <Button variant='outline' size='sm'>
+              <ArrowLeft className='mr-2 h-4 w-4' />
               Back to Layouts
             </Button>
           </Link>
           <div>
-            <h1 className="text-3xl font-bold">
+            <h1 className='text-3xl font-bold'>
               {isEditing ? 'Edit Layout' : 'Create Layout'}
             </h1>
-            <p className="text-muted-foreground">
+            <p className='text-muted-foreground'>
               {isEditing ? 'Modify your layout template' : 'Design a new layout template for your displays'}
             </p>
           </div>
         </div>
 
-        <div className="flex items-center space-x-2">
+        <div className='flex items-center space-x-2'>
           {isEditing && (
             <Button
-              variant="outline"
+              variant='outline'
               onClick={() => window.open(`/layout-preview?id=${selectedLayoutId}`, '_blank')}
             >
-              <Eye className="mr-2 h-4 w-4" />
+              <Eye className='mr-2 h-4 w-4' />
               Preview
             </Button>
           )}
@@ -565,21 +563,21 @@ const LayoutAdminContent = memo(function LayoutAdminContent() {
             onClick={handleSave}
             disabled={isCreating || isUpdating || !layoutData.name.trim()}
           >
-            <Save className="mr-2 h-4 w-4" />
+            <Save className='mr-2 h-4 w-4' />
             {isCreating || isUpdating ? 'Saving...' : 'Save Layout'}
           </Button>
         </div>
       </div>
 
       {/* Layout Selector */}
-      <Card className="mb-6">
+      <Card className='mb-6'>
         <CardHeader>
           <CardTitle>Layout Selection</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="flex items-center space-x-4">
-            <div className="flex-1">
-              <label className="text-sm font-medium mb-2 block">
+          <div className='flex items-center space-x-4'>
+            <div className='flex-1'>
+              <label className='text-sm font-medium mb-2 block'>
                 Choose Layout to Edit or Create New
               </label>
               <Select
@@ -588,19 +586,19 @@ const LayoutAdminContent = memo(function LayoutAdminContent() {
                 disabled={layoutsLoading}
               >
                 <SelectTrigger>
-                  <SelectValue placeholder="Select a layout to edit or create new" />
+                  <SelectValue placeholder='Select a layout to edit or create new' />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="new">
-                    <div className="flex items-center">
-                      <span className="font-medium">Create New Layout</span>
+                  <SelectItem value='new'>
+                    <div className='flex items-center'>
+                      <span className='font-medium'>Create New Layout</span>
                     </div>
                   </SelectItem>
                   {layoutOptions.map((layout) => (
                     <SelectItem key={layout.id} value={layout.id}>
-                      <div className="flex flex-col">
-                        <span className="font-medium">{layout.name}</span>
-                        <span className="text-xs text-muted-foreground">
+                      <div className='flex flex-col'>
+                        <span className='font-medium'>{layout.name}</span>
+                        <span className='text-xs text-muted-foreground'>
                           {layout.widgetCount} widgets • {layout.orientation} • {layout.layoutType}
                         </span>
                       </div>
@@ -609,15 +607,15 @@ const LayoutAdminContent = memo(function LayoutAdminContent() {
                 </SelectContent>
               </Select>
             </div>
-            <div className="text-sm text-muted-foreground">
+            <div className='text-sm text-muted-foreground'>
               {isEditing ? (
-                <div className="flex items-center space-x-2">
-                  <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                <div className='flex items-center space-x-2'>
+                  <div className='w-2 h-2 bg-green-500 rounded-full'></div>
                   <span>Editing existing layout</span>
                 </div>
               ) : (
-                <div className="flex items-center space-x-2">
-                  <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                <div className='flex items-center space-x-2'>
+                  <div className='w-2 h-2 bg-blue-500 rounded-full'></div>
                   <span>Creating new layout</span>
                 </div>
               )}
@@ -627,24 +625,24 @@ const LayoutAdminContent = memo(function LayoutAdminContent() {
       </Card>
 
       {/* Layout Settings */}
-      <Card className="mb-6">
+      <Card className='mb-6'>
         <CardHeader>
           <CardTitle>Layout Settings</CardTitle>
         </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <CardContent className='space-y-4'>
+          <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
             <div>
-              <label className="text-sm font-medium mb-2 block">Layout Name</label>
+              <label className='text-sm font-medium mb-2 block'>Layout Name</label>
               <Input
-                placeholder="Enter layout name"
+                placeholder='Enter layout name'
                 value={layoutData.name}
                 onChange={(e) => setLayoutData(prev => ({ ...prev, name: e.target.value }))}
               />
             </div>
             <div>
-              <label className="text-sm font-medium mb-2 block">Description</label>
+              <label className='text-sm font-medium mb-2 block'>Description</label>
               <Input
-                placeholder="Enter description (optional)"
+                placeholder='Enter description (optional)'
                 value={layoutData.description}
                 onChange={(e) => setLayoutData(prev => ({ ...prev, description: e.target.value }))}
               />
@@ -654,9 +652,9 @@ const LayoutAdminContent = memo(function LayoutAdminContent() {
       </Card>
 
       {/* Status Bar Configuration */}
-      <Card className="mb-6">
+      <Card className='mb-6'>
         <CardHeader>
-          <div className="flex items-center justify-between">
+          <div className='flex items-center justify-between'>
             <CardTitle>Status Bar</CardTitle>
             <DropdownButton
               icon={Edit}
@@ -668,7 +666,7 @@ const LayoutAdminContent = memo(function LayoutAdminContent() {
         </CardHeader>
         <CardContent>
           {layoutData.statusBar.elements.length > 0 ? (
-            <div className="bg-gray-300 rounded-lg h-16 min-h-16">
+            <div className='bg-gray-300 rounded-lg h-16 min-h-16'>
               <DragDropContext onDragEnd={handleDragEnd}>
                 <Droppable droppableId='droppable-statusbar' direction='horizontal'>
                   {(provided) => (
@@ -701,16 +699,16 @@ const LayoutAdminContent = memo(function LayoutAdminContent() {
               </DragDropContext>
             </div>
           ) : (
-            <p className="text-muted-foreground text-center py-4">
-              No status bar items added. Click "Add Status Bar Item" to get started.
+            <p className='text-muted-foreground text-center py-4'>
+              No status bar items added. Click &quot;Add Status Bar Item&quot; to get started.
             </p>
           )}
         </CardContent>
       </Card>
 
       {/* Layout Controls */}
-      <div className="flex flex-row items-center justify-between mb-4">
-        <div className="flex items-center space-x-4">
+      <div className='flex flex-row items-center justify-between mb-4'>
+        <div className='flex items-center space-x-4'>
           <DropdownButton
             icon={Edit}
             text={
@@ -723,18 +721,18 @@ const LayoutAdminContent = memo(function LayoutAdminContent() {
             disabled={widgetChoicesLoading || isAddingWidget}
           />
           <Button
-            variant="outline"
-            size="sm"
+            variant='outline'
+            size='sm'
             onClick={handleAutoArrange}
             disabled={!existingLayout?.widgets || existingLayout.widgets.length === 0}
-            className="flex items-center space-x-2"
+            className='flex items-center space-x-2'
           >
-            <Maximize2 className="w-4 h-4" />
+            <Maximize2 className='w-4 h-4' />
             <span>Auto-arrange</span>
           </Button>
           {!isEditing && !savedLayoutId && (
-            <div className="text-sm text-muted-foreground bg-blue-50 px-3 py-2 rounded-md border border-blue-200">
-              💡 Enter a layout name and click "Add Widget" to save and start adding widgets
+            <div className='text-sm text-muted-foreground bg-blue-50 px-3 py-2 rounded-md border border-blue-200'>
+              💡 Enter a layout name and click &quot;Add Widget&quot; to save and start adding widgets
             </div>
           )}
         </div>
@@ -766,7 +764,7 @@ const LayoutAdminContent = memo(function LayoutAdminContent() {
           <CardTitle>Layout Canvas</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="bg-gray-300 relative" style={{
+          <div className='bg-gray-300 relative' style={{
             borderRadius: layoutData.layoutType === 'spaced' ? '8px' : '0px',
             aspectRatio: layoutData.orientation === 'portrait' ? '9/16' : '16/9',
             maxWidth: layoutData.orientation === 'portrait' ? '600px' : '100%',
@@ -774,16 +772,16 @@ const LayoutAdminContent = memo(function LayoutAdminContent() {
             margin: layoutData.orientation === 'portrait' ? '0 auto' : '0'
           }}>
             {/* Aspect ratio indicator */}
-            <div className="absolute top-2 left-2 bg-black/20 text-white text-xs px-2 py-1 rounded backdrop-blur-sm z-10">
+            <div className='absolute top-2 left-2 bg-black/20 text-white text-xs px-2 py-1 rounded backdrop-blur-sm z-10'>
               {layoutData.orientation === 'portrait' ? '9:16' : '16:9'} • {layoutData.gridConfig.cols}×{layoutData.gridConfig.rows}
             </div>
 
             {/* Warning banner for invalid widgets */}
             {invalidWidgetsCount > 0 && (
-              <div className="absolute top-12 left-2 right-2 bg-yellow-50 border border-yellow-200 rounded-lg p-3 z-20">
-                <div className="flex items-center space-x-2 text-yellow-800">
-                  <AlertCircle className="w-4 h-4" />
-                  <span className="text-sm font-medium">
+              <div className='absolute top-12 left-2 right-2 bg-yellow-50 border border-yellow-200 rounded-lg p-3 z-20'>
+                <div className='flex items-center space-x-2 text-yellow-800'>
+                  <AlertCircle className='w-4 h-4' />
+                  <span className='text-sm font-medium'>
                     {invalidWidgetsCount} widget{invalidWidgetsCount > 1 ? 's' : ''} {invalidWidgetsCount > 1 ? 'have' : 'has'} invalid references and {invalidWidgetsCount > 1 ? 'are' : 'is'} not displayed
                   </span>
                 </div>
@@ -791,11 +789,11 @@ const LayoutAdminContent = memo(function LayoutAdminContent() {
             )}
 
             {(!existingLayout?.widgets || existingLayout.widgets.length === 0) ? (
-              <div className="absolute inset-0 flex items-center justify-center">
-                <div className="text-center text-gray-500">
-                  <Grid3X3 className="mx-auto h-12 w-12 mb-4 opacity-50" />
-                  <p className="text-lg font-medium">No widgets added yet</p>
-                  <p className="text-sm">Click "Add Widget" to start designing your layout</p>
+              <div className='absolute inset-0 flex items-center justify-center'>
+                <div className='text-center text-gray-500'>
+                  <Grid3X3 className='mx-auto h-12 w-12 mb-4 opacity-50' />
+                  <p className='text-lg font-medium'>No widgets added yet</p>
+                  <p className='text-sm'>Click &quot;Add Widget&quot; to start designing your layout</p>
                 </div>
               </div>
             ) : (
@@ -810,7 +808,7 @@ const LayoutAdminContent = memo(function LayoutAdminContent() {
                 useCSSTransforms={true}
                 transformScale={1}
                 preventCollision={true}
-                compactType="vertical"
+                compactType='vertical'
                 maxRows={layoutData.gridConfig.rows}
               >
                 {existingLayout?.widgets?.filter((widget, index) => {
@@ -878,10 +876,10 @@ export default function LayoutAdminPage() {
   return (
     <Suspense fallback={
       <Frame loggedIn={true}>
-        <div className="flex items-center justify-center min-h-[400px]">
-          <div className="text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
-            <p className="text-muted-foreground">Loading layout editor...</p>
+        <div className='flex items-center justify-center min-h-[400px]'>
+          <div className='text-center'>
+            <div className='animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4'></div>
+            <p className='text-muted-foreground'>Loading layout editor...</p>
           </div>
         </div>
       </Frame>

@@ -8,7 +8,6 @@ import {
   Trash2,
   Cast,
   Settings,
-  ChevronDown,
   ChevronUp,
   RefreshCw,
   Check,
@@ -17,13 +16,12 @@ import {
 } from "lucide-react";
 import { useRouter } from "next/router";
 import * as z from "zod";
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Separator } from "@/components/ui/separator";
-import { cn } from "@/lib/utils";
 import OrientationPreview from "./OrientationPreview";
 import DisplayEditDialog from "./DisplayEditDialog";
 
@@ -214,47 +212,47 @@ const ScreenCard: React.FC<IScreenCardProps> = ({
   };
 
   return (
-    <Card className="group my-6 transition-all duration-200 hover:shadow-lg cursor-pointer" onClick={handleCardClick}>
-      <CardContent className="p-6">
-          <div className="flex items-center space-x-4">
+    <Card className='group my-6 transition-all duration-200 hover:shadow-lg cursor-pointer' onClick={handleCardClick}>
+      <CardContent className='p-6'>
+          <div className='flex items-center space-x-4'>
             {/* Display Icon */}
-            <div className="flex-shrink-0">
-              <div className="h-16 w-16 rounded-lg bg-primary/10 flex items-center justify-center border border-primary/20">
-                <Tv className="h-8 w-8 text-primary" />
+            <div className='flex-shrink-0'>
+              <div className='h-16 w-16 rounded-lg bg-primary/10 flex items-center justify-center border border-primary/20'>
+                <Tv className='h-8 w-8 text-primary' />
               </div>
             </div>
 
             {/* Display Info */}
-            <div className="flex-1 min-w-0">
-              <div className="flex items-center justify-between mb-2">
-                <h3 className="text-lg font-semibold text-foreground truncate">
+            <div className='flex-1 min-w-0'>
+              <div className='flex items-center justify-between mb-2'>
+                <h3 className='text-lg font-semibold text-foreground truncate'>
                   {value?.name || "Untitled Display"}
                 </h3>
                 <Badge
                   variant={value?.isOnline ? "success" : "destructive"}
-                  className="ml-2"
+                  className='ml-2'
                 >
                   {value?.isOnline ? "Online" : "Offline"}
                 </Badge>
               </div>
 
-              <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
-                <div className="flex items-center gap-1">
-                  <Layout className="h-4 w-4" />
+              <div className='flex flex-wrap items-center gap-4 text-sm text-muted-foreground'>
+                <div className='flex items-center gap-1'>
+                  <Layout className='h-4 w-4' />
                   <span>{widgetCount} widgets</span>
                 </div>
-                <div className="flex items-center gap-1">
-                  <Cast className="h-4 w-4" />
+                <div className='flex items-center gap-1'>
+                  <Cast className='h-4 w-4' />
                   <span>
                     {value?.clientCount || 0} client
                     {(value?.clientCount || 0) !== 1 ? "s" : ""} paired
                   </span>
                 </div>
-                <div className="flex items-center gap-4">
+                <div className='flex items-center gap-4'>
                   <OrientationPreview
                     orientation={value?.orientation || null}
                   />
-                  <span className="text-xs">
+                  <span className='text-xs'>
                     {value?.orientation === "portrait"
                       ? "Portrait"
                       : "Landscape"}
@@ -263,82 +261,82 @@ const ScreenCard: React.FC<IScreenCardProps> = ({
               </div>
             </div>
             {/* Action Buttons */}
-            <div className="flex items-center space-x-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+            <div className='flex items-center space-x-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200'>
               <Button
-                variant="ghost"
-                size="icon"
+                variant='ghost'
+                size='icon'
                 onClick={(e) => {
                   e.preventDefault();
                   e.stopPropagation();
                   handleEdit(e as any);
                 }}
-                aria-label="Edit Display"
-                className="h-8 w-8"
+                aria-label='Edit Display'
+                className='h-8 w-8'
               >
-                <Edit className="h-4 w-4" />
+                <Edit className='h-4 w-4' />
               </Button>
 
               {/* Layout Control Toggle Button - only show for online displays */}
               {value?.isOnline && (
                 <Button
-                  variant="ghost"
-                  size="icon"
+                  variant='ghost'
+                  size='icon'
                   onClick={(e) => {
                     e.preventDefault();
                     e.stopPropagation();
                     handleLayoutSectionToggle(e as any);
                   }}
-                  aria-label="Toggle Layout Controls"
-                  className="h-8 w-8"
+                  aria-label='Toggle Layout Controls'
+                  className='h-8 w-8'
                 >
                   {isLayoutSectionExpanded ? (
-                    <ChevronUp className="h-4 w-4" />
+                    <ChevronUp className='h-4 w-4' />
                   ) : (
-                    <Settings className="h-4 w-4" />
+                    <Settings className='h-4 w-4' />
                   )}
                 </Button>
               )}
 
               <Button
-                variant="ghost"
-                size="icon"
-                className="h-8 w-8"
+                variant='ghost'
+                size='icon'
+                className='h-8 w-8'
                 onClick={(e) => {
                   e.preventDefault();
                   e.stopPropagation();
                   router.push(`/layout?display=${value?._id || ""}`);
                 }}
-                aria-label="Edit Layout"
+                aria-label='Edit Layout'
               >
-                <Eye className="h-4 w-4" />
+                <Eye className='h-4 w-4' />
               </Button>
 
               <Button
-                variant="ghost"
-                size="icon"
-                className="h-8 w-8"
+                variant='ghost'
+                size='icon'
+                className='h-8 w-8'
                 onClick={(e) => {
                   e.preventDefault();
                   e.stopPropagation();
                   window.open(`/display/${value?._id || ""}`, '_blank');
                 }}
-                aria-label="View Display"
+                aria-label='View Display'
               >
-                <ExternalLink className="h-4 w-4" />
+                <ExternalLink className='h-4 w-4' />
               </Button>
 
               <Button
-                variant="ghost"
-                size="icon"
+                variant='ghost'
+                size='icon'
                 onClick={(e) => {
                   e.preventDefault();
                   e.stopPropagation();
                   handleDelete(e as any);
                 }}
-                aria-label="Delete Display"
-                className="h-8 w-8 text-destructive hover:text-destructive"
+                aria-label='Delete Display'
+                className='h-8 w-8 text-destructive hover:text-destructive'
               >
-                <Trash2 className="h-4 w-4" />
+                <Trash2 className='h-4 w-4' />
               </Button>
             </div>
           </div>
@@ -348,46 +346,46 @@ const ScreenCard: React.FC<IScreenCardProps> = ({
         {isLayoutSectionExpanded && value?.isOnline && (
           <>
             <Separator />
-            <CardContent className="pt-4">
-              <div className="space-y-4">
-                <div className="flex items-center gap-2 mb-3">
-                  <Layout className="h-4 w-4 text-primary" />
-                  <h4 className="font-medium text-sm">Remote Layout Control</h4>
-                  <Badge variant="outline" className="text-xs">
+            <CardContent className='pt-4'>
+              <div className='space-y-4'>
+                <div className='flex items-center gap-2 mb-3'>
+                  <Layout className='h-4 w-4 text-primary' />
+                  <h4 className='font-medium text-sm'>Remote Layout Control</h4>
+                  <Badge variant='outline' className='text-xs'>
                     Live
                   </Badge>
                 </div>
 
                 {/* Current Layout Info */}
-                <div className="p-3 bg-muted/30 rounded-lg">
-                  <div className="flex items-center justify-between">
+                <div className='p-3 bg-muted/30 rounded-lg'>
+                  <div className='flex items-center justify-between'>
                     <div>
-                      <p className="text-sm font-medium">Current Layout</p>
-                      <p className="text-xs text-muted-foreground">{getCurrentLayoutName()}</p>
+                      <p className='text-sm font-medium'>Current Layout</p>
+                      <p className='text-xs text-muted-foreground'>{getCurrentLayoutName()}</p>
                     </div>
-                    <Badge variant="outline" className="text-xs">
+                    <Badge variant='outline' className='text-xs'>
                       Active
                     </Badge>
                   </div>
                 </div>
 
                 {/* Layout Selection */}
-                <div className="space-y-2">
-                  <label className="text-sm font-medium">Change to Layout</label>
+                <div className='space-y-2'>
+                  <label className='text-sm font-medium'>Change to Layout</label>
                   <Select
                     value={selectedLayout}
                     onValueChange={setSelectedLayout}
                     disabled={isChangingLayout}
                   >
-                    <SelectTrigger className="h-9">
-                      <SelectValue placeholder="Select a layout" />
+                    <SelectTrigger className='h-9'>
+                      <SelectValue placeholder='Select a layout' />
                     </SelectTrigger>
                     <SelectContent>
                       {availableLayouts.map((layout) => (
                         <SelectItem key={layout.id} value={layout.id}>
-                          <div className="flex flex-col">
-                            <span className="font-medium text-sm">{layout.name}</span>
-                            <span className="text-xs text-muted-foreground">{layout.description}</span>
+                          <div className='flex flex-col'>
+                            <span className='font-medium text-sm'>{layout.name}</span>
+                            <span className='text-xs text-muted-foreground'>{layout.description}</span>
                           </div>
                         </SelectItem>
                       ))}
@@ -397,18 +395,18 @@ const ScreenCard: React.FC<IScreenCardProps> = ({
 
                 {/* Status Messages */}
                 {layoutChangeStatus === 'success' && (
-                  <Alert className="border-green-200 bg-green-50">
-                    <Check className="h-4 w-4 text-green-600" />
-                    <AlertDescription className="text-green-800 text-sm">
+                  <Alert className='border-green-200 bg-green-50'>
+                    <Check className='h-4 w-4 text-green-600' />
+                    <AlertDescription className='text-green-800 text-sm'>
                       Layout change sent! The display will update shortly.
                     </AlertDescription>
                   </Alert>
                 )}
 
                 {layoutChangeStatus === 'error' && (
-                  <Alert className="border-red-200 bg-red-50">
-                    <AlertTriangle className="h-4 w-4 text-red-600" />
-                    <AlertDescription className="text-red-800 text-sm">
+                  <Alert className='border-red-200 bg-red-50'>
+                    <AlertTriangle className='h-4 w-4 text-red-600' />
+                    <AlertDescription className='text-red-800 text-sm'>
                       {layoutChangeError}
                     </AlertDescription>
                   </Alert>
@@ -416,32 +414,32 @@ const ScreenCard: React.FC<IScreenCardProps> = ({
 
                 {/* Preview Info */}
                 {hasLayoutChanges && (
-                  <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg">
-                    <p className="text-sm font-medium text-blue-900">Preview Change</p>
-                    <p className="text-xs text-blue-700 mt-1">
-                      <span className="font-medium">{getCurrentLayoutName()}</span>
+                  <div className='p-3 bg-blue-50 border border-blue-200 rounded-lg'>
+                    <p className='text-sm font-medium text-blue-900'>Preview Change</p>
+                    <p className='text-xs text-blue-700 mt-1'>
+                      <span className='font-medium'>{getCurrentLayoutName()}</span>
                       {' → '}
-                      <span className="font-medium">{getSelectedLayoutName()}</span>
+                      <span className='font-medium'>{getSelectedLayoutName()}</span>
                     </p>
                   </div>
                 )}
 
                 {/* Action Buttons */}
-                <div className="flex gap-2">
+                <div className='flex gap-2'>
                   <Button
                     onClick={handleRemoteLayoutChange}
                     disabled={!hasLayoutChanges || isChangingLayout}
-                    size="sm"
-                    className="flex-1"
+                    size='sm'
+                    className='flex-1'
                   >
                     {isChangingLayout ? (
                       <>
-                        <Loader2 className="h-3 w-3 mr-2 animate-spin" />
+                        <Loader2 className='h-3 w-3 mr-2 animate-spin' />
                         Applying...
                       </>
                     ) : (
                       <>
-                        <RefreshCw className="h-3 w-3 mr-2" />
+                        <RefreshCw className='h-3 w-3 mr-2' />
                         Apply Change
                       </>
                     )}
@@ -449,10 +447,10 @@ const ScreenCard: React.FC<IScreenCardProps> = ({
 
                   {hasLayoutChanges && (
                     <Button
-                      variant="outline"
+                      variant='outline'
                       onClick={() => setSelectedLayout('layout-1')}
                       disabled={isChangingLayout}
-                      size="sm"
+                      size='sm'
                     >
                       Reset
                     </Button>
@@ -460,7 +458,7 @@ const ScreenCard: React.FC<IScreenCardProps> = ({
                 </div>
 
                 {/* Instructions */}
-                <div className="text-xs text-muted-foreground">
+                <div className='text-xs text-muted-foreground'>
                   <p><strong>Note:</strong> The display will automatically reload with the new layout.</p>
                 </div>
               </div>

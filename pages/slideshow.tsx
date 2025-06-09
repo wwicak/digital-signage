@@ -80,8 +80,8 @@ const SlideshowPageComponent = memo(function SlideshowPageComponent({ slideshow:
 
   return (
     <Frame loggedIn={loggedIn}>
-      <h1 className="inline-block">Slideshow: </h1>{' '}
-      <div className="inline-block relative ml-4 mr-4 border-b-2 border-gray-400">
+      <h1 className='inline-block'>Slideshow: </h1>{' '}
+      <div className='inline-block relative ml-4 mr-4 border-b-2 border-gray-400'>
         <input
           className='input'
           placeholder='Untitled Slideshow'
@@ -91,10 +91,10 @@ const SlideshowPageComponent = memo(function SlideshowPageComponent({ slideshow:
           size={(slideshow && slideshow.name && slideshow.name.length) || 20}
         />
         <div className='icon'>
-          <Edit className="w-4 h-4 text-gray-500" />
+          <Edit className='w-4 h-4 text-gray-500' />
         </div>
       </div>
-      <div className="max-w-2xl">
+      <div className='max-w-2xl'>
         <Upload slideshowId={slideshow && slideshow._id || ''} refresh={refresh} />
         <SlideEditDialogComponent
           slideshowId={slideshow && slideshow._id || ''}

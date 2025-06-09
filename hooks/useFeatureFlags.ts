@@ -3,7 +3,7 @@ import axios from "axios";
 import {
   IFeatureFlag,
   FeatureFlagType,
-  FeatureFlagName
+  FeatureFlagName,
 } from "@/lib/types/feature-flags";
 
 // Types for API responses
@@ -25,12 +25,18 @@ interface FeatureFlagUpdateData {
 
 // API functions
 const featureFlagApi = {
-  getAll: async (params?: { type?: FeatureFlagType; enabled?: boolean }): Promise<IFeatureFlag[]> => {
+  getAll: async (params?: {
+    type?: FeatureFlagType;
+    enabled?: boolean;
+  }): Promise<IFeatureFlag[]> => {
     const searchParams = new URLSearchParams();
     if (params?.type) searchParams.append("type", params.type);
-    if (params?.enabled !== undefined) searchParams.append("enabled", params.enabled.toString());
-    
-    const url = `/api/feature-flags${searchParams.toString() ? `?${searchParams.toString()}` : ""}`;
+    if (params?.enabled !== undefined)
+      searchParams.append("enabled", params.enabled.toString());
+
+    const url = `/api/feature-flags${
+      searchParams.toString() ? `?${searchParams.toString()}` : ""
+    }`;
     const response = await axios.get(url);
     return response.data;
   },
@@ -45,7 +51,10 @@ const featureFlagApi = {
     return response.data;
   },
 
-  update: async (id: string, data: FeatureFlagUpdateData): Promise<IFeatureFlag> => {
+  update: async (
+    id: string,
+    data: FeatureFlagUpdateData
+  ): Promise<IFeatureFlag> => {
     const response = await axios.put(`/api/feature-flags/${id}`, data);
     return response.data;
   },
@@ -56,7 +65,10 @@ const featureFlagApi = {
 };
 
 // Hook for fetching all feature flags
-export function useFeatureFlags(params?: { type?: FeatureFlagType; enabled?: boolean }) {
+export function useFeatureFlags(params?: {
+  type?: FeatureFlagType;
+  enabled?: boolean;
+}) {
   return useQuery({
     queryKey: ["feature-flags", params],
     queryFn: () => featureFlagApi.getAll(params),
@@ -118,10 +130,10 @@ export function useDeleteFeatureFlag() {
 // Hook for checking if a specific feature flag is enabled for the current user
 export function useFeatureFlagAccess(flagName: FeatureFlagName) {
   const { data: featureFlags, isLoading } = useFeatureFlags({ enabled: true });
-  
-  const hasAccess = featureFlags?.some(flag => 
-    flag.name === flagName && flag.enabled
-  ) ?? false;
+
+  const hasAccess =
+    featureFlags?.some((flag) => flag.name === flagName && flag.enabled) ??
+    false;
 
   return {
     hasAccess,

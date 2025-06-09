@@ -39,15 +39,15 @@ const DialogLegacy = forwardRef<DialogRef, IDialogProps>(
           className={`max-h-[90vh] w-full max-w-4xl flex flex-col ${className || ''}`}
         >
           {(title || description) && (
-            <DialogHeader className="flex-shrink-0 pb-4 border-b border-gray-200">
-              {title && <DialogTitle className="text-xl font-semibold text-gray-900">{title}</DialogTitle>}
+            <DialogHeader className='flex-shrink-0 pb-4 border-b border-gray-200'>
+              {title && <DialogTitle className='text-xl font-semibold text-gray-900'>{title}</DialogTitle>}
               {description && (
-                <DialogDescription className="text-gray-600 mt-1">{description}</DialogDescription>
+                <DialogDescription className='text-gray-600 mt-1'>{description}</DialogDescription>
               )}
             </DialogHeader>
           )}
-          <div className="flex-1 overflow-y-auto min-h-0 py-4">
-            <div className="pb-4">
+          <div className='flex-1 overflow-y-auto min-h-0 py-4'>
+            <div className='pb-4'>
               {children}
             </div>
           </div>

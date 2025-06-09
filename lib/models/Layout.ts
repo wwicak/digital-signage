@@ -1,6 +1,5 @@
 import mongoose, { Document, Model, Schema } from "mongoose";
 import * as z from "zod";
-import { IWidget } from "./Widget";
 
 // Layout widget positioning data (separate from actual widget content)
 export interface ILayoutWidget {

@@ -1,5 +1,4 @@
 import React, { forwardRef, useImperativeHandle, useState } from "react";
-import ContentLoader from "react-content-loader";
 import { Tv } from "lucide-react";
 
 import ScreenCard from "./ScreenCard"; // Assuming ScreenCard.tsx and its props
@@ -38,28 +37,28 @@ const ScreenList = forwardRef<IScreenListRef, IScreenListProps>(
     }));
     if (error) {
       return (
-        <div className="text-center p-5 font-sans">
+        <div className='text-center p-5 font-sans'>
           Failed to load screens. Please try again later.
         </div>
       );
     }
 
     return (
-      <div className="space-y-6">
+      <div className='space-y-6'>
         {!isLoading && screens ? (
           <>
             {screens.length === 0 ? (
-              <div className="text-center py-12">
-                <div className="mx-auto w-24 h-24 bg-muted rounded-full flex items-center justify-center mb-4">
-                  <Tv className="w-12 h-12 text-muted-foreground" />
+              <div className='text-center py-12'>
+                <div className='mx-auto w-24 h-24 bg-muted rounded-full flex items-center justify-center mb-4'>
+                  <Tv className='w-12 h-12 text-muted-foreground' />
                 </div>
-                <h3 className="text-lg font-semibold mb-2">No displays found</h3>
-                <p className="text-muted-foreground mb-4">
+                <h3 className='text-lg font-semibold mb-2'>No displays found</h3>
+                <p className='text-muted-foreground mb-4'>
                   Get started by creating your first display.
                 </p>
               </div>
             ) : (
-              <div className="grid gap-6">
+              <div className='grid gap-6'>
                 {screens.map((screen, index) => (
                   <ScreenCard
                     key={screen._id || `item-${index}`}
@@ -71,19 +70,19 @@ const ScreenList = forwardRef<IScreenListRef, IScreenListProps>(
             )}
           </>
         ) : (
-          <div className="grid gap-6">
+          <div className='grid gap-6'>
             {Array(4)
               .fill(0)
               .map((_, index) => (
-                <div key={`loader-${index}`} className="animate-pulse">
-                  <div className="bg-card border rounded-lg p-6">
-                    <div className="flex items-center space-x-4">
-                      <div className="h-16 w-16 bg-muted rounded-lg"></div>
-                      <div className="flex-1 space-y-2">
-                        <div className="h-4 bg-muted rounded w-3/4"></div>
-                        <div className="h-3 bg-muted rounded w-1/2"></div>
+                <div key={`loader-${index}`} className='animate-pulse'>
+                  <div className='bg-card border rounded-lg p-6'>
+                    <div className='flex items-center space-x-4'>
+                      <div className='h-16 w-16 bg-muted rounded-lg'></div>
+                      <div className='flex-1 space-y-2'>
+                        <div className='h-4 bg-muted rounded w-3/4'></div>
+                        <div className='h-3 bg-muted rounded w-1/2'></div>
                       </div>
-                      <div className="h-6 w-16 bg-muted rounded-full"></div>
+                      <div className='h-6 w-16 bg-muted rounded-full'></div>
                     </div>
                   </div>
                 </div>

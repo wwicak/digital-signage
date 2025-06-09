@@ -32,7 +32,7 @@ const InlineInputGroup: React.FC<IInlineInputGroupProps> = ({
         return (
           <div
             key={`input-group-child-${index}`}
-            className="flex-1 min-w-0"
+            className='flex-1 min-w-0'
           >
             {child}
           </div>
