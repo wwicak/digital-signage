@@ -845,7 +845,7 @@ const LayoutAdminContent = memo(function LayoutAdminContent() {
       </Card>
 
       {/* Layout Controls */}
-      <div className='flex flex-row items-center justify-between mb-4'>
+      <div className='relative z-30 flex flex-row items-center justify-between mb-4'>
         <div className='flex items-center space-x-4'>
           <DropdownButton
             icon={Edit}
@@ -897,7 +897,7 @@ const LayoutAdminContent = memo(function LayoutAdminContent() {
       </div>
 
       {/* Layout Canvas */}
-      <Card>
+      <Card className='relative z-10'>
         <CardHeader>
           <CardTitle>Layout Canvas</CardTitle>
         </CardHeader>

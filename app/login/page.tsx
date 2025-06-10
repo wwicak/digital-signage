@@ -26,10 +26,13 @@ const LoginContent = memo(function LoginContent() {
       } else {
         setAlert('success')
         // Redirect on success
-        if (displayId) {
+        const redirectUrl = searchParams?.get('redirect')
+        if (redirectUrl) {
+          router.push(redirectUrl)
+        } else if (displayId) {
           router.push(`/display/${displayId}`)
         } else {
-          router.push('/layouts')
+          router.push('/dashboard')
         }
       }
     } catch (error) {
