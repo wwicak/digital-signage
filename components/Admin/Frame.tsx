@@ -30,7 +30,9 @@ export const FramePropsSchema = z.object({
 });
 
 // Derive TypeScript type from Zod schema
-export type IFrameProps = z.infer<typeof FramePropsSchema>;
+export type IFrameProps = z.infer<typeof FramePropsSchema> & {
+    isLoading?: boolean;
+};
 
 const Frame: React.FC<IFrameProps> = (props) => {
   const { state } = useDisplayContext();
@@ -225,7 +227,6 @@ const Frame: React.FC<IFrameProps> = (props) => {
               </div>
             )}
 
-            {/* Content Wrapper Card */}
             <Card className='min-h-[calc(100vh-12rem)] bg-card/40 backdrop-blur-sm border-border/50 shadow-sm'>
               <CardContent className='p-8'>
                 <div className='space-y-8 animate-in fade-in-50 slide-in-from-bottom-4 duration-700'>

@@ -62,7 +62,7 @@ const GridStackWrapper = forwardRef<GridStackWrapperRef, GridStackWrapperProps>(
 
   // Default GridStack options optimized for digital signage
   const defaultOptions: GridStackOptions = {
-    float: true, // Allow free movement
+    float: true, // Re-enable float but with proper collision prevention
     cellHeight: 'auto',
     minRow: 1,
     margin: 12,
@@ -75,6 +75,7 @@ const GridStackWrapper = forwardRef<GridStackWrapperRef, GridStackWrapperProps>(
     },
     acceptWidgets: true,
     removable: false,
+    animate: false, // Disable animations that might cause layout thrashing
     ...options
   }
 
@@ -92,54 +93,102 @@ const GridStackWrapper = forwardRef<GridStackWrapperRef, GridStackWrapperProps>(
   }, [items])
 
   // Initialize GridStack
-useEffect(() => {
-    if (!gridRef.current) return
+  useEffect(() => {
+    if (!gridRef.current) return;
+    
+    // Initialize grid
+    if (!gridInstanceRef.current) {
+        gridInstanceRef.current = GridStack.init(defaultOptions, gridRef.current);
+        const grid = gridInstanceRef.current;
+        
+        const handleUserChange = () => {
+            if (onLayoutChange) {
+                const currentItems = grid.save(false) as GridStackItem[];
+                onLayoutChange(currentItems);
+            }
+        };
 
-    // If an instance already exists, destroy it before creating a new one
-    if (gridInstanceRef.current) {
-      gridInstanceRef.current.destroy(false) // `false` to preserve DOM nodes for React
+        grid.on('dragstop', handleUserChange);
+        grid.on('resizestop', handleUserChange);
+        if (onAdded) grid.on('added', onAdded);
+        if (onRemoved) grid.on('removed', onRemoved);
     }
+  }, [onLayoutChange, onAdded, onRemoved, defaultOptions]);
 
-    const finalOptions = {
-        ...defaultOptions,
-        ...options
-    };
+  // Sync items with grid
+  useEffect(() => {
+    const grid = gridInstanceRef.current;
+    if (!grid) return;
 
-    // Initialize GridStack instance. It will automatically discover and initialize grid items.
-    gridInstanceRef.current = GridStack.init(finalOptions, gridRef.current)
-    const grid = gridInstanceRef.current
+    // Use batch update for better performance
+    grid.batchUpdate();
 
-    // --- EVENT LISTENERS ---
-    if (onDragStart) grid.on('dragstart', onDragStart)
-    if (onDragStop) grid.on('dragstop', onDragStop)
-    if (onResizeStart) grid.on('resizestart', onResizeStart)
-    if (onResizeStop) grid.on('resizestop', onResizeStop)
-    if (onAdded) grid.on('added', onAdded)
-    if (onRemoved) grid.on('removed', onRemoved)
+    try {
+      // Get current grid nodes
+      const currentNodes = grid.engine.nodes.map(n => n.id).filter(Boolean) as string[];
+      const newItemIds = items.map(item => item.id);
 
-    // Layout change handler
-    if (onLayoutChange) {
-      const handleChange = () => {
-        if (!grid) return;
-        const currentItems = grid.save(false) as GridStackItem[]
-        onLayoutChange(currentItems)
-      }
-      grid.on('change', handleChange)
-    }
-
-    // Cleanup function
-    return () => {
-      if (gridInstanceRef.current) {
-        try {
-          gridInstanceRef.current.destroy(false)
-        } catch (e) {
-          // Can throw error if grid is already destroyed
+      // Remove nodes that are no longer in items
+      currentNodes.forEach(nodeId => {
+        if (!newItemIds.includes(nodeId)) {
+          const el = grid.engine.nodes.find(n => n.id === nodeId)?.el;
+          if (el) grid.removeWidget(el, false);
         }
-        gridInstanceRef.current = null
-      }
+      });
+
+      // Add or update items
+      items.forEach(item => {
+        const el = itemRefs.current?.[item.id]?.current;
+        if (!el) return;
+
+        const existingNode = grid.engine.nodes.find(n => n.id === item.id);
+        
+        if (existingNode) {
+          // Update existing widget if position/size changed
+          if (existingNode.x !== item.x || existingNode.y !== item.y ||
+              existingNode.w !== item.w || existingNode.h !== item.h) {
+            grid.update(el, {
+              x: item.x,
+              y: item.y,
+              w: item.w,
+              h: item.h
+            });
+          }
+        } else {
+          // Add new widget
+          try {
+            // Set attributes first
+            el.setAttribute('gs-x', item.x?.toString() || '0');
+            el.setAttribute('gs-y', item.y?.toString() || '0');
+            el.setAttribute('gs-w', item.w?.toString() || '1');
+            el.setAttribute('gs-h', item.h?.toString() || '1');
+            el.setAttribute('gs-id', item.id);
+            
+            // Then make it a widget
+            grid.makeWidget(el);
+          } catch (error) {
+            console.error('Error adding widget:', item.id, error);
+          }
+        }
+      });
+
+    } finally {
+      grid.batchUpdate(false);
     }
-    // This effect should re-run when items change or when crucial grid options are modified.
-  }, [items, options.column, options.maxRow, options.margin, onLayoutChange, onDragStart, onDragStop, onResizeStart, onResizeStop, onAdded, onRemoved])
+  }, [items]);
+
+  // Handle options change
+  useEffect(() => {
+    const grid = gridInstanceRef.current;
+    if (!grid) return;
+
+    if (options.column && grid.getColumn() !== options.column) {
+      grid.column(options.column as number);
+    }
+    if(options.margin && grid.getMargin() !== options.margin) {
+      grid.margin(options.margin);
+    }
+  }, [options.column, options.margin]);
 
   // Expose methods via ref
   useImperativeHandle(ref, () => ({
@@ -198,25 +247,10 @@ useEffect(() => {
     
     autoArrange: () => {
       if (gridInstanceRef.current) {
-        // GridStack doesn't have built-in auto-arrange, but we can implement basic logic
-        const currentItems = gridInstanceRef.current.save(false) as any[]
-        let x = 0, y = 0
-        const cols = gridInstanceRef.current.getColumn()
-
-        currentItems.forEach((item: any, index: number) => {
-          if (x + (item.w || 1) > cols) {
-            x = 0
-            y += item.h || 1
-          }
-
-          if (item.el) {
-            gridInstanceRef.current?.update(item.el as HTMLElement, { x, y })
-          }
-          x += item.w || 1
-        })
+        gridInstanceRef.current.compact()
       }
     }
-  }), [items, options.column, options.margin])
+  }), [onLayoutChange]);
 
   return (
     <div 

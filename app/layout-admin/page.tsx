@@ -99,16 +99,21 @@ function LayoutAdminContent() {
   // Update layout data when existing layout is loaded
   useEffect(() => {
     if (existingLayout) {
+      // Preserve the current orientation from the local state
+      const currentOrientation = layoutData.orientation;
+      const currentGridConfig = layoutData.gridConfig;
+
       setLayoutData({
         name: existingLayout.name || '',
         description: existingLayout.description || '',
-        orientation: existingLayout.orientation || 'landscape',
+        // Use existingLayout.orientation only if it's the initial load (layoutData.name is empty)
+        orientation: layoutData.name ? currentOrientation : existingLayout.orientation || 'landscape',
         layoutType: existingLayout.layoutType || 'spaced',
         widgets: existingLayout.widgets || [],
         statusBar: existingLayout.statusBar || { enabled: true, elements: [] },
         isActive: existingLayout.isActive ?? true,
         isTemplate: existingLayout.isTemplate ?? true,
-        gridConfig: {
+        gridConfig: layoutData.name ? currentGridConfig : {
           cols: existingLayout.gridConfig?.cols || 16,
           rows: existingLayout.gridConfig?.rows || 9,
           margin: existingLayout.gridConfig?.margin || [12, 12],
@@ -119,41 +124,52 @@ function LayoutAdminContent() {
   }, [existingLayout])
 
   // Convert layout widgets to GridStack items
+  // Convert layout widgets to GridStack items
   const gridStackItems: GridStackItem[] = useMemo(() => {
-    if (!existingLayout?.widgets) return []
+    if (!existingLayout?.widgets) {
+      return []
+    }
 
-    return existingLayout.widgets
-      .filter((widget) => {
-        const widgetId = getWidgetId(widget)
-        return widgetId && /^[0-9a-fA-F]{24}$/.test(widgetId)
-      })
-      .map((widget) => {
-        const widgetId = getWidgetId(widget)!
-        let widgetType = 'unknown'
+    const filteredWidgets = existingLayout.widgets.filter((widget) => {
+      const widgetId = getWidgetId(widget)
+      return widgetId && /^[0-9a-fA-F]{24}$/.test(widgetId)
+    })
 
-        if (typeof widget.widget_id === 'object' && widget.widget_id) {
-          widgetType = (widget.widget_id as any).type || 'unknown'
-        }
+    // Simplified position validation - trust GridStack to handle collisions
+    const items = filteredWidgets.map((widget, index) => {
+      const widgetId = getWidgetId(widget)!
+      let widgetType = 'unknown'
 
-        return {
-          id: widgetId,
-          x: widget.x || 0,
-          y: widget.y || 0,
-          w: widget.w || 2,
-          h: widget.h || 2,
-          widgetType,
-          content: (
-            <GridStackEditableWidget
-              id={widgetId}
-              type={getWidgetType(widgetType)}
-              layout={layoutData.layoutType}
-              onDelete={() => handleDeleteWidget(widgetId)}
-            />
-          )
-        }
-      })
-  }, [existingLayout?.widgets, layoutData.layoutType])
+      if (typeof widget.widget_id === 'object' && widget.widget_id) {
+        widgetType = (widget.widget_id as any).type || 'unknown'
+      }
 
+      // Basic validation only - let GridStack handle positioning
+      const w = Math.max(1, Math.min(layoutData.gridConfig.cols, Math.floor(widget.w || 2)))
+      const h = Math.max(1, Math.floor(widget.h || 2))
+      const x = Math.max(0, Math.min(layoutData.gridConfig.cols - w, Math.floor(widget.x || 0)))
+      const y = Math.max(0, Math.floor(widget.y || 0))
+
+      return {
+        id: widgetId,
+        x: x,
+        y: y,
+        w: w,
+        h: h,
+        widgetType,
+        content: (
+          <GridStackEditableWidget
+            id={widgetId}
+            type={getWidgetType(widgetType)}
+            layout={layoutData.layoutType}
+            onDelete={() => handleDeleteWidget(widgetId)}
+          />
+        )
+      }
+    })
+    
+    return items
+  }, [existingLayout?.widgets, layoutData.layoutType, layoutData.gridConfig.cols])
   // Handle layout selection
   const handleLayoutSelect = (layoutId: string) => {
     if (layoutId === 'new') {
@@ -285,7 +301,9 @@ function LayoutAdminContent() {
 
   // Handle layout changes from GridStack
   const handleLayoutChange = useCallback(async (items: GridStackItem[]) => {
-    if (!savedLayoutId || !existingLayout?.widgets) return
+    if (!savedLayoutId || !existingLayout?.widgets) {
+      return
+    }
 
     try {
       const updatedWidgets = items.map(item => ({
@@ -335,7 +353,7 @@ function LayoutAdminContent() {
 
   // GridStack options
   const gridStackOptions = useMemo(() => ({
-    float: true,
+    float: false, // Disable float to prevent collision detection infinite loops
     cellHeight: 'auto',
     margin: layoutData.gridConfig.margin[0],
     column: layoutData.gridConfig.cols,
@@ -350,7 +368,7 @@ function LayoutAdminContent() {
     },
     acceptWidgets: true,
     removable: false,
-    animate: true,
+    animate: false, // Disable animations to prevent layout thrashing
     rtl: false,
   }), [layoutData.gridConfig])
 
@@ -516,18 +534,6 @@ function LayoutAdminContent() {
                   items={gridStackItems}
                   options={gridStackOptions}
                   onLayoutChange={handleLayoutChange}
-                  onDragStart={(event, element) => {
-                    console.log('🎯 [DRAG] Started for widget:', element.getAttribute('gs-id'))
-                  }}
-                  onDragStop={(event, element) => {
-                    console.log('🎯 [DRAG] Stopped for widget:', element.getAttribute('gs-id'))
-                  }}
-                  onResizeStart={(event, element) => {
-                    console.log('📏 [RESIZE] Started for widget:', element.getAttribute('gs-id'))
-                  }}
-                  onResizeStop={(event, element) => {
-                    console.log('📏 [RESIZE] Stopped for widget:', element.getAttribute('gs-id'))
-                  }}
                   className="h-full w-full"
                 />
               )}
@@ -543,9 +549,11 @@ function LayoutAdminContent() {
 export default function LayoutAdmin() {
   return (
     <Suspense fallback={
-      <Frame loggedIn={true} title="Layout Designer" isLoading={true}>
-        <div />
-      </Frame>
+     <Frame loggedIn={true} title="Layout Designer">
+       <div className='flex items-center justify-center h-64'>
+         <div className='text-center'>Loading...</div>
+       </div>
+     </Frame>
     }>
       <LayoutAdminContent />
     </Suspense>
