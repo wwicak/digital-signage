@@ -63,7 +63,7 @@ const EditableWidget: React.FC<IEditableWidgetProps> = memo(({
       <div className='group relative bg-white border border-gray-200 rounded-lg hover:shadow-md transition-shadow w-full h-full overflow-hidden'>
         {/* Drag handle area - top portion of widget excluding controls */}
         <div
-          className='absolute top-0 left-0 right-0 h-8 cursor-grab active:cursor-grabbing z-10'
+          className='absolute top-0 left-0 right-0 h-full cursor-grab active:cursor-grabbing z-20'
           style={{
             background: 'transparent',
             touchAction: 'none'
@@ -71,7 +71,7 @@ const EditableWidget: React.FC<IEditableWidgetProps> = memo(({
         />
 
         {/* Controls - positioned to not interfere with drag handle */}
-        <div className='absolute top-2 right-2 flex space-x-1 controls z-30 opacity-0 group-hover:opacity-100 transition-opacity duration-200'>
+        <div className='absolute top-2 right-2 flex space-x-1 controls z-10 group-hover:z-30 opacity-0 group-hover:opacity-100 transition-all duration-200'>
           <button
             className='p-2 rounded hover:bg-gray-100 transition-colors bg-white/90 backdrop-blur-sm shadow-sm'
             onClick={openDialog}
@@ -113,7 +113,7 @@ const EditableWidget: React.FC<IEditableWidgetProps> = memo(({
         </div>
 
         {/* Widget content - draggable but controls are excluded */}
-        <div className='flex flex-col items-center justify-center h-full min-h-24 p-4 pt-8'>
+        <div className='relative flex flex-col items-center justify-center h-full min-h-24 p-4 pt-8 z-20'>
           <div className='mb-2'>
             <WidgetIcon className='w-8 h-8 text-primary' />
           </div>
