@@ -62,7 +62,7 @@ const EditableWidget: React.FC<IEditableWidgetProps> = memo(({
     <>
       {/* The 'drag-handle' class is added here. The entire card is now the handle. */}
       {/* The z-index and cursor styles are removed from the now-deleted overlay div. */}
-      <div className='group relative bg-white border border-gray-200 rounded-lg hover:shadow-md transition-shadow w-full h-full overflow-hidden drag-handle'>
+      <div className='group relative bg-white border border-gray-200 rounded-lg hover:shadow-md transition-shadow w-full h-full drag-handle'>
 
         {/* Controls - positioned to not interfere with drag handle */}
         {/* The 'no-drag' class will be used by react-grid-layout to prevent dragging when clicking these buttons */}
