@@ -58,7 +58,8 @@ export default function WidthProvider<P extends object>(
 
     const { rows, margin } = gridConfig || { rows: 9, margin: [12, 12] };
     // Corrected rowHeight calculation
-    const calculatedRowHeight = Math.max(10, (height - (margin[1] * (rows + 1))) / rows);
+    const calculatedRowHeight = Math.max(10, (height - (margin[1] * (rows - 1))) / rows);
+    
 
     return (
       // This div now correctly fills its parent and is measured by the ResizeObserver
