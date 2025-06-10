@@ -199,16 +199,80 @@ function LayoutAdminContent() {
       alert('Please save the layout first before adding widgets.')
       return
     }
+    
+    if (!existingLayout) {
+        alert('Could not read existing layout to determine widget position.');
+        return;
+    }
+
+    const newWidgetSize = { w: 2, h: 2 };
+    const { cols, rows } = layoutData.gridConfig;
+    const widgets = existingLayout.widgets || [];
+    const grid = Array(rows).fill(null).map(() => Array(cols).fill(false));
+
+    widgets.forEach(widget => {
+        const w = widget.w || 0;
+        const h = widget.h || 0;
+        const x = widget.x || 0;
+        const y = widget.y || 0;
+        for (let i = y; i < y + h && i < rows; i++) {
+            for (let j = x; j < x + w && j < cols; j++) {
+                grid[i][j] = true;
+            }
+        }
+    });
+
+    let position: {x: number, y: number} | null = null;
+
+    for (let y = 0; y <= rows - newWidgetSize.h; y++) {
+        for (let x = 0; x <= cols - newWidgetSize.w; x++) {
+            let canPlace = true;
+            for (let i = 0; i < newWidgetSize.h; i++) {
+                for (let j = 0; j < newWidgetSize.w; j++) {
+                    if (grid[y + i][x + j]) {
+                        canPlace = false;
+                        break;
+                    }
+                }
+                if (!canPlace) break;
+            }
+            if (canPlace) {
+                position = { x, y };
+                break;
+            }
+        }
+        if (position) break;
+    }
+
+    if (!position) {
+        // Fallback: find the first empty cell for a 1x1 widget as a last resort
+        let fallbackPosition: {x: number, y: number} | null = null;
+        for (let y = 0; y < rows; y++) {
+            for (let x = 0; x < cols; x++) {
+                if (!grid[y][x]) {
+                    fallbackPosition = { x, y };
+                    break;
+                }
+            }
+            if (fallbackPosition) break;
+        }
+
+        if (fallbackPosition) {
+            position = fallbackPosition;
+        } else {
+            alert('No available space for a new widget. Please make some room.');
+            return;
+        }
+    }
 
     try {
-      // Add widget directly to layout with default position
       await addWidgetToLayout(savedLayoutId, {
         type: widgetType,
         name: `${widgetType.charAt(0).toUpperCase() + widgetType.slice(1)} Widget`,
-        x: 0,
-        y: 0,
-        w: 2,
-        h: 2,
+        x: position.x,
+        y: position.y,
+        w: newWidgetSize.w,
+        h: newWidgetSize.h,
         data: {},
       })
       
@@ -217,7 +281,7 @@ function LayoutAdminContent() {
       console.error('Failed to add widget:', error)
       alert('Failed to add widget. Please try again.')
     }
-  }, [savedLayoutId, refetchLayout])
+  }, [savedLayoutId, refetchLayout, existingLayout, layoutData.gridConfig])
 
   // Handle layout changes from GridStack
   const handleLayoutChange = useCallback(async (items: GridStackItem[]) => {
