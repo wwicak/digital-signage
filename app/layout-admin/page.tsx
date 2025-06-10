@@ -4,7 +4,7 @@ import React, { useState, useCallback, useRef, useEffect, useMemo, Suspense } fr
 import { useRouter, useSearchParams } from 'next/navigation'
 import { Grid3X3, Plus, Save, Trash2, RotateCcw, ArrowLeft } from 'lucide-react'
 
-import LayoutFrame from '../../components/Admin/LayoutFrame'
+import Frame from '../../components/Admin/Frame'
 import GridStackWrapper, { GridStackItem, GridStackWrapperRef } from '../../components/GridStack/GridStackWrapper'
 import GridStackEditableWidget from '../../components/GridStack/GridStackEditableWidget'
 import StatusBarElement from '../../components/Admin/StatusBarElement'
@@ -356,16 +356,16 @@ function LayoutAdminContent() {
 
   if (layoutsLoading) {
     return (
-      <LayoutFrame loggedIn={true} title="Layout Designer">
+      <Frame loggedIn={true} title="Layout Designer">
         <div className='flex items-center justify-center h-64'>
           <div className='text-center'>Loading layouts...</div>
         </div>
-      </LayoutFrame>
+      </Frame>
     )
   }
 
   return (
-    <LayoutFrame loggedIn={true} title="Layout Designer">
+    <Frame loggedIn={true} title="Layout Designer">
       <div className='p-6'>
         <Card>
         <CardHeader>
@@ -536,18 +536,16 @@ function LayoutAdminContent() {
         </CardContent>
       </Card>
       </div>
-    </LayoutFrame>
+    </Frame>
   )
 }
 
 export default function LayoutAdmin() {
   return (
     <Suspense fallback={
-      <LayoutFrame loggedIn={true} title="Layout Designer">
-        <div className='flex items-center justify-center h-64'>
-          <div className='text-center'>Loading...</div>
-        </div>
-      </LayoutFrame>
+      <Frame loggedIn={true} title="Layout Designer" isLoading={true}>
+        <div />
+      </Frame>
     }>
       <LayoutAdminContent />
     </Suspense>

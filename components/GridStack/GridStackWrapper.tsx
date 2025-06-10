@@ -92,99 +92,54 @@ const GridStackWrapper = forwardRef<GridStackWrapperRef, GridStackWrapperProps>(
   }, [items])
 
   // Initialize GridStack
-  useEffect(() => {
+useEffect(() => {
     if (!gridRef.current) return
 
-    // Initialize GridStack instance
-    gridInstanceRef.current = GridStack.init(defaultOptions, gridRef.current)
+    // If an instance already exists, destroy it before creating a new one
+    if (gridInstanceRef.current) {
+      gridInstanceRef.current.destroy(false) // `false` to preserve DOM nodes for React
+    }
+
+    const finalOptions = {
+        ...defaultOptions,
+        ...options
+    };
+
+    // Initialize GridStack instance. It will automatically discover and initialize grid items.
+    gridInstanceRef.current = GridStack.init(finalOptions, gridRef.current)
     const grid = gridInstanceRef.current
 
-    // Set up event listeners
-    if (onDragStart) {
-      grid.on('dragstart', onDragStart)
-    }
-    
-    if (onDragStop) {
-      grid.on('dragstop', onDragStop)
-    }
-    
-    if (onResizeStart) {
-      grid.on('resizestart', onResizeStart)
-    }
-    
-    if (onResizeStop) {
-      grid.on('resizestop', onResizeStop)
-    }
-    
-    if (onAdded) {
-      grid.on('added', onAdded)
-    }
-    
-    if (onRemoved) {
-      grid.on('removed', onRemoved)
-    }
+    // --- EVENT LISTENERS ---
+    if (onDragStart) grid.on('dragstart', onDragStart)
+    if (onDragStop) grid.on('dragstop', onDragStop)
+    if (onResizeStart) grid.on('resizestart', onResizeStart)
+    if (onResizeStop) grid.on('resizestop', onResizeStop)
+    if (onAdded) grid.on('added', onAdded)
+    if (onRemoved) grid.on('removed', onRemoved)
 
     // Layout change handler
     if (onLayoutChange) {
       const handleChange = () => {
+        if (!grid) return;
         const currentItems = grid.save(false) as GridStackItem[]
         onLayoutChange(currentItems)
       }
-      
       grid.on('change', handleChange)
-      grid.on('dragstop', handleChange)
-      grid.on('resizestop', handleChange)
     }
 
     // Cleanup function
     return () => {
       if (gridInstanceRef.current) {
-        gridInstanceRef.current.destroy(false)
+        try {
+          gridInstanceRef.current.destroy(false)
+        } catch (e) {
+          // Can throw error if grid is already destroyed
+        }
         gridInstanceRef.current = null
       }
     }
-  }, []) // Only run once on mount
-
-  // Update grid when items change
-  useEffect(() => {
-    if (!gridInstanceRef.current) return
-
-    const grid = gridInstanceRef.current
-
-    // Batch update for performance
-    grid.batchUpdate()
-
-    // Remove all existing widgets
-    grid.removeAll(false)
-
-    // Add current items
-    items.forEach(item => {
-      const element = itemRefs.current[item.id]?.current
-      if (element) {
-        grid.makeWidget(element)
-      }
-    })
-
-    grid.batchUpdate(false)
-  }, [items])
-
-  // Update grid options when they change
-  useEffect(() => {
-    if (!gridInstanceRef.current) return
-
-    const grid = gridInstanceRef.current
-
-    // Update grid configuration
-    if (options.column !== undefined && typeof options.column === 'number') {
-      grid.column(options.column)
-    }
-    if (options.margin !== undefined && typeof options.margin === 'number') {
-      grid.margin(options.margin)
-    }
-
-    // Force a layout update
-    grid.compact()
-  }, [options.column, options.maxRow, options.margin])
+    // This effect should re-run when items change or when crucial grid options are modified.
+  }, [items, options.column, options.maxRow, options.margin, onLayoutChange, onDragStart, onDragStop, onResizeStart, onResizeStop, onAdded, onRemoved])
 
   // Expose methods via ref
   useImperativeHandle(ref, () => ({
@@ -261,7 +216,7 @@ const GridStackWrapper = forwardRef<GridStackWrapperRef, GridStackWrapperProps>(
         })
       }
     }
-  }), [])
+  }), [items, options.column, options.margin])
 
   return (
     <div 
