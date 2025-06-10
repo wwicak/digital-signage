@@ -989,12 +989,14 @@ const LayoutAdminContent = memo(function LayoutAdminContent() {
                 draggableHandle=".drag-handle"
                 resizeHandles={['se', 'sw', 'ne', 'nw', 's', 'n', 'e', 'w']}
                 margin={layoutData.gridConfig.margin}
-                rowHeight={layoutData.gridConfig.rowHeight}
+                // Pass gridConfig to the HOC for dynamic rowHeight calculation
+                gridConfig={layoutData.gridConfig}
                 isBounded={true}
                 useCSSTransforms={true}
                 transformScale={1}
                 preventCollision={true}
-                //compactType={null}
+                // FIX: Allow free vertical movement
+                verticalCompact={false}
                 maxRows={layoutData.gridConfig.rows}
                 className="react-grid-layout"
                 style={{
@@ -1006,9 +1008,6 @@ const LayoutAdminContent = memo(function LayoutAdminContent() {
                 }}
                 isDraggable={true}
                 isResizable={true}
-                autoSize={false}
-                //verticalCompact={false}
-                //allowOverlap={false}
                 containerPadding={[0, 0]}
               >
                 {existingLayout?.widgets?.filter((widget) => {

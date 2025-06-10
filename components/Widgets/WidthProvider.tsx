@@ -4,25 +4,26 @@ interface WidthProviderProps {
   measureBeforeMount?: boolean;
   className?: string;
   style?: CSSProperties;
-  cols: number; // Assuming cols is a required prop for ComposedComponent's calculation
-  // Add any other props passed to the ComposedComponent that are specific to this HOC's usage
-  [key: string]: any; // For other props passed down
-}
-
-interface WidthProviderState {
-  width: number;
+  // Add gridConfig to props for rowHeight calculation
+  gridConfig: {
+    rows: number;
+    margin: [number, number];
+  };
+  // Other props for ComposedComponent
+  [key: string]: any;
 }
 
 /*
- * A modern HOC that provides facility for listening to container resizes with improved performance.
- * Uses ResizeObserver when available, falls back to window resize events.
+ * A modern HOC that provides container dimensions for its children.
+ * It measures both width and height and calculates a dynamic rowHeight for react-grid-layout.
  */
 export default function WidthProvider<P extends object>(
   ComposedComponent: ComponentType<P & { width: number; rowHeight: number }>,
 ) {
   return function WidthProviderComponent(props: P & WidthProviderProps) {
-    const { measureBeforeMount = false, cols, className, style, ...rest } = props;
+    const { measureBeforeMount = false, className, style, gridConfig, ...rest } = props;
     const [width, setWidth] = useState(1280);
+    const [height, setHeight] = useState(720); // Default height
     const [mounted, setMounted] = useState(false);
     const containerRef = useRef<HTMLDivElement>(null);
 
@@ -30,69 +31,66 @@ export default function WidthProvider<P extends object>(
     const debouncedResize = useCallback(
       (() => {
         let timeoutId: NodeJS.Timeout;
-        return (newWidth: number) => {
+        return (newWidth: number, newHeight: number) => {
           clearTimeout(timeoutId);
           timeoutId = setTimeout(() => {
             setWidth(newWidth);
+            setHeight(newHeight);
           }, 16); // ~60fps
         };
       })(),
       []
     );
 
-    const updateWidth = useCallback(() => {
+    const updateSize = useCallback(() => {
       if (containerRef.current) {
         const newWidth = containerRef.current.offsetWidth;
-        if (newWidth !== width) {
-          debouncedResize(newWidth);
+        const newHeight = containerRef.current.offsetHeight;
+        if (newWidth > 0 && newHeight > 0 && (newWidth !== width || newHeight !== height)) {
+          debouncedResize(newWidth, newHeight);
         }
       }
-    }, [width, debouncedResize]);
+    }, [width, height, debouncedResize]);
 
     useEffect(() => {
       setMounted(true);
 
-      // Use ResizeObserver if available for better performance
-      if (typeof ResizeObserver !== 'undefined' && containerRef.current) {
-        const resizeObserver = new ResizeObserver((entries) => {
-          for (const entry of entries) {
-            const newWidth = entry.contentRect.width;
-            if (newWidth !== width) {
-              debouncedResize(newWidth);
-            }
+      const element = containerRef.current;
+      if (!element) return;
+
+      // Use ResizeObserver for efficient dimension tracking
+      const resizeObserver = new ResizeObserver((entries) => {
+        for (const entry of entries) {
+          const newWidth = entry.contentRect.width;
+          const newHeight = entry.contentRect.height;
+          if (newWidth > 0 && newHeight > 0 && (newWidth !== width || newHeight !== height)) {
+            debouncedResize(newWidth, newHeight);
           }
-        });
+        }
+      });
 
-        resizeObserver.observe(containerRef.current);
-        updateWidth(); // Initial measurement
+      resizeObserver.observe(element);
+      updateSize(); // Initial measurement
 
-        return () => {
-          resizeObserver.disconnect();
-        };
-      } else {
-        // Fallback to window resize events
-        window.addEventListener("resize", updateWidth);
-        updateWidth(); // Initial measurement
-
-        return () => {
-          window.removeEventListener("resize", updateWidth);
-        };
-      }
-    }, [updateWidth, width, debouncedResize]);
+      return () => {
+        resizeObserver.disconnect();
+      };
+    }, [updateSize, width, height, debouncedResize]);
 
     if (measureBeforeMount && !mounted) {
       return <div ref={containerRef} className={className} style={style} />;
     }
 
-    // Ensure cols is a positive number to avoid division by zero or negative rowHeight
-    const validCols = cols > 0 ? cols : 1;
+    // Calculate rowHeight dynamically based on container height and grid configuration
+    const { rows, margin } = gridConfig || { rows: 9, margin: [12, 12] };
+    const calculatedRowHeight = Math.max(10, (height - (rows - 1) * margin[1]) / rows);
 
     return (
       <div ref={containerRef} className={className} style={style}>
         <ComposedComponent
           {...(rest as P)}
           width={width}
-          rowHeight={rest.rowHeight || Math.max(width / validCols - 10, 60)} // Use provided rowHeight or calculate
+          rowHeight={calculatedRowHeight}
         />
       </div>
     );
