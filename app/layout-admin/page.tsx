@@ -172,6 +172,7 @@ function LayoutAdminContent() {
       })
     } else {
       setSelectedLayoutId(layoutId)
+      setSavedLayoutId(layoutId) // This was missing!
       router.replace(`/layout-admin?id=${layoutId}`, { scroll: false })
     }
   }
@@ -286,7 +287,7 @@ function LayoutAdminContent() {
 
   if (layoutsLoading) {
     return (
-      <Frame>
+      <Frame loggedIn={true}>
         <div className='flex items-center justify-center h-64'>
           <div className='text-center'>Loading layouts...</div>
         </div>
@@ -295,7 +296,7 @@ function LayoutAdminContent() {
   }
 
   return (
-    <Frame>
+    <Frame loggedIn={true}>
       <Card>
         <CardHeader>
           <div className='flex items-center justify-between'>
@@ -437,7 +438,7 @@ function LayoutAdminContent() {
 export default function LayoutAdmin() {
   return (
     <Suspense fallback={
-      <Frame>
+      <Frame loggedIn={true}>
         <div className='flex items-center justify-center h-64'>
           <div className='text-center'>Loading...</div>
         </div>
