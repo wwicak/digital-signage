@@ -795,6 +795,7 @@ const LayoutPage: React.FC<ILayoutPageProps> = ({ loggedIn, displayId }) => {
               onResize={handleResize}
               onResizeStop={handleResizeStop}
               draggableCancel=".controls"
+              draggableHandle=""
               resizeHandles={['se']}
               margin={[10, 10]}
               rowHeight={60}
@@ -820,22 +821,13 @@ const LayoutPage: React.FC<ILayoutPageProps> = ({ loggedIn, displayId }) => {
                   key={widget._id}
                   className={`w-full h-full ${
                     draggedWidgetId === widget._id
-                      ? 'z-10 ring-2 ring-primary/50 scale-105'
+                      ? 'z-10 ring-2 ring-primary/50'
                       : isDragging
                         ? 'opacity-90'
                         : ''
-                  } ${isDragging && draggedWidgetId === widget._id ? 'cursor-grabbing' : 'cursor-grab'}`}
-                  onMouseDown={(e) => {
-                    console.log('[DEBUG] Widget container mouseDown:', widget._id, e.target);
-                  }}
-                  onMouseMove={(e) => {
-                    if (isDragging && draggedWidgetId === widget._id) {
-                      console.log('[DEBUG] Widget container mouseMove during drag:', widget._id);
-                    }
-                  }}
+                  }`}
                   style={{
-                    touchAction: 'none',
-                    userSelect: 'none'
+                    touchAction: 'none'
                   }}
                 >
                   <EditableWidget
