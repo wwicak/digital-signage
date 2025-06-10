@@ -60,3 +60,4 @@ bun.lockb
 .eslintrc.old
 tsconfig.tsbuildinfo
 docs
+repomix-output.xml

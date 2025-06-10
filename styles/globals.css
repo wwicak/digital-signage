@@ -1,3 +1,6 @@
+@import "react-grid-layout/css/styles.css";
+@import "react-resizable/css/styles.css";
+
 @import "tailwindcss";
 @import "tw-animate-css";
 @import "./themes.css";
@@ -181,230 +184,32 @@
 }
 
 @utility container-wrapper {
-  @apply 3xl:fixed:max-w-[calc(var(--breakpoint-2xl)+2rem)] mx-auto w-full px-2;
-}
-
-/* React Grid Layout - Critical CSS for drag and drop functionality */
-.react-grid-layout {
-  position: relative !important;
-  background: transparent;
-}
-
-.react-grid-item {
-  position: absolute !important;
-  box-sizing: border-box !important;
-  border: 2px solid transparent;
-  border-radius: 8px;
-  background-clip: padding-box;
-  touch-action: none !important;
-}
-
-.react-grid-item:hover {
-  border-color: rgba(59, 130, 246, 0.5);
-  box-shadow: 0 0 0 1px rgba(59, 130, 246, 0.2);
-}
-
-.react-grid-item.cssTransforms {
-  transition-property: transform !important;
-  transition-duration: 200ms !important;
-}
-
-.react-grid-item.resizing {
-  z-index: 999 !important;
-  will-change: width, height, transform;
-  transition: none !important;
-  border-color: rgba(16, 185, 129, 0.8) !important;
-  box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.3) !important;
-}
-
-.react-grid-item.react-draggable-dragging {
-  transition: none !important;
-  z-index: 1000 !important;
-  border-color: rgba(239, 68, 68, 0.8) !important;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
-  transform: scale(1.02) !important;
-}
-
-.react-grid-item.react-draggable-dragging .controls {
-  pointer-events: none !important;
-}
-
-.react-grid-item.react-grid-placeholder {
-  background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(59, 130, 246, 0.05)) !important;
-  border: 2px dashed rgba(59, 130, 246, 0.4) !important;
-  border-radius: 8px !important;
-  opacity: 0.8 !important;
-  z-index: 2 !important;
-  user-select: none !important;
-}
-
-/* Resize handles - Enhanced visibility and styling */
-.react-grid-item > .react-resizable-handle {
-  position: absolute !important;
-  pointer-events: auto !important;
-  touch-action: none !important;
-  z-index: 25 !important;
-  opacity: 0;
-  transition: opacity 200ms ease;
-  background: rgba(59, 130, 246, 0.9);
-  border: 2px solid rgba(255, 255, 255, 0.9);
-  border-radius: 2px;
-}
-
-.react-grid-item:hover > .react-resizable-handle,
-.react-grid-item.resizing > .react-resizable-handle {
-  opacity: 1 !important;
-}
-
-/* Hide resize handles during drag to avoid conflicts */
-.react-grid-item.react-draggable-dragging > .react-resizable-handle {
-  opacity: 0 !important;
-  pointer-events: none !important;
-}
-
-/* Ensure drag handle works properly */
-.react-grid-drag-handle {
-  cursor: grab !important;
-}
-
-.react-grid-drag-handle:active {
-  cursor: grabbing !important;
-}
-
-/* Fix pointer events for drag functionality */
-.react-grid-item .react-grid-drag-handle {
-  pointer-events: auto !important;
-}
-
-/* Specific resize handle positions and styles */
-.react-grid-item > .react-resizable-handle.react-resizable-handle-se {
-  bottom: 0;
-  right: 0;
-  width: 20px;
-  height: 20px;
-  border-radius: 0 0 8px 0;
-}
-
-.react-grid-item > .react-resizable-handle.react-resizable-handle-sw {
-  bottom: 0;
-  left: 0;
-  width: 20px;
-  height: 20px;
-  border-radius: 0 0 0 8px;
-}
-
-.react-grid-item > .react-resizable-handle.react-resizable-handle-ne {
-  top: 0;
-  right: 0;
-  width: 20px;
-  height: 20px;
-  border-radius: 0 8px 0 0;
-}
-
-.react-grid-item > .react-resizable-handle.react-resizable-handle-nw {
-  top: 0;
-  left: 0;
-  width: 20px;
-  height: 20px;
-  border-radius: 8px 0 0 0;
-}
-
-.react-grid-item > .react-resizable-handle.react-resizable-handle-s {
-  bottom: 0;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 40px;
-  height: 8px;
-  border-radius: 0 0 4px 4px;
-}
-
-.react-grid-item > .react-resizable-handle.react-resizable-handle-n {
-  top: 0;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 40px;
-  height: 8px;
-  border-radius: 4px 4px 0 0;
-}
-
-.react-grid-item > .react-resizable-handle.react-resizable-handle-e {
-  right: 0;
-  top: 50%;
-  transform: translateY(-50%);
-  width: 8px;
-  height: 40px;
-  border-radius: 0 4px 4px 0;
-}
-
-.react-grid-item > .react-resizable-handle.react-resizable-handle-w {
-  left: 0;
-  top: 50%;
-  transform: translateY(-50%);
-  width: 8px;
-  height: 40px;
-  border-radius: 4px 0 0 4px;
-}
-
-/* Southeast handle (bottom-right) - Primary resize handle */
-.react-grid-item > .react-resizable-handle.react-resizable-handle-se {
-  width: 20px !important;
-  height: 20px !important;
-  bottom: 0 !important;
-  right: 0 !important;
-  cursor: se-resize !important;
-  background: rgba(59, 130, 246, 0.9) !important;
-  border: 2px solid rgba(255, 255, 255, 0.9) !important;
-  border-radius: 0 0 8px 0 !important;
-}
-
-.react-grid-item > .react-resizable-handle.react-resizable-handle-se::after {
-  content: "" !important;
-  position: absolute !important;
-  right: 4px !important;
-  bottom: 4px !important;
-  width: 6px !important;
-  height: 6px !important;
-  border-right: 2px solid white !important;
-  border-bottom: 2px solid white !important;
-  border-radius: 0 0 1px 0 !important;
-}
-
-/* Visual feedback for drag and resize operations */
-.react-grid-item.dragging-active {
-  transform: scale(1.02) !important;
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15) !important;
-  border-color: rgba(239, 68, 68, 0.8) !important;
-  z-index: 1000 !important;
-}
-
-.react-grid-item.resizing-active {
-  border-color: rgba(16, 185, 129, 0.8) !important;
-  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.2) !important;
-  z-index: 999 !important;
-}
-
-/* Widget controls - ensure they don't interfere with drag/resize */
-.react-grid-item .controls {
-  pointer-events: auto !important;
-  position: absolute !important;
-  z-index: 30 !important;
-}
-
-.react-grid-item .controls button {
-  pointer-events: auto !important;
-  z-index: 31 !important;
-  position: relative;
-}
-
-/* Disable controls during drag operations */
-.react-grid-item.react-draggable-dragging .controls {
-  pointer-events: none !important;
-  opacity: 0.5 !important;
-}
-
-/* Ensure proper touch action for drag functionality */
-.react-grid-item > div:first-child {
-  touch-action: none !important;
+  /* Minimal react-grid-layout overrides - let the official CSS handle most styling */
+  .react-grid-item {
+    border: 2px solid transparent;
+    border-radius: 8px;
+    transition: border-color 0.2s ease;
+  }
+  
+  .react-grid-item:hover {
+    border-color: rgba(59, 130, 246, 0.5);
+  }
+  
+  .react-grid-item.react-draggable-dragging {
+    border-color: rgba(239, 68, 68, 0.8) !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
+  }
+  
+  .react-grid-item.resizing {
+    border-color: rgba(16, 185, 129, 0.8) !important;
+  }
+  
+  /* Ensure controls don't interfere with drag/resize */
+  .react-grid-item .controls {
+    pointer-events: auto !important;
+    position: absolute !important;
+    z-index: 30 !important;
+  }
   width: 100% !important;
   height: 100% !important;
 }
