@@ -29,7 +29,7 @@ const LoginContent = memo(function LoginContent() {
         if (displayId) {
           router.push(`/display/${displayId}`)
         } else {
-          router.push('/layout')
+          router.push('/layouts')
         }
       }
     } catch (error) {

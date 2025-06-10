@@ -208,7 +208,7 @@ const ScreenCard: React.FC<IScreenCardProps> = ({
 
   const handleCardClick = () => {
     // Navigate to layout page when clicking the card
-    router.push(`/layout?display=${value?._id || ""}`);
+    router.push(`/layouts?display=${value?._id || ""}`);
   };
 
   return (
@@ -304,7 +304,7 @@ const ScreenCard: React.FC<IScreenCardProps> = ({
                 onClick={(e) => {
                   e.preventDefault();
                   e.stopPropagation();
-                  router.push(`/layout?display=${value?._id || ""}`);
+                  router.push(`/layouts?display=${value?._id || ""}`);
                 }}
                 aria-label='Edit Layout'
               >

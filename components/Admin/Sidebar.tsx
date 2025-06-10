@@ -66,7 +66,7 @@ const Sidebar: React.FC<ISidebarProps> = ({ loggedIn, displayId, collapsed = fal
 
   const navigateToAdmin = (id: string): void => {
     // This method is called by DropdownButton with the key of the selected choice (which is display._id)
-    router.push(`/layout?display=${id}`);
+    router.push(`/layouts?display=${id}`);
     context.setId(id); // Update the context
   };
 
