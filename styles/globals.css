@@ -220,7 +220,7 @@
   .react-resizable-handle {
     position: absolute !important;
     z-index: 50 !important;
-    opacity: 0 !important;
+    opacity: 0;
     transition: opacity 0.2s ease !important;
   }
   
