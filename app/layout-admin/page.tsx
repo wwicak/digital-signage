@@ -91,29 +91,51 @@ const BrokenWidget = memo(function BrokenWidget({
 })
 
 // Memoized widget component to prevent unnecessary re-renders
-const LayoutWidget = memo(function LayoutWidget({
-  widgetId,
-  widgetType,
-  layoutType,
-  isDeleting,
-  onDelete
-}: {
+// Memoized widget component to prevent unnecessary re-renders
+const LayoutWidget = memo(React.forwardRef<HTMLDivElement, {
   widgetId: string
   widgetType: string
   layoutType: 'spaced' | 'compact'
   isDeleting: boolean
   onDelete: (id: string) => void
-}) {
+  // Accept all react-grid-layout props
+  style?: React.CSSProperties
+  className?: string
+  [key: string]: any
+}>(function LayoutWidget({
+  widgetId,
+  widgetType,
+  layoutType,
+  isDeleting,
+  onDelete,
+  style,
+  className,
+  ...gridProps
+}, ref) {
   const handleDelete = useCallback(() => onDelete(widgetId), [onDelete, widgetId])
 
   // If widget type is unknown or invalid, show broken widget component
   if (!widgetType || widgetType === 'unknown') {
-    return <BrokenWidget widgetId={widgetId} onDelete={handleDelete} />
+    return (
+      <div
+        ref={ref}
+        style={style}
+        className={className}
+        {...gridProps}
+      >
+        <BrokenWidget widgetId={widgetId} onDelete={handleDelete} />
+      </div>
+    )
   }
 
   try {
     return (
-      <div className={`w-full h-full ${isDeleting ? 'opacity-50 pointer-events-none' : ''}`}>
+      <div
+        ref={ref}
+        style={style}
+        className={`${className || ''} ${isDeleting ? 'opacity-50 pointer-events-none' : ''}`}
+        {...gridProps}
+      >
         <EditableWidget
           id={widgetId}
           type={getWidgetType(widgetType)}
@@ -124,10 +146,18 @@ const LayoutWidget = memo(function LayoutWidget({
     )
   } catch (error) {
     console.error('Error rendering widget:', error)
-    return <BrokenWidget widgetId={widgetId} onDelete={handleDelete} />
+    return (
+      <div
+        ref={ref}
+        style={style}
+        className={className}
+        {...gridProps}
+      >
+        <BrokenWidget widgetId={widgetId} onDelete={handleDelete} />
+      </div>
+    )
   }
-})
-
+}))
 const LayoutAdminContent = memo(function LayoutAdminContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
@@ -424,15 +454,25 @@ const LayoutAdminContent = memo(function LayoutAdminContent() {
 
   const handleResizeStart = useCallback((layout: RglLayout[], oldItem: RglLayout, newItem: RglLayout) => {
     console.log('📏 [RESIZE] Started for widget:', newItem.i, 'size:', oldItem.w, 'x', oldItem.h)
+    console.log('📏 [RESIZE] Layout config:', {
+      cols: layoutData.gridConfig.cols,
+      rows: layoutData.gridConfig.rows,
+      rowHeight: layoutData.gridConfig.rowHeight,
+      margin: layoutData.gridConfig.margin
+    })
     // Add visual feedback for resize start
     const element = document.querySelector(`[data-grid='${newItem.i}']`)
     if (element) {
       element.classList.add('resizing-active')
+      console.log('📏 [RESIZE] Added resizing class to element')
+    } else {
+      console.warn('📏 [RESIZE] Could not find element for widget:', newItem.i)
     }
-  }, [])
+  }, [layoutData.gridConfig])
 
   const handleResize = useCallback((layout: RglLayout[], oldItem: RglLayout, newItem: RglLayout) => {
     console.log('📏 [RESIZE] Resizing widget:', newItem.i, 'from', oldItem.w, 'x', oldItem.h, 'to', newItem.w, 'x', newItem.h)
+    console.log('📏 [RESIZE] Current layout:', layout.find(item => item.i === newItem.i))
   }, [])
 
   const handleLayoutChange = useCallback((layout: RglLayout[]): void => {
@@ -956,7 +996,14 @@ const LayoutAdminContent = memo(function LayoutAdminContent() {
                 preventCollision={false}
                 compactType={null}
                 maxRows={layoutData.gridConfig.rows}
-                className="react-grid-layout w-full h-full"
+                className="react-grid-layout"
+                style={{
+                  width: '100%',
+                  height: '100%',
+                  position: 'absolute',
+                  top: 0,
+                  left: 0
+                }}
                 isDraggable={true}
                 isResizable={true}
                 autoSize={false}

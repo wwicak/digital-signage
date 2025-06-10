@@ -59,49 +59,44 @@ const EditableWidget: React.FC<IEditableWidgetProps> = memo(({
   const WidgetIcon = widgetDefinition?.icon || X; // Default icon if not found
 
   return (
-    <>
-      {/* The 'drag-handle' class is added here. The entire card is now the handle. */}
-      {/* The z-index and cursor styles are removed from the now-deleted overlay div. */}
-      <div className='group relative bg-white border border-gray-200 rounded-lg hover:shadow-md transition-shadow w-full h-full drag-handle'>
-
-        {/* Controls - positioned to not interfere with drag handle */}
-        {/* The 'no-drag' class will be used by react-grid-layout to prevent dragging when clicking these buttons */}
-        <div className='absolute top-2 right-2 flex space-x-1 controls no-drag z-10 group-hover:z-30 opacity-0 group-hover:opacity-100 transition-all duration-200'>
-          <button
-            className='p-2 rounded hover:bg-gray-100 transition-colors bg-white/90 backdrop-blur-sm shadow-sm'
-            onClick={openDialog}
-            aria-label='Edit widget'
-            // REMOVED: onMouseDown, onTouchStart, onDragStart
-          >
-            <Settings className='w-4 h-4 text-gray-500' />
-          </button>
-          <button
-            className='p-2 rounded hover:bg-gray-100 transition-colors bg-white/90 backdrop-blur-sm shadow-sm hover:bg-red-50 hover:text-red-600'
-            onClick={handleDeleteClick}
-            aria-label='Delete widget'
-            // REMOVED: onMouseDown, onTouchStart, onDragStart
-          >
-            <X className='w-4 h-4 text-gray-500' />
-          </button>
-        </div>
-
-        {/* Widget content - no changes needed here */}
-        <div className='relative flex flex-col items-center justify-center h-full min-h-24 p-4 pt-8'>
-          <div className='mb-2'>
-            <WidgetIcon className='w-8 h-8 text-primary' />
-          </div>
-          <span className='text-sm font-medium text-gray-600 text-center'>
-            {widgetName}
-          </span>
-        </div>
-
-        <WidgetEditDialog
-          ref={dialogRef}
-          OptionsComponent={widgetDefinition?.Options as any}
-          widgetId={id}
-          widgetType={type}
-        />
+    <div className='group relative bg-white border border-gray-200 rounded-lg hover:shadow-md transition-shadow w-full h-full drag-handle'>
+      {/* Controls - positioned to not interfere with drag handle */}
+      {/* The 'no-drag' class will be used by react-grid-layout to prevent dragging when clicking these buttons */}
+      <div className='absolute top-2 right-2 flex space-x-1 controls no-drag z-10 group-hover:z-30 opacity-0 group-hover:opacity-100 transition-all duration-200'>
+        <button
+          className='p-2 rounded hover:bg-gray-100 transition-colors bg-white/90 backdrop-blur-sm shadow-sm'
+          onClick={openDialog}
+          aria-label='Edit widget'
+          // REMOVED: onMouseDown, onTouchStart, onDragStart
+        >
+          <Settings className='w-4 h-4 text-gray-500' />
+        </button>
+        <button
+          className='p-2 rounded hover:bg-gray-100 transition-colors bg-white/90 backdrop-blur-sm shadow-sm hover:bg-red-50 hover:text-red-600'
+          onClick={handleDeleteClick}
+          aria-label='Delete widget'
+          // REMOVED: onMouseDown, onTouchStart, onDragStart
+        >
+          <X className='w-4 h-4 text-gray-500' />
+        </button>
       </div>
+
+      {/* Widget content - no changes needed here */}
+      <div className='relative flex flex-col items-center justify-center h-full min-h-24 p-4 pt-8'>
+        <div className='mb-2'>
+          <WidgetIcon className='w-8 h-8 text-primary' />
+        </div>
+        <span className='text-sm font-medium text-gray-600 text-center'>
+          {widgetName}
+        </span>
+      </div>
+
+      <WidgetEditDialog
+        ref={dialogRef}
+        OptionsComponent={widgetDefinition?.Options as any}
+        widgetId={id}
+        widgetType={type}
+      />
 
       {/* Delete Confirmation Modal */}
       <DeleteWidgetModal
@@ -111,7 +106,7 @@ const EditableWidget: React.FC<IEditableWidgetProps> = memo(({
         widgetName={widgetName}
         widgetType={type}
       />
-    </>
+    </div>
   );
 });
 

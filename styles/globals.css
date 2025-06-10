@@ -210,8 +210,103 @@
     position: absolute !important;
     z-index: 30 !important;
   }
-  width: 100% !important;
-  height: 100% !important;
+  
+  /* Fix for react-grid-layout container */
+  .react-grid-layout {
+    position: relative !important;
+  }
+  
+  /* Ensure resize handles are visible and functional */
+  .react-resizable-handle {
+    position: absolute !important;
+    z-index: 50 !important;
+    opacity: 0 !important;
+    transition: opacity 0.2s ease !important;
+  }
+  
+  .react-grid-item:hover .react-resizable-handle {
+    opacity: 1 !important;
+  }
+  
+  .react-resizable-handle-se {
+    bottom: 0 !important;
+    right: 0 !important;
+    width: 20px !important;
+    height: 20px !important;
+    cursor: se-resize !important;
+    background: linear-gradient(-45deg, transparent 0%, transparent 40%, rgba(59, 130, 246, 0.8) 40%, rgba(59, 130, 246, 0.8) 60%, transparent 60%) !important;
+  }
+  
+  .react-resizable-handle-sw {
+    bottom: 0 !important;
+    left: 0 !important;
+    width: 20px !important;
+    height: 20px !important;
+    cursor: sw-resize !important;
+    background: linear-gradient(45deg, transparent 0%, transparent 40%, rgba(59, 130, 246, 0.8) 40%, rgba(59, 130, 246, 0.8) 60%, transparent 60%) !important;
+  }
+  
+  .react-resizable-handle-ne {
+    top: 0 !important;
+    right: 0 !important;
+    width: 20px !important;
+    height: 20px !important;
+    cursor: ne-resize !important;
+    background: linear-gradient(45deg, transparent 0%, transparent 40%, rgba(59, 130, 246, 0.8) 40%, rgba(59, 130, 246, 0.8) 60%, transparent 60%) !important;
+  }
+  
+  .react-resizable-handle-nw {
+    top: 0 !important;
+    left: 0 !important;
+    width: 20px !important;
+    height: 20px !important;
+    cursor: nw-resize !important;
+    background: linear-gradient(-45deg, transparent 0%, transparent 40%, rgba(59, 130, 246, 0.8) 40%, rgba(59, 130, 246, 0.8) 60%, transparent 60%) !important;
+  }
+  
+  .react-resizable-handle-s {
+    bottom: 0 !important;
+    left: 50% !important;
+    transform: translateX(-50%) !important;
+    width: 30px !important;
+    height: 10px !important;
+    cursor: s-resize !important;
+    background: rgba(59, 130, 246, 0.8) !important;
+    border-radius: 5px 5px 0 0 !important;
+  }
+  
+  .react-resizable-handle-n {
+    top: 0 !important;
+    left: 50% !important;
+    transform: translateX(-50%) !important;
+    width: 30px !important;
+    height: 10px !important;
+    cursor: n-resize !important;
+    background: rgba(59, 130, 246, 0.8) !important;
+    border-radius: 0 0 5px 5px !important;
+  }
+  
+  .react-resizable-handle-e {
+    top: 50% !important;
+    right: 0 !important;
+    transform: translateY(-50%) !important;
+    width: 10px !important;
+    height: 30px !important;
+    cursor: e-resize !important;
+    background: rgba(59, 130, 246, 0.8) !important;
+    border-radius: 5px 0 0 5px !important;
+  }
+  
+  .react-resizable-handle-w {
+    top: 50% !important;
+    left: 0 !important;
+    transform: translateY(-50%) !important;
+    width: 10px !important;
+    height: 30px !important;
+    cursor: w-resize !important;
+    background: rgba(59, 130, 246, 0.8) !important;
+    border-radius: 0 5px 5px 0 !important;
+  }
 }
 
 @utility container {
