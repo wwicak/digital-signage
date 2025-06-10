@@ -150,13 +150,13 @@ const GridStackWrapper = forwardRef<GridStackWrapperRef, GridStackWrapperProps>(
     if (!gridInstanceRef.current) return
 
     const grid = gridInstanceRef.current
-    
+
     // Batch update for performance
     grid.batchUpdate()
-    
+
     // Remove all existing widgets
     grid.removeAll(false)
-    
+
     // Add current items
     items.forEach(item => {
       const element = itemRefs.current[item.id]?.current
@@ -164,9 +164,27 @@ const GridStackWrapper = forwardRef<GridStackWrapperRef, GridStackWrapperProps>(
         grid.makeWidget(element)
       }
     })
-    
+
     grid.batchUpdate(false)
   }, [items])
+
+  // Update grid options when they change
+  useEffect(() => {
+    if (!gridInstanceRef.current) return
+
+    const grid = gridInstanceRef.current
+
+    // Update grid configuration
+    if (options.column !== undefined && typeof options.column === 'number') {
+      grid.column(options.column)
+    }
+    if (options.margin !== undefined && typeof options.margin === 'number') {
+      grid.margin(options.margin)
+    }
+
+    // Force a layout update
+    grid.compact()
+  }, [options.column, options.maxRow, options.margin])
 
   // Expose methods via ref
   useImperativeHandle(ref, () => ({

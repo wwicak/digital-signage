@@ -187,6 +187,10 @@
   /* GridStack Styling */
   .grid-stack {
     background: transparent;
+    height: 100% !important;
+    width: 100% !important;
+    position: relative;
+    overflow: hidden;
   }
 
   .grid-stack-item {

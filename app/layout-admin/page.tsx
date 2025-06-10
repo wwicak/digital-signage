@@ -276,13 +276,18 @@ function LayoutAdminContent() {
     margin: layoutData.gridConfig.margin[0],
     column: layoutData.gridConfig.cols,
     maxRow: layoutData.gridConfig.rows,
+    minRow: 1,
     resizable: {
       handles: 'se, sw, ne, nw, s, n, e, w'
     },
     draggable: {
       handle: '.gridstack-drag-handle',
       cancel: '.gridstack-no-drag'
-    }
+    },
+    acceptWidgets: true,
+    removable: false,
+    animate: true,
+    rtl: false,
   }), [layoutData.gridConfig])
 
   if (layoutsLoading) {
@@ -391,6 +396,14 @@ function LayoutAdminContent() {
                         rowHeight: newOrientation === 'portrait' ? 40 : 60,
                       }
                     }))
+
+                    // Force GridStack to refresh after orientation change
+                    setTimeout(() => {
+                      if (gridRef.current) {
+                        // Trigger a layout refresh
+                        window.dispatchEvent(new Event('resize'))
+                      }
+                    }, 100)
                   }}
                   label={layoutData.orientation === 'portrait' ? 'Portrait' : 'Landscape'}
                 />
@@ -399,35 +412,62 @@ function LayoutAdminContent() {
           </div>
 
           {/* GridStack Canvas */}
-          <div className='border border-gray-200 rounded-lg p-4 bg-gray-50 min-h-[600px] relative'>
-            {(!existingLayout?.widgets || existingLayout.widgets.length === 0) ? (
-              <div className='absolute inset-0 flex items-center justify-center'>
-                <div className='text-center text-gray-500'>
-                  <Grid3X3 className='mx-auto h-12 w-12 mb-4 opacity-50' />
-                  <p className='text-lg font-medium'>No widgets added yet</p>
-                  <p className='text-sm'>Click "Add Widget" to start designing your layout</p>
-                </div>
+          <div className='border border-gray-200 rounded-lg p-4 bg-gray-50 relative'>
+            {/* Canvas Info */}
+            <div className='mb-4 flex items-center justify-between text-sm text-gray-600'>
+              <div className='flex items-center space-x-4'>
+                <span>Canvas: {layoutData.gridConfig.cols} × {layoutData.gridConfig.rows}</span>
+                <span>Orientation: {layoutData.orientation}</span>
+                <span>Margin: {layoutData.gridConfig.margin[0]}px</span>
               </div>
-            ) : (
-              <GridStackWrapper
-                ref={gridRef}
-                items={gridStackItems}
-                options={gridStackOptions}
-                onLayoutChange={handleLayoutChange}
-                onDragStart={(event, element) => {
-                  console.log('🎯 [DRAG] Started for widget:', element.getAttribute('gs-id'))
-                }}
-                onDragStop={(event, element) => {
-                  console.log('🎯 [DRAG] Stopped for widget:', element.getAttribute('gs-id'))
-                }}
-                onResizeStart={(event, element) => {
-                  console.log('📏 [RESIZE] Started for widget:', element.getAttribute('gs-id'))
-                }}
-                onResizeStop={(event, element) => {
-                  console.log('📏 [RESIZE] Stopped for widget:', element.getAttribute('gs-id'))
-                }}
-              />
-            )}
+              <div className='text-xs text-gray-500'>
+                {layoutData.orientation === 'portrait' ? '📱 Portrait Mode' : '🖥️ Landscape Mode'}
+              </div>
+            </div>
+
+            {/* Canvas Container with Aspect Ratio */}
+            <div
+              className={`border-2 border-dashed border-gray-300 rounded-lg bg-white relative ${
+                layoutData.orientation === 'portrait'
+                  ? 'aspect-[9/16] max-h-[800px]'
+                  : 'aspect-[16/9] min-h-[500px]'
+              }`}
+              style={{
+                width: '100%',
+                maxWidth: layoutData.orientation === 'portrait' ? '450px' : '100%',
+                margin: '0 auto'
+              }}
+            >
+              {(!existingLayout?.widgets || existingLayout.widgets.length === 0) ? (
+                <div className='absolute inset-0 flex items-center justify-center'>
+                  <div className='text-center text-gray-500'>
+                    <Grid3X3 className='mx-auto h-12 w-12 mb-4 opacity-50' />
+                    <p className='text-lg font-medium'>No widgets added yet</p>
+                    <p className='text-sm'>Click "Add Widget" to start designing your layout</p>
+                  </div>
+                </div>
+              ) : (
+                <GridStackWrapper
+                  ref={gridRef}
+                  items={gridStackItems}
+                  options={gridStackOptions}
+                  onLayoutChange={handleLayoutChange}
+                  onDragStart={(event, element) => {
+                    console.log('🎯 [DRAG] Started for widget:', element.getAttribute('gs-id'))
+                  }}
+                  onDragStop={(event, element) => {
+                    console.log('🎯 [DRAG] Stopped for widget:', element.getAttribute('gs-id'))
+                  }}
+                  onResizeStart={(event, element) => {
+                    console.log('📏 [RESIZE] Started for widget:', element.getAttribute('gs-id'))
+                  }}
+                  onResizeStop={(event, element) => {
+                    console.log('📏 [RESIZE] Stopped for widget:', element.getAttribute('gs-id'))
+                  }}
+                  className="h-full w-full"
+                />
+              )}
+            </div>
           </div>
         </CardContent>
       </Card>
