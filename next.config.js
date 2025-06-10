@@ -10,11 +10,7 @@ const nextConfig = {
   },
 
   // Transpile packages that might need it
-  transpilePackages: [
-    "react-grid-layout",
-    "react-beautiful-dnd",
-    "react-easy-state",
-  ],
+  transpilePackages: ["react-beautiful-dnd", "react-easy-state", "gridstack"],
 
   // Configure static file serving
   async rewrites() {

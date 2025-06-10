@@ -48,18 +48,29 @@ Object.defineProperty(HTMLCanvasElement.prototype, 'getContext', {
   })),
 })
 
-// Mock react-grid-layout
-jest.mock('react-grid-layout', () => {
-  const MockGridLayout = ({ children, onLayoutChange, layout, ...props }: any) => (
-    <div data-testid="grid-layout" {...props}>
-      {children}
-    </div>
-  )
-  return {
-    __esModule: true,
-    default: MockGridLayout,
-  }
-})
+// Mock GridStack
+jest.mock('gridstack', () => ({
+  GridStack: {
+    init: jest.fn(() => ({
+      on: jest.fn(),
+      off: jest.fn(),
+      destroy: jest.fn(),
+      addWidget: jest.fn(),
+      removeWidget: jest.fn(),
+      removeAll: jest.fn(),
+      makeWidget: jest.fn(),
+      batchUpdate: jest.fn(),
+      save: jest.fn(() => []),
+      enableMove: jest.fn(),
+      enableResize: jest.fn(),
+      getColumn: jest.fn(() => 12),
+      update: jest.fn(),
+    })),
+  },
+}))
+
+// Mock GridStack CSS
+jest.mock('gridstack/dist/gridstack.min.css', () => ({}))
 
 // Mock widgets to avoid canvas issues
 jest.mock('../../widgets', () => ({
@@ -80,12 +91,21 @@ jest.mock('../../widgets', () => ({
   }
 }))
 
-// Mock the WidthProvider
-jest.mock('../../components/Widgets/WidthProvider', () => {
-  return function WidthProvider(Component: any) {
-    return function WrappedComponent(props: any) {
-      return <Component {...props} width={1200} />
-    }
+// Mock GridStackWrapper
+jest.mock('../../components/GridStack/GridStackWrapper', () => {
+  const MockGridStackWrapper = ({ items, children, ...props }: any) => (
+    <div data-testid="gridstack-wrapper" {...props}>
+      {items?.map((item: any) => (
+        <div key={item.id} data-testid={`gridstack-item-${item.id}`}>
+          {item.content}
+        </div>
+      ))}
+      {children}
+    </div>
+  )
+  return {
+    __esModule: true,
+    default: MockGridStackWrapper,
   }
 })
 

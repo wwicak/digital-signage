@@ -3,7 +3,6 @@ import { Providers } from './providers'
 
 // Import global styles
 import '../styles/globals.css'
-import 'react-resizable/css/styles.css'
 
 export const metadata = {
   title: 'Digital Signage',

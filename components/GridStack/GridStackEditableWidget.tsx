@@ -1,35 +1,30 @@
 import React, { useRef, useState, memo, useCallback } from "react";
-import { Settings, X } from "lucide-react";
+import { Settings, X, GripVertical } from "lucide-react";
 
 import Widgets from "../../widgets";
 import { IBaseWidget } from "../../widgets/base_widget";
-import WidgetEditDialog from "./WidgetEditDialog";
-import DeleteWidgetModal from "./DeleteWidgetModal";
+import WidgetEditDialog from "../Admin/WidgetEditDialog";
+import DeleteWidgetModal from "../Admin/DeleteWidgetModal";
 import * as z from "zod";
-import { WidgetType, WidgetTypeZod } from "@/lib/models/Widget"; // Import enum and its Zod schema
+import { WidgetType, WidgetTypeZod } from "@/lib/models/Widget";
 
-// Zod schema for EditableWidget props
-export const EditableWidgetPropsSchema = z.object({
+// Zod schema for GridStackEditableWidget props
+export const GridStackEditableWidgetPropsSchema = z.object({
   id: z.string(),
-  type: WidgetTypeZod.default(WidgetType.SLIDESHOW), // Default to slideshow type
-  onDelete: z.function(z.tuple([]), z.union([z.void(), z.promise(z.void())])), // Function with no args, returns void or Promise<void>
-  layout: z.enum(["spaced", "compact"]).default("spaced"), // Default to spaced layout
-  /*
-   * react-grid-layout props like 'style', 'className', 'data-grid' are omitted
-   * as they are typically handled by RGL and not directly used by this component's logic.
-   */
+  type: WidgetTypeZod.default(WidgetType.SLIDESHOW),
+  onDelete: z.function(z.tuple([]), z.union([z.void(), z.promise(z.void())])),
+  layout: z.enum(["spaced", "compact"]).default("spaced"),
 });
 
 // Derive TypeScript type from Zod schema
-export type IEditableWidgetProps = z.infer<typeof EditableWidgetPropsSchema>;
+export type IGridStackEditableWidgetProps = z.infer<typeof GridStackEditableWidgetPropsSchema>;
 
-const EditableWidget: React.FC<IEditableWidgetProps> = memo(({
+const GridStackEditableWidget: React.FC<IGridStackEditableWidgetProps> = memo(({
   id,
   type = WidgetType.SLIDESHOW,
   onDelete,
   layout: _layout = "spaced",
 }) => {
-  // Using useRef hook instead of createRef
   const dialogRef = useRef<WidgetEditDialog>(null);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
@@ -50,24 +45,26 @@ const EditableWidget: React.FC<IEditableWidgetProps> = memo(({
     setShowDeleteConfirm(true);
   }, []);
 
-
-
   // Retrieve widget definition from the global Widgets object
   const widgetDefinition: IBaseWidget | undefined = Widgets[type];
-
   const widgetName = widgetDefinition?.name || "Broken Widget";
-  const WidgetIcon = widgetDefinition?.icon || X; // Default icon if not found
+  const WidgetIcon = widgetDefinition?.icon || X;
 
   return (
-    <div className='group relative bg-white border border-gray-200 rounded-lg hover:shadow-md transition-shadow w-full h-full gridstack-drag-handle'>
+    <div className='group relative bg-white border border-gray-200 rounded-lg hover:shadow-md transition-shadow w-full h-full'>
+      {/* Drag Handle - GridStack specific */}
+      <div className='gridstack-drag-handle absolute top-2 left-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200 cursor-move z-10'>
+        <div className='p-1 rounded bg-white/90 backdrop-blur-sm shadow-sm'>
+          <GripVertical className='w-4 h-4 text-gray-500' />
+        </div>
+      </div>
+
       {/* Controls - positioned to not interfere with drag handle */}
-      {/* The 'gridstack-no-drag' class will be used by GridStack to prevent dragging when clicking these buttons */}
       <div className='absolute top-2 right-2 flex space-x-1 controls gridstack-no-drag z-10 group-hover:z-30 opacity-0 group-hover:opacity-100 transition-all duration-200'>
         <button
           className='p-2 rounded hover:bg-gray-100 transition-colors bg-white/90 backdrop-blur-sm shadow-sm'
           onClick={openDialog}
           aria-label='Edit widget'
-          // REMOVED: onMouseDown, onTouchStart, onDragStart
         >
           <Settings className='w-4 h-4 text-gray-500' />
         </button>
@@ -75,13 +72,12 @@ const EditableWidget: React.FC<IEditableWidgetProps> = memo(({
           className='p-2 rounded hover:bg-gray-100 transition-colors bg-white/90 backdrop-blur-sm shadow-sm hover:bg-red-50 hover:text-red-600'
           onClick={handleDeleteClick}
           aria-label='Delete widget'
-          // REMOVED: onMouseDown, onTouchStart, onDragStart
         >
           <X className='w-4 h-4 text-gray-500' />
         </button>
       </div>
 
-      {/* Widget content - no changes needed here */}
+      {/* Widget content */}
       <div className='relative flex flex-col items-center justify-center h-full min-h-24 p-4 pt-8'>
         <div className='mb-2'>
           <WidgetIcon className='w-8 h-8 text-primary' />
@@ -110,6 +106,6 @@ const EditableWidget: React.FC<IEditableWidgetProps> = memo(({
   );
 });
 
-EditableWidget.displayName = 'EditableWidget';
+GridStackEditableWidget.displayName = 'GridStackEditableWidget';
 
-export default EditableWidget;
+export default GridStackEditableWidget;

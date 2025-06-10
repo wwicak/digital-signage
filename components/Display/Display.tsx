@@ -1,9 +1,8 @@
 import React, { useEffect, useRef, useMemo, useCallback } from "react";
-import GridLayout, { Layout as RglLayout } from "react-grid-layout";
 import _ from "lodash";
 
 import Frame from "./Frame";
-import HeightProvider from "../Widgets/HeightProvider";
+import GridStackWrapper, { GridStackItem } from "../GridStack/GridStackWrapper";
 import Widgets from "../../widgets";
 import EmptyWidget from "../Widgets/EmptyWidget";
 import { IBaseWidget } from "../../widgets/base_widget";
@@ -165,33 +164,38 @@ const Display: React.FC<IDisplayComponentProps> = React.memo(({ display }) => {
   // Adjust grid columns based on aspect ratio (16:9 landscape, 9:16 portrait)
   const gridCols = isPortrait ? 9 : 16; // Portrait: 9 cols (9:16), Landscape: 16 cols (16:9)
 
-  // Memoize layout for react-grid-layout to prevent unnecessary re-renders
-  const rglWidgetLayout: RglLayout[] = useMemo(
+  // Memoize layout for GridStack to prevent unnecessary re-renders
+  const gridStackItems: GridStackItem[] = useMemo(
     () =>
-      (state.widgets || []).map((widget: any) => ({
-        i: widget._id, // react-grid-layout uses 'i' for id
-        x: widget.x || 0,
-        y: widget.y || 0,
-        w: widget.w || 1,
-        h: widget.h || 1,
-        // Add other RGL properties if needed: minW, maxW, isDraggable, isResizable etc.
-      })),
+      (state.widgets || []).map((widget: any) => {
+        const WidgetComponent = Widgets[widget.type]?.Component;
+
+        return {
+          id: widget._id,
+          x: widget.x || 0,
+          y: widget.y || 0,
+          w: widget.w || 1,
+          h: widget.h || 1,
+          content: WidgetComponent ? (
+            <WidgetComponent
+              key={widget._id}
+              id={widget._id}
+              options={widget.options || {}}
+            />
+          ) : (
+            <div className="flex items-center justify-center h-full bg-red-100 text-red-600">
+              Unknown Widget: {widget.type}
+            </div>
+          )
+        };
+      }),
     [state.widgets],
   );
 
-  // Memoize layout setting and grid component
+  // Memoize layout setting
   const currentLayout = useMemo(
     () => state.layout || DEFAULT_LAYOUT,
     [state.layout],
-  );
-  const RglComponent = useMemo(
-    () =>
-      HeightProvider(
-        GridLayout as any,
-        containerRef.current,
-        currentLayout,
-      ) as any,
-    [currentLayout],
   );
 
   // Memoize margin calculation for stable props
@@ -203,27 +207,7 @@ const Display: React.FC<IDisplayComponentProps> = React.memo(({ display }) => {
     [currentLayout],
   );
 
-  // Memoize widget rendering for performance - now isPortrait is available
-  const renderWidget = useCallback(
-    (widget: any) => {
-      const WidgetDefinition: IBaseWidget | undefined = Widgets[widget.type];
-      const WidgetComponent = WidgetDefinition
-        ? WidgetDefinition.Widget
-        : EmptyWidget;
 
-      return (
-        <div
-          key={widget._id}
-          className={`w-full h-full overflow-hidden transition-all duration-300 ease-in-out bg-gray-100 bg-opacity-10 ${
-            currentLayout === "spaced" ? "rounded-md" : "rounded-none"
-          } ${isPortrait ? "min-h-[120px]" : ""}`}
-        >
-          <WidgetComponent {...(widget.data ? { data: widget.data } : {})} />
-        </div>
-      );
-    },
-    [currentLayout, isPortrait],
-  );
 
   return (
     /*
@@ -246,20 +230,20 @@ const Display: React.FC<IDisplayComponentProps> = React.memo(({ display }) => {
           marginBottom: currentLayout === "spaced" ? "10px" : "0px",
         }}
       >
-        <RglComponent
-          className='layout' // Default class, react-grid-layout uses this
-          isDraggable={false} // From original JS
-          isResizable={false} // From original JS
-          layout={rglWidgetLayout}
-          cols={gridCols} // Dynamic columns based on orientation
-          margin={gridMargin}
-          /*
-           * rowHeight is now handled by HeightProvider HOC for stability
-           * Other RGL props: width, autoSize, compactType, etc.
-           */
-        >
-          {state.widgets.map(renderWidget)}
-        </RglComponent>
+        <GridStackWrapper
+          items={gridStackItems}
+          options={{
+            float: true,
+            cellHeight: 'auto',
+            margin: gridMargin[0],
+            column: gridCols,
+            staticGrid: true, // Make grid read-only for display
+            disableDrag: true,
+            disableResize: true,
+            animate: false, // Disable animations for better performance
+          }}
+          className="display-grid"
+        />
       </div>
     </Frame>
   );
