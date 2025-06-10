@@ -4,7 +4,7 @@ import React, { useState, useCallback, useRef, useEffect, useMemo, Suspense } fr
 import { useRouter, useSearchParams } from 'next/navigation'
 import { Grid3X3, Plus, Save, Trash2, RotateCcw, ArrowLeft } from 'lucide-react'
 
-import Frame from '../../components/Admin/Frame'
+import LayoutFrame from '../../components/Admin/LayoutFrame'
 import GridStackWrapper, { GridStackItem, GridStackWrapperRef } from '../../components/GridStack/GridStackWrapper'
 import GridStackEditableWidget from '../../components/GridStack/GridStackEditableWidget'
 import StatusBarElement from '../../components/Admin/StatusBarElement'
@@ -292,17 +292,18 @@ function LayoutAdminContent() {
 
   if (layoutsLoading) {
     return (
-      <Frame loggedIn={true}>
+      <LayoutFrame loggedIn={true} title="Layout Designer">
         <div className='flex items-center justify-center h-64'>
           <div className='text-center'>Loading layouts...</div>
         </div>
-      </Frame>
+      </LayoutFrame>
     )
   }
 
   return (
-    <Frame loggedIn={true}>
-      <Card>
+    <LayoutFrame loggedIn={true} title="Layout Designer">
+      <div className='p-6'>
+        <Card>
         <CardHeader>
           <div className='flex items-center justify-between'>
             <div className='flex items-center space-x-4'>
@@ -314,7 +315,6 @@ function LayoutAdminContent() {
                 <ArrowLeft className='w-4 h-4 mr-2' />
                 Back to Layouts
               </Button>
-              <CardTitle>Layout Designer</CardTitle>
             </div>
             <div className='flex items-center space-x-2'>
               <Button
@@ -471,18 +471,19 @@ function LayoutAdminContent() {
           </div>
         </CardContent>
       </Card>
-    </Frame>
+      </div>
+    </LayoutFrame>
   )
 }
 
 export default function LayoutAdmin() {
   return (
     <Suspense fallback={
-      <Frame loggedIn={true}>
+      <LayoutFrame loggedIn={true} title="Layout Designer">
         <div className='flex items-center justify-center h-64'>
           <div className='text-center'>Loading...</div>
         </div>
-      </Frame>
+      </LayoutFrame>
     }>
       <LayoutAdminContent />
     </Suspense>
