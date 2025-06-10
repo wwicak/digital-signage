@@ -58,7 +58,8 @@ export default function WidthProvider<P extends object>(
 
     const { rows, margin } = gridConfig || { rows: 9, margin: [12, 12] };
     // Corrected rowHeight calculation
-    const calculatedRowHeight = Math.max(10, (height - (margin[1] * (rows - 1))) / rows);
+    //const calculatedRowHeight = Math.max(10, (height - (margin[1] * (rows - 1))) / rows);
+    const calculatedRowHeight = Math.max(10, Math.round((height - (margin[1] * (rows - 1))) / rows));
     
 
     return (

@@ -233,8 +233,11 @@
     right: 0 !important;
     width: 20px !important;
     height: 20px !important;
+    background: red !important;
+    border: 2px solid yellow !important;
     cursor: se-resize !important;
-    background: linear-gradient(-45deg, transparent 0%, transparent 40%, rgba(59, 130, 246, 0.8) 40%, rgba(59, 130, 246, 0.8) 60%, transparent 60%) !important;
+    z-index: 1000 !important;
+    /*background: linear-gradient(-45deg, transparent 0%, transparent 40%, rgba(59, 130, 246, 0.8) 40%, rgba(59, 130, 246, 0.8) 60%, transparent 60%) !important;*/
   }
   
   .react-resizable-handle-sw {
