@@ -989,23 +989,16 @@ const LayoutAdminContent = memo(function LayoutAdminContent() {
                 draggableHandle=".drag-handle"
                 resizeHandles={['se', 'sw', 'ne', 'nw', 's', 'n', 'e', 'w']}
                 margin={layoutData.gridConfig.margin}
-                // Pass gridConfig to the HOC for dynamic rowHeight calculation
                 gridConfig={layoutData.gridConfig}
                 isBounded={true}
                 useCSSTransforms={true}
                 transformScale={1}
                 preventCollision={true}
-                // FIX: Allow free vertical movement
                 verticalCompact={false}
                 maxRows={layoutData.gridConfig.rows}
                 className="react-grid-layout"
-                style={{
-                  width: '100%',
-                  height: '100%',
-                  position: 'absolute',
-                  top: 0,
-                  left: 0
-                }}
+                // FIX: Remove the style prop that sets absolute positioning.
+                // The WidthProvider HOC will now handle the container styling.
                 isDraggable={true}
                 isResizable={true}
                 containerPadding={[0, 0]}

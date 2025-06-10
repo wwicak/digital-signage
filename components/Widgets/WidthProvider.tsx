@@ -53,16 +53,16 @@ export default function WidthProvider<P extends object>(
     }, [updateSize]);
 
     if (measureBeforeMount && !mounted) {
-      return <div ref={containerRef} className={cn("w-full h-full relative", className)} style={style} />;
+      return <div ref={containerRef} className={cn("w-full h-full", className)} style={style} />;
     }
 
     const { rows, margin } = gridConfig || { rows: 9, margin: [12, 12] };
-    // FIX: Corrected the rowHeight calculation formula
-    const calculatedRowHeight = Math.max(10, (height - (margin[1] * (rows - 1))) / rows);
+    // Corrected rowHeight calculation
+    const calculatedRowHeight = Math.max(10, (height - (margin[1] * (rows + 1))) / rows);
 
     return (
-      // FIX: Added `relative` and `w-full h-full` to make this div a proper container
-      <div ref={containerRef} className={cn("w-full h-full relative", className)} style={style}>
+      // This div now correctly fills its parent and is measured by the ResizeObserver
+      <div ref={containerRef} className={cn("w-full h-full", className)} style={style}>
         <ComposedComponent
           {...(rest as P)}
           width={width}
