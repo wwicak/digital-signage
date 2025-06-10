@@ -43,6 +43,11 @@ export interface ILogoutAuthResponse extends IAuthSuccessResponse {
   // Add any logout-specific fields
 }
 
+// For signup, assuming it might return more specific data upon success
+export interface ISignupAuthResponse extends IAuthSuccessResponse {
+  // Add any signup-specific fields if the API returns them
+}
+
 // Props injected by the protect HOC into the wrapped component
 export interface IProtectedPageProps {
   displayId?: string; // Default displayId if none in query (can be optional)
@@ -115,6 +120,35 @@ export const logout = async (host: string = ''): Promise<ILogoutAuthResponse> =>
       return error.response.data as ILogoutAuthResponse
     }
     return { success: false, message: error.message || 'Logout failed due to an unexpected error.' }
+  }
+}
+
+export const signup = async (
+  credentials: {
+    email: string;
+    password: string;
+    name: string;
+  },
+  host: string = ''
+): Promise<ISignupAuthResponse> => {
+  try {
+    const response: AxiosResponse<ISignupAuthResponse> = await axios.post(
+      `${host}/api/auth/register`,
+      credentials
+    )
+
+    if (response.data && response.data.success) {
+      setCookie(null, 'loggedIn', 'true', {
+        maxAge: 30 * 24 * 60 * 60,
+        path: '/',
+      })
+    }
+    return response.data
+  } catch (error: any) {
+    if (error.response) {
+      return error.response.data as ISignupAuthResponse
+    }
+    return { success: false, message: error.message || 'Registration failed due to an unexpected error.' }
   }
 }
 
