@@ -543,7 +543,7 @@ function LayoutAdminContent() {
 export default function LayoutAdmin() {
   return (
     <Suspense fallback={
-      <Frame loggedIn={true} title="Layout Designer" isLoading={true}>
+      <Frame loggedIn={true} title="Layout Designer">
         <div />
       </Frame>
     }>
