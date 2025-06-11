@@ -119,23 +119,86 @@ const ReservationModel: Model<IReservation> =
 // Zod schema for IReservation
 export const ReservationSchemaZod = z
   .object({
-    _id: z.instanceof(mongoose.Types.ObjectId).optional(),
+    _id: z
+      .union([
+        z.instanceof(mongoose.Types.ObjectId),
+        z.string().refine((id) => mongoose.Types.ObjectId.isValid(id), {
+          message: "Invalid ObjectId format",
+        }),
+      ])
+      .optional()
+      .transform((val) => {
+        if (typeof val === "string") {
+          return new mongoose.Types.ObjectId(val);
+        }
+        return val;
+      }),
     title: z.string().min(1, { message: "Reservation title is required" }),
-    room_id: z.instanceof(mongoose.Types.ObjectId),
-    start_time: z.date(),
-    end_time: z.date(),
+    room_id: z
+      .union([
+        z.instanceof(mongoose.Types.ObjectId),
+        z.string().refine((id) => mongoose.Types.ObjectId.isValid(id), {
+          message: "Invalid ObjectId format",
+        }),
+      ])
+      .transform((val) => {
+        if (typeof val === "string") {
+          return new mongoose.Types.ObjectId(val);
+        }
+        return val;
+      }),
+    start_time: z
+      .union([z.date(), z.string()])
+      .transform((val) => {
+        if (typeof val === "string") {
+          return new Date(val);
+        }
+        return val;
+      }),
+    end_time: z
+      .union([z.date(), z.string()])
+      .transform((val) => {
+        if (typeof val === "string") {
+          return new Date(val);
+        }
+        return val;
+      }),
     organizer: z.string().min(1, { message: "Organizer is required" }),
     attendees: z.array(z.string()).default([]),
     agenda_meeting: z.string().optional(),
-    creation_date: z.date().optional(), // Defaulted by Mongoose
-    last_update: z.date().optional(), // Defaulted by Mongoose
+    creation_date: z
+      .union([z.date(), z.string()])
+      .optional()
+      .transform((val) => {
+        if (typeof val === "string") {
+          return new Date(val);
+        }
+        return val;
+      }), // Defaulted by Mongoose
+    last_update: z
+      .union([z.date(), z.string()])
+      .optional()
+      .transform((val) => {
+        if (typeof val === "string") {
+          return new Date(val);
+        }
+        return val;
+      }), // Defaulted by Mongoose
     // External calendar integration fields
     externalCalendarEventId: z.string().optional(),
     externalCalendarId: z.string().optional(),
     sourceCalendarType: z
       .enum(["google", "outlook", "internal"])
       .default("internal"),
-    lastSyncedAt: z.date().optional(),
+    lastSyncedAt: z
+      .union([z.date(), z.string()])
+      .optional()
+      .transform((val) => {
+        if (typeof val === "string") {
+          return new Date(val);
+        }
+        return val;
+      }),
     isExternallyManaged: z.boolean().default(false),
     __v: z.number().optional(),
   })

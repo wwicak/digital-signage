@@ -52,6 +52,20 @@ interface IRoomFormData {
   facilities: string;
 }
 
+// Add validation helper
+const validateRoomForm = (data: IRoomFormData): string | null => {
+  if (!data.name.trim()) {
+    return "Room name is required";
+  }
+  if (!data.building_id) {
+    return "Building is required";
+  }
+  if (data.capacity < 1) {
+    return "Capacity must be at least 1";
+  }
+  return null;
+};
+
 const RoomsPage = () => {
   const [rooms, setRooms] = useState<IRoom[]>([]);
   const [buildings, setBuildings] = useState<IBuilding[]>([]);
@@ -109,6 +123,14 @@ const RoomsPage = () => {
 
   const handleCreateRoom = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Validate form data before making API call
+    const validationError = validateRoomForm(formData);
+    if (validationError) {
+      toast.error(validationError);
+      return;
+    }
+
     try {
       const facilitiesArray = formData.facilities
         .split(",")
@@ -117,16 +139,27 @@ const RoomsPage = () => {
 
       const response = await fetch("/api/v1/rooms", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { 
+          "Content-Type": "application/json",
+        },
         body: JSON.stringify({
-          ...formData,
+          name: formData.name,
+          building_id: formData.building_id,
+          capacity: formData.capacity,
           facilities: facilitiesArray,
         }),
       });
 
+      const data = await response.json();
+      
       if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || "Failed to create room");
+        if (data.errors) {
+          // If we have validation errors, show them in detail
+          const errorMessages = data.errors.map((err: any) => err.message).join(", ");
+          toast.error(errorMessages);
+          return;
+        }
+        throw new Error(data.message || "Failed to create room");
       }
 
       toast.success("Room created successfully");

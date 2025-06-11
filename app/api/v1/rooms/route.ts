@@ -81,7 +81,10 @@ export async function POST(request: NextRequest) {
 
     const { name, building_id, capacity, facilities } = validation.data;
 
-    const building = await Building.findById(building_id);
+    // Convert the validated building_id string to ObjectId
+    const buildingObjectId = new mongoose.Types.ObjectId(building_id);
+
+    const building = await Building.findById(buildingObjectId);
     if (!building) {
       return NextResponse.json(
         { message: "Building not found" },
@@ -89,7 +92,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const existingRoom = await Room.findOne({ name, building_id });
+    const existingRoom = await Room.findOne({ name, building_id: buildingObjectId });
     if (existingRoom) {
       return NextResponse.json(
         { message: "Room with this name already exists in the building" },
@@ -99,7 +102,7 @@ export async function POST(request: NextRequest) {
 
     const room = new Room({
       name,
-      building_id,
+      building_id: buildingObjectId,
       capacity,
       facilities: facilities || [],
     });

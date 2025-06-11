@@ -60,15 +60,21 @@ const RoomModel: Model<IRoom> =
   (mongoose.models?.Room as Model<IRoom>) ||
   mongoose.model<IRoom>("Room", RoomSchema);
 
-// Zod schema for IRoom
+// Custom validator for ObjectId strings
+const objectIdValidator = z.string().refine(
+  (val) => mongoose.Types.ObjectId.isValid(val),
+  { message: "Invalid ObjectId format" }
+);
+
+// Zod schema for room creation/update
 export const RoomSchemaZod = z.object({
-  _id: z.instanceof(mongoose.Types.ObjectId).optional(),
+  _id: objectIdValidator.optional(),
   name: z.string().min(1, { message: "Room name is required" }),
-  building_id: z.instanceof(mongoose.Types.ObjectId),
+  building_id: objectIdValidator,
   capacity: z.number().min(1, { message: "Capacity must be at least 1" }),
   facilities: z.array(z.string()).default([]),
-  creation_date: z.date().optional(), // Defaulted by Mongoose
-  last_update: z.date().optional(), // Defaulted by Mongoose
+  creation_date: z.date().optional(),
+  last_update: z.date().optional(),
   __v: z.number().optional(),
 });
 
