@@ -61,3 +61,4 @@ bun.lockb
 tsconfig.tsbuildinfo
 docs
 repomix-output.xml
+public/uploads/

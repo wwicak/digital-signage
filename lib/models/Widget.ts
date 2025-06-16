@@ -32,9 +32,11 @@ export interface CongratsWidgetData {
 }
 
 export interface ImageWidgetData {
-  title?: string;
-  url?: string;
-  color?: string;
+  title?: string | null;
+  url: string | null;  // Required but can be null
+  fit: "contain" | "cover" | "fill" | "none" | "scale-down";  // Required
+  color: string;  // Required
+  altText?: string;  // Optional
 }
 
 export interface ListWidgetData {
@@ -207,9 +209,11 @@ export const CongratsWidgetDataSchema = z.object({
 });
 
 export const ImageWidgetDataSchema = z.object({
-  title: z.string().optional(),
-  url: z.string().url().optional(),
-  color: z.string().optional(),
+  title: z.string().nullable().optional(),
+  url: z.string().url().nullable(),  // Required but can be null
+  fit: z.enum(["contain", "cover", "fill", "none", "scale-down"]),  // Required
+  color: z.string(),  // Required
+  altText: z.string().optional(),
 });
 
 export const ListWidgetDataSchema = z.object({

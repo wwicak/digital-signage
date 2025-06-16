@@ -99,7 +99,12 @@ class ListOptions extends Component<IListOptionsProps, IListOptionsState> {
     })
   }
 
-  addItem = (): void => {
+  addItem = (e?: React.MouseEvent): void => {
+    if (e) {
+      e.preventDefault()
+      e.stopPropagation()
+    }
+    
     const newItem: IListItem = { text: '', label: null }
     this.setState(
       prevState => ({
@@ -140,7 +145,7 @@ class ListOptions extends Component<IListOptionsProps, IListOptionsState> {
 
     return (
       <div className={'options-container'}>
-        <Form>
+        <Form onSubmit={(e) => e.preventDefault()}>
           <h3>Widget: List</h3>
           <p>Choose your preferences for the list widget.</p>
           <InlineInputGroup>
@@ -222,10 +227,13 @@ class ListOptions extends Component<IListOptionsProps, IListOptionsState> {
             ))}
           </div>
           <Button
-            text={' + Add Item'} // Changed text
+            text={' + Add Item'}
             color={'#8bc34a'}
-            onClick={this.addItem} // Changed name
-            style={{ marginTop: 10,alignSelf:'flex-start' }} // Added margin and alignment
+            onClick={(e: React.MouseEvent) => {
+              e.preventDefault()
+              this.addItem(e)
+            }}
+            style={{ marginTop: 10, alignSelf: 'flex-start' }}
           />
         </Form>
         <div className={'preview-section-container'}>

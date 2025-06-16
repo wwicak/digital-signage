@@ -7,6 +7,7 @@ import '../styles/globals.css'
 export const metadata = {
   title: 'Digital Signage',
   description: 'A user interface for dynamic digital signage',
+  manifest: "/manifest.json",
 }
 
 export const viewport = {

@@ -82,13 +82,19 @@ class ImageContent extends Component<IImageContentProps> {
           </div>
         )}
         {url ? (
-          <div className='content-area' style={contentStyle}> {/* Renamed class */}
-            <div className='absolute' style={photoCoverStyle} /> {/* Renamed class */}
-            <div className='h-full absolute' style={photoStyle} /> {/* Renamed class */}
+          <div className='relative w-full h-full' style={contentStyle}>
+            <div
+              className='absolute inset-0 blur-sm opacity-50 bg-no-repeat bg-center'
+              style={photoCoverStyle}
+            />
+            <div
+              className='absolute inset-0 bg-no-repeat bg-center'
+              style={photoStyle}
+            />
           </div>
         ) : (
-          <div className='content-area placeholder-content' style={contentStyle}> {/* Placeholder if no URL */}
-            <span>No Image URL Provided</span>
+          <div className='relative w-full h-full flex items-center justify-center text-white' style={contentStyle}>
+            <span className='text-sm'>No Image URL Provided</span>
           </div>
         )}
         

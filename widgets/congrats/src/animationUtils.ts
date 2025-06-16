@@ -9,20 +9,28 @@ const getAnimationDataInternal = (animationName: string | undefined): any | null
   if (!animationName) {
     animationName = DEFAULT_ANIMATION
   }
+
+  let sourceData: any = null;
   switch (animationName) {
     case 'confetti':
-      return confettiAnimationData
+      sourceData = confettiAnimationData
+      break
     case 'balloons':
-      return balloonsAnimationData
+      sourceData = balloonsAnimationData
+      break
     default:
       console.error(`Animation not found: ${animationName}. Falling back to default.`)
       // Fallback to default animation if specified one is not found
-      if (DEFAULT_ANIMATION === 'confetti') return confettiAnimationData
-      if (DEFAULT_ANIMATION === 'balloons') return balloonsAnimationData
-      // If default is also unknown (config error), return null
-      console.error(`Default animation "${DEFAULT_ANIMATION}" also not found.`)
-      return null
+      if (DEFAULT_ANIMATION === 'confetti') sourceData = confettiAnimationData
+      else if (DEFAULT_ANIMATION === 'balloons') sourceData = balloonsAnimationData
+      else {
+        console.error(`Default animation "${DEFAULT_ANIMATION}" also not found.`)
+        return null
+      }
   }
+
+  // Return a mutable copy of the animation data
+  return sourceData ? JSON.parse(JSON.stringify(sourceData)) : null
 }
 
 export const animationUtils = {

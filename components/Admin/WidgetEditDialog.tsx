@@ -1,7 +1,29 @@
 import React, { Component, ComponentType } from "react";
 import Dialog, { DialogMethods } from "../Dialog";
 import { Form, Button } from "../Form";
-import { getWidget, updateWidget, IWidgetData } from "../../actions/widgets"; // IWidgetData is likely an interface
+import { getWidget, updateWidget, IWidgetData, IUpdateWidgetData } from "../../actions/widgets";
+import { updateWidgetPositions } from "../../actions/layouts";
+
+// GridStack types
+interface GridStackNode {
+  id: string;
+  x: number;
+  y: number;
+  w: number;
+  h: number;
+}
+
+interface GridStackEngine {
+  nodes: GridStackNode[];
+}
+
+interface GridStack {
+  engine: GridStackEngine;
+}
+
+interface GridStackElement extends Element {
+  gridstack?: GridStack;
+}
 import * as z from "zod";
 import { WidgetDataZod, WidgetTypeZod } from "@/lib/models/Widget"; // Import Zod schema for widget's 'data' field and type
 import { Loader2, AlertCircle } from "lucide-react";
@@ -59,10 +81,14 @@ export type IWidgetEditDialogProps = z.infer<
 
 // Local Zod schema for the expected structure of IWidgetData (full widget)
 const LocalFullWidgetDataSchema = z.object({
-  _id: z.string(), // Assuming IWidgetData has _id
-  name: z.string().optional(), // And other fields if used by the dialog
+  _id: z.string(),
+  name: z.string().optional(),
   type: WidgetTypeZod.optional(),
-  data: WidgetDataZod.optional(), // This is the specific config object, matching api/models/Widget.WidgetDataZod
+  data: WidgetDataZod.optional(),
+  x: z.number(),
+  y: z.number(),
+  w: z.number(),
+  h: z.number(),
 });
 type LocalFullWidgetDataType = z.infer<typeof LocalFullWidgetDataSchema>;
 
@@ -156,26 +182,40 @@ class WidgetEditDialog
 
     getWidget(trimmedId)
       .then((widgetFullData: IWidgetData) => {
+        console.log('Fetched raw widget data:', widgetFullData);
+        console.log('Widget data field:', widgetFullData.data);
+        
         // Cache the successful response
         setCachedWidgetData(widgetId, widgetFullData);
 
-        // IWidgetData is from actions, potentially an interface
-        // Attempt to parse with our local Zod schema for safety before setting state
+        // Create default data structure based on widget type
+        let defaultData = {};
+        if (widgetFullData.type === 'image') {
+          defaultData = {
+            title: null,
+            url: null,
+            fit: 'contain',
+            color: '#2d3436',
+            altText: ''
+          };
+        }
+
+        // Merge default data with widget data
+        const mergedData = {
+          ...defaultData,
+          ...(widgetFullData.data || {})
+        };
+
+        console.log('Merged widget data:', mergedData);
+        
         const parsedFullData =
           LocalFullWidgetDataSchema.safeParse(widgetFullData);
+        
         if (parsedFullData.success) {
           this.setState({
-            /*
-             * widgetConfigData should be the 'data' field of the widget.
-             * It could be a specific type from WidgetDataZod union.
-             * For generic OptionsComponent, we pass it as is if it's an object.
-             */
-            widgetConfigData:
-              typeof parsedFullData.data.data === "object"
-                ? parsedFullData.data.data
-                : {},
+            widgetConfigData: mergedData,
             initialWidgetData: parsedFullData.data,
-            error: null, // Clear any previous errors
+            error: null,
           });
         } else {
           console.error(
@@ -255,13 +295,35 @@ class WidgetEditDialog
 
     if (!widgetId) {
       console.error("Cannot save, widgetId is missing.");
-      // Optionally set an error state to inform user
       return;
     }
 
     try {
-      // We only update the 'data' field (widget-specific config) of the widget
-      await updateWidget(widgetId, { data: widgetConfigData || {} });
+      // Only update the widget's data field, not its position
+      await updateWidget(widgetId, {
+        data: widgetConfigData || {}
+      });
+
+      // Get GridStack instance and trigger a layout update
+      // This ensures grid positions are synchronized after saving
+      const gridStackEl = document.querySelector('.grid-stack') as GridStackElement;
+      const gridStack = gridStackEl?.gridstack;
+      if (gridStack) {
+        const items = gridStack.engine.nodes.map((node: GridStackNode) => ({
+          widget_id: node.id,
+          x: node.x,
+          y: node.y,
+          w: node.w,
+          h: node.h
+        }));
+        
+        // Get layout ID from URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const layoutId = urlParams.get('id');
+        if (layoutId) {
+          await updateWidgetPositions(layoutId, items);
+        }
+      }
 
       // Invalidate cache for this widget
       widgetDataCache.delete(widgetId);

@@ -1,10 +1,32 @@
-import React, { Component } from 'react'
+import React, { Component, memo } from 'react'
 import Lottie, { Options as LottieOptions } from 'react-lottie'
 // FontAwesome configuration is handled globally
 import AutoScroll from '../../../components/AutoScroll'
 import * as z from 'zod'
 import { CongratsWidgetContentDataSchema } from './types'
 import { animationUtils } from './animationUtils' // Import the utility
+
+// Memoized animation component
+const Animation = memo(({ animationName }: { animationName: string }) => {
+  const animationData = animationUtils.getAnimationData(animationName)
+  const lottieOptions: LottieOptions = {
+    loop: false,
+    autoplay: true,
+    animationData,
+    rendererSettings: {
+      preserveAspectRatio: 'xMidYMid slice'
+    }
+  }
+
+  if (!animationData) return null
+
+  return (
+    <div className='background-animation'>
+      <Lottie options={lottieOptions} height={'100%'} width={'100%'} />
+    </div>
+  )
+})
+Animation.displayName = 'Animation'
 
 
 export const CongratsContentPropsSchema = z.object({
@@ -23,7 +45,7 @@ const DEFAULT_FONT_SIZE = 16
 
 class CongratsContent extends Component<ICongratsContentProps> {
   render() {
-    const { data = {} } = this.props
+    const data = Object.assign({}, this.props.data || {})
     const text = data.text ?? DEFAULT_TEXT
     const textColor = data.textColor ?? DEFAULT_TEXT_COLOR
     const animationName = data.animation ?? DEFAULT_ANIMATION
@@ -33,14 +55,15 @@ class CongratsContent extends Component<ICongratsContentProps> {
     // Use animationUtils to get animation data
     const animationData = animationUtils.getAnimationData(animationName)
 
-    const lottieOptions: LottieOptions = {
-      loop: true,
+    // Create lottie options with loop disabled
+    const lottieOptions: LottieOptions = Object.assign({}, {
+      loop: false,
       autoplay: true,
-      animationData: animationData,
-      rendererSettings: {
-        preserveAspectRatio: 'xMidYMid slice',
-      },
-    }
+      animationData,
+      rendererSettings: Object.assign({}, {
+        preserveAspectRatio: 'xMidYMid slice'
+      })
+    })
 
     return (
       <div className='relative box-border h-full w-full'>
