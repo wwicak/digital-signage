@@ -17,7 +17,7 @@ class MediaPlayerContent extends Component<IMediaPlayerContentProps, IMediaPlaye
   constructor(props: IMediaPlayerContentProps) {
     super(props);
     this.state = {
-      isScheduleActive: true,
+      isScheduleActive: false, // Start inactive until schedule is checked
       error: null,
       isLoading: false,
     };
@@ -25,9 +25,14 @@ class MediaPlayerContent extends Component<IMediaPlayerContentProps, IMediaPlaye
   }
 
   componentDidMount() {
-    this.checkSchedule();
+    // Initial schedule check and media setup
+    const isActive = this.checkSchedule();
+    this.setState({ isScheduleActive: isActive }, () => {
+      this.setupMediaElement();
+    });
+    
+    // Setup interval for future checks
     this.setupScheduleCheck();
-    this.setupMediaElement();
   }
 
   componentDidUpdate(prevProps: IMediaPlayerContentProps, prevState: IMediaPlayerContentState) {
@@ -51,16 +56,22 @@ class MediaPlayerContent extends Component<IMediaPlayerContentProps, IMediaPlaye
   setupScheduleCheck = () => {
     // Check schedule every 30 seconds for more responsive scheduling
     this.scheduleCheckInterval = setInterval(() => {
-      this.checkSchedule();
+      const isActive = this.checkSchedule();
+      if (isActive !== this.state.isScheduleActive) {
+        this.setState({ isScheduleActive: isActive }, () => {
+          // Re-setup media element when schedule changes
+          this.setupMediaElement();
+        });
+      }
     }, 30000);
   };
 
-  checkSchedule = () => {
+  checkSchedule = (): boolean => {
     const { data } = this.props;
 
+    // If scheduling is not enabled, media should be active
     if (!data?.enableScheduling || !data?.schedule) {
-      this.setState({ isScheduleActive: true });
-      return;
+      return true;
     }
 
     const now = new Date();
@@ -70,26 +81,26 @@ class MediaPlayerContent extends Component<IMediaPlayerContentProps, IMediaPlaye
     // Check if current day is in allowed days
     const { daysOfWeek, timeSlots } = data.schedule;
 
+    // Return false early if current day is not in schedule
     if (daysOfWeek && daysOfWeek.length > 0 && !daysOfWeek.includes(currentDay)) {
-      this.setState({ isScheduleActive: false });
-      return;
+      return false;
     }
 
     // Check if current time is in allowed time slots
+    // Check time slots
     if (timeSlots && timeSlots.length > 0) {
       const isInTimeSlot = timeSlots.some(slot => {
         return currentTime >= slot.startTime && currentTime <= slot.endTime;
       });
 
-      // Log schedule changes for debugging
-      if (this.state.isScheduleActive !== isInTimeSlot) {
-        console.log(`Media player schedule changed: ${isInTimeSlot ? 'ACTIVE' : 'INACTIVE'} at ${currentTime} on day ${currentDay}`);
-      }
+      // Log schedule state
+      console.log(`Media player schedule: ${isInTimeSlot ? 'ACTIVE' : 'INACTIVE'} at ${currentTime} on day ${currentDay}`);
 
-      this.setState({ isScheduleActive: isInTimeSlot });
-    } else {
-      this.setState({ isScheduleActive: true });
+      return isInTimeSlot;
     }
+
+    // If no time slots defined, media should be active
+    return true;
   };
 
   handleScheduleChange = () => {
@@ -133,13 +144,26 @@ class MediaPlayerContent extends Component<IMediaPlayerContentProps, IMediaPlaye
     }
 
     // Handle autoplay (note: browsers may block autoplay)
+    console.log('Attempting autoplay:', {
+      autoplay: data.autoplay,
+      isScheduleActive: this.state.isScheduleActive,
+      mediaElement
+    });
+
     if (data.autoplay && this.state.isScheduleActive) {
+      // Force muted for initial autoplay (browser requirement)
+      mediaElement.muted = true;
       const playPromise = mediaElement.play();
       if (playPromise !== undefined) {
-        playPromise.catch(error => {
-          console.warn('Autoplay was prevented:', error);
-          this.setState({ error: 'Autoplay was blocked by the browser' });
-        });
+        playPromise
+          .then(() => {
+            // After successful autoplay, restore original muted state
+            mediaElement.muted = data.muted ?? false;
+          })
+          .catch(error => {
+            console.warn('Autoplay was prevented:', error);
+            this.setState({ error: 'Autoplay was blocked by the browser' });
+          });
       }
     }
   };

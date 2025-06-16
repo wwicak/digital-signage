@@ -4,6 +4,9 @@ import _ from "lodash";
 import Frame from "./Frame";
 import GridStackWrapper, { GridStackItem } from "../GridStack/GridStackWrapper";
 import Widgets from "../../widgets";
+
+// Debug log available widgets
+console.log('Available widgets:', Object.keys(Widgets));
 import EmptyWidget from "../Widgets/EmptyWidget";
 import { IBaseWidget } from "../../widgets/base_widget";
 import { useDisplayContext } from "../../contexts/DisplayContext";
@@ -25,6 +28,19 @@ const DEFAULT_LAYOUT: DisplayLayoutType = "spaced";
 
 const Display: React.FC<IDisplayComponentProps> = React.memo(({ display }) => {
   const { state, setId, refreshDisplayData } = useDisplayContext();
+  const [layoutData, setLayoutData] = React.useState<any>(null);
+
+  // Fetch layout data when display data changes
+  React.useEffect(() => {
+    if (state.layout && typeof state.layout === 'string') {
+      fetch(`/api/layouts/${state.layout}`)
+        .then(res => res.json())
+        .then(data => {
+          setLayoutData(data.layout);
+        })
+        .catch(err => console.error('Error fetching layout:', err));
+    }
+  }, [state.layout]);
   const eventSourceRef = useRef<EventSource | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
   const layoutChangeCheckRef = useRef<NodeJS.Timeout | null>(null);
@@ -167,35 +183,88 @@ const Display: React.FC<IDisplayComponentProps> = React.memo(({ display }) => {
   // Memoize layout for GridStack to prevent unnecessary re-renders
   const gridStackItems: GridStackItem[] = useMemo(
     () =>
-      (state.widgets || []).map((widget: any) => {
-        const WidgetComponent = Widgets[widget.type]?.Component;
+      (layoutData?.widgets || []).map((widget: any) => {
+        // Skip if no widget data
+        if (!widget?.widget_id) return null;
+
+        // Get the widget definition data - handle both string ID and embedded object
+        let widgetData = widget.widget_id;
+        if (typeof widgetData !== 'object') {
+          console.error('Widget data is not an object:', widgetData);
+          return null;
+        }
+
+        
+        // Skip if corrupted data
+        if (!widgetData || !widgetData.type) {
+          console.error('Invalid widget data:', widget);
+          return null;
+        }
+        // Detailed debug logging
+        console.log('Full widget data:', JSON.stringify(widgetData, null, 2));
+        console.log('Widget instance:', widget);
+        
+        // Debug log widget type and available widgets
+        // Type normalization and debug logging
+        const widgetType = (widgetData.type || '').toLowerCase();
+        const registeredWidgets = Object.keys(Widgets);
+        console.log('Widget type:', widgetType, 'Original:', widgetData.type);
+        console.log('Available widgets:', registeredWidgets);
+        console.log('Type comparison:', registeredWidgets.map(k => ({
+          registered: k,
+          lowercased: k.toLowerCase(),
+          matches: k.toLowerCase() === widgetType
+        })));
+        
+        // Get the component from our widgets registry
+        // Find widget definition regardless of case
+        let widgetDef;
+        const matchingKey = Object.keys(Widgets).find(key =>
+          key.toLowerCase() === widgetType ||
+          key === widgetData.type // try exact match too
+        );
+        
+        if (matchingKey) {
+          widgetDef = Widgets[matchingKey];
+          console.log('Found widget definition for type:', widgetData.type, 'using key:', matchingKey);
+        }
+        
+        if (!widgetDef) {
+          console.error(`Widget type "${widgetData.type}" not found in registry. Available types:`,
+            Object.keys(Widgets).join(', '),
+            '\nAttempted lowercase match:', widgetType,
+            '\nAttempted exact match:', widgetData.type
+          );
+          return null;
+        }
 
         return {
-          id: widget._id,
+          id: widgetData._id,
           x: widget.x || 0,
           y: widget.y || 0,
           w: widget.w || 1,
           h: widget.h || 1,
-          content: WidgetComponent ? (
-            <WidgetComponent
-              key={widget._id}
-              id={widget._id}
-              options={widget.options || {}}
+          content: widgetDef.Widget ? (
+            <widgetDef.Widget
+              key={widgetData._id}
+              // id={widgetData._id}
+              data={widgetData.data || {}}
+              isPreview={false}
             />
           ) : (
             <div className="flex items-center justify-center h-full bg-red-100 text-red-600">
-              Unknown Widget: {widget.type}
+              Unknown Widget Type: {widgetData.type} (Available types: {Object.keys(Widgets).join(', ')})
             </div>
           )
         };
-      }),
-    [state.widgets],
+      }).filter(Boolean), // Remove any null items
+    [layoutData?.widgets],
   );
 
   // Memoize layout setting
   const currentLayout = useMemo(
-    () => state.layout || DEFAULT_LAYOUT,
-    [state.layout],
+    () => layoutData?.layoutType || DEFAULT_LAYOUT,
+    [layoutData?.layoutType],
   );
 
   // Memoize margin calculation for stable props
@@ -208,6 +277,19 @@ const Display: React.FC<IDisplayComponentProps> = React.memo(({ display }) => {
   );
 
 
+
+  if (!layoutData) {
+    return (
+      <Frame
+        statusBar={state.statusBar?.elements || DEFAULT_STATUS_BAR}
+        orientation={state.orientation}
+      >
+        <div className="flex items-center justify-center h-full">
+          <div className='animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600'></div>
+        </div>
+      </Frame>
+    );
+  }
 
   return (
     /*
@@ -235,8 +317,8 @@ const Display: React.FC<IDisplayComponentProps> = React.memo(({ display }) => {
           options={{
             float: true,
             cellHeight: 'auto',
-            margin: gridMargin[0],
-            column: gridCols,
+            margin: layoutData.gridConfig?.margin[0] || gridMargin[0],
+            column: layoutData.gridConfig?.cols || gridCols,
             staticGrid: true, // Make grid read-only for display
             disableDrag: true,
             disableResize: true,
