@@ -178,19 +178,20 @@ class MediaPlayerContent extends Component<IMediaPlayerContentProps, IMediaPlaye
           errorMessage = 'Media playback was aborted';
           break;
         case MediaError.MEDIA_ERR_NETWORK:
-          errorMessage = 'Network error occurred while loading media';
+          errorMessage = 'Network error occurred while loading media. Check your internet connection or URL.';
           break;
         case MediaError.MEDIA_ERR_DECODE:
-          errorMessage = 'Media format is not supported';
+          errorMessage = 'Media format is not supported by this browser';
           break;
         case MediaError.MEDIA_ERR_SRC_NOT_SUPPORTED:
-          errorMessage = 'Media source is not supported';
+          errorMessage = 'Media source is not supported. Please check the URL or file format.';
           break;
         default:
           errorMessage = 'Unknown media error';
       }
     }
     
+    console.error('MediaPlayer - Media error:', errorMessage, 'Source:', target.src);
     this.setState({ error: errorMessage });
   };
 
@@ -222,6 +223,59 @@ class MediaPlayerContent extends Component<IMediaPlayerContentProps, IMediaPlaye
     );
   };
 
+  renderYouTubeEmbed = (youtubeUrl: string) => {
+    const { data } = this.props;
+    
+    // Extract video ID from various YouTube URL formats
+    const getYouTubeVideoId = (url: string): string | null => {
+      const regex = /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/;
+      const match = url.match(regex);
+      return match ? match[1] : null;
+    };
+
+    const videoId = getYouTubeVideoId(youtubeUrl);
+    if (!videoId) {
+      console.error('MediaPlayer - Could not extract YouTube video ID from:', youtubeUrl);
+      return this.renderFallbackContent();
+    }
+
+    // Build YouTube embed URL with parameters
+    const embedUrl = new URL(`https://www.youtube.com/embed/${videoId}`);
+    
+    // Add YouTube embed parameters
+    if (data?.autoplay && this.state.isScheduleActive) {
+      embedUrl.searchParams.set('autoplay', '1');
+    }
+    if (data?.loop) {
+      embedUrl.searchParams.set('loop', '1');
+      embedUrl.searchParams.set('playlist', videoId); // Required for loop to work
+    }
+    if (data?.muted) {
+      embedUrl.searchParams.set('mute', '1');
+    }
+    if (data?.showControls === false) {
+      embedUrl.searchParams.set('controls', '0');
+    }
+    
+    // Additional YouTube parameters
+    embedUrl.searchParams.set('rel', '0'); // Don't show related videos
+    embedUrl.searchParams.set('modestbranding', '1'); // Reduce YouTube branding
+
+    return (
+      <iframe
+        src={embedUrl.toString()}
+        className="w-full h-full"
+        style={{
+          backgroundColor: data?.backgroundColor || 'transparent',
+        }}
+        frameBorder="0"
+        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+        allowFullScreen
+        title={data?.title || 'YouTube Video'}
+      />
+    );
+  };
+
   renderMediaElement = () => {
     const { data } = this.props;
     
@@ -229,9 +283,41 @@ class MediaPlayerContent extends Component<IMediaPlayerContentProps, IMediaPlaye
       return this.renderFallbackContent();
     }
 
+    // Process and validate URL
+    let processedUrl = data.url;
+    let isYouTubeUrl = false;
+    
+    try {
+      // Handle relative URLs by converting to absolute
+      if (data.url.startsWith('/')) {
+        processedUrl = `${window.location.origin}${data.url}`;
+      }
+      
+      // Check if it's a YouTube URL and convert it
+      const youtubeRegex = /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/;
+      const match = data.url.match(youtubeRegex);
+      
+      if (match) {
+        isYouTubeUrl = true;
+        // For YouTube, we'll need to use iframe embed instead of video element
+        processedUrl = data.url; // Keep original for iframe
+      } else {
+        // Validate URL format for non-YouTube URLs
+        new URL(processedUrl);
+      }
+    } catch (error) {
+      console.error('MediaPlayer - Invalid URL format:', data.url, error);
+      return this.renderFallbackContent();
+    }
+
+    // Handle YouTube URLs with iframe
+    if (isYouTubeUrl) {
+      return this.renderYouTubeEmbed(processedUrl);
+    }
+
     const commonProps = {
       ref: this.mediaRef as any,
-      src: data.url,
+      src: processedUrl,
       controls: data.showControls !== false, // Default to true
       autoPlay: data.autoplay && this.state.isScheduleActive,
       loop: data.loop,
@@ -240,6 +326,8 @@ class MediaPlayerContent extends Component<IMediaPlayerContentProps, IMediaPlaye
       onLoadStart: this.handleMediaLoadStart,
       onLoadedData: this.handleMediaLoad,
       className: "w-full h-full",
+      crossOrigin: "anonymous", // Enable CORS for external URLs
+      preload: "metadata", // Preload metadata for better UX
       style: {
         objectFit: data.fit || 'contain',
         backgroundColor: data.backgroundColor || 'transparent',

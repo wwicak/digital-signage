@@ -132,7 +132,38 @@ class MediaPlayerOptions extends Component<IWidgetOptionsEditorProps<MediaPlayer
         }
       } else if (typeof value === 'string') {
         finalValue = value;
-        this.setState({ uploadError: undefined });
+        
+        // Enhanced URL validation
+        if (value) {
+          try {
+            const url = new URL(value);
+            // Check if it's a valid media URL pattern
+            const validProtocols = ['http:', 'https:'];
+            
+            if (!validProtocols.includes(url.protocol)) {
+              throw new Error('URL must use HTTP or HTTPS protocol');
+            }
+            
+            // Check if it's a YouTube URL (allowed) or validate as direct media URL
+            const youtubeRegex = /(?:youtube\.com|youtu\.be)/i;
+            const isYouTubeUrl = youtubeRegex.test(url.hostname);
+            
+            if (isYouTubeUrl) {
+              // Additional validation for YouTube URLs
+              const videoIdRegex = /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/;
+              if (!videoIdRegex.test(value)) {
+                throw new Error('Invalid YouTube URL format');
+              }
+            }
+            
+            this.setState({ uploadError: undefined });
+          } catch (error) {
+            const errorMessage = `Invalid URL: ${error instanceof Error ? error.message : 'Please enter a valid URL'}`;
+            this.setState({ uploadError: errorMessage });
+          }
+        } else {
+          this.setState({ uploadError: undefined });
+        }
       } else {
         finalValue = '';
       }
@@ -293,21 +324,37 @@ class MediaPlayerOptions extends Component<IWidgetOptionsEditorProps<MediaPlayer
                 />
 
                 <div>
-                  <Input
-                    label='Media File (Upload or URL)'
-                    type='photo'
-                    name='upload'
-                    value={url}
-                    onChange={this.handleChange}
-                    accept={{
-                      'video/mp4': ['.mp4'],
-                      'video/webm': ['.webm'],
-                      'video/quicktime': ['.mov'],
-                      'audio/mpeg': ['.mp3'],
-                      'audio/wav': ['.wav'],
-                      'audio/ogg': ['.ogg'],
-                    }}
-                  />
+                  <div className='space-y-4'>
+                    <Input
+                      label='Media URL'
+                      type='url'
+                      name='upload'
+                      value={url}
+                      placeholder='https://example.com/video.mp4 or https://youtube.com/watch?v=...'
+                      onChange={this.handleChange}
+                      helpText='Enter a direct URL to a video/audio file, or a YouTube URL'
+                    />
+                    
+                    <div className='text-center text-gray-500 text-sm font-medium'>
+                      OR
+                    </div>
+                    
+                    <Input
+                      label='Upload Media File'
+                      type='photo'
+                      name='upload'
+                      value={url}
+                      onChange={this.handleChange}
+                      accept={{
+                        'video/mp4': ['.mp4'],
+                        'video/webm': ['.webm'],
+                        'video/quicktime': ['.mov'],
+                        'audio/mpeg': ['.mp3'],
+                        'audio/wav': ['.wav'],
+                        'audio/ogg': ['.ogg'],
+                      }}
+                    />
+                  </div>
                   {isUploading && (
                     <div className='flex items-center gap-2 mt-3 p-3 bg-blue-50 border border-blue-200 rounded-lg'>
                       <div className='w-4 h-4 border-2 border-blue-600 border-t-transparent rounded-full animate-spin'></div>
@@ -322,10 +369,13 @@ class MediaPlayerOptions extends Component<IWidgetOptionsEditorProps<MediaPlayer
                   )}
                   <div className='mt-3 p-3 bg-gray-50 border border-gray-200 rounded-lg'>
                     <p className='text-sm text-gray-600'>
-                      <strong>Supported formats:</strong> MP4, WebM, MOV (video) | MP3, WAV, OGG (audio)
+                      <strong>Supported formats:</strong> MP4, WebM, MOV (video) | MP3, WAV, OGG (audio) | YouTube URLs
                     </p>
                     <p className='text-sm text-gray-600 mt-1'>
-                      <strong>Maximum file size:</strong> 50MB
+                      <strong>Maximum file size:</strong> 50MB (for uploads)
+                    </p>
+                    <p className='text-sm text-gray-600 mt-1'>
+                      <strong>URL Examples:</strong> Direct media files or YouTube links (youtube.com, youtu.be)
                     </p>
                   </div>
                 </div>
