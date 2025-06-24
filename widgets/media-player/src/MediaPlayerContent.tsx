@@ -326,7 +326,6 @@ class MediaPlayerContent extends Component<IMediaPlayerContentProps, IMediaPlaye
       onLoadStart: this.handleMediaLoadStart,
       onLoadedData: this.handleMediaLoad,
       className: "w-full h-full",
-      crossOrigin: "anonymous" as "" | "anonymous" | "use-credentials" | undefined, // Fix type error
       preload: "metadata", // Preload metadata for better UX
       style: {
         objectFit: data.fit || 'contain',
@@ -348,7 +347,7 @@ class MediaPlayerContent extends Component<IMediaPlayerContentProps, IMediaPlaye
 
     // Video element
     return (
-      <video {...commonProps}>
+      <video {...commonProps} crossOrigin="anonymous">
         Your browser does not support the video tag.
       </video>
     );
