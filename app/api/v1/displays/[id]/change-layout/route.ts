@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import dbConnect from "@/lib/mongodb";
 import Display from "@/lib/models/Display";
-import { requireAuth } from "@/lib/helpers/auth_helper";
+import { requireAuth } from "@/lib/auth";
 import { sendEventToDisplay } from "@/lib/sse_display_manager";
 import { z } from "zod";
 
