@@ -271,7 +271,7 @@ const Display: React.FC<IDisplayComponentProps> = React.memo(({ display }) => {
   const gridMargin = useMemo(
     () =>
       currentLayout === "spaced"
-        ? ([10, 10] as [number, number])
+        ? ([2, 2] as [number, number])
         : ([0, 0] as [number, number]),
     [currentLayout],
   );
@@ -305,11 +305,11 @@ const Display: React.FC<IDisplayComponentProps> = React.memo(({ display }) => {
     >
       <div
         className={`flex-1 overflow-hidden transition-all duration-300 ease-in-out ${
-          currentLayout === "spaced" ? "mb-2" : "mb-0"
+          currentLayout === "spaced" ? "mb-0" : "mb-0"
         } ${orientationClass}`}
         ref={containerRef}
         style={{
-          marginBottom: currentLayout === "spaced" ? "10px" : "0px",
+          marginBottom: currentLayout === "spaced" ? "2px" : "0px",
         }}
       >
         <GridStackWrapper
@@ -317,7 +317,7 @@ const Display: React.FC<IDisplayComponentProps> = React.memo(({ display }) => {
           options={{
             float: true,
             cellHeight: 'auto',
-            margin: layoutData.gridConfig?.margin[0] || gridMargin[0],
+            margin: "2",
             column: layoutData.gridConfig?.cols || gridCols,
             staticGrid: true, // Make grid read-only for display
             disableDrag: true,

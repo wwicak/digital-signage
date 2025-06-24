@@ -9,6 +9,7 @@ export enum WidgetType {
   LIST = "list",
   MEDIA_PLAYER = "media-player",
   MEETING_ROOM = "meeting-room",
+  PRIORITY_VIDEO = "priority-video",
   SLIDESHOW = "slideshow", // Refers to a Slideshow model
   WEATHER = "weather",
   WEB = "web",
@@ -74,6 +75,31 @@ export interface MediaPlayerWidgetData {
   };
 }
 
+export interface PriorityVideoWidgetData {
+  title?: string;
+  url?: string; // URL for uploaded file or remote media
+  mediaType?: "video" | "audio";
+  backgroundColor?: string;
+  // Priority scheduling (always enabled)
+  schedule: {
+    daysOfWeek?: number[]; // 0-6 (Sunday-Saturday)
+    timeSlots: Array<{
+      startTime: string; // HH:MM format
+      endTime: string; // HH:MM format
+    }>;
+  };
+  // Playback settings (simplified - always autoplay, no loop, muted initially)
+  volume?: number; // 0-1
+  // Fallback content
+  fallbackContent?: {
+    message?: string;
+    backgroundColor?: string;
+  };
+  // Priority settings
+  priority?: number; // Higher number = higher priority
+  playOnce?: boolean; // Play only once per schedule activation
+}
+
 export interface SlideshowWidgetData {
   slideshow_id?: string;
   title?: string;
@@ -113,6 +139,7 @@ export type WidgetData =
   | ImageWidgetData
   | ListWidgetData
   | MediaPlayerWidgetData
+  | PriorityVideoWidgetData
   | SlideshowWidgetData
   | WeatherWidgetData
   | WebWidgetData
@@ -261,6 +288,39 @@ export const MediaPlayerWidgetDataSchema = z
   })
   .passthrough(); // Allow additional properties
 
+export const PriorityVideoWidgetDataSchema = z
+  .object({
+    title: z.string().optional(),
+    url: z.string().url().optional().or(z.string().length(0)).optional(),
+    mediaType: z.enum(["video", "audio"]).optional(),
+    backgroundColor: z.string().optional(),
+    // Priority scheduling (always enabled)
+    schedule: z.object({
+      daysOfWeek: z.array(z.number().min(0).max(6)).optional(),
+      timeSlots: z
+        .array(
+          z.object({
+            startTime: z.string(), // HH:MM format
+            endTime: z.string(), // HH:MM format
+          })
+        )
+        .min(1), // At least one time slot required
+    }),
+    // Playback settings
+    volume: z.number().min(0).max(1).optional(),
+    // Fallback content
+    fallbackContent: z
+      .object({
+        message: z.string().optional(),
+        backgroundColor: z.string().optional(),
+      })
+      .optional(),
+    // Priority settings
+    priority: z.number().optional(),
+    playOnce: z.boolean().optional(),
+  })
+  .passthrough(); // Allow additional properties
+
 export const SlideshowWidgetDataSchema = z.object({
   slideshow_id: z.string().optional(), // Could be refined to ObjectId if always the case
   title: z.string().optional(),
@@ -298,6 +358,7 @@ export const WidgetDataZod = z.union([
   ImageWidgetDataSchema,
   ListWidgetDataSchema,
   MediaPlayerWidgetDataSchema,
+  PriorityVideoWidgetDataSchema,
   SlideshowWidgetDataSchema,
   WeatherWidgetDataSchema,
   WebWidgetDataSchema,
@@ -386,6 +447,20 @@ export const WidgetSchemaZod = z
             path: ["data"],
             message: `Data does not match MEDIA_PLAYER type schema: ${JSON.stringify(
               mediaPlayerResult.error.issues
+            )}`,
+          });
+        }
+        break;
+      case WidgetType.PRIORITY_VIDEO:
+        const priorityVideoResult = PriorityVideoWidgetDataSchema.safeParse(
+          val.data
+        );
+        if (!priorityVideoResult.success) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            path: ["data"],
+            message: `Data does not match PRIORITY_VIDEO type schema: ${JSON.stringify(
+              priorityVideoResult.error.issues
             )}`,
           });
         }
