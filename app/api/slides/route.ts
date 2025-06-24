@@ -6,7 +6,7 @@ import {
   getDisplayIdsForSlide,
 } from "@/lib/helpers/slide_helper";
 import { sendEventToDisplay } from "@/lib/sse_manager";
-import { requireAuth } from "@/lib/helpers/auth_helper";
+import { requireAuth } from "@/lib/auth";
 
 export async function GET(request: NextRequest) {
   try {

@@ -3,7 +3,7 @@ import dbConnect from "@/lib/mongodb";
 import Display from "@/lib/models/Display";
 import { WidgetType } from "@/lib/models/Widget";
 import { createWidgetsForDisplay } from "@/lib/helpers/display_helper";
-import { requireAuth } from "@/lib/helpers/auth_helper";
+import { requireAuth } from "@/lib/auth";
 import { hasPermission, addAccessFilter } from "@/lib/helpers/rbac_helper";
 import { sendEventToDisplay } from "@/lib/sse_manager";
 import { z } from "zod";

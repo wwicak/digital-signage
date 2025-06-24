@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { requireAuth } from "@/lib/helpers/auth_helper";
+import { requireAuth } from "@/lib/auth";
 
 // Force dynamic rendering to prevent static generation errors
 export const dynamic = "force-dynamic";

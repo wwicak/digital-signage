@@ -6,7 +6,7 @@ import {
   updateWidgetsForDisplay,
   deleteWidgetsForDisplay,
 } from "@/lib/helpers/display_helper";
-import { requireAuth } from "@/lib/helpers/auth_helper";
+import { requireAuth } from "@/lib/auth";
 import { canAccessDisplay, canManageDisplay } from "@/lib/helpers/rbac_helper";
 import { sendEventToDisplay } from "@/lib/sse_manager";
 import { z } from "zod";

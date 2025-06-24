@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import dbConnect from "../../../../../lib/mongodb";
 import Layout from "../../../../../lib/models/Layout";
 import Widget from "../../../../../lib/models/Widget";
-import { requireAuth } from "../../../../../lib/helpers/auth_helper";
+import { requireAuth } from "../../../../../lib/auth";
 import mongoose from "mongoose";
 
 // Force dynamic rendering

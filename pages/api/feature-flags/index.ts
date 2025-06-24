@@ -1,5 +1,5 @@
 import dbConnect from "@/lib/mongodb";
-import { requireAuth } from "@/lib/helpers/auth_helper";
+import { requireAuth } from "@/lib/auth";
 import FeatureFlag, {
   FeatureFlagSchemaZodServer,
 } from "@/lib/models/FeatureFlag";

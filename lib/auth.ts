@@ -1,4 +1,5 @@
 import type { NextApiRequest, NextApiResponse } from "next/types";
+import type { NextRequest } from "next/server";
 import { IncomingMessage } from "http";
 import User, { IUser, IUserRole, UserRoleName } from "./models/User";
 import * as jwt from "jsonwebtoken";
@@ -58,16 +59,34 @@ export function verifyToken(token: string): SessionData | null {
  * Extract token from request (from Authorization header or cookies)
  */
 export function extractToken(
-  req: NextApiRequest | IncomingMessage
+  req: NextApiRequest | NextRequest | IncomingMessage
 ): string | null {
+  // Handle NextRequest (App Router)
+  if ('cookies' in req && typeof req.cookies.get === 'function') {
+    // Try Authorization header first
+    const authHeader = req.headers.get('authorization');
+    if (authHeader && authHeader.startsWith("Bearer ")) {
+      return authHeader.substring(7);
+    }
+
+    // Try cookie
+    const authTokenCookie = req.cookies.get('auth-token');
+    if (authTokenCookie) {
+      return authTokenCookie.value;
+    }
+
+    return null;
+  }
+
+  // Handle NextApiRequest and IncomingMessage (Pages Router)
   // Try Authorization header first
-  const authHeader = req.headers.authorization;
+  const authHeader = (req.headers as any).authorization;
   if (authHeader && authHeader.startsWith("Bearer ")) {
     return authHeader.substring(7);
   }
 
   // Try cookie
-  const cookies = req.headers.cookie;
+  const cookies = (req.headers as any).cookie;
   if (cookies) {
     const tokenMatch = cookies.match(/auth-token=([^;]+)/);
     if (tokenMatch) {
@@ -82,7 +101,7 @@ export function extractToken(
  * Get authenticated user from request
  */
 export async function getAuthenticatedUser(
-  req: NextApiRequest
+  req: NextApiRequest | NextRequest
 ): Promise<AuthenticatedUser | null> {
   await dbConnect();
 
@@ -114,7 +133,7 @@ export async function getAuthenticatedUser(
  * Require authentication middleware
  */
 export async function requireAuth(
-  req: NextApiRequest
+  req: NextApiRequest | NextRequest
 ): Promise<AuthenticatedUser> {
   const user = await getAuthenticatedUser(req);
 

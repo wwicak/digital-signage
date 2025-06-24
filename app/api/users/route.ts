@@ -3,7 +3,7 @@ import dbConnect from "@/lib/mongodb";
 import User, { UserRoleName, IUserRole } from "@/lib/models/User";
 import Building from "@/lib/models/Building";
 import Display from "@/lib/models/Display";
-import { requireAuth } from "@/lib/helpers/auth_helper";
+import { requireAuth } from "@/lib/auth";
 import { hasPermission, canCreateUsers } from "@/lib/helpers/rbac_helper";
 import { registerUser, sanitizeUser } from "@/lib/helpers/auth_helper";
 import { z } from "zod";

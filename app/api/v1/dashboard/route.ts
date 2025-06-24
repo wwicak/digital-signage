@@ -4,7 +4,7 @@ import Building from "@/lib/models/Building";
 import Room from "@/lib/models/Room";
 import Reservation from "@/lib/models/Reservation";
 import UserCalendarLink from "@/lib/models/UserCalendarLink";
-import { requireAuth } from "@/lib/helpers/auth_helper";
+import { requireAuth } from "@/lib/auth";
 import { hasPermission } from "@/lib/helpers/rbac_helper";
 
 // Force dynamic rendering to prevent static generation errors

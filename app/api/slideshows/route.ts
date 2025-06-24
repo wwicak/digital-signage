@@ -6,7 +6,7 @@ import {
   validateSlidesExist,
   populateSlideshowSlides,
 } from "@/lib/helpers/slideshow_helper";
-import { requireAuth } from "@/lib/helpers/auth_helper";
+import { requireAuth } from "@/lib/auth";
 
 export async function GET(request: NextRequest) {
   try {

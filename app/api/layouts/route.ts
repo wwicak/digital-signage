@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import dbConnect from "../../../lib/mongodb";
 import Layout from "../../../lib/models/Layout";
-import { requireAuth } from "../../../lib/helpers/auth_helper";
+import { requireAuth } from "../../../lib/auth";
 
 // Force dynamic rendering
 export const dynamic = "force-dynamic";
