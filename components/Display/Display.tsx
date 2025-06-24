@@ -194,7 +194,7 @@ const Display: React.FC<IDisplayComponentProps> = React.memo(({ display }) => {
           return null;
         }
 
-        
+
         // Skip if corrupted data
         if (!widgetData || !widgetData.type) {
           console.error('Invalid widget data:', widget);
@@ -203,7 +203,7 @@ const Display: React.FC<IDisplayComponentProps> = React.memo(({ display }) => {
         // Detailed debug logging
         console.log('Full widget data:', JSON.stringify(widgetData, null, 2));
         console.log('Widget instance:', widget);
-        
+
         // Debug log widget type and available widgets
         // Type normalization and debug logging
         const widgetType = (widgetData.type || '').toLowerCase();
@@ -215,7 +215,7 @@ const Display: React.FC<IDisplayComponentProps> = React.memo(({ display }) => {
           lowercased: k.toLowerCase(),
           matches: k.toLowerCase() === widgetType
         })));
-        
+
         // Get the component from our widgets registry
         // Find widget definition regardless of case
         let widgetDef;
@@ -223,12 +223,12 @@ const Display: React.FC<IDisplayComponentProps> = React.memo(({ display }) => {
           key.toLowerCase() === widgetType ||
           key === widgetData.type // try exact match too
         );
-        
+
         if (matchingKey) {
           widgetDef = Widgets[matchingKey];
           console.log('Found widget definition for type:', widgetData.type, 'using key:', matchingKey);
         }
-        
+
         if (!widgetDef) {
           console.error(`Widget type "${widgetData.type}" not found in registry. Available types:`,
             Object.keys(Widgets).join(', '),
@@ -304,27 +304,22 @@ const Display: React.FC<IDisplayComponentProps> = React.memo(({ display }) => {
       orientation={state.orientation}
     >
       <div
-        className={`flex-1 overflow-hidden transition-all duration-300 ease-in-out ${
-          currentLayout === "spaced" ? "mb-0" : "mb-0"
-        } ${orientationClass}`}
+        className={`flex-1 w-full h-full overflow-hidden ${orientationClass}`}
         ref={containerRef}
-        style={{
-          marginBottom: currentLayout === "spaced" ? "2px" : "0px",
-        }}
       >
         <GridStackWrapper
           items={gridStackItems}
           options={{
             float: true,
             cellHeight: 'auto',
-            margin: "2",
+            margin: currentLayout === "spaced" ? "2" : "0",
             column: layoutData.gridConfig?.cols || gridCols,
             staticGrid: true, // Make grid read-only for display
             disableDrag: true,
             disableResize: true,
             animate: false, // Disable animations for better performance
           }}
-          className="display-grid"
+          className="display-grid w-full h-full"
         />
       </div>
     </Frame>

@@ -21,7 +21,15 @@ const LayoutPreviewComponent: React.FC<LayoutPreviewProps> = ({ loggedIn }) => {
   const [previewScale, setPreviewScale] = useState(0.5)
   const [isClient, setIsClient] = useState(false)
 
+  // Handle client-side hydration
   useEffect(() => {
+    setIsClient(true)
+  }, [])
+
+  useEffect(() => {
+    // Only run scaling calculations on client side to avoid hydration mismatch
+    if (!isClient) return
+
     // Adjust preview scale based on screen size
     const updateScale = () => {
       // Account for sidebar (240px) + padding + margins more conservatively
@@ -45,7 +53,7 @@ const LayoutPreviewComponent: React.FC<LayoutPreviewProps> = ({ loggedIn }) => {
     return () => {
       window.removeEventListener('resize', updateScale)
     }
-  }, [layout?.orientation]) // Only depend on orientation, not entire layout object
+  }, [isClient, layout?.orientation]) // Depend on isClient and orientation
 
   if (isLoading) {
     return (
@@ -194,8 +202,8 @@ const LayoutPreviewComponent: React.FC<LayoutPreviewProps> = ({ loggedIn }) => {
                 <div
                   className='bg-black rounded-lg shadow-lg overflow-hidden max-w-full'
                   style={{
-                    width: layout.orientation === 'portrait' ? `${720 * previewScale}px` : `${1280 * previewScale}px`,
-                    height: layout.orientation === 'portrait' ? `${1280 * previewScale}px` : `${720 * previewScale}px`,
+                    width: !isClient ? '640px' : (layout.orientation === 'portrait' ? `${720 * previewScale}px` : `${1280 * previewScale}px`),
+                    height: !isClient ? '360px' : (layout.orientation === 'portrait' ? `${1280 * previewScale}px` : `${720 * previewScale}px`),
                     minHeight: '300px',
                     maxWidth: '100%',
                   }}

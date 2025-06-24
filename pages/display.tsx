@@ -19,23 +19,35 @@ const DisplayPageComponent = memo(function DisplayPageComponent({
   const router = useRouter();
   const [actualDisplayId, setActualDisplayId] = useState<string | undefined>(displayId);
   const [isRegistering, setIsRegistering] = useState(false);
+  const [isClient, setIsClient] = useState(false);
+
+  // Handle client-side hydration
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
 
   useEffect(() => {
+    // Only run registration on client side to avoid hydration mismatch
+    if (!isClient) return;
+
     // If we have a layoutId but no displayId, we need to auto-register this display
     if (layoutId && !displayId && autostart) {
       registerDisplay();
     }
-  }, [layoutId, displayId, autostart]);
+  }, [isClient, layoutId, displayId, autostart]);
 
   const registerDisplay = async () => {
+    // Only register on client side
+    if (!isClient) return;
+
     setIsRegistering(true);
 
     try {
-      // Get device information
+      // Get device information (safe to use browser APIs here since we're on client)
       const deviceInfo = {
-        userAgent: navigator.userAgent,
-        screenResolution: `${screen.width}x${screen.height}`,
-        orientation: screen.width > screen.height ? 'landscape' : 'portrait',
+        userAgent: typeof navigator !== 'undefined' ? navigator.userAgent : 'Unknown',
+        screenResolution: typeof screen !== 'undefined' ? `${screen.width}x${screen.height}` : 'Unknown',
+        orientation: typeof screen !== 'undefined' ? (screen.width > screen.height ? 'landscape' : 'portrait') : 'landscape',
       };
 
       // Auto-register this display with the selected layout
@@ -72,6 +84,19 @@ const DisplayPageComponent = memo(function DisplayPageComponent({
     }
   };
 
+  // Show loading state while hydrating
+  if (!isClient) {
+    return (
+      <div className='min-h-screen flex items-center justify-center bg-gray-100'>
+        <div className='text-center'>
+          <div className='animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4'></div>
+          <h2 className='text-xl font-semibold text-gray-900 mb-2'>Loading Display...</h2>
+          <p className='text-gray-600'>Initializing display system</p>
+        </div>
+      </div>
+    );
+  }
+
   // Show registration loading state
   if (isRegistering) {
     return (
@@ -104,7 +129,7 @@ const DisplayPageComponent = memo(function DisplayPageComponent({
   }
 
   return (
-    <div className={'container'}>
+    <div className='w-full h-screen overflow-hidden'>
       {/* Pass the displayId obtained from props directly to the Display component */}
       {/* The Display component uses this ID to fetch its own data and setup SSE */}
       {actualDisplayId ? (
