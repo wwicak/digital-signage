@@ -141,6 +141,16 @@ export default function HomePage() {
               </Link>
             </Button>
 
+            <Button
+              variant='outline'
+              size='lg'
+              onClick={() => setShowDisplaySelector(!showDisplaySelector)}
+              className='text-lg px-8 py-6'
+            >
+              <Monitor className='mr-2 h-5 w-5' />
+              {showDisplaySelector ? 'Hide' : 'Show'} Display Manager
+            </Button>
+
             {displays.length > 0 && (
               <div className='flex items-center gap-4'>
                 <span className='text-sm text-muted-foreground'>or view a display:</span>
@@ -158,19 +168,6 @@ export default function HomePage() {
                 />
               </div>
             )}
-
-            {/* Display Selector Toggle */}
-            <div className='mt-8'>
-              <Button
-                variant='outline'
-                size='lg'
-                onClick={() => setShowDisplaySelector(!showDisplaySelector)}
-                className='text-lg px-8 py-6'
-              >
-                <Monitor className='mr-2 h-5 w-5' />
-                {showDisplaySelector ? 'Hide' : 'Show'} Display Manager
-              </Button>
-            </div>
           </div>
         </div>
 
