@@ -49,7 +49,7 @@ const ScreenCardValueSchema = z.object({
 
 // Import the original IDisplayData to ensure compatibility or use if it becomes a Zod type later.
 import { useDisplayMutations } from "../../hooks/useDisplayMutations";
-import { getLayouts } from "@/actions/layouts";
+import { getLayouts, ILayoutData } from "@/actions/layouts";
 
 // Zod schema for ScreenCard props
 export const ScreenCardPropsSchema = z.object({
@@ -76,7 +76,7 @@ const ScreenCard: React.FC<IScreenCardProps> = ({
   const [layoutChangeError, setLayoutChangeError] = useState<string>('');
 
   // Available layouts state
-  const [availableLayouts, setAvailableLayouts] = useState<any[]>([]);
+  const [availableLayouts, setAvailableLayouts] = useState<ILayoutData[]>([]);
   const [loadingLayouts, setLoadingLayouts] = useState(true);
 
   // Fetch available layouts
@@ -104,33 +104,7 @@ const ScreenCard: React.FC<IScreenCardProps> = ({
     }
   }, [value?.layout, selectedLayout]);
 
-  const handleOrientationChange = (
-    event: React.ChangeEvent<HTMLSelectElement>,
-  ): void => {
-    event.preventDefault();
-    event.stopPropagation();
 
-    const newOrientation = event.target.value as "landscape" | "portrait";
-    if (value && value._id && newOrientation !== value.orientation) {
-      setIsUpdatingOrientation(true);
-      updateDisplay.mutate(
-        {
-          id: value._id,
-          data: { orientation: newOrientation },
-        },
-        {
-          onSuccess: () => {
-            setIsUpdatingOrientation(false);
-            refresh();
-          },
-          onError: (error: any) => {
-            console.error("Failed to update orientation:", error);
-            setIsUpdatingOrientation(false);
-          },
-        },
-      );
-    }
-  };
 
   const handleEdit = (event: React.MouseEvent): void => {
     event.preventDefault();
@@ -188,12 +162,12 @@ const ScreenCard: React.FC<IScreenCardProps> = ({
   };
 
   const getCurrentLayoutName = () => {
-    const layout = availableLayouts.find(l => l._id === value?.layout);
+    const layout = availableLayouts.find(l => l._id?.toString() === value?.layout);
     return layout?.name || (value?.layout === 'spaced' ? 'Spaced Layout' : value?.layout === 'compact' ? 'Compact Layout' : 'Unknown Layout');
   };
 
   const getSelectedLayoutName = () => {
-    const layout = availableLayouts.find(l => l._id === selectedLayout);
+    const layout = availableLayouts.find(l => l._id?.toString() === selectedLayout);
     return layout?.name || selectedLayout;
   };
 
@@ -406,7 +380,7 @@ const ScreenCard: React.FC<IScreenCardProps> = ({
                   </SelectTrigger>
                   <SelectContent>
                     {availableLayouts.map((layout) => (
-                      <SelectItem key={layout._id} value={layout._id}>
+                      <SelectItem key={layout._id?.toString() || ''} value={layout._id?.toString() || ''}>
                         <div className='flex flex-col'>
                           <span className='font-medium text-sm'>{layout.name}</span>
                           <span className='text-xs text-muted-foreground'>

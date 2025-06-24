@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { X } from "lucide-react";
 import { useDisplayMutations } from "@/hooks/useDisplayMutations";
-import { getLayouts } from "@/actions/layouts";
+import { getLayouts, ILayoutData } from "@/actions/layouts";
 
 interface DisplayEditDialogProps {
   display?: {
@@ -35,7 +35,7 @@ const DisplayEditDialog: React.FC<DisplayEditDialogProps> = ({
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [layouts, setLayouts] = useState<any[]>([]);
+  const [layouts, setLayouts] = useState<ILayoutData[]>([]);
   const [loadingLayouts, setLoadingLayouts] = useState(true);
 
   // Fetch available layouts
@@ -272,7 +272,7 @@ const DisplayEditDialog: React.FC<DisplayEditDialogProps> = ({
                   {loadingLayouts ? "Loading layouts..." : "Select a layout"}
                 </option>
                 {layouts.map((layout) => (
-                  <option key={layout._id} value={layout._id}>
+                  <option key={layout._id?.toString()} value={layout._id?.toString()}>
                     {layout.name} ({layout.orientation}) - {layout.widgets?.length || 0} widgets
                   </option>
                 ))}
