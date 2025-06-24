@@ -135,6 +135,7 @@ export const checkAuthStatus = async (host: string = ''): Promise<{ isAuthentica
     // If we have a cookie, verify with the server
     const response = await axios.get(`${host}/api/auth/me`, {
       withCredentials: true, // Include cookies in the request
+      timeout: 5000, // 5 second timeout
     })
 
     if (response.data && response.data.success) {

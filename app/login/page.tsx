@@ -46,6 +46,8 @@ const LoginContent = memo(function LoginContent() {
         }
       } catch (error) {
         console.error('Auth check failed:', error)
+        // If auth check fails, just proceed to show login form
+        // This handles network errors gracefully
       } finally {
         setIsCheckingAuth(false)
       }
@@ -81,6 +83,21 @@ const LoginContent = memo(function LoginContent() {
     performLogin()
   }
 
+  // Show loading state while checking authentication
+  if (isCheckingAuth) {
+    return (
+      <Frame loggedIn={false}>
+        <div className='max-w-2xl m-auto flex flex-col items-center justify-center min-h-[400px]'>
+          <div className='flex flex-col items-center'>
+            <Loader2 className='w-8 h-8 text-primary animate-spin mb-4' />
+            <h2 className='text-xl font-semibold text-gray-700 mb-2'>Checking authentication...</h2>
+            <p className='text-gray-500 text-center'>Please wait while we verify your login status.</p>
+          </div>
+        </div>
+      </Frame>
+    )
+  }
+
   return (
     <Frame loggedIn={false}>
       <h1 className='font-sans text-2xl text-gray-600 m-0'>Login</h1>
@@ -93,7 +110,7 @@ const LoginContent = memo(function LoginContent() {
         <form className='bg-white rounded-lg flex flex-col p-6 font-sans' onSubmit={handleSubmit}>
           {alert && (
             <div className={`${alert === 'error' ? 'bg-red-500' : alert === 'success' ? 'bg-primary' : 'bg-blue-500'} rounded-md mb-4 p-4 flex items-center`}>
-              {alert === 'success' ? (
+              {alert === 'success' || (alert === 'info' && isAlreadyLoggedIn) ? (
                 <Check className='w-4 h-4 text-white mr-2' />
               ) : (
                 <X className='w-4 h-4 text-white mr-2' />
