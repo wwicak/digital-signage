@@ -1,13 +1,16 @@
 import React, { useState, useEffect } from "react";
 import { X } from "lucide-react";
 import { useDisplayMutations } from "@/hooks/useDisplayMutations";
+import { getLayouts } from "@/actions/layouts";
 
 interface DisplayEditDialogProps {
   display?: {
     _id: string;
     name: string;
     orientation?: "landscape" | "portrait";
-    layout?: "spaced" | "compact";
+    layout?: string; // Can be layout ID or legacy "spaced"/"compact"
+    location?: string;
+    building?: string;
   } | null;
   isCreateMode: boolean;
   onClose: () => void;
@@ -24,7 +27,7 @@ const DisplayEditDialog: React.FC<DisplayEditDialogProps> = ({
 
   const [formData, setFormData] = useState({
     name: "",
-    layout: "spaced" as "spaced" | "compact",
+    layout: "", // Will store layout ID
     location: "",
     building: "",
     ipAddress: "",
@@ -32,20 +35,40 @@ const DisplayEditDialog: React.FC<DisplayEditDialogProps> = ({
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [layouts, setLayouts] = useState<any[]>([]);
+  const [loadingLayouts, setLoadingLayouts] = useState(true);
+
+  // Fetch available layouts
+  useEffect(() => {
+    const fetchLayouts = async () => {
+      try {
+        setLoadingLayouts(true);
+        const response = await getLayouts({ isActive: true });
+        setLayouts(response.layouts || []);
+      } catch (error) {
+        console.error("Failed to fetch layouts:", error);
+        setLayouts([]);
+      } finally {
+        setLoadingLayouts(false);
+      }
+    };
+
+    fetchLayouts();
+  }, []);
 
   useEffect(() => {
     if (display && !isCreateMode) {
       setFormData({
         name: display.name || "",
-        layout: display.layout || "spaced",
-        location: "",
-        building: "",
+        layout: display.layout || "",
+        location: display.location || "",
+        building: display.building || "",
         ipAddress: "",
       });
     } else {
       setFormData({
         name: "",
-        layout: "spaced",
+        layout: "",
         location: "",
         building: "",
         ipAddress: "",
@@ -73,19 +96,41 @@ const DisplayEditDialog: React.FC<DisplayEditDialogProps> = ({
         await createDisplay.mutateAsync({
           data: {
             name: formData.name,
-            layout: formData.layout,
+            layout: formData.layout as any, // Allow layout ID
             location: formData.location || 'Unknown Location',
             building: formData.building || 'Main Building',
           },
         });
       } else if (display) {
+        // For existing displays, update basic info first
         await updateDisplay.mutateAsync({
           id: display._id,
           data: {
             name: formData.name,
-            layout: formData.layout,
+            location: formData.location,
+            building: formData.building,
           },
         });
+
+        // If layout changed, use the change-layout API for remote update
+        if (formData.layout && formData.layout !== display.layout) {
+          const response = await fetch(`/api/v1/displays/${display._id}/change-layout`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            credentials: 'include',
+            body: JSON.stringify({
+              layoutId: formData.layout,
+              immediate: true,
+            }),
+          });
+
+          if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.error || 'Failed to change layout');
+          }
+        }
       }
 
       onSave();
@@ -213,7 +258,7 @@ const DisplayEditDialog: React.FC<DisplayEditDialogProps> = ({
                 htmlFor='layout'
                 className='block text-sm font-medium text-gray-700 mb-2'
               >
-                Layout Style
+                Layout
               </label>
               <select
                 id='layout'
@@ -221,17 +266,25 @@ const DisplayEditDialog: React.FC<DisplayEditDialogProps> = ({
                 value={formData.layout}
                 onChange={handleInputChange}
                 className='w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent'
+                disabled={loadingLayouts}
               >
-                <option value='spaced'>
-                  Spaced - More padding between widgets
+                <option value="">
+                  {loadingLayouts ? "Loading layouts..." : "Select a layout"}
                 </option>
-                <option value='compact'>
-                  Compact - Minimal spacing between widgets
-                </option>
+                {layouts.map((layout) => (
+                  <option key={layout._id} value={layout._id}>
+                    {layout.name} ({layout.orientation}) - {layout.widgets?.length || 0} widgets
+                  </option>
+                ))}
               </select>
               <p className='text-xs text-gray-500 mt-1'>
-                Layout style affects widget spacing and visual density
+                Choose the layout that will be displayed on this device. Changes will be applied immediately to connected displays.
               </p>
+              {!isCreateMode && formData.layout && formData.layout !== display?.layout && (
+                <p className='text-xs text-amber-600 mt-1 font-medium'>
+                  ⚠️ Layout change will be applied immediately to the physical display
+                </p>
+              )}
             </div>
           </div>
 
