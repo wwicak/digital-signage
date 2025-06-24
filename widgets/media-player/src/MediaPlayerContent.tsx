@@ -315,8 +315,8 @@ class MediaPlayerContent extends Component<IMediaPlayerContentProps, IMediaPlaye
       return this.renderYouTubeEmbed(processedUrl);
     }
 
-    const commonProps = {
-      ref: this.mediaRef as any,
+    const commonProps: React.DetailedHTMLProps<React.AudioHTMLAttributes<HTMLAudioElement>, HTMLAudioElement> & React.DetailedHTMLProps<React.VideoHTMLAttributes<HTMLVideoElement>, HTMLVideoElement> = {
+      ref: this.mediaRef as React.RefObject<HTMLAudioElement & HTMLVideoElement>,
       src: processedUrl,
       controls: data.showControls !== false, // Default to true
       autoPlay: data.autoplay && this.state.isScheduleActive,
@@ -326,7 +326,7 @@ class MediaPlayerContent extends Component<IMediaPlayerContentProps, IMediaPlaye
       onLoadStart: this.handleMediaLoadStart,
       onLoadedData: this.handleMediaLoad,
       className: "w-full h-full",
-      crossOrigin: "anonymous", // Enable CORS for external URLs
+      crossOrigin: "anonymous" as "" | "anonymous" | "use-credentials" | undefined, // Fix type error
       preload: "metadata", // Preload metadata for better UX
       style: {
         objectFit: data.fit || 'contain',
