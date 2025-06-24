@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { Monitor, Layout, Play, Wifi, RefreshCw } from 'lucide-react'
+import { Monitor, Layout, Play, Wifi, RefreshCw, Network, Globe } from 'lucide-react'
 import { useRouter } from 'next/router'
 
 import { Button } from '@/components/ui/button'
@@ -7,6 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { cn } from '@/lib/utils'
 import { useActiveLayoutTemplates } from '../hooks/useLayouts'
+import { detectIPAddress, getDeviceNetworkInfo, IPDetectionResult } from '../lib/utils/ipDetection'
 
 // This page is designed to be opened on physical display devices
 // It allows users to select which layout to show on the current display
@@ -19,7 +20,10 @@ export default function DisplaySelector() {
     userAgent: '',
     screenResolution: '',
     ipAddress: 'Detecting...',
+    ipMethod: '',
+    networkInfo: null as any,
   });
+  const [ipDetectionResult, setIpDetectionResult] = useState<IPDetectionResult | null>(null);
 
   // Check if a specific layout was requested via URL parameter
   useEffect(() => {
@@ -30,23 +34,38 @@ export default function DisplaySelector() {
   }, [router.query]);
 
   useEffect(() => {
-    // Get device information
+    // Get basic device information immediately
+    const networkInfo = getDeviceNetworkInfo();
     setDeviceInfo({
       userAgent: navigator.userAgent,
       screenResolution: `${screen.width}x${screen.height}`,
       ipAddress: 'Detecting...',
+      ipMethod: '',
+      networkInfo,
     });
 
-    // Try to get IP address (simplified)
-    fetch('/api/system/status')
-      .then(res => res.json())
-      .then(data => {
-        // This would include IP detection logic
-        setDeviceInfo(prev => ({ ...prev, ipAddress: 'Auto-detected' }));
-      })
-      .catch(() => {
-        setDeviceInfo(prev => ({ ...prev, ipAddress: 'Unable to detect' }));
-      });
+    // Detect IP address asynchronously
+    const detectIP = async () => {
+      try {
+        const result = await detectIPAddress();
+        setIpDetectionResult(result);
+
+        setDeviceInfo(prev => ({
+          ...prev,
+          ipAddress: result.ip || 'Unable to detect',
+          ipMethod: result.method,
+        }));
+      } catch (error) {
+        console.error('IP detection failed:', error);
+        setDeviceInfo(prev => ({
+          ...prev,
+          ipAddress: 'Detection failed',
+          ipMethod: 'error',
+        }));
+      }
+    };
+
+    detectIP();
   }, []);
 
   const layouts = layoutsResponse?.layouts || [];
@@ -246,7 +265,7 @@ export default function DisplaySelector() {
                     </p>
                   </div>
                 </div>
-                
+
                 <Button
                   onClick={handleStartDisplay}
                   size='lg'
@@ -255,7 +274,7 @@ export default function DisplaySelector() {
                   <Play className='h-5 w-5 mr-2' />
                   Start Display
                 </Button>
-                
+
                 <p className='text-xs text-green-600 mt-2'>
                   This display will automatically register with the admin panel
                 </p>

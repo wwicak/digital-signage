@@ -12,7 +12,7 @@ import { useActiveLayoutTemplates } from '@/hooks/useLayouts'
 import { IDisplayWithLayout } from '@/hooks/useDisplaysWithLayouts'
 
 interface LayoutAssignmentProps {
-  selectedDisplay?: IDisplayWithLayout
+  selectedDisplay?: IDisplayWithLayout | null
   onAssignmentComplete?: (success: boolean, message?: string) => void
   className?: string
 }
@@ -58,7 +58,7 @@ const LayoutAssignment: React.FC<LayoutAssignmentProps> = ({
       }
 
       const result = await response.json()
-      
+
       setAssignmentStatus({
         type: 'success',
         message: `Layout successfully assigned to ${selectedDisplay.name}. The display will update shortly.`,
@@ -74,7 +74,7 @@ const LayoutAssignment: React.FC<LayoutAssignmentProps> = ({
 
     } catch (error: any) {
       console.error('Layout assignment error:', error)
-      
+
       setAssignmentStatus({
         type: 'error',
         message: error.message || 'Failed to assign layout. Please try again.',
@@ -214,7 +214,7 @@ const LayoutAssignment: React.FC<LayoutAssignmentProps> = ({
               </>
             )}
           </Button>
-          
+
           {selectedLayoutId && (
             <Button
               variant='outline'

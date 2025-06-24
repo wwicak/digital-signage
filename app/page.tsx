@@ -3,13 +3,18 @@
 import React, { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { ArrowRight, Tv, Layout, Users, Zap, Shield, Palette } from 'lucide-react'
+import { ArrowRight, Tv, Layout, Users, Zap, Shield, Palette, Monitor, Settings } from 'lucide-react'
 
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { Alert, AlertDescription } from '@/components/ui/alert'
 import DropdownButton from '../components/DropdownButton'
+import DisplaySelector from '../components/DisplaySelector/DisplaySelector'
+import LayoutAssignment from '../components/DisplaySelector/LayoutAssignment'
 import { getDisplays } from '../actions/display'
+import { useDisplaySelector } from '../hooks/useDisplaySelector'
 
 // Simplified display data for the dropdown
 interface IDisplaySummary {
@@ -19,8 +24,18 @@ interface IDisplaySummary {
 
 export default function HomePage() {
   const [displays, setDisplays] = useState<IDisplaySummary[]>([])
-  const [loading, setLoading] = useState(true)
+  const [showDisplaySelector, setShowDisplaySelector] = useState(false)
+  const [notification, setNotification] = useState<{
+    type: 'success' | 'error' | null
+    message: string
+  }>({ type: null, message: '' })
   const router = useRouter()
+
+  // Use the display selector hook for the new functionality
+  const {
+    selectedDisplay,
+    handleDisplaySelect,
+  } = useDisplaySelector()
 
   useEffect(() => {
     async function fetchDisplays() {
@@ -28,27 +43,27 @@ export default function HomePage() {
         const host = process.env.NODE_ENV === 'development'
           ? 'http://localhost:3000'
           : 'https://your-domain.com' // Update this with your production domain
-        
+
         const fullDisplayList = await getDisplays(host)
-        
+
         // Ensure fullDisplayList is an array before calling map
         if (!Array.isArray(fullDisplayList)) {
           console.error('getDisplays() did not return an array:', fullDisplayList)
           setDisplays([])
           return
         }
-        
+
         const displaySummaries = fullDisplayList.map(display => ({
           _id: display._id,
           name: display.name,
         }))
-        
+
         setDisplays(displaySummaries)
       } catch (error) {
         console.error('Failed to fetch displays:', error)
         setDisplays([])
       } finally {
-        setLoading(false)
+        // Loading complete
       }
     }
 
@@ -125,7 +140,7 @@ export default function HomePage() {
                 <ArrowRight className='ml-2 h-5 w-5' />
               </Link>
             </Button>
-            
+
             {displays.length > 0 && (
               <div className='flex items-center gap-4'>
                 <span className='text-sm text-muted-foreground'>or view a display:</span>
@@ -143,8 +158,93 @@ export default function HomePage() {
                 />
               </div>
             )}
+
+            {/* Display Selector Toggle */}
+            <div className='mt-8'>
+              <Button
+                variant='outline'
+                size='lg'
+                onClick={() => setShowDisplaySelector(!showDisplaySelector)}
+                className='text-lg px-8 py-6'
+              >
+                <Monitor className='mr-2 h-5 w-5' />
+                {showDisplaySelector ? 'Hide' : 'Show'} Display Manager
+              </Button>
+            </div>
           </div>
         </div>
+
+        {/* Display Selector Section */}
+        {showDisplaySelector && (
+          <div className='mt-16'>
+            <Card className='border-0 shadow-xl'>
+              <CardHeader className='text-center pb-6'>
+                <CardTitle className='text-2xl flex items-center justify-center gap-2'>
+                  <Settings className='h-6 w-6' />
+                  Display Configuration Center
+                </CardTitle>
+                <CardDescription className='text-lg'>
+                  Select displays and assign layouts directly from here. Perfect for quick configuration and management.
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                {/* Notification */}
+                {notification.type && (
+                  <Alert variant={notification.type === 'error' ? 'destructive' : 'default'} className='mb-6'>
+                    <AlertDescription>{notification.message}</AlertDescription>
+                  </Alert>
+                )}
+
+                <Tabs defaultValue='select' className='w-full'>
+                  <TabsList className='grid w-full grid-cols-2'>
+                    <TabsTrigger value='select' className='flex items-center gap-2'>
+                      <Monitor className='h-4 w-4' />
+                      Select Display
+                    </TabsTrigger>
+                    <TabsTrigger value='assign' className='flex items-center gap-2'>
+                      <Layout className='h-4 w-4' />
+                      Assign Layout
+                    </TabsTrigger>
+                  </TabsList>
+
+                  <TabsContent value='select' className='mt-6'>
+                    <DisplaySelector
+                      onDisplaySelect={handleDisplaySelect}
+                      selectedDisplayId={selectedDisplay?._id}
+                      showLayoutInfo={true}
+                      className='min-h-[400px]'
+                    />
+                  </TabsContent>
+
+                  <TabsContent value='assign' className='mt-6'>
+                    <div className='grid grid-cols-1 lg:grid-cols-2 gap-6'>
+                      <DisplaySelector
+                        onDisplaySelect={handleDisplaySelect}
+                        selectedDisplayId={selectedDisplay?._id}
+                        showLayoutInfo={true}
+                        className='lg:max-h-[500px] lg:overflow-y-auto'
+                      />
+                      <LayoutAssignment
+                        selectedDisplay={selectedDisplay}
+                        onAssignmentComplete={(success, message) => {
+                          setNotification({
+                            type: success ? 'success' : 'error',
+                            message: message || (success ? 'Layout assigned successfully!' : 'Failed to assign layout'),
+                          })
+
+                          // Clear notification after 5 seconds
+                          setTimeout(() => {
+                            setNotification({ type: null, message: '' })
+                          }, 5000)
+                        }}
+                      />
+                    </div>
+                  </TabsContent>
+                </Tabs>
+              </CardContent>
+            </Card>
+          </div>
+        )}
 
         {/* Features Grid */}
         <div className='mt-24'>
