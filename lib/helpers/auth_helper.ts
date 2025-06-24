@@ -1,8 +1,8 @@
 import User, { IUser, IUserRole, UserRoleName } from "../models/User";
 import mongoose from "mongoose";
 
-// TODO: Replace with next-auth integration
-// This is a placeholder authentication helper that will be replaced with next-auth
+// DEPRECATED: This is a placeholder authentication helper that has been replaced with JWT-based auth
+// Use the functions from @/lib/auth instead
 
 export interface AuthenticatedUser {
   _id: any;
@@ -12,10 +12,11 @@ export interface AuthenticatedUser {
 }
 
 /**
- * Placeholder authentication function
- * TODO: Replace with next-auth getServerSession implementation
+ * @deprecated Use requireAuth from @/lib/auth instead
+ * Placeholder authentication function - DEPRECATED
  */
 export async function requireAuth(req: any): Promise<AuthenticatedUser> {
+  console.warn("DEPRECATED: requireAuth from auth_helper.ts is deprecated. Use requireAuth from @/lib/auth instead.");
   // Temporary implementation for development/testing
   // TODO: Replace with next-auth integration in production
 
@@ -126,12 +127,13 @@ export async function requireAuth(req: any): Promise<AuthenticatedUser> {
 }
 
 /**
- * Middleware to protect API routes
- * TODO: Replace with next-auth session validation
+ * @deprecated Use withAuth from @/lib/auth instead
+ * Middleware to protect API routes - DEPRECATED
  */
 export function withAuth(
   handler: (req: any, res: any, user: AuthenticatedUser) => Promise<void>
 ) {
+  console.warn("DEPRECATED: withAuth from auth_helper.ts is deprecated. Use withAuth from @/lib/auth instead.");
   return async (req: any, res: any) => {
     try {
       const user = await requireAuth(req);

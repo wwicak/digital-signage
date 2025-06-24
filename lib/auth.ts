@@ -63,14 +63,16 @@ export function extractToken(
 ): string | null {
   // Handle NextRequest (App Router)
   if ('cookies' in req && typeof req.cookies.get === 'function') {
+    const nextReq = req as NextRequest;
+
     // Try Authorization header first
-    const authHeader = req.headers.get('authorization');
+    const authHeader = nextReq.headers.get('authorization');
     if (authHeader && authHeader.startsWith("Bearer ")) {
       return authHeader.substring(7);
     }
 
     // Try cookie
-    const authTokenCookie = req.cookies.get('auth-token');
+    const authTokenCookie = nextReq.cookies.get('auth-token');
     if (authTokenCookie) {
       return authTokenCookie.value;
     }
