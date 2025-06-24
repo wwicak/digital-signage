@@ -80,7 +80,7 @@ export const login = async (
         maxAge: 30 * 24 * 60 * 60,
         path: '/',
       })
-      
+
       // Let the calling component handle the redirect
       // Removed automatic redirect to allow login page to control navigation
     }
@@ -108,13 +108,49 @@ export const logout = async (host: string = ''): Promise<ILogoutAuthResponse> =>
     destroyCookie(null, 'loggedIn', { path: '/' }) // null for client-side context
     // Router.push('/login');
     window.location.href = '/login' // Kept original behavior
-    
+
     return response.data // Should ideally indicate success/failure from server
   } catch (error: any) {
     if (error.response) {
       return error.response.data as ILogoutAuthResponse
     }
     return { success: false, message: error.message || 'Logout failed due to an unexpected error.' }
+  }
+}
+
+/**
+ * Check if user is currently authenticated
+ * This function checks both cookies and makes an API call to verify the session
+ */
+export const checkAuthStatus = async (host: string = ''): Promise<{ isAuthenticated: boolean; user?: any }> => {
+  try {
+    // First check if we have a login cookie
+    const cookies = parseCookies()
+    const hasLoginCookie = !!cookies.loggedIn
+
+    if (!hasLoginCookie) {
+      return { isAuthenticated: false }
+    }
+
+    // If we have a cookie, verify with the server
+    const response = await axios.get(`${host}/api/auth/me`, {
+      withCredentials: true, // Include cookies in the request
+    })
+
+    if (response.data && response.data.success) {
+      return {
+        isAuthenticated: true,
+        user: response.data.user
+      }
+    } else {
+      // Cookie exists but session is invalid, clean up
+      destroyCookie(null, 'loggedIn', { path: '/' })
+      return { isAuthenticated: false }
+    }
+  } catch (error: any) {
+    // If API call fails, assume not authenticated and clean up cookie
+    destroyCookie(null, 'loggedIn', { path: '/' })
+    return { isAuthenticated: false }
   }
 }
 
@@ -136,8 +172,8 @@ export const protect = <P extends object>(
         req && req.headers && req.headers.host
           ? `http://${req.headers.host}`
           : typeof window !== 'undefined'
-          ? window.location.origin
-          : ''
+            ? window.location.origin
+            : ''
 
       /*
        * Check if user is authenticated (e.g., via server-side session if req.user exists, or cookie)
@@ -148,29 +184,29 @@ export const protect = <P extends object>(
 
       if (isAuthenticated) {
         if (!alreadyLoggedIn && typeof window === 'undefined') { // Only set cookie on server-side if not already set
-            setCookie(ctx as any, 'loggedIn', 'true', { // Nookies ctx for server-side
-                maxAge: 30 * 24 * 60 * 60, // 30 days
-                path: '/',
-                /*
-                 * secure: process.env.NODE_ENV === 'production', // Add secure and httpOnly if applicable
-                 * httpOnly: true,
-                 */
-            })
+          setCookie(ctx as any, 'loggedIn', 'true', { // Nookies ctx for server-side
+            maxAge: 30 * 24 * 60 * 60, // 30 days
+            path: '/',
+            /*
+             * secure: process.env.NODE_ENV === 'production', // Add secure and httpOnly if applicable
+             * httpOnly: true,
+             */
+          })
         }
-        
+
         const displayIdFromQuery = query?.display
         let displayId: string | undefined = undefined
 
         if (Array.isArray(displayIdFromQuery)) {
-            displayId = displayIdFromQuery[0]
+          displayId = displayIdFromQuery[0]
         } else if (typeof displayIdFromQuery === 'string') {
-            displayId = displayIdFromQuery
+          displayId = displayIdFromQuery
         }
 
         // Skip fetching displays in the HOC to avoid circular dependency
         // Let individual pages handle display fetching after authentication
         if (!displayId) {
-            console.log('ProtectedPage HOC: No displayId in query, will be handled by the page component.')
+          console.log('ProtectedPage HOC: No displayId in query, will be handled by the page component.')
         }
 
         // Call wrapped component's getInitialProps if it exists
@@ -178,7 +214,7 @@ export const protect = <P extends object>(
         const componentProps = wrappedComponentWithInitialProps.getInitialProps
           ? await wrappedComponentWithInitialProps.getInitialProps(ctx as any) // Cast ctx if WrappedComponent expects a simpler NextPageContext
           : {}
-        
+
         return {
           ...componentProps, // Spread props from wrapped component
           displayId: displayId || '', // Ensure displayId is always a string, even if empty

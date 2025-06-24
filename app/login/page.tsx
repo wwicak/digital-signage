@@ -1,12 +1,12 @@
 'use client'
 
-import { useState, Suspense, memo } from 'react'
+import { useState, useEffect, Suspense, memo } from 'react'
 import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
 
 import Frame from '../../components/Admin/Frame'
-import { login } from '../../helpers/auth'
-import { Tv, Check, X, ChevronLeft, Eye, EyeOff } from 'lucide-react'
+import { login, checkAuthStatus } from '../../helpers/auth'
+import { Tv, Check, X, ChevronLeft, Eye, EyeOff, Loader2 } from 'lucide-react'
 
 const LoginContent = memo(function LoginContent() {
   const router = useRouter()
@@ -17,6 +17,42 @@ const LoginContent = memo(function LoginContent() {
   const [password, setPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
   const [alert, setAlert] = useState<'success' | 'error' | 'info' | null>(null)
+  const [isCheckingAuth, setIsCheckingAuth] = useState(true)
+  const [isAlreadyLoggedIn, setIsAlreadyLoggedIn] = useState(false)
+
+  // Check if user is already authenticated on component mount
+  useEffect(() => {
+    const checkAuth = async () => {
+      try {
+        const authStatus = await checkAuthStatus()
+        if (authStatus.isAuthenticated) {
+          setIsAlreadyLoggedIn(true)
+
+          // Determine redirect URL
+          const redirectUrl = searchParams?.get('redirect')
+          let targetUrl = '/dashboard' // Default redirect
+
+          if (redirectUrl) {
+            targetUrl = redirectUrl
+          } else if (displayId) {
+            targetUrl = `/display/${displayId}`
+          }
+
+          // Show a brief message before redirecting
+          setAlert('info')
+          setTimeout(() => {
+            router.push(targetUrl)
+          }, 1500)
+        }
+      } catch (error) {
+        console.error('Auth check failed:', error)
+      } finally {
+        setIsCheckingAuth(false)
+      }
+    }
+
+    checkAuth()
+  }, [router, searchParams, displayId])
 
   const performLogin = async () => {
     try {
@@ -66,8 +102,10 @@ const LoginContent = memo(function LoginContent() {
                 {alert === 'success'
                   ? 'Successfully logged in to your account.'
                   : alert === 'error'
-                  ? 'Username or password not recognized.'
-                  : 'Use the username "demo" and password "demo"'}
+                    ? 'Username or password not recognized.'
+                    : alert === 'info' && isAlreadyLoggedIn
+                      ? 'You are already logged in. Redirecting to admin panel...'
+                      : 'Use the username "demo" and password "demo"'}
               </span>
             </div>
           )}
@@ -117,7 +155,7 @@ const LoginContent = memo(function LoginContent() {
           </span>
         </Link>
       </div>
-      
+
     </Frame>
   )
 })

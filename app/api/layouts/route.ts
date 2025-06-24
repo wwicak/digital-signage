@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import dbConnect from "../../../lib/mongodb";
 import Layout from "../../../lib/models/Layout";
-import Widget from "../../../lib/models/Widget"; // Import Widget model to ensure it's registered
+// Widget model is now imported via dbConnect in mongodb.ts
 import { requireAuth } from "../../../lib/auth";
 
 // Force dynamic rendering

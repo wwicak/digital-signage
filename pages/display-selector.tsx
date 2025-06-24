@@ -147,9 +147,9 @@ export default function DisplaySelector() {
                 </div>
                 <div className='text-left sm:text-right flex-shrink-0'>
                   <div className='text-xl sm:text-2xl font-bold text-blue-900 font-mono break-all'>
-                    {deviceInfo.ipAddress}
+                    {!isClient ? 'Loading...' : deviceInfo.ipAddress}
                   </div>
-                  {deviceInfo.ipMethod && (
+                  {isClient && deviceInfo.ipMethod && (
                     <Badge variant='outline' className='mt-1'>
                       {deviceInfo.ipMethod.toUpperCase()}
                     </Badge>
@@ -162,37 +162,51 @@ export default function DisplaySelector() {
             <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 text-sm'>
               <div className='min-w-0'>
                 <span className='font-medium text-gray-600'>Screen Resolution:</span>
-                <p className='text-gray-900 font-mono break-all'>{deviceInfo.screenResolution}</p>
+                <p className='text-gray-900 font-mono break-all'>
+                  {!isClient ? 'Loading...' : deviceInfo.screenResolution || 'Unknown'}
+                </p>
               </div>
               <div className='min-w-0'>
                 <span className='font-medium text-gray-600'>Platform:</span>
-                <p className='text-gray-900 truncate'>{deviceInfo.networkInfo?.platform || 'Unknown'}</p>
+                <p className='text-gray-900 truncate'>
+                  {!isClient ? 'Loading...' : (deviceInfo.networkInfo?.platform || 'Unknown')}
+                </p>
               </div>
               <div className='min-w-0'>
                 <span className='font-medium text-gray-600'>Connection Status:</span>
                 <div className='mt-1'>
-                  <Badge variant={deviceInfo.networkInfo?.onLine ? 'default' : 'destructive'}>
-                    <Wifi className='h-3 w-3 mr-1' />
-                    {deviceInfo.networkInfo?.onLine ? 'Online' : 'Offline'}
-                  </Badge>
+                  {!isClient ? (
+                    <Badge variant='outline'>Loading...</Badge>
+                  ) : (
+                    <Badge variant={deviceInfo.networkInfo?.onLine ? 'default' : 'destructive'}>
+                      <Wifi className='h-3 w-3 mr-1' />
+                      {deviceInfo.networkInfo?.onLine ? 'Online' : 'Offline'}
+                    </Badge>
+                  )}
                 </div>
               </div>
               <div className='min-w-0'>
                 <span className='font-medium text-gray-600'>Hostname:</span>
-                <p className='text-gray-900 font-mono break-all'>{deviceInfo.networkInfo?.hostname || 'Unknown'}</p>
+                <p className='text-gray-900 font-mono break-all'>
+                  {!isClient ? 'Loading...' : (deviceInfo.networkInfo?.hostname || 'Unknown')}
+                </p>
               </div>
               <div className='min-w-0'>
                 <span className='font-medium text-gray-600'>Protocol:</span>
-                <p className='text-gray-900'>{deviceInfo.networkInfo?.protocol || 'Unknown'}</p>
+                <p className='text-gray-900'>
+                  {!isClient ? 'Loading...' : (deviceInfo.networkInfo?.protocol || 'Unknown')}
+                </p>
               </div>
               <div className='min-w-0'>
                 <span className='font-medium text-gray-600'>Timezone:</span>
-                <p className='text-gray-900 truncate'>{deviceInfo.networkInfo?.timezone || 'Unknown'}</p>
+                <p className='text-gray-900 truncate'>
+                  {!isClient ? 'Loading...' : (deviceInfo.networkInfo?.timezone || 'Unknown')}
+                </p>
               </div>
             </div>
 
             {/* Error Information */}
-            {ipDetectionResult?.error && (
+            {isClient && ipDetectionResult?.error && (
               <div className='mt-4 p-3 bg-orange-50 border border-orange-200 rounded-lg'>
                 <p className='text-sm text-orange-800'>
                   <strong>Detection Note:</strong> {ipDetectionResult.error}
