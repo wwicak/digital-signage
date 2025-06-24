@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Layout,
   Tv,
@@ -49,15 +49,7 @@ const ScreenCardValueSchema = z.object({
 
 // Import the original IDisplayData to ensure compatibility or use if it becomes a Zod type later.
 import { useDisplayMutations } from "../../hooks/useDisplayMutations";
-
-// Available layouts - in real implementation, this would come from layouts API
-const availableLayouts = [
-  { id: 'layout-1', name: 'Corporate Announcements', description: 'General corporate communications' },
-  { id: 'layout-2', name: 'Meeting Room Display', description: 'Room booking and meeting information' },
-  { id: 'layout-3', name: 'Lobby Information', description: 'Welcome messages and general information' },
-  { id: 'layout-4', name: 'Emergency Alerts', description: 'Emergency notifications and alerts' },
-  { id: 'layout-5', name: 'Digital Menu Board', description: 'Restaurant menu and pricing' },
-];
+import { getLayouts } from "@/actions/layouts";
 
 // Zod schema for ScreenCard props
 export const ScreenCardPropsSchema = z.object({
@@ -78,10 +70,39 @@ const ScreenCard: React.FC<IScreenCardProps> = ({
   const [isLayoutSectionExpanded, setIsLayoutSectionExpanded] = useState(false);
 
   // Layout change state
-  const [selectedLayout, setSelectedLayout] = useState<string>('layout-1'); // Default current layout
+  const [selectedLayout, setSelectedLayout] = useState<string>(''); // Will be set to current layout
   const [isChangingLayout, setIsChangingLayout] = useState(false);
   const [layoutChangeStatus, setLayoutChangeStatus] = useState<'idle' | 'success' | 'error'>('idle');
   const [layoutChangeError, setLayoutChangeError] = useState<string>('');
+
+  // Available layouts state
+  const [availableLayouts, setAvailableLayouts] = useState<any[]>([]);
+  const [loadingLayouts, setLoadingLayouts] = useState(true);
+
+  // Fetch available layouts
+  useEffect(() => {
+    const fetchLayouts = async () => {
+      try {
+        setLoadingLayouts(true);
+        const response = await getLayouts({ isActive: true });
+        setAvailableLayouts(response.layouts || []);
+      } catch (error) {
+        console.error("Failed to fetch layouts:", error);
+        setAvailableLayouts([]);
+      } finally {
+        setLoadingLayouts(false);
+      }
+    };
+
+    fetchLayouts();
+  }, []);
+
+  // Initialize selected layout when display data or layouts change
+  useEffect(() => {
+    if (value?.layout && !selectedLayout) {
+      setSelectedLayout(value.layout);
+    }
+  }, [value?.layout, selectedLayout]);
 
   const handleOrientationChange = (
     event: React.ChangeEvent<HTMLSelectElement>,
@@ -124,7 +145,7 @@ const ScreenCard: React.FC<IScreenCardProps> = ({
   };
 
   const handleRemoteLayoutChange = async () => {
-    if (!value?._id || !selectedLayout || selectedLayout === 'layout-1') {
+    if (!value?._id || !selectedLayout || selectedLayout === value?.layout) {
       return;
     }
 
@@ -167,16 +188,16 @@ const ScreenCard: React.FC<IScreenCardProps> = ({
   };
 
   const getCurrentLayoutName = () => {
-    const layout = availableLayouts.find(l => l.id === 'layout-1'); // Current layout
-    return layout?.name || 'Current Layout';
+    const layout = availableLayouts.find(l => l._id === value?.layout);
+    return layout?.name || (value?.layout === 'spaced' ? 'Spaced Layout' : value?.layout === 'compact' ? 'Compact Layout' : 'Unknown Layout');
   };
 
   const getSelectedLayoutName = () => {
-    const layout = availableLayouts.find(l => l.id === selectedLayout);
+    const layout = availableLayouts.find(l => l._id === selectedLayout);
     return layout?.name || selectedLayout;
   };
 
-  const hasLayoutChanges = selectedLayout !== 'layout-1';
+  const hasLayoutChanges = selectedLayout !== value?.layout;
 
   const handleDelete = (event: React.MouseEvent): void => {
     event.preventDefault(); // Prevent Link navigation when clicking delete icon
@@ -378,17 +399,19 @@ const ScreenCard: React.FC<IScreenCardProps> = ({
                 <Select
                   value={selectedLayout}
                   onValueChange={setSelectedLayout}
-                  disabled={isChangingLayout}
+                  disabled={isChangingLayout || loadingLayouts}
                 >
                   <SelectTrigger className='h-9'>
-                    <SelectValue placeholder='Select a layout' />
+                    <SelectValue placeholder={loadingLayouts ? 'Loading layouts...' : 'Select a layout'} />
                   </SelectTrigger>
                   <SelectContent>
                     {availableLayouts.map((layout) => (
-                      <SelectItem key={layout.id} value={layout.id}>
+                      <SelectItem key={layout._id} value={layout._id}>
                         <div className='flex flex-col'>
                           <span className='font-medium text-sm'>{layout.name}</span>
-                          <span className='text-xs text-muted-foreground'>{layout.description}</span>
+                          <span className='text-xs text-muted-foreground'>
+                            {layout.description || `${layout.orientation} • ${layout.widgets?.length || 0} widgets`}
+                          </span>
                         </div>
                       </SelectItem>
                     ))}
@@ -451,7 +474,7 @@ const ScreenCard: React.FC<IScreenCardProps> = ({
                 {hasLayoutChanges && (
                   <Button
                     variant='outline'
-                    onClick={() => setSelectedLayout('layout-1')}
+                    onClick={() => setSelectedLayout(value?.layout || '')}
                     disabled={isChangingLayout}
                     size='sm'
                   >
