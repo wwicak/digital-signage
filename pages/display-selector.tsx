@@ -8,6 +8,7 @@ import { Badge } from '@/components/ui/badge'
 import { cn } from '@/lib/utils'
 import { useActiveLayoutTemplates } from '../hooks/useLayouts'
 import { detectIPAddress, getDeviceNetworkInfo, IPDetectionResult } from '../lib/utils/ipDetection'
+import LayoutPreview from '../components/LayoutPreview/LayoutPreview'
 
 // This page is designed to be opened on physical display devices
 // It allows users to select which layout to show on the current display
@@ -16,6 +17,7 @@ export default function DisplaySelector() {
   const router = useRouter();
   const { data: layoutsResponse, isLoading, error, refetch } = useActiveLayoutTemplates();
   const [selectedLayout, setSelectedLayout] = useState<string | null>(null);
+  const [isClient, setIsClient] = useState(false);
   const [deviceInfo, setDeviceInfo] = useState({
     userAgent: '',
     screenResolution: '',
@@ -24,6 +26,11 @@ export default function DisplaySelector() {
     networkInfo: null as any,
   });
   const [ipDetectionResult, setIpDetectionResult] = useState<IPDetectionResult | null>(null);
+
+  // Handle client-side hydration
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
 
   // Check if a specific layout was requested via URL parameter
   useEffect(() => {
@@ -34,6 +41,9 @@ export default function DisplaySelector() {
   }, [router.query]);
 
   useEffect(() => {
+    // Only run on client side to avoid hydration mismatch
+    if (!isClient) return;
+
     // Get basic device information immediately
     const networkInfo = getDeviceNetworkInfo();
     setDeviceInfo({
@@ -66,7 +76,7 @@ export default function DisplaySelector() {
     };
 
     detectIP();
-  }, []);
+  }, [isClient]);
 
   const layouts = layoutsResponse?.layouts || [];
 
@@ -88,8 +98,8 @@ export default function DisplaySelector() {
   };
 
   return (
-    <div className='min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 p-4'>
-      <div className='max-w-6xl mx-auto'>
+    <div className='min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 p-4 overflow-x-hidden'>
+      <div className='max-w-6xl mx-auto w-full'>
         {/* Header */}
         <div className='text-center mb-8'>
           <div className='flex items-center justify-center mb-4'>
@@ -106,28 +116,89 @@ export default function DisplaySelector() {
         <Card className='mb-8'>
           <CardHeader>
             <CardTitle className='flex items-center'>
-              <Wifi className='h-5 w-5 mr-2' />
+              <Network className='h-5 w-5 mr-2' />
               Device Information
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className='grid grid-cols-1 md:grid-cols-3 gap-4 text-sm'>
-              <div>
-                <span className='font-medium text-gray-600'>Screen Resolution:</span>
-                <p className='text-gray-900'>{deviceInfo.screenResolution}</p>
-              </div>
-              <div>
-                <span className='font-medium text-gray-600'>IP Address:</span>
-                <p className='text-gray-900'>{deviceInfo.ipAddress}</p>
-              </div>
-              <div>
-                <span className='font-medium text-gray-600'>Status:</span>
-                <Badge variant='default' className='ml-1'>
-                  <Wifi className='h-3 w-3 mr-1' />
-                  Connected
-                </Badge>
+            {/* Prominent IP Address Display */}
+            <div className='mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg'>
+              <div className='flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4'>
+                <div className='flex items-center min-w-0'>
+                  <Globe className='h-6 w-6 text-blue-600 mr-3 flex-shrink-0' />
+                  <div className='min-w-0'>
+                    <h3 className='text-lg font-semibold text-blue-900'>Device IP Address</h3>
+                    <p className='text-sm text-blue-700'>
+                      {!isClient || deviceInfo.ipAddress === 'Detecting...' ? (
+                        <span className='flex items-center'>
+                          <div className='animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600 mr-2'></div>
+                          Detecting IP address...
+                        </span>
+                      ) : (
+                        <>
+                          Detected via {deviceInfo.ipMethod}
+                          {ipDetectionResult?.error && (
+                            <span className='text-orange-600'> (with issues)</span>
+                          )}
+                        </>
+                      )}
+                    </p>
+                  </div>
+                </div>
+                <div className='text-left sm:text-right flex-shrink-0'>
+                  <div className='text-xl sm:text-2xl font-bold text-blue-900 font-mono break-all'>
+                    {deviceInfo.ipAddress}
+                  </div>
+                  {deviceInfo.ipMethod && (
+                    <Badge variant='outline' className='mt-1'>
+                      {deviceInfo.ipMethod.toUpperCase()}
+                    </Badge>
+                  )}
+                </div>
               </div>
             </div>
+
+            {/* Additional Device Info */}
+            <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 text-sm'>
+              <div className='min-w-0'>
+                <span className='font-medium text-gray-600'>Screen Resolution:</span>
+                <p className='text-gray-900 font-mono break-all'>{deviceInfo.screenResolution}</p>
+              </div>
+              <div className='min-w-0'>
+                <span className='font-medium text-gray-600'>Platform:</span>
+                <p className='text-gray-900 truncate'>{deviceInfo.networkInfo?.platform || 'Unknown'}</p>
+              </div>
+              <div className='min-w-0'>
+                <span className='font-medium text-gray-600'>Connection Status:</span>
+                <div className='mt-1'>
+                  <Badge variant={deviceInfo.networkInfo?.onLine ? 'default' : 'destructive'}>
+                    <Wifi className='h-3 w-3 mr-1' />
+                    {deviceInfo.networkInfo?.onLine ? 'Online' : 'Offline'}
+                  </Badge>
+                </div>
+              </div>
+              <div className='min-w-0'>
+                <span className='font-medium text-gray-600'>Hostname:</span>
+                <p className='text-gray-900 font-mono break-all'>{deviceInfo.networkInfo?.hostname || 'Unknown'}</p>
+              </div>
+              <div className='min-w-0'>
+                <span className='font-medium text-gray-600'>Protocol:</span>
+                <p className='text-gray-900'>{deviceInfo.networkInfo?.protocol || 'Unknown'}</p>
+              </div>
+              <div className='min-w-0'>
+                <span className='font-medium text-gray-600'>Timezone:</span>
+                <p className='text-gray-900 truncate'>{deviceInfo.networkInfo?.timezone || 'Unknown'}</p>
+              </div>
+            </div>
+
+            {/* Error Information */}
+            {ipDetectionResult?.error && (
+              <div className='mt-4 p-3 bg-orange-50 border border-orange-200 rounded-lg'>
+                <p className='text-sm text-orange-800'>
+                  <strong>Detection Note:</strong> {ipDetectionResult.error}
+                </p>
+              </div>
+            )}
           </CardContent>
         </Card>
 
@@ -179,12 +250,12 @@ export default function DisplaySelector() {
               </CardContent>
             </Card>
           ) : (
-            <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6'>
+            <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 w-full'>
               {layouts.map((layout: any) => (
                 <Card
                   key={layout._id}
                   className={cn(
-                    "cursor-pointer transition-all duration-200 hover:shadow-lg",
+                    "cursor-pointer transition-all duration-200 hover:shadow-lg w-full max-w-full",
                     selectedLayout === layout._id
                       ? "ring-2 ring-blue-500 bg-blue-50"
                       : "hover:shadow-md"
@@ -202,23 +273,36 @@ export default function DisplaySelector() {
                   </CardHeader>
 
                   <CardContent>
-                    <div className='space-y-3'>
-                      <div className='flex items-center justify-between text-sm'>
-                        <span className='text-gray-600'>Widgets:</span>
-                        <span className='font-medium'>{Array.isArray(layout.widgets) ? layout.widgets.length : 0}</span>
+                    <div className='space-y-4'>
+                      {/* Layout Preview */}
+                      <div className='flex justify-center'>
+                        <LayoutPreview
+                          layout={layout}
+                          scale={0.25}
+                          className="border border-gray-200"
+                        />
                       </div>
 
-                      <div className='flex items-center justify-between text-sm'>
-                        <span className='text-gray-600'>Orientation:</span>
-                        <span className='font-medium capitalize'>{layout.orientation}</span>
+                      {/* Layout Info */}
+                      <div className='space-y-2'>
+                        <div className='flex items-center justify-between text-sm'>
+                          <span className='text-gray-600'>Widgets:</span>
+                          <span className='font-medium'>{Array.isArray(layout.widgets) ? layout.widgets.length : 0}</span>
+                        </div>
+
+                        <div className='flex items-center justify-between text-sm'>
+                          <span className='text-gray-600'>Orientation:</span>
+                          <span className='font-medium capitalize'>{layout.orientation}</span>
+                        </div>
+
+                        <div className='flex items-center justify-between text-sm'>
+                          <span className='text-gray-600'>Layout Type:</span>
+                          <span className='font-medium capitalize'>{layout.layoutType}</span>
+                        </div>
                       </div>
 
-                      <div className='flex items-center justify-between text-sm'>
-                        <span className='text-gray-600'>Layout Type:</span>
-                        <span className='font-medium capitalize'>{layout.layoutType}</span>
-                      </div>
-
-                      <div className='flex gap-2 pt-2'>
+                      {/* Action Buttons */}
+                      <div className='flex flex-col sm:flex-row gap-2 pt-2 w-full'>
                         <Button
                           variant='outline'
                           size='sm'
@@ -226,9 +310,9 @@ export default function DisplaySelector() {
                             e.stopPropagation();
                             handlePreview(layout._id as string);
                           }}
-                          className='flex-1'
+                          className='flex-1 min-w-0 text-xs sm:text-sm'
                         >
-                          Preview
+                          Full Preview
                         </Button>
 
                         <Button
@@ -238,7 +322,7 @@ export default function DisplaySelector() {
                             e.stopPropagation();
                             handleLayoutSelect(layout._id as string);
                           }}
-                          className='flex-1'
+                          className='flex-1 min-w-0 text-xs sm:text-sm'
                         >
                           {selectedLayout === layout._id ? "Selected" : "Select"}
                         </Button>
@@ -253,31 +337,33 @@ export default function DisplaySelector() {
 
         {/* Start Display Button */}
         {selectedLayout && (
-          <div className='text-center'>
-            <Card className='inline-block p-6 bg-green-50 border-green-200'>
+          <div className='flex justify-center'>
+            <Card className='w-full max-w-md p-6 bg-green-50 border-green-200'>
               <CardContent className='p-0'>
-                <div className='flex items-center justify-center mb-4'>
-                  <Play className='h-8 w-8 text-green-600 mr-3' />
-                  <div>
+                <div className='flex flex-col sm:flex-row items-center justify-center mb-4 gap-3'>
+                  <Play className='h-8 w-8 text-green-600 flex-shrink-0' />
+                  <div className='text-center sm:text-left min-w-0'>
                     <h3 className='text-lg font-semibold text-green-900'>Ready to Start</h3>
-                    <p className='text-sm text-green-700'>
+                    <p className='text-sm text-green-700 break-words'>
                       Layout &quot;{layouts.find((l: any) => l._id === selectedLayout)?.name}&quot; selected
                     </p>
                   </div>
                 </div>
 
-                <Button
-                  onClick={handleStartDisplay}
-                  size='lg'
-                  className='bg-green-600 hover:bg-green-700'
-                >
-                  <Play className='h-5 w-5 mr-2' />
-                  Start Display
-                </Button>
+                <div className='text-center'>
+                  <Button
+                    onClick={handleStartDisplay}
+                    size='lg'
+                    className='bg-green-600 hover:bg-green-700 w-full sm:w-auto'
+                  >
+                    <Play className='h-5 w-5 mr-2' />
+                    Start Display
+                  </Button>
 
-                <p className='text-xs text-green-600 mt-2'>
-                  This display will automatically register with the admin panel
-                </p>
+                  <p className='text-xs text-green-600 mt-2'>
+                    This display will automatically register with the admin panel
+                  </p>
+                </div>
               </CardContent>
             </Card>
           </div>

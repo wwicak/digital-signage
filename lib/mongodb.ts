@@ -1,5 +1,21 @@
 import mongoose from "mongoose";
 
+// Import all models to ensure they are registered
+import "./models/User";
+import "./models/Display";
+import "./models/Widget";
+import "./models/Layout";
+import "./models/Slide";
+import "./models/Slideshow";
+import "./models/Building";
+import "./models/Room";
+import "./models/Reservation";
+import "./models/UserCalendarLink";
+import "./models/DisplayAlert";
+import "./models/DisplayHeartbeat";
+import "./models/DisplayStatus";
+import "./models/FeatureFlag";
+
 const MONGODB_URI = process.env.MONGODB_URI;
 
 if (!MONGODB_URI) {
