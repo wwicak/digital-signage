@@ -104,7 +104,34 @@ const ScreenCard: React.FC<IScreenCardProps> = ({
     }
   }, [value?.layout, selectedLayout]);
 
+  // Handler for changing display orientation - ready for future UI implementation
+  const handleOrientationChange = (
+    event: React.ChangeEvent<HTMLSelectElement>,
+  ): void => {
+    event.preventDefault();
+    event.stopPropagation();
 
+    const newOrientation = event.target.value as "landscape" | "portrait";
+    if (value && value._id && newOrientation !== value.orientation) {
+      setIsUpdatingOrientation(true);
+      updateDisplay.mutate(
+        {
+          id: value._id,
+          data: { orientation: newOrientation },
+        },
+        {
+          onSuccess: () => {
+            setIsUpdatingOrientation(false);
+            refresh();
+          },
+          onError: (error: any) => {
+            console.error("Failed to update orientation:", error);
+            setIsUpdatingOrientation(false);
+          },
+        },
+      );
+    }
+  };
 
   const handleEdit = (event: React.MouseEvent): void => {
     event.preventDefault();
@@ -250,11 +277,28 @@ const ScreenCard: React.FC<IScreenCardProps> = ({
                 <OrientationPreview
                   orientation={value?.orientation || null}
                 />
-                <span className='text-xs'>
-                  {value?.orientation === "portrait"
-                    ? "Portrait"
-                    : "Landscape"}
-                </span>
+                <div className='flex items-center gap-2'>
+                  <span className='text-xs'>
+                    {value?.orientation === "portrait"
+                      ? "Portrait"
+                      : "Landscape"}
+                  </span>
+                  {value?.isOnline && (
+                    <select
+                      value={value?.orientation || "landscape"}
+                      onChange={handleOrientationChange}
+                      className='text-xs border rounded px-1 py-0.5 bg-background'
+                      disabled={isUpdatingOrientation}
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      <option value="landscape">Landscape</option>
+                      <option value="portrait">Portrait</option>
+                    </select>
+                  )}
+                  {isUpdatingOrientation && (
+                    <Loader2 className='h-3 w-3 animate-spin text-muted-foreground' />
+                  )}
+                </div>
               </div>
             </div>
           </div>
@@ -365,6 +409,47 @@ const ScreenCard: React.FC<IScreenCardProps> = ({
                     Active
                   </Badge>
                 </div>
+              </div>
+
+              {/* Orientation Control */}
+              <div className='space-y-2'>
+                <label className='text-sm font-medium'>Display Orientation</label>
+                <Select
+                  value={value?.orientation || "landscape"}
+                  onValueChange={(newOrientation: "landscape" | "portrait") => {
+                    const event = {
+                      target: { value: newOrientation },
+                      preventDefault: () => { },
+                      stopPropagation: () => { }
+                    } as React.ChangeEvent<HTMLSelectElement>;
+                    handleOrientationChange(event);
+                  }}
+                  disabled={isUpdatingOrientation}
+                >
+                  <SelectTrigger className='h-9'>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="landscape">
+                      <div className='flex items-center gap-2'>
+                        <div className='w-4 h-3 border rounded bg-muted'></div>
+                        <span>Landscape</span>
+                      </div>
+                    </SelectItem>
+                    <SelectItem value="portrait">
+                      <div className='flex items-center gap-2'>
+                        <div className='w-3 h-4 border rounded bg-muted'></div>
+                        <span>Portrait</span>
+                      </div>
+                    </SelectItem>
+                  </SelectContent>
+                </Select>
+                {isUpdatingOrientation && (
+                  <div className='flex items-center gap-2 text-sm text-muted-foreground'>
+                    <Loader2 className='h-3 w-3 animate-spin' />
+                    <span>Updating orientation...</span>
+                  </div>
+                )}
               </div>
 
               {/* Layout Selection */}

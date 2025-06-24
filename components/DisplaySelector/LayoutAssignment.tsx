@@ -57,7 +57,7 @@ const LayoutAssignment: React.FC<LayoutAssignmentProps> = ({
         throw new Error(errorData.error || 'Failed to assign layout')
       }
 
-      const result = await response.json()
+      await response.json()
 
       setAssignmentStatus({
         type: 'success',
@@ -148,10 +148,10 @@ const LayoutAssignment: React.FC<LayoutAssignmentProps> = ({
               </SelectTrigger>
               <SelectContent>
                 {layouts.map((layout) => (
-                  <SelectItem key={layout._id} value={layout._id}>
+                  <SelectItem key={layout._id?.toString() || ''} value={layout._id?.toString() || ''}>
                     <div className='flex items-center justify-between w-full'>
                       <span>{layout.name}</span>
-                      {selectedDisplay.layout === layout._id && (
+                      {selectedDisplay.layout === layout._id?.toString() && (
                         <Badge variant='outline' className='ml-2'>Current</Badge>
                       )}
                     </div>

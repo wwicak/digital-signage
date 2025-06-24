@@ -28,6 +28,7 @@ const DisplayEditDialog: React.FC<DisplayEditDialogProps> = ({
   const [formData, setFormData] = useState({
     name: "",
     layout: "", // Will store layout ID
+    orientation: "landscape" as "landscape" | "portrait",
     location: "",
     building: "",
     ipAddress: "",
@@ -61,6 +62,7 @@ const DisplayEditDialog: React.FC<DisplayEditDialogProps> = ({
       setFormData({
         name: display.name || "",
         layout: display.layout || "",
+        orientation: display.orientation || "landscape",
         location: display.location || "",
         building: display.building || "",
         ipAddress: "",
@@ -69,6 +71,7 @@ const DisplayEditDialog: React.FC<DisplayEditDialogProps> = ({
       setFormData({
         name: "",
         layout: "",
+        orientation: "landscape",
         location: "",
         building: "",
         ipAddress: "",
@@ -97,6 +100,7 @@ const DisplayEditDialog: React.FC<DisplayEditDialogProps> = ({
           data: {
             name: formData.name,
             layout: formData.layout as any, // Allow layout ID
+            orientation: formData.orientation,
             location: formData.location || 'Unknown Location',
             building: formData.building || 'Main Building',
           },
@@ -107,6 +111,7 @@ const DisplayEditDialog: React.FC<DisplayEditDialogProps> = ({
           id: display._id,
           data: {
             name: formData.name,
+            orientation: formData.orientation,
             location: formData.location,
             building: formData.building,
           },
@@ -251,7 +256,27 @@ const DisplayEditDialog: React.FC<DisplayEditDialogProps> = ({
               </div>
             </div>
 
-
+            <div className='mb-6'>
+              <label
+                htmlFor='orientation'
+                className='block text-sm font-medium text-gray-700 mb-2'
+              >
+                Display Orientation
+              </label>
+              <select
+                id='orientation'
+                name='orientation'
+                value={formData.orientation}
+                onChange={handleInputChange}
+                className='w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent'
+              >
+                <option value="landscape">Landscape</option>
+                <option value="portrait">Portrait</option>
+              </select>
+              <p className='text-xs text-gray-500 mt-1'>
+                Choose the orientation for this display. This affects how content is displayed.
+              </p>
+            </div>
 
             <div className='mb-6'>
               <label

@@ -158,8 +158,8 @@ export const useDisplaySelectorStats = () => {
     offlineDisplays: displayStats?.offline || 0,
     totalLayouts: layouts.length,
     displaysWithoutLayout: displays.filter(d => !d.layout).length,
-    uptimePercentage: displayStats?.total > 0 
-      ? Math.round((displayStats.online / displayStats.total) * 100) 
+    uptimePercentage: displayStats?.total && displayStats?.total > 0
+      ? Math.round(((displayStats?.online || 0) / displayStats.total) * 100)
       : 0,
   }
 
