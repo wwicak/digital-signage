@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import dbConnect from "@/lib/mongodb";
 import Slide, { SlideSchemaZod, SlideTypeZod } from "@/lib/models/Slide";
-import { Error as MongooseError } from "mongoose";
+import mongoose from "mongoose";
+import { getHttpStatusFromError, getErrorMessage } from "@/types/error";
 import {
   handleSlideInSlideshows,
   getDisplayIdsForSlide,
@@ -23,8 +24,8 @@ export async function GET(request: NextRequest) {
       );
     }
     return NextResponse.json(
-      { message: "Error fetching slides.", error: error instanceof Error ? error.message : "Unknown error" },
-      { status: 500 }
+      { message: "Error fetching slides.", error: getErrorMessage(error) },
+      { status: getHttpStatusFromError(error) }
     );
   }
 }
@@ -130,15 +131,15 @@ export async function POST(request: NextRequest) {
         { status: 401 }
       );
     }
-    if (error instanceof MongooseError.ValidationError) {
+    if (error instanceof mongoose.Error.ValidationError) {
       return NextResponse.json(
         { message: "Validation Error", errors: error.errors },
         { status: 400 }
       );
     }
     return NextResponse.json(
-      { message: "Error creating slide", error: error instanceof Error ? error.message : "Unknown error" },
-      { status: 500 }
+      { message: "Error creating slide", error: getErrorMessage(error) },
+      { status: getHttpStatusFromError(error) }
     );
   }
 }

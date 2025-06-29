@@ -2,7 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import dbConnect from "@/lib/mongodb";
 import Slide, { SlideSchemaZod, SlideTypeZod } from "@/lib/models/Slide";
 import Slideshow from "@/lib/models/Slideshow";
-import { Error as MongooseError } from "mongoose";
+import mongoose from "mongoose";
+import { getHttpStatusFromError, getErrorMessage } from "@/types/error";
 import {
   handleSlideInSlideshows,
   getDisplayIdsForSlide,
@@ -142,15 +143,15 @@ export async function PUT(
         { status: 401 }
       );
     }
-    if (error instanceof MongooseError.ValidationError) {
+    if (error instanceof mongoose.Error.ValidationError) {
       return NextResponse.json(
         { message: "Validation Error", errors: error.errors },
         { status: 400 }
       );
     }
     return NextResponse.json(
-      { message: "Error updating slide", error: error instanceof Error ? error.message : "Unknown error" },
-      { status: 500 }
+      { message: "Error updating slide", error: getErrorMessage(error) },
+      { status: getHttpStatusFromError(error) }
     );
   }
 }

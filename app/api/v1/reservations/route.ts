@@ -8,6 +8,15 @@ import { sendEventToDisplay } from "@/lib/sse_manager";
 import mongoose from "mongoose";
 import { getHttpStatusFromError, getErrorMessage } from "@/types/error";
 
+// Interface for MongoDB query filters
+interface ReservationQuery {
+  room_id?: string;
+  building_id?: string;
+  start_time?: { $gte?: Date; $lte?: Date };
+  end_time?: { $gte?: Date; $lte?: Date };
+  status?: string;
+}
+
 export async function GET(request: NextRequest) {
   try {
     await dbConnect();
@@ -30,7 +39,7 @@ export async function GET(request: NextRequest) {
     const skip = (page - 1) * limit;
 
     // Build MongoDB query with proper typing
-    const query: any = {}; // MongoDB queries are inherently dynamic
+    const query: ReservationQuery = {};
 
     if (roomId && mongoose.Types.ObjectId.isValid(roomId)) {
       query.room_id = roomId;

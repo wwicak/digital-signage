@@ -1,10 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import dbConnect from "@/lib/mongodb";
-import Widget from "@/lib/models/Widget";
+import Widget, { IWidget } from "@/lib/models/Widget";
 import { validateWidgetData } from "@/lib/helpers/widget_helper";
 import { sendEventToDisplay } from "@/lib/sse_manager";
 import { requireAuth } from "@/lib/auth";
-import { MongooseError } from "mongoose";
+import mongoose from "mongoose";
 import { getHttpStatusFromError, getErrorMessage } from "@/types/error";
 
 export async function GET(request: NextRequest) {
@@ -29,7 +29,7 @@ export async function GET(request: NextRequest) {
 
       // Filter widgets to only include those owned by the current user
       const userWidgets = display.widgets.filter(
-        (widget: any) =>
+        (widget: IWidget) =>
           widget.creator_id && widget.creator_id.toString() === user._id
       );
 
@@ -165,7 +165,7 @@ export async function POST(request: NextRequest) {
         name: error.name,
         message: error.message,
         stack: error.stack,
-        errors: error instanceof MongooseError.ValidationError ? error.errors : undefined,
+        errors: error instanceof mongoose.Error.ValidationError ? error.errors : undefined,
       });
     }
 
@@ -177,7 +177,7 @@ export async function POST(request: NextRequest) {
       );
     }
     // Check for Mongoose ValidationError
-    if (error instanceof MongooseError.ValidationError) {
+    if (error instanceof mongoose.Error.ValidationError) {
       return NextResponse.json(
         { message: "Validation Error", errors: error.errors },
         { status: 400 }

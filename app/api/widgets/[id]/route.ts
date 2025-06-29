@@ -5,7 +5,7 @@ import Display, { IDisplay } from "@/lib/models/Display";
 import { validateWidgetData } from "@/lib/helpers/widget_helper";
 import { sendEventToDisplay } from "@/lib/sse_manager";
 import { requireAuth } from "@/lib/auth";
-import { MongooseError } from "mongoose";
+import mongoose from "mongoose";
 import { getHttpStatusFromError, getErrorMessage } from "@/types/error";
 
 export async function GET(
@@ -125,11 +125,11 @@ export async function PUT(
       })) as IDisplay[];
 
       for (const display of displays) {
-        sendEventToDisplay((display._id as any).toString(), "display_updated", {
-          displayId: (display._id as any).toString(),
+        sendEventToDisplay(String(display._id), "display_updated", {
+          displayId: String(display._id),
           action: "update",
           reason: "widget_change",
-          widgetId: (savedWidget._id as any).toString(),
+          widgetId: String(savedWidget._id),
         });
       }
     } catch (notifyError) {
@@ -146,7 +146,7 @@ export async function PUT(
       );
     }
     // Check for Mongoose ValidationError
-    if (error instanceof MongooseError.ValidationError) {
+    if (error instanceof mongoose.Error.ValidationError) {
       return NextResponse.json(
         { message: "Validation Error", errors: error.errors },
         { status: 400 }
@@ -208,8 +208,8 @@ export async function DELETE(
       })) as IDisplay[];
 
       for (const display of displays) {
-        sendEventToDisplay((display._id as any).toString(), "display_updated", {
-          displayId: (display._id as any).toString(),
+        sendEventToDisplay(String(display._id), "display_updated", {
+          displayId: String(display._id),
           action: "update",
           reason: "widget_deleted",
           widgetId: id,

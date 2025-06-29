@@ -3,6 +3,7 @@ import dbConnect from "@/lib/mongodb";
 import { requireAuth } from "@/lib/auth";
 import User from "@/lib/models/User";
 import { z } from "zod";
+import { getHttpStatusFromError, getErrorMessage } from "@/types/error";
 
 // Force dynamic rendering to prevent static generation errors
 export const dynamic = "force-dynamic";
@@ -100,8 +101,9 @@ export async function POST(request: NextRequest) {
           { status: 400 }
         );
       }
-    } catch (error) {
-      console.error("Password verification error:", error);
+    } catch (verificationError) {
+      // Fixed: renamed error to verificationError to avoid shadowing
+      console.error("Password verification error:", verificationError);
       return NextResponse.json(
         { message: "Error verifying current password" },
         { status: 500 }
@@ -129,19 +131,20 @@ export async function POST(request: NextRequest) {
         success: true,
         message: "Password changed successfully",
       });
-    } catch (error: unknown) {
-      const errorMessage = error instanceof Error ? error.message : "Failed to change password";
-      console.error("Password change error:", error);
+    } catch (passwordError: unknown) {
+      // Fixed: renamed error to passwordError to avoid shadowing
+      const errorMessage = getErrorMessage(passwordError);
+      console.error("Password change error:", passwordError);
       return NextResponse.json(
         { message: errorMessage },
-        { status: 500 }
+        { status: getHttpStatusFromError(passwordError) }
       );
     }
   } catch (error: unknown) {
     console.error("Change password error:", error);
 
     // Handle specific error types with proper type checking
-    const errorMessage = error instanceof Error ? error.message : "Internal server error";
+    const errorMessage = getErrorMessage(error);
     
     if (errorMessage === "User not authenticated") {
       return NextResponse.json(
@@ -150,9 +153,10 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Use type-safe error handling utilities
     return NextResponse.json(
       { message: "Internal server error" },
-      { status: 500 }
+      { status: getHttpStatusFromError(error) }
     );
   }
 }

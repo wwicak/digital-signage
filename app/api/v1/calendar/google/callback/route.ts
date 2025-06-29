@@ -130,12 +130,12 @@ export async function GET(request: NextRequest) {
       return NextResponse.redirect(
         new URL("/calendar-integration?success=google_connected", request.url)
       );
-    } catch (authError: any) {
+    } catch (authError: unknown) {
       console.error("Google OAuth error:", authError);
       return NextResponse.redirect(
         new URL(
           `/calendar-integration?error=${encodeURIComponent(
-            authError.message
+            authError instanceof Error ? authError.message : "Authentication failed"
           )}`,
           request.url
         )
