@@ -5,6 +5,18 @@ import Frame from "../Admin/Frame";
 import GridStackWrapper, { GridStackItem } from "../GridStack/GridStackWrapper";
 import Widgets from "../../widgets";
 import { useDisplayState } from "../../hooks/useDisplayState";
+import { WidgetType, type WidgetData } from "../../lib/models/Widget";
+
+// Define a proper widget type for display
+interface DisplayWidget {
+  _id: string;
+  type: WidgetType | string; // Allow both enum and string for flexibility
+  x: number;
+  y: number;
+  w: number;
+  h: number;
+  options?: WidgetData;
+}
 
 interface DisplayGridStackProps {
   displayId?: string;
@@ -30,7 +42,7 @@ const DisplayGridStack: React.FC<DisplayGridStackProps> = memo(({
   const gridStackItems: GridStackItem[] = useMemo(() => {
     if (!state.widgets || state.widgets.length === 0) return [];
 
-    return state.widgets.map((widget: any) => {
+    return state.widgets.map((widget: DisplayWidget) => {
       const WidgetComponent = Widgets[widget.type]?.Component;
       
       return {

@@ -6,7 +6,11 @@ import * as jwt from "jsonwebtoken";
 import dbConnect from "./mongodb";
 
 // Type for response objects that can set cookies (both App Router and Pages Router)
-type CookieResponse = NextResponse | NextApiResponse | { cookies: { set: (name: string, value: string, options?: any) => void } };
+type CookieResponse = 
+  | NextResponse 
+  | NextApiResponse 
+  | { cookies: { set: (name: string, value: string, options?: any) => void } }
+  | { setHeader: (name: string, value: string) => void };
 
 const JWT_SECRET =
   process.env.JWT_SECRET ||
@@ -31,7 +35,7 @@ export interface SessionData {
 export function generateToken(user: IUser): string {
   const payload: SessionData = {
     user: {
-      _id: user._id,
+      _id: String(user._id), // Convert ObjectId to string
       email: user.email!,
       name: user.name,
       role: user.role || {
@@ -85,13 +89,17 @@ export function extractToken(
 
   // Handle NextApiRequest and IncomingMessage (Pages Router)
   // Try Authorization header first
-  const authHeader = req.headers.authorization;
+  const authHeader = 'authorization' in req.headers 
+    ? req.headers.authorization 
+    : (req.headers as any).get?.('authorization');
   if (authHeader && authHeader.startsWith("Bearer ")) {
     return authHeader.substring(7);
   }
 
   // Try cookie
-  const cookies = req.headers.cookie;
+  const cookies = 'cookie' in req.headers 
+    ? req.headers.cookie 
+    : (req.headers as any).get?.('cookie');
   if (cookies && typeof cookies === 'string') {
     const tokenMatch = cookies.match(/auth-token=([^;]+)/);
     if (tokenMatch) {
@@ -177,7 +185,7 @@ export function withAuth(
  */
 export function setAuthCookie(res: CookieResponse, token: string) {
   // Check if this is a NextResponse (App Router) or ServerResponse (Pages Router)
-  if (res.cookies && typeof res.cookies.set === "function") {
+  if ('cookies' in res && res.cookies && typeof res.cookies.set === "function") {
     // App Router - use NextResponse.cookies.set()
     res.cookies.set("auth-token", token, {
       httpOnly: true,
@@ -186,7 +194,7 @@ export function setAuthCookie(res: CookieResponse, token: string) {
       sameSite: "strict",
       secure: process.env.NODE_ENV === "production",
     });
-  } else if (res.setHeader && typeof res.setHeader === "function") {
+  } else if ('setHeader' in res && res.setHeader && typeof res.setHeader === "function") {
     // Pages Router - use setHeader
     res.setHeader(
       "Set-Cookie",
@@ -206,7 +214,7 @@ export function setAuthCookie(res: CookieResponse, token: string) {
  */
 export function clearAuthCookie(res: CookieResponse) {
   // Check if this is a NextResponse (App Router) or ServerResponse (Pages Router)
-  if (res.cookies && typeof res.cookies.set === "function") {
+  if ('cookies' in res && res.cookies && typeof res.cookies.set === "function") {
     // App Router - use NextResponse.cookies.set()
     res.cookies.set("auth-token", "", {
       httpOnly: true,
@@ -215,7 +223,7 @@ export function clearAuthCookie(res: CookieResponse) {
       sameSite: "strict",
       secure: process.env.NODE_ENV === "production",
     });
-  } else if (res.setHeader && typeof res.setHeader === "function") {
+  } else if ('setHeader' in res && res.setHeader && typeof res.setHeader === "function") {
     // Pages Router - use setHeader
     res.setHeader(
       "Set-Cookie",

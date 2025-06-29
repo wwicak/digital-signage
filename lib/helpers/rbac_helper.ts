@@ -4,6 +4,14 @@ import { hasFeatureFlagAccess } from "./feature_flag_helper";
 import { FeatureFlagName } from "../types/feature-flags";
 import mongoose from "mongoose";
 
+// Types for MongoDB queries
+type MongoQueryFilter = {
+  [key: string]: any;
+  _id?: {
+    $in: mongoose.Types.ObjectId[];
+  };
+};
+
 /**
  * Check if user has permission to perform an action on a resource
  */
@@ -256,8 +264,8 @@ export function requirePermission(permission: Permission) {
 export function addAccessFilter(
   user: AuthenticatedUser,
   resource: "display" | "building",
-  query: any = {}
-): any {
+  query: MongoQueryFilter = {}
+): MongoQueryFilter {
   // SuperAdmin can access everything
   if (user.role.name === UserRoleName.SUPER_ADMIN) {
     return query;

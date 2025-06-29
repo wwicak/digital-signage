@@ -3,15 +3,18 @@ import { X } from "lucide-react";
 import { useDisplayMutations } from "@/hooks/useDisplayMutations";
 import { getLayouts, ILayoutData } from "@/actions/layouts";
 
+// Define proper types for the display object
+interface Display {
+  _id: string;
+  name: string;
+  orientation?: "landscape" | "portrait";
+  layout?: string; // Can be layout ID or legacy "spaced"/"compact"
+  location?: string;
+  building?: string;
+}
+
 interface DisplayEditDialogProps {
-  display?: {
-    _id: string;
-    name: string;
-    orientation?: "landscape" | "portrait";
-    layout?: string; // Can be layout ID or legacy "spaced"/"compact"
-    location?: string;
-    building?: string;
-  } | null;
+  display?: Display | null;
   isCreateMode: boolean;
   onClose: () => void;
   onSave: () => void;
@@ -46,7 +49,7 @@ const DisplayEditDialog: React.FC<DisplayEditDialogProps> = ({
         setLoadingLayouts(true);
         const response = await getLayouts({ isActive: true });
         setLayouts(response.layouts || []);
-      } catch (error) {
+      } catch (error: unknown) {
         console.error("Failed to fetch layouts:", error);
         setLayouts([]);
       } finally {
@@ -99,8 +102,8 @@ const DisplayEditDialog: React.FC<DisplayEditDialogProps> = ({
         await createDisplay.mutateAsync({
           data: {
             name: formData.name,
-            layout: formData.layout as any, // Allow layout ID
-            orientation: formData.orientation,
+            layout: formData.layout as "spaced" | "compact" | undefined, // Layout type
+            orientation: formData.orientation as "landscape" | "portrait",
             location: formData.location || 'Unknown Location',
             building: formData.building || 'Main Building',
           },
@@ -111,7 +114,7 @@ const DisplayEditDialog: React.FC<DisplayEditDialogProps> = ({
           id: display._id,
           data: {
             name: formData.name,
-            orientation: formData.orientation,
+            orientation: formData.orientation as "landscape" | "portrait",
             location: formData.location,
             building: formData.building,
           },
@@ -132,14 +135,14 @@ const DisplayEditDialog: React.FC<DisplayEditDialogProps> = ({
           });
 
           if (!response.ok) {
-            const errorData = await response.json();
+            const errorData = await response.json() as { error?: string };
             throw new Error(errorData.error || 'Failed to change layout');
           }
         }
       }
 
       onSave();
-    } catch (err) {
+    } catch (err: unknown) {
       setError(err instanceof Error ? err.message : "An error occurred");
     } finally {
       setLoading(false);
@@ -153,7 +156,7 @@ const DisplayEditDialog: React.FC<DisplayEditDialogProps> = ({
     >
       <div
         className='bg-white rounded-lg w-full max-w-lg max-h-[90vh] overflow-y-auto shadow-xl'
-        onClick={(e) => e.stopPropagation()}
+        onClick={(e: React.MouseEvent) => e.stopPropagation()}
       >
         <div className='flex justify-between items-center p-6 border-b border-gray-200'>
           <div>

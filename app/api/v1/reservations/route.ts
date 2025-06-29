@@ -28,7 +28,8 @@ export async function GET(request: NextRequest) {
     const endDate = searchParams.get("end_date");
     const skip = (page - 1) * limit;
 
-    const query: Record<string, unknown> = {};
+    // Build MongoDB query with proper typing
+    const query: any = {}; // MongoDB queries are inherently dynamic
 
     if (roomId && mongoose.Types.ObjectId.isValid(roomId)) {
       query.room_id = roomId;

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import dbConnect from "@/lib/mongodb";
 import { requireAuth } from "@/lib/auth";
+import { IUserRole } from "@/lib/models/User";
 
 // Define the response interface with proper typing
 interface StatusResponse {
@@ -9,7 +10,7 @@ interface StatusResponse {
     _id: string; // Change from any to string for MongoDB ObjectId
     email: string;
     name?: string;
-    role?: string;
+    role?: IUserRole;
   };
   message?: string;
 }

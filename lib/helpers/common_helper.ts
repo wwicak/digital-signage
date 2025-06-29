@@ -2,30 +2,59 @@
  * @fileoverview Common helper functions for the API
  */
 
-import mongoose from "mongoose";
+import mongoose, { FilterQuery } from "mongoose";
+import { Response } from "express";
 
-/*
- * Define a more specific type for Mongoose query results if possible,
- * but 'any' is a fallback if the structure is highly variable or complex.
- */
-type MongooseQueryResult = any;
-type MongooseDocument = mongoose.Document & {
+// Generic type for Mongoose documents - simplified to work with Mongoose types
+type MongooseDocument<T = any> = mongoose.Document & {
   _id: mongoose.Types.ObjectId | string;
+  toObject?: () => any;
+} & T;
+
+// Generic type for Mongoose query results
+type MongooseQueryResult<T = any> = (mongoose.Document & T) | null;
+
+// Type for Express-like response objects
+interface ExpressResponse {
+  status: (code: number) => ExpressResponse;
+  json: (data: any) => void;
+  getHeader?: (name: string) => string | undefined;
+  write?: (data: string) => void;
+}
+
+// Type for validation errors
+interface ValidationError extends Error {
+  name: "ValidationError";
+  errors: Record<string, any>;
+}
+
+// Type for SSE response
+interface SSEResponse {
+  getHeader?: (name: string) => string | number | string[] | undefined;
+  write?: (data: string) => void;
+}
+
+// Type for MongoDB filter query
+type MongoFilterQuery<T = any> = FilterQuery<T>;
+
+// Type for update data
+interface UpdateData {
   [key: string]: any;
-};
+  last_update?: Date;
+}
 
 /**
  * Finds a document by ID and sends it as a JSON response.
- * @param {mongoose.Model<any>} model - The Mongoose model to query.
+ * @param {mongoose.Model<T>} model - The Mongoose model to query.
  * @param {string | mongoose.Types.ObjectId} id - The ID of the document to find.
- * @param {any} res - The Express response object.
+ * @param {ExpressResponse} res - The Express response object.
  * @param {string} [populateField] - Optional field name to populate.
  * @returns {Promise<void>}
  */
-export const findByIdAndSend = async (
-  model: mongoose.Model<any>,
+export const findByIdAndSend = async <T = any>(
+  model: mongoose.Model<T>,
   id: string | mongoose.Types.ObjectId,
-  res: any, // Should be Express.Response, but keeping 'any' if not directly passed from route
+  res: ExpressResponse,
   populateField?: string
 ): Promise<void> => {
   try {
@@ -33,91 +62,99 @@ export const findByIdAndSend = async (
     if (populateField) {
       query = query.populate(populateField);
     }
-    const result: MongooseQueryResult = await query;
+    const result = await query;
     if (!result) {
-      return res.status(404).json({ message: `${model.modelName} not found` });
+      res.status(404).json({ message: `${model.modelName} not found` });
+      return;
     }
     res.json(result);
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const errorMessage = error instanceof Error ? error.message : "Unknown error";
     console.error(`Error finding ${model.modelName} by ID:`, error);
     res
       .status(500)
-      .json({ message: "Error fetching data", error: error.message });
+      .json({ message: "Error fetching data", error: errorMessage });
   }
 };
 
 /**
  * Finds all documents in a model and sends them as a JSON response.
- * @param {mongoose.Model<any>} model - The Mongoose model to query.
- * @param {any} res - The Express response object.
+ * @param {mongoose.Model<T>} model - The Mongoose model to query.
+ * @param {ExpressResponse} res - The Express response object.
  * @param {string} [populateField] - Optional field name to populate.
- * @param {object} [queryOptions] - Optional query options (e.g., filter, sort).
+ * @param {QueryOptions} [queryOptions] - Optional query options (e.g., filter, sort).
  * @returns {Promise<void>}
  */
-export const findAllAndSend = async (
-  model: mongoose.Model<any>,
-  res: any, // Should be Express.Response
+export const findAllAndSend = async <T = any>(
+  model: mongoose.Model<T>,
+  res: ExpressResponse,
   populateField?: string,
-  queryOptions: object = {}
+  queryOptions: MongoFilterQuery<T> = {} as MongoFilterQuery<T>
 ): Promise<void> => {
   try {
     let query = model.find(queryOptions);
     if (populateField) {
       query = query.populate(populateField);
     }
-    const results: MongooseQueryResult[] = await query;
+    const results = await query;
     res.json(results);
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const errorMessage = error instanceof Error ? error.message : "Unknown error";
     console.error(`Error finding all ${model.modelName}:`, error);
     res
       .status(500)
-      .json({ message: "Error fetching data", error: error.message });
+      .json({ message: "Error fetching data", error: errorMessage });
   }
 };
 
 /**
  * Creates a new document and sends it as a JSON response.
- * @param {mongoose.Model<any>} model - The Mongoose model to use for creation.
- * @param {object} data - The data for the new document.
- * @param {any} res - The Express response object.
+ * @param {mongoose.Model<T>} model - The Mongoose model to use for creation.
+ * @param {Partial<T>} data - The data for the new document.
+ * @param {ExpressResponse} res - The Express response object.
  * @returns {Promise<void>}
  */
-export const createAndSend = async (
-  model: mongoose.Model<any>,
-  data: object,
-  res: any // Should be Express.Response
+export const createAndSend = async <T = any>(
+  model: mongoose.Model<T>,
+  data: Partial<T>,
+  res: ExpressResponse
 ): Promise<void> => {
   try {
     const newItem = new model(data);
-    const result: MongooseQueryResult = await newItem.save();
+    const result = await newItem.save();
     res.status(201).json(result);
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error(`Error creating ${model.modelName}:`, error);
-    if (error.name === "ValidationError") {
-      return res
-        .status(400)
-        .json({ message: "Validation Error", errors: error.errors });
+    if (error instanceof Error) {
+      if ((error as ValidationError).name === "ValidationError") {
+        res.status(400).json({ message: "Validation Error", errors: (error as ValidationError).errors });
+        return;
+      }
+      res
+        .status(500)
+        .json({ message: "Error creating data", error: error.message });
+    } else {
+      res
+        .status(500)
+        .json({ message: "Error creating data", error: "Unknown error" });
     }
-    res
-      .status(500)
-      .json({ message: "Error creating data", error: error.message });
   }
 };
 
 /**
  * Updates a document by ID and sends the updated document as a JSON response.
- * @param {mongoose.Model<any>} model - The Mongoose model to update.
+ * @param {mongoose.Model<T>} model - The Mongoose model to update.
  * @param {string | mongoose.Types.ObjectId} id - The ID of the document to update.
- * @param {object} data - The update data.
- * @param {any} res - The Express response object.
+ * @param {Partial<T>} data - The update data.
+ * @param {ExpressResponse} res - The Express response object.
  * @param {string} [populateField] - Optional field name to populate after update.
  * @returns {Promise<void>}
  */
-export const findByIdAndUpdateAndSend = async (
-  model: mongoose.Model<any>,
+export const findByIdAndUpdateAndSend = async <T = any>(
+  model: mongoose.Model<T>,
   id: string | mongoose.Types.ObjectId,
-  data: object,
-  res: any, // Should be Express.Response
+  data: Partial<T>,
+  res: ExpressResponse,
   populateField?: string
 ): Promise<void> => {
   try {
@@ -126,86 +163,84 @@ export const findByIdAndUpdateAndSend = async (
      * (data as any).last_update = new Date(); // Or handle this via schema middleware
      */
 
-    let updatedItem: MongooseDocument | null = await model.findByIdAndUpdate(
+    let updatedItem = await model.findByIdAndUpdate(
       id,
       data,
       { new: true, runValidators: true }
     );
 
     if (!updatedItem) {
-      return res.status(404).json({ message: `${model.modelName} not found` });
+      res.status(404).json({ message: `${model.modelName} not found` });
+      return;
     }
 
-    if (populateField && updatedItem.populate) {
-      // Call populate once, as it might return different things based on Mongoose version context
-      const populateCallResult = updatedItem.populate(populateField);
-
-      /*
-       * Check if execPopulate exists on the result of the first populate call (for older Mongoose)
-       * or if populateCallResult itself is a promise (Mongoose 6+ on instances)
-       */
-      if (typeof (populateCallResult as any).execPopulate === "function") {
-        updatedItem = await (populateCallResult as any).execPopulate(); // Older Mongoose
-      } else if (typeof (populateCallResult as any).then === "function") {
-        // Mongoose 6+: populateCallResult is a Promise, await it.
-        updatedItem = (await populateCallResult) as any;
+    if (populateField && updatedItem) {
+      try {
+        // Use model.populate for better type safety
+        updatedItem = await model.populate(updatedItem, populateField);
+      } catch (populateError) {
+        // If populate fails, log error but continue with unpopulated result
+        console.warn(`Failed to populate field '${populateField}':`, populateError);
       }
-      /*
-       * If neither, it might be a case where populate() mutated updatedItem directly (older Mongoose with no promise/execPopulate)
-       * or the populate field was invalid. For this helper, we assume valid fields
-       * and rely on the above two main patterns. If updatedItem wasn't reassigned, it remains as is.
-       */
     }
 
     res.json(updatedItem);
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error(`Error updating ${model.modelName}:`, error);
-    if (error.name === "ValidationError") {
-      return res
-        .status(400)
-        .json({ message: "Validation Error", errors: error.errors });
+    if (error instanceof Error) {
+      if ((error as ValidationError).name === "ValidationError") {
+        res.status(400).json({ message: "Validation Error", errors: (error as ValidationError).errors });
+        return;
+      }
+      res
+        .status(500)
+        .json({ message: "Error updating data", error: error.message });
+    } else {
+      res
+        .status(500)
+        .json({ message: "Error updating data", error: "Unknown error" });
     }
-    res
-      .status(500)
-      .json({ message: "Error updating data", error: error.message });
   }
 };
 
 /**
  * Deletes a document by ID and sends a success message as a JSON response.
- * @param {mongoose.Model<any>} model - The Mongoose model to delete from.
+ * @param {mongoose.Model<T>} model - The Mongoose model to delete from.
  * @param {string | mongoose.Types.ObjectId} id - The ID of the document to delete.
- * @param {any} res - The Express response object.
+ * @param {ExpressResponse} res - The Express response object.
  * @returns {Promise<void>}
  */
-export const findByIdAndDeleteAndSend = async (
-  model: mongoose.Model<any>,
+export const findByIdAndDeleteAndSend = async <T = any>(
+  model: mongoose.Model<T>,
   id: string | mongoose.Types.ObjectId,
-  res: any // Should be Express.Response
+  res: ExpressResponse
 ): Promise<void> => {
   try {
-    const result: MongooseQueryResult = await model.findByIdAndDelete(id);
+    const result = await model.findByIdAndDelete(id);
     if (!result) {
-      return res.status(404).json({ message: `${model.modelName} not found` });
+      res.status(404).json({ message: `${model.modelName} not found` });
+      return;
     }
     res.json({ message: `${model.modelName} deleted successfully` });
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const errorMessage = error instanceof Error ? error.message : "Unknown error";
     console.error(`Error deleting ${model.modelName}:`, error);
     res
       .status(500)
-      .json({ message: "Error deleting data", error: error.message });
+      .json({ message: "Error deleting data", error: errorMessage });
   }
 };
 
 /**
  * Helper to handle SSE updates. (This is a placeholder, actual implementation might vary)
- * @param {any} res - The Express response object, configured for SSE.
+ * @param {SSEResponse} res - The Express response object, configured for SSE.
  * @param {string} eventName - The name of the event to send.
- * @param {any} data - The data to send with the event.
+ * @param {unknown} data - The data to send with the event.
  */
-export const sendSseEvent = (res: any, eventName: string, data: any): void => {
+export const sendSseEvent = (res: SSEResponse, eventName: string, data: unknown): void => {
   // Check if this is an SSE response by looking for text/event-stream content type
-  if (res.getHeader && res.getHeader("Content-Type") === "text/event-stream") {
+  const contentType = res.getHeader && res.getHeader("Content-Type");
+  if (contentType === "text/event-stream") {
     if (res.write) {
       res.write(`event: ${eventName}\ndata: ${JSON.stringify(data)}\n\n`);
     }
@@ -225,7 +260,7 @@ export interface ParsedQueryParams {
   limit: number;
 }
 
-export const parseQueryParams = (query: any): ParsedQueryParams => {
+export const parseQueryParams = (query: Record<string, unknown>): ParsedQueryParams => {
   const { page = 1, limit = 10, sort, ...filter } = query;
   const skip =
     (parseInt(page as string, 10) - 1) * parseInt(limit as string, 10);
@@ -246,14 +281,14 @@ export const parseQueryParams = (query: any): ParsedQueryParams => {
 
 /**
  * Augments display objects with clientCount and isOnline properties
- * @param {any[]} displays - Array of display objects
+ * @param {T[]} displays - Array of display objects
  * @param {Function} getClientCount - Function to get client count for a display ID
- * @returns {any[]} - Augmented display objects
+ * @returns {(T & { clientCount: number; isOnline: boolean })[]} - Augmented display objects
  */
-export const augmentDisplaysWithClientInfo = (
-  displays: any[],
+export const augmentDisplaysWithClientInfo = <T extends { _id: any; toObject?: () => any }>(
+  displays: T[],
   getClientCount: (displayId: string) => number
-): any[] => {
+): (T & { clientCount: number; isOnline: boolean })[] => {
   return displays.map((display) => {
     const displayObj = display.toObject ? display.toObject() : display;
     const clientCount = getClientCount(displayObj._id.toString());
@@ -267,14 +302,14 @@ export const augmentDisplaysWithClientInfo = (
 
 /**
  * Augments a single display object with clientCount and isOnline properties
- * @param {any} display - Display object
+ * @param {T} display - Display object
  * @param {Function} getClientCount - Function to get client count for a display ID
- * @returns {any} - Augmented display object
+ * @returns {T & { clientCount: number; isOnline: boolean }} - Augmented display object
  */
-export const augmentDisplayWithClientInfo = (
-  display: any,
+export const augmentDisplayWithClientInfo = <T extends { _id: any; toObject?: () => any }>(
+  display: T,
   getClientCount: (displayId: string) => number
-): any => {
+): T & { clientCount: number; isOnline: boolean } => {
   const displayObj = display.toObject ? display.toObject() : display;
   const clientCount = getClientCount(displayObj._id.toString());
   return {

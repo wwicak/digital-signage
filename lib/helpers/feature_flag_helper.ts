@@ -295,7 +295,20 @@ export async function refreshFeatureFlagCache(): Promise<void> {
   featureFlagCache.clear();
 
   for (const flag of flags) {
-    featureFlagCache.set(flag.name, flag as any);
+    // Convert MongoDB document to IFeatureFlag interface
+    const flagData: IFeatureFlag = {
+      _id: flag._id?.toString(),
+      name: flag.name,
+      displayName: flag.displayName,
+      description: flag.description,
+      type: flag.type,
+      enabled: flag.enabled,
+      allowedRoles: flag.allowedRoles,
+      createdBy: typeof flag.createdBy === 'string' ? flag.createdBy : flag.createdBy?.toString() || '',
+      createdAt: flag.createdAt,
+      updatedAt: flag.updatedAt,
+    };
+    featureFlagCache.set(flag.name, flagData);
   }
 
   cacheLastUpdated = new Date();
@@ -352,7 +365,7 @@ export async function hasFeatureFlagAccess(
 export async function getUserAccessibleFeatureFlags(
   user: AuthenticatedUser,
   type?: FeatureFlagType
-): Promise<any[]> {
+): Promise<IFeatureFlag[]> {
   await dbConnect();
 
   // Super admins can see all flags
@@ -362,7 +375,7 @@ export async function getUserAccessibleFeatureFlags(
   }
 
   // For other users, filter by their role and enabled status
-  const query: any = {
+  const query: Record<string, any> = {
     enabled: true,
     allowedRoles: { $in: [user.role.name] },
   };

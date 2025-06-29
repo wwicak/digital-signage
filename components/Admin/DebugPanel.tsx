@@ -19,8 +19,16 @@ import {
 const DebugPanel: React.FC = () => {
   const { theme, setTheme, resolvedTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
-  const [systemStatus, setSystemStatus] = useState<any>(null);
-  const [authStatus, setAuthStatus] = useState<any>(null);
+  const [systemStatus, setSystemStatus] = useState<{
+    status?: number;
+    data?: Record<string, unknown>;
+    error?: string;
+  } | null>(null);
+  const [authStatus, setAuthStatus] = useState<{
+    status?: number;
+    data?: Record<string, unknown>;
+    error?: string;
+  } | null>(null);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -34,8 +42,8 @@ const DebugPanel: React.FC = () => {
       const response = await fetch("/api/system/status");
       const data = await response.json();
       setSystemStatus({ status: response.status, data });
-    } catch (error: any) {
-      setSystemStatus({ error: error.message });
+    } catch (error: unknown) {
+      setSystemStatus({ error: error instanceof Error ? error.message : 'Unknown error' });
     }
   };
 
@@ -44,8 +52,8 @@ const DebugPanel: React.FC = () => {
       const response = await fetch("/api/auth/status");
       const data = await response.json();
       setAuthStatus({ status: response.status, data });
-    } catch (error: any) {
-      setAuthStatus({ error: error.message });
+    } catch (error: unknown) {
+      setAuthStatus({ error: error instanceof Error ? error.message : 'Unknown error' });
     }
   };
 

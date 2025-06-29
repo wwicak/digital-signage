@@ -71,7 +71,7 @@ export async function GET(request: NextRequest) {
         isRunning: false,
       },
       lastUpdated: new Date().toISOString(),
-      error: error.message,
+      error: error instanceof Error ? error.message : "Unknown error occurred",
     });
   }
 }

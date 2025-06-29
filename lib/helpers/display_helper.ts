@@ -13,7 +13,7 @@ interface WidgetData {
   y: number;
   w: number;
   h: number;
-  data: any;
+  data: Record<string, unknown>;
   // creator_id will be set by the helper
 }
 
@@ -53,10 +53,11 @@ export const createWidgetsForDisplay = async (
      */
 
     return widgetIds
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
     console.error('Error creating widgets for display:', error)
     // Potentially, clean up created widgets if the process is transactional, though MongoDB makes this complex.
-    throw new Error('Failed to create widgets for display.')
+    throw new Error(`Failed to create widgets for display: ${errorMessage}`)
   }
 }
 
@@ -92,9 +93,11 @@ export const updateWidgetsForDisplay = async (
         updatedWidgetObjectIds.push(
           new mongoose.Types.ObjectId(widgetData._id as string)
         )
-      } catch (error) {
+      } catch (error: unknown) {
+        const errorMessage = error instanceof Error ? error.message : 'Unknown error';
         console.error(`Error updating widget ${widgetData._id}:`, error)
         // Decide if one failed update should stop the whole process
+        throw new Error(`Failed to update widget ${widgetData._id}: ${errorMessage}`);
       }
     } else {
       // New widget
@@ -108,8 +111,10 @@ export const updateWidgetsForDisplay = async (
           (savedWidget._id as mongoose.Types.ObjectId).toString()
         )
         updatedWidgetObjectIds.push(savedWidget._id as mongoose.Types.ObjectId)
-      } catch (error) {
+      } catch (error: unknown) {
+        const errorMessage = error instanceof Error ? error.message : 'Unknown error';
         console.error('Error creating new widget:', error)
+        throw new Error(`Failed to create new widget: ${errorMessage}`);
       }
     }
   }
@@ -125,9 +130,11 @@ export const updateWidgetsForDisplay = async (
           $in: widgetsToRemove.map((id) => new mongoose.Types.ObjectId(id)),
         },
       })
-    } catch (error) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       console.error('Error deleting old widgets:', error)
       // Decide error handling strategy
+      throw new Error(`Failed to delete old widgets: ${errorMessage}`);
     }
   }
 
@@ -157,9 +164,10 @@ export const deleteWidgetsForDisplay = async (
       await Widget.deleteMany({ _id: { $in: display.widgets } })
       display.widgets = []
       // await display.save(); // Caller should save the display
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       console.error('Error deleting widgets for display:', error)
-      throw new Error('Failed to delete widgets for display.')
+      throw new Error(`Failed to delete widgets for display: ${errorMessage}`)
     }
   }
 }
@@ -176,8 +184,9 @@ export const getDisplayWithWidgets = async (
   try {
     const display = await Display.findById(displayId).populate('widgets')
     return display
-  } catch (error) {
-    console.error('Error fetching display with widgets:', error)
+  } catch (error: unknown) {
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    console.error('Error fetching display with widgets:', errorMessage)
     return null
   }
 }
