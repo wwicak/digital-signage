@@ -1,4 +1,5 @@
-export default {
+// Mock implementation for UserCalendarLink model used in tests
+const UserCalendarLinkMock = {
   find: jest.fn(),
   findOne: jest.fn(),
   findByIdAndDelete: jest.fn(),
@@ -9,3 +10,5 @@ export default {
     isTokenExpired: jest.fn(),
   },
 };
+
+export default UserCalendarLinkMock;

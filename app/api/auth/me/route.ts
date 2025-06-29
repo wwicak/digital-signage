@@ -13,7 +13,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({
         success: true,
         user: {
-          _id: user._id,
+          _id: user._id.toString(), // Convert ObjectId to string
           email: user.email,
           name: user.name,
           role: user.role,
@@ -25,10 +25,14 @@ export async function GET(request: NextRequest) {
         message: "User not authenticated",
       }, { status: 401 });
     }
-  } catch (error: any) {
+  } catch (error: unknown) {
+    // Properly type error handling
+    const errorMessage = error instanceof Error ? error.message : "Authentication check failed";
+    console.error("Authentication error:", error);
+    
     return NextResponse.json({
       success: false,
-      message: "Authentication check failed",
+      message: errorMessage,
     }, { status: 401 });
   }
 }

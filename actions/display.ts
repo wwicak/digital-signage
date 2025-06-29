@@ -1,20 +1,21 @@
 import axios, { AxiosResponse } from "axios";
+import { WidgetType, WidgetData } from "@/lib/models/Widget";
 
 /*
  * Define interfaces for the data structures
  * These should ideally match the backend API/models or be a subset
- * For now, defining them based on common expectations for display data.
+ * Using the proper types from the Widget model for consistency.
  */
 
 interface IWidget {
   _id: string;
   name: string;
-  type: string; // Consider an enum if widget types are fixed
+  type: WidgetType; // Use the defined WidgetType enum for better type safety
   x: number;
   y: number;
   w: number;
   h: number;
-  data: any; // Be more specific if possible
+  data: WidgetData; // Use the union type for widget-specific data
 }
 
 interface IStatusBar {
@@ -55,12 +56,12 @@ export const getDisplays = (host: string = ""): Promise<IDisplayData[]> => {
 
   return axios
     .get(`${host}/api/displays`)
-    .then((res: AxiosResponse<any>) => {
+    .then((res: AxiosResponse<{ displays: IDisplayData[] } | IDisplayData[]>) => {
       // The API returns {displays: [...], ...} structure
       if (
         res &&
         res.data &&
-        res.data.displays &&
+        'displays' in res.data &&
         Array.isArray(res.data.displays)
       ) {
         return res.data.displays;

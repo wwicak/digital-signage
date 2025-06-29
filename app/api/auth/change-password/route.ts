@@ -60,9 +60,15 @@ export async function POST(request: NextRequest) {
     // Verify current password using passport-local-mongoose
     try {
       const isValidPassword = await new Promise<boolean>((resolve, reject) => {
-        (dbUser as any).authenticate(
+        // Use type assertion for passport-local-mongoose authenticate method
+        const authenticateMethod = (dbUser as any).authenticate as (
+          password: string,
+          callback: (err: Error | null, user: any, passwordErr: Error | null) => void
+        ) => void;
+        
+        authenticateMethod(
           currentPassword,
-          (err: any, user: any, passwordErr: any) => {
+          (err: Error | null, user: any, passwordErr: Error | null) => {
             if (err) {
               reject(err);
             } else if (passwordErr) {
@@ -93,7 +99,13 @@ export async function POST(request: NextRequest) {
     // Change password using passport-local-mongoose
     try {
       await new Promise<void>((resolve, reject) => {
-        (dbUser as any).setPassword(newPassword, (err: any) => {
+        // Use type assertion for passport-local-mongoose setPassword method
+        const setPasswordMethod = (dbUser as any).setPassword as (
+          password: string,
+          callback: (err: Error | null) => void
+        ) => void;
+        
+        setPasswordMethod(newPassword, (err: Error | null) => {
           if (err) {
             reject(err);
           } else {
@@ -109,18 +121,21 @@ export async function POST(request: NextRequest) {
         success: true,
         message: "Password changed successfully",
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : "Failed to change password";
       console.error("Password change error:", error);
       return NextResponse.json(
-        { message: "Failed to change password" },
+        { message: errorMessage },
         { status: 500 }
       );
     }
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Change password error:", error);
 
-    // Handle specific error types
-    if (error.message === "User not authenticated") {
+    // Handle specific error types with proper type checking
+    const errorMessage = error instanceof Error ? error.message : "Internal server error";
+    
+    if (errorMessage === "User not authenticated") {
       return NextResponse.json(
         { message: "User not authenticated" },
         { status: 401 }

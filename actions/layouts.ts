@@ -244,9 +244,9 @@ export async function addWidgetToLayout(
     y: number;
     w: number;
     h: number;
-    data?: any;
+    data?: Record<string, unknown>; // Replace any with Record for better type safety
   }
-): Promise<any> {
+): Promise<ILayoutWidget> {
   const response = await fetch(`/api/layouts/${layoutId}/widgets`, {
     method: "POST",
     headers: {

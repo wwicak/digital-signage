@@ -53,11 +53,13 @@ export async function POST(request: NextRequest) {
     setAuthCookie(response, token);
 
     return response;
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Login error:", error);
 
-    // Handle authentication errors
-    if (error.message === "Invalid credentials") {
+    // Handle authentication errors with proper type checking
+    const errorMessage = error instanceof Error ? error.message : "Unknown error occurred";
+    
+    if (errorMessage === "Invalid credentials") {
       return NextResponse.json(
         { message: "Invalid credentials" },
         { status: 401 }
@@ -67,7 +69,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(
       {
         message: "Error during login",
-        error: error.message,
+        error: errorMessage,
       },
       { status: 500 }
     );
