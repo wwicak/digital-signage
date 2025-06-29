@@ -53,7 +53,9 @@ const UserMenu: React.FC<UserMenuProps> = ({ className, user }) => {
   // Helper function to safely extract string values from potentially nested objects
   const safeGetString = (value: unknown, fallback: string = ""): string => {
     if (typeof value === "string") return value;
-    if (value && typeof value === "object" && value.name) return value.name;
+    if (value && typeof value === "object" && (value as { name?: string }).name) {
+      return (value as { name: string }).name;
+    }
     return fallback;
   };
   const [isPasswordDialogOpen, setIsPasswordDialogOpen] = useState(false);

@@ -1,6 +1,6 @@
 import axios, { AxiosResponse } from "axios";
 import * as z from "zod";
-import { SlideTypeZod, SlideDataZod, ISlide } from "@/lib/models/Slide"; // Using Zod schemas from the model
+import { SlideTypeZod, SlideDataZod } from "@/lib/models/Slide"; // Using Zod schemas from the model
 
 // Local slideshow schema to avoid circular dependency
 const LocalSlideshowSchema = z.object({
@@ -93,7 +93,7 @@ export const getSlides = (
         // Extract slides from the slideshow, ensuring they are full slide objects, not just IDs
         if (slideshow.slides && Array.isArray(slideshow.slides)) {
           const fullSlides = slideshow.slides.filter(
-            (slide: unknown): slide is Record<string, unknown> => 
+            (slide: unknown): slide is Record<string, unknown> =>
               typeof slide === "object" && slide !== null
           ) as ISlideData[];
           return fullSlides;

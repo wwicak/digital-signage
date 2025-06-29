@@ -74,13 +74,16 @@ const LayoutAssignment: React.FC<LayoutAssignmentProps> = ({
 
     } catch (error: unknown) {
       console.error('Layout assignment error:', error)
+      
+      // Type guard to safely access error message
+      const errorMsg = error instanceof Error ? error.message : 'Failed to assign layout. Please try again.';
 
       setAssignmentStatus({
         type: 'error',
-        message: error.message || 'Failed to assign layout. Please try again.',
+        message: errorMsg,
       })
 
-      onAssignmentComplete?.(false, error.message)
+      onAssignmentComplete?.(false, errorMsg)
     } finally {
       setIsAssigning(false)
     }

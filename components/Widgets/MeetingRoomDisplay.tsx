@@ -108,11 +108,13 @@ const MeetingRoomDisplay: React.FC<IMeetingRoomDisplayProps> = ({
       }
     } catch (error: unknown) {
       console.error("Error fetching reservations:", error);
+      // Type guard to safely access error message
+      const errorMsg = error instanceof Error ? error.message : "";
       // Show a more user-friendly error message
-      if (error.message.includes("fetch")) {
+      if (errorMsg.includes("fetch")) {
         setError("Meeting room system is being set up. Please check back later.");
       } else {
-        setError(error.message || "Failed to load reservations");
+        setError(errorMsg || "Failed to load reservations");
       }
       setReservations([]);
     } finally {

@@ -72,9 +72,11 @@ class WebOptionsEnhanced extends Component<IWebOptionsProps, IWebOptionsState> {
     
     let processedValue = value
     if (name === 'refreshInterval' || name === 'scale') {
-      processedValue = parseFloat(value as string) || 0
-      if (name === 'scale' && (processedValue < 0.1 || processedValue > 5)) {
-        processedValue = Math.max(0.1, Math.min(5, processedValue))
+      // Type guard to safely handle unknown value
+      const numValue = typeof value === 'number' ? value : parseFloat(String(value)) || 0;
+      processedValue = numValue;
+      if (name === 'scale' && (numValue < 0.1 || numValue > 5)) {
+        processedValue = Math.max(0.1, Math.min(5, numValue))
       }
     }
 

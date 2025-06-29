@@ -60,11 +60,14 @@ export async function POST(request: NextRequest) {
     // Verify current password using passport-local-mongoose
     try {
       const isValidPassword = await new Promise<boolean>((resolve, reject) => {
-        // Use type assertion for passport-local-mongoose authenticate method
-        const authenticateMethod = (dbUser as any).authenticate as (
-          password: string,
-          callback: (err: Error | null, user: unknown, passwordErr: Error | null) => void
-        ) => void;
+        // Type interface for passport-local-mongoose authenticate method
+        interface PassportLocalUser {
+          authenticate: (
+            password: string,
+            callback: (err: Error | null, user: unknown, passwordErr: Error | null) => void
+          ) => void;
+        }
+        const authenticateMethod = (dbUser as PassportLocalUser).authenticate;
         
         authenticateMethod(
           currentPassword,
@@ -99,11 +102,15 @@ export async function POST(request: NextRequest) {
     // Change password using passport-local-mongoose
     try {
       await new Promise<void>((resolve, reject) => {
-        // Use type assertion for passport-local-mongoose setPassword method
-        const setPasswordMethod = (dbUser as any).setPassword as (
-          password: string,
-          callback: (err: Error | null) => void
-        ) => void;
+        // Type interface for passport-local-mongoose setPassword method
+        interface PassportLocalUserWithPassword extends PassportLocalUser {
+          setPassword: (
+            password: string,
+            callback: (err: Error | null) => void
+          ) => void;
+          save: (callback?: (err: Error | null) => void) => void;
+        }
+        const setPasswordMethod = (dbUser as PassportLocalUserWithPassword).setPassword;
         
         setPasswordMethod(newPassword, (err: Error | null) => {
           if (err) {

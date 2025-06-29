@@ -43,7 +43,9 @@ const DisplayGridStack: React.FC<DisplayGridStackProps> = memo(({
     if (!state.widgets || state.widgets.length === 0) return [];
 
     return state.widgets.map((widget: DisplayWidget) => {
-      const WidgetComponent = Widgets[widget.type]?.Component;
+      // Get the widget definition from the registry
+      const widgetDef = Widgets[widget.type];
+      const WidgetComponent = widgetDef?.Widget; // Use 'Widget' property instead of 'Component'
       
       return {
         id: widget._id,
@@ -54,8 +56,8 @@ const DisplayGridStack: React.FC<DisplayGridStackProps> = memo(({
         content: WidgetComponent ? (
           <WidgetComponent
             key={widget._id}
-            id={widget._id}
-            options={widget.options || {}}
+            data={widget.options || {}}
+            isPreview={false}
           />
         ) : (
           <div className="flex items-center justify-center h-full bg-red-100 text-red-600">

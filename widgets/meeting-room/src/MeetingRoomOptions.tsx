@@ -84,7 +84,7 @@ const MeetingRoomOptions: React.FC<IWidgetOptionsEditorProps<IMeetingRoomData>> 
         name='refreshInterval'
         label='Refresh Interval (seconds)'
         value={Math.floor((data.refreshInterval || 30000) / 1000)}
-        onChange={(name, value) => handleChange(name, value * 1000)}
+        onChange={(name, value) => handleChange(name, (typeof value === 'number' ? value : Number(value) || 30) * 1000)}
         min={5}
         max={300}
         helpText='How often to refresh the meeting data (5-300 seconds)'

@@ -22,6 +22,23 @@ export type IDisplayComponentProps = z.infer<
   typeof DisplayComponentPropsSchema
 >;
 
+// Type for widget data object
+interface WidgetObjectData {
+  _id: string;
+  type: string;
+  data?: Record<string, unknown>;
+  [key: string]: unknown;
+}
+
+// Type for layout widget with position data
+interface LayoutWidget {
+  widget_id?: unknown;
+  x?: number;
+  y?: number;
+  w?: number;
+  h?: number;
+}
+
 // --- Constants ---
 const DEFAULT_STATUS_BAR: string[] = [];
 const DEFAULT_LAYOUT: DisplayLayoutType = "spaced";
@@ -183,23 +200,32 @@ const Display: React.FC<IDisplayComponentProps> = React.memo(({ display }) => {
   // Memoize layout for GridStack to prevent unnecessary re-renders
   const gridStackItems: GridStackItem[] = useMemo(
     () =>
-      (layoutData?.widgets || []).map((widget: {widget_id?: unknown; x?: number; y?: number; w?: number; h?: number}) => {
+      (layoutData?.widgets || []).map((widget: LayoutWidget) => {
         // Skip if no widget data
         if (!widget?.widget_id) return null;
 
         // Get the widget definition data - handle both string ID and embedded object
         let widgetData = widget.widget_id;
-        if (typeof widgetData !== 'object') {
+        if (typeof widgetData !== 'object' || widgetData === null) {
           console.error('Widget data is not an object:', widgetData);
           return null;
         }
 
+        // Type guard to ensure we have the expected structure
+        const isValidWidgetData = (data: unknown): data is WidgetObjectData => {
+          return (
+            typeof data === 'object' &&
+            data !== null &&
+            typeof (data as WidgetObjectData)._id === 'string' &&
+            typeof (data as WidgetObjectData).type === 'string'
+          );
+        };
 
-        // Skip if corrupted data
-        if (!widgetData || !widgetData.type) {
-          console.error('Invalid widget data:', widget);
+        if (!isValidWidgetData(widgetData)) {
+          console.error('Invalid widget data structure:', widget);
           return null;
         }
+
         // Detailed debug logging
         console.log('Full widget data:', JSON.stringify(widgetData, null, 2));
         console.log('Widget instance:', widget);

@@ -209,6 +209,18 @@ class SlideEditDialog
     }
   };
 
+  // Wrapper to handle type conversion for photo onChange
+  handlePhotoChangeWrapper = (name: string, value: unknown): void => {
+    // Type guard and conversion to ensure value is File | string | null
+    if (value instanceof File || typeof value === 'string' || value === null) {
+      this.handlePhotoChange(name, value);
+    } else {
+      // Log unexpected value type for debugging
+      console.warn('Unexpected value type in handlePhotoChangeWrapper:', typeof value, value);
+      this.handlePhotoChange(name, null);
+    }
+  };
+
   handleSave = async (): Promise<void> => {
     const { slideId, slideshowId } = this.props;
     const { upload, title, description, type, data, duration } = this.state;
@@ -387,7 +399,7 @@ class SlideEditDialog
               label={"Photo"}
               name={"upload"} // This input should update the 'upload' state field
               value={photoInputValue} // Pass the File object or existing URL string
-              onChange={this.handlePhotoChange} // Use specific handler for photo
+              onChange={this.handlePhotoChangeWrapper} // Use wrapper to handle type conversion
               inline={true}
             />
           ) : (

@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import dbConnect from "@/lib/mongodb";
 import Display from "@/lib/models/Display";
-import { WidgetType } from "@/lib/models/Widget";
+import { WidgetType, type IWidget } from "@/lib/models/Widget";
 import {
   updateWidgetsForDisplay,
   deleteWidgetsForDisplay,
@@ -69,10 +69,9 @@ export async function GET(
     return NextResponse.json(display);
   } catch (error: unknown) {
     const errorMessage = error instanceof Error ? error.message : "Error fetching display";
-    const errorStatus = error && typeof error === 'object' && 'status' in error && typeof error.status === 'number' 
-      ? error.status 
+    const errorStatus = error && typeof error === 'object' && 'status' in error && typeof error.status === 'number'
+      ? error.status
       : 500;
-    
     return NextResponse.json(
       { message: errorMessage },
       { status: errorStatus }
@@ -122,7 +121,7 @@ export async function PUT(
     if (newWidgetsData) {
       const updatedWidgetIds = await updateWidgetsForDisplay(
         displayToUpdate,
-        newWidgetsData as any, // Type assertion for Partial<IWidget>[] compatibility
+        newWidgetsData as Partial<IWidget>[], // Type assertion for Partial<IWidget>[] compatibility
         user._id
       );
       displayToUpdate.widgets = updatedWidgetIds;
@@ -148,10 +147,12 @@ export async function PUT(
     }
 
     return NextResponse.json(populatedDisplay);
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const errorMessage = error instanceof Error ? error.message : "Error updating display";
+    const statusCode = error instanceof Error && 'status' in error ? (error as { status: number }).status : 500;
     return NextResponse.json(
-      { message: error.message || "Error updating display" },
-      { status: error.status || 500 }
+      { message: errorMessage },
+      { status: statusCode }
     );
   }
 }
@@ -202,10 +203,12 @@ export async function DELETE(
     return NextResponse.json({
       message: "Display and associated widgets deleted successfully",
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const errorMessage = error instanceof Error ? error.message : "Error deleting display";
+    const statusCode = error instanceof Error && 'status' in error ? (error as { status: number }).status : 500;
     return NextResponse.json(
-      { message: error.message || "Error deleting display" },
-      { status: error.status || 500 }
+      { message: errorMessage },
+      { status: statusCode }
     );
   }
 }
