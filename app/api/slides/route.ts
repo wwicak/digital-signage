@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import dbConnect from "@/lib/mongodb";
 import Slide, { SlideSchemaZod, SlideTypeZod } from "@/lib/models/Slide";
+import { Error as MongooseError } from "mongoose";
 import {
   handleSlideInSlideshows,
   getDisplayIdsForSlide,
@@ -129,9 +130,9 @@ export async function POST(request: NextRequest) {
         { status: 401 }
       );
     }
-    if (error instanceof Error && error.name === "ValidationError") {
+    if (error instanceof MongooseError.ValidationError) {
       return NextResponse.json(
-        { message: "Validation Error", errors: (error as any).errors },
+        { message: "Validation Error", errors: error.errors },
         { status: 400 }
       );
     }

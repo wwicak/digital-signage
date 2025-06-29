@@ -4,6 +4,7 @@ import Display from "@/lib/models/Display";
 import { requireAuth } from "@/lib/auth";
 import { sendEventToDisplay } from "@/lib/sse_display_manager";
 import { z } from "zod";
+import { getHttpStatusFromError, getErrorMessage } from "@/types/error";
 
 // Force dynamic rendering
 export const dynamic = "force-dynamic";
@@ -106,10 +107,11 @@ export async function POST(
             `No SSE connections for display ${displayId}, will rely on polling`
           );
         }
-      } catch (error) {
+      } catch (sseError) {
+        // Fixed: renamed error to sseError to avoid shadowing
         console.error(
           `Failed to send SSE event to display ${displayId}:`,
-          error
+          sseError
         );
         // Don't fail the request if SSE fails - the display will pick it up via polling
       }
@@ -128,9 +130,10 @@ export async function POST(
     });
   } catch (error: unknown) {
     console.error("Change layout error:", error);
+    // Use type-safe error handling utilities
     return NextResponse.json(
-      { error: "Internal server error", message: error instanceof Error ? error.message : "Unknown error" },
-      { status: 500 }
+      { error: "Internal server error", message: getErrorMessage(error) },
+      { status: getHttpStatusFromError(error) }
     );
   }
 }

@@ -6,6 +6,7 @@ import { requireAuth } from "@/lib/auth";
 import { hasPermission } from "@/lib/helpers/rbac_helper";
 import { sendEventToDisplay } from "@/lib/sse_manager";
 import mongoose from "mongoose";
+import { getHttpStatusFromError, getErrorMessage } from "@/types/error";
 
 export async function GET(request: NextRequest) {
   try {
@@ -76,9 +77,10 @@ export async function GET(request: NextRequest) {
     });
   } catch (error: unknown) {
     console.error("Error fetching reservations:", error);
+    // Use type-safe error handling utilities
     return NextResponse.json(
-      { message: error instanceof Error ? error.message : "Error fetching reservations" },
-      { status: (error as any)?.status || 500 }
+      { message: getErrorMessage(error) },
+      { status: getHttpStatusFromError(error) }
     );
   }
 }
@@ -167,9 +169,10 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(reservation, { status: 201 });
   } catch (error: unknown) {
     console.error("Error creating reservation:", error);
+    // Use type-safe error handling utilities
     return NextResponse.json(
-      { message: error instanceof Error ? error.message : "Error creating reservation" },
-      { status: (error as any)?.status || 500 }
+      { message: getErrorMessage(error) },
+      { status: getHttpStatusFromError(error) }
     );
   }
 }

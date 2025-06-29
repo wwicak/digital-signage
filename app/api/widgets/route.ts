@@ -4,6 +4,8 @@ import Widget from "@/lib/models/Widget";
 import { validateWidgetData } from "@/lib/helpers/widget_helper";
 import { sendEventToDisplay } from "@/lib/sse_manager";
 import { requireAuth } from "@/lib/auth";
+import { MongooseError } from "mongoose";
+import { getHttpStatusFromError, getErrorMessage } from "@/types/error";
 
 export async function GET(request: NextRequest) {
   try {
@@ -37,16 +39,17 @@ export async function GET(request: NextRequest) {
       const widgets = await Widget.find({ creator_id: user._id });
       return NextResponse.json(widgets);
     }
-  } catch (error: any) {
-    if (error.message === "Authentication required") {
+  } catch (error: unknown) {
+    // Handle specific error cases with proper type checking
+    if (error instanceof Error && error.message === "Authentication required") {
       return NextResponse.json(
         { message: "Authentication required" },
         { status: 401 }
       );
     }
     return NextResponse.json(
-      { message: "Error fetching widgets.", error: error.message },
-      { status: 500 }
+      { message: "Error fetching widgets.", error: getErrorMessage(error) },
+      { status: getHttpStatusFromError(error) }
     );
   }
 }
@@ -154,36 +157,42 @@ export async function POST(request: NextRequest) {
     }
 
     return NextResponse.json(savedWidget, { status: 201 });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Widget creation error:", error);
-    console.error("Error details:", {
-      name: error.name,
-      message: error.message,
-      stack: error.stack,
-      errors: error.errors,
-    });
+    // Log error details with proper type checking
+    if (error instanceof Error) {
+      console.error("Error details:", {
+        name: error.name,
+        message: error.message,
+        stack: error.stack,
+        errors: error instanceof MongooseError.ValidationError ? error.errors : undefined,
+      });
+    }
 
-    if (error.message === "Authentication required") {
+    // Handle specific error cases with proper type checking
+    if (error instanceof Error && error.message === "Authentication required") {
       return NextResponse.json(
         { message: "Authentication required" },
         { status: 401 }
       );
     }
-    if (error.name === "ValidationError") {
+    // Check for Mongoose ValidationError
+    if (error instanceof MongooseError.ValidationError) {
       return NextResponse.json(
         { message: "Validation Error", errors: error.errors },
         { status: 400 }
       );
     }
-    if (
+    // Check for specific error messages
+    if (error instanceof Error && (
       error.message.startsWith("Invalid data for") ||
       error.message.includes("not found")
-    ) {
+    )) {
       return NextResponse.json({ message: error.message }, { status: 400 });
     }
     return NextResponse.json(
-      { message: "Error creating widget", error: error.message },
-      { status: 500 }
+      { message: "Error creating widget", error: getErrorMessage(error) },
+      { status: getHttpStatusFromError(error) }
     );
   }
 }

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requireAuth } from "@/lib/auth";
+import { getHttpStatusFromError, getErrorMessage } from "@/types/error";
 
 // Force dynamic rendering to prevent static generation errors
 export const dynamic = "force-dynamic";
@@ -48,9 +49,10 @@ export async function GET(request: NextRequest) {
     });
   } catch (error: unknown) {
     console.error("Error initiating Outlook OAuth:", error);
+    // Use type-safe error handling utilities
     return NextResponse.json(
-      { message: error instanceof Error ? error.message : "Error initiating Outlook authorization" },
-      { status: (error as any)?.status || 500 }
+      { message: getErrorMessage(error) },
+      { status: getHttpStatusFromError(error) }
     );
   }
 }

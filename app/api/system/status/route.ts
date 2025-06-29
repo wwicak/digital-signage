@@ -11,11 +11,12 @@ interface SystemStatusResponse {
   server: {
     status: "online" | "offline";
     uptime?: number;
+    responseTime?: number;
   };
   lastChecked: Date;
 }
 
-export async function GET(request: NextRequest) {
+export async function GET(_request: NextRequest) {
   const startTime = Date.now();
 
   try {
@@ -54,11 +55,11 @@ export async function GET(request: NextRequest) {
           error: `Connection state: ${connectionState}`,
         };
       }
-    } catch (dbError: any) {
+    } catch (dbError: unknown) {
       databaseStatus = {
         connected: false,
         responseTime: undefined,
-        error: dbError.message || "Database connection failed",
+        error: dbError instanceof Error ? dbError.message : "Database connection failed",
       };
     }
 
@@ -66,6 +67,7 @@ export async function GET(request: NextRequest) {
     const serverStatus = {
       status: "online" as const,
       uptime: process.uptime(), // Server uptime in seconds
+      responseTime: Date.now() - startTime, // Total response time for this request
     };
 
     const response: SystemStatusResponse = {
@@ -82,17 +84,18 @@ export async function GET(request: NextRequest) {
         Expires: "0",
       },
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("System status check failed:", error);
 
     const errorResponse: SystemStatusResponse = {
       database: {
         connected: false,
-        error: error.message || "Unknown error",
+        error: error instanceof Error ? error.message : "Unknown error",
       },
       server: {
         status: "online", // Server is online if we can respond
         uptime: process.uptime(),
+        responseTime: Date.now() - startTime, // Total response time for this request
       },
       lastChecked: new Date(),
     };

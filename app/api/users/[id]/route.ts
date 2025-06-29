@@ -8,6 +8,7 @@ import { hasPermission } from "@/lib/helpers/rbac_helper";
 import { sanitizeUser } from "@/lib/helpers/auth_helper";
 import { z } from "zod";
 import mongoose from "mongoose";
+import { getHttpStatusFromError, getErrorMessage } from "@/types/error";
 
 // Request schema for updating user role
 const UpdateUserRoleSchema = z.object({
@@ -53,9 +54,10 @@ export async function GET(
     });
   } catch (error: unknown) {
     console.error("Error fetching user:", error);
+    // Use type-safe error handling utilities
     return NextResponse.json(
-      { message: error instanceof Error ? error.message : "Error fetching user" },
-      { status: (error as any)?.status || 500 }
+      { message: getErrorMessage(error) },
+      { status: getHttpStatusFromError(error) }
     );
   }
 }
@@ -252,12 +254,13 @@ export async function PUT(
     });
   } catch (error: unknown) {
     console.error("Error updating user:", error);
+    // Use type-safe error handling utilities
     return NextResponse.json(
       {
         message: "Error updating user",
-        error: error instanceof Error ? error.message : "Unknown error",
+        error: getErrorMessage(error),
       },
-      { status: 500 }
+      { status: getHttpStatusFromError(error) }
     );
   }
 }
@@ -311,12 +314,13 @@ export async function DELETE(
     });
   } catch (error: unknown) {
     console.error("Error deleting user:", error);
+    // Use type-safe error handling utilities
     return NextResponse.json(
       {
         message: "Error deleting user",
-        error: error instanceof Error ? error.message : "Unknown error",
+        error: getErrorMessage(error),
       },
-      { status: 500 }
+      { status: getHttpStatusFromError(error) }
     );
   }
 }

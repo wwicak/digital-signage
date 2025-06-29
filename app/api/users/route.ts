@@ -9,6 +9,11 @@ import { registerUser, sanitizeUser } from "@/lib/helpers/auth_helper";
 import { z } from "zod";
 import mongoose from "mongoose";
 
+// Interface for HTTP-like errors
+interface HttpError extends Error {
+  status?: number;
+}
+
 // Request schema for creating a user
 const CreateUserRequestSchema = z.object({
   email: z.string().email("Invalid email address"),
@@ -73,7 +78,7 @@ export async function GET(request: NextRequest) {
     console.error("Error fetching users:", error);
     return NextResponse.json(
       { message: error instanceof Error ? error.message : "Error fetching users" },
-      { status: (error as any)?.status || 500 }
+      { status: (error as HttpError)?.status || 500 }
     );
   }
 }

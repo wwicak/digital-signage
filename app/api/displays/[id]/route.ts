@@ -10,6 +10,7 @@ import { requireAuth } from "@/lib/auth";
 import { canAccessDisplay, canManageDisplay } from "@/lib/helpers/rbac_helper";
 import { sendEventToDisplay } from "@/lib/sse_manager";
 import { z } from "zod";
+import { getHttpStatusFromError, getErrorMessage } from "@/types/error";
 
 // --- Zod schemas ---
 const DisplayUpdateSchema = z.object({
@@ -68,13 +69,10 @@ export async function GET(
 
     return NextResponse.json(display);
   } catch (error: unknown) {
-    const errorMessage = error instanceof Error ? error.message : "Error fetching display";
-    const errorStatus = error && typeof error === 'object' && 'status' in error && typeof error.status === 'number'
-      ? error.status
-      : 500;
+    // Use type-safe error handling utilities
     return NextResponse.json(
-      { message: errorMessage },
-      { status: errorStatus }
+      { message: getErrorMessage(error) },
+      { status: getHttpStatusFromError(error) }
     );
   }
 }
@@ -142,17 +140,17 @@ export async function PUT(
         action: "update",
         display: populatedDisplay,
       });
-    } catch (error) {
-      console.error("Failed to send SSE event:", error);
+    } catch (sseError) {
+      // Fixed: renamed error to sseError to avoid shadowing
+      console.error("Failed to send SSE event:", sseError);
     }
 
     return NextResponse.json(populatedDisplay);
   } catch (error: unknown) {
-    const errorMessage = error instanceof Error ? error.message : "Error updating display";
-    const statusCode = error instanceof Error && 'status' in error ? (error as { status: number }).status : 500;
+    // Use type-safe error handling utilities
     return NextResponse.json(
-      { message: errorMessage },
-      { status: statusCode }
+      { message: getErrorMessage(error) },
+      { status: getHttpStatusFromError(error) }
     );
   }
 }
@@ -196,19 +194,19 @@ export async function DELETE(
         displayId: id,
         action: "delete",
       });
-    } catch (error) {
-      console.error("Failed to send SSE event:", error);
+    } catch (sseError) {
+      // Fixed: renamed error to sseError to avoid shadowing
+      console.error("Failed to send SSE event:", sseError);
     }
 
     return NextResponse.json({
       message: "Display and associated widgets deleted successfully",
     });
   } catch (error: unknown) {
-    const errorMessage = error instanceof Error ? error.message : "Error deleting display";
-    const statusCode = error instanceof Error && 'status' in error ? (error as { status: number }).status : 500;
+    // Use type-safe error handling utilities
     return NextResponse.json(
-      { message: errorMessage },
-      { status: statusCode }
+      { message: getErrorMessage(error) },
+      { status: getHttpStatusFromError(error) }
     );
   }
 }

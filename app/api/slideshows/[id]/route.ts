@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import mongoose from "mongoose";
+import mongoose, { Error as MongooseError } from "mongoose";
 import dbConnect from "@/lib/mongodb";
 import Slideshow from "@/lib/models/Slideshow";
 import { UpdateSlideshowSchema } from "@/lib/schemas/slideshow";
@@ -138,9 +138,9 @@ export async function PUT(
         { status: 401 }
       );
     }
-    if (error instanceof Error && error.name === "ValidationError") {
+    if (error instanceof MongooseError.ValidationError) {
       return NextResponse.json(
-        { message: "Validation Error", errors: (error as any).errors },
+        { message: "Validation Error", errors: error.errors },
         { status: 400 }
       );
     }

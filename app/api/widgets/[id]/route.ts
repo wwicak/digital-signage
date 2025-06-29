@@ -5,6 +5,8 @@ import Display, { IDisplay } from "@/lib/models/Display";
 import { validateWidgetData } from "@/lib/helpers/widget_helper";
 import { sendEventToDisplay } from "@/lib/sse_manager";
 import { requireAuth } from "@/lib/auth";
+import { MongooseError } from "mongoose";
+import { getHttpStatusFromError, getErrorMessage } from "@/types/error";
 
 export async function GET(
   request: NextRequest,
@@ -46,16 +48,17 @@ export async function GET(
     }
 
     return NextResponse.json(widget);
-  } catch (error: any) {
-    if (error.message === "Authentication required") {
+  } catch (error: unknown) {
+    // Handle specific error cases with proper type checking
+    if (error instanceof Error && error.message === "Authentication required") {
       return NextResponse.json(
         { message: "Authentication required" },
         { status: 401 }
       );
     }
     return NextResponse.json(
-      { message: "Error fetching widget.", error: error.message },
-      { status: 500 }
+      { message: "Error fetching widget.", error: getErrorMessage(error) },
+      { status: getHttpStatusFromError(error) }
     );
   }
 }
@@ -134,28 +137,31 @@ export async function PUT(
     }
 
     return NextResponse.json(savedWidget);
-  } catch (error: any) {
-    if (error.message === "Authentication required") {
+  } catch (error: unknown) {
+    // Handle specific error cases with proper type checking
+    if (error instanceof Error && error.message === "Authentication required") {
       return NextResponse.json(
         { message: "Authentication required" },
         { status: 401 }
       );
     }
-    if (error.name === "ValidationError") {
+    // Check for Mongoose ValidationError
+    if (error instanceof MongooseError.ValidationError) {
       return NextResponse.json(
         { message: "Validation Error", errors: error.errors },
         { status: 400 }
       );
     }
-    if (
+    // Check for specific error messages
+    if (error instanceof Error && (
       error.message.startsWith("Invalid data for") ||
       error.message.includes("not found")
-    ) {
+    )) {
       return NextResponse.json({ message: error.message }, { status: 400 });
     }
     return NextResponse.json(
-      { message: "Error updating widget", error: error.message },
-      { status: 500 }
+      { message: "Error updating widget", error: getErrorMessage(error) },
+      { status: getHttpStatusFromError(error) }
     );
   }
 }
@@ -216,16 +222,17 @@ export async function DELETE(
     return NextResponse.json({
       message: "Widget deleted successfully and removed from displays",
     });
-  } catch (error: any) {
-    if (error.message === "Authentication required") {
+  } catch (error: unknown) {
+    // Handle specific error cases with proper type checking
+    if (error instanceof Error && error.message === "Authentication required") {
       return NextResponse.json(
         { message: "Authentication required" },
         { status: 401 }
       );
     }
     return NextResponse.json(
-      { message: "Error deleting widget", error: error.message },
-      { status: 500 }
+      { message: "Error deleting widget", error: getErrorMessage(error) },
+      { status: getHttpStatusFromError(error) }
     );
   }
 }

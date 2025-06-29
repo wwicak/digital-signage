@@ -4,6 +4,11 @@ import Building, { BuildingSchemaZod } from "@/lib/models/Building";
 import { requireAuth } from "@/lib/auth";
 import { hasPermission } from "@/lib/helpers/rbac_helper";
 
+// Interface for HTTP-like errors
+interface HttpError extends Error {
+  status?: number;
+}
+
 export async function GET(request: NextRequest) {
   try {
     await dbConnect();
@@ -41,7 +46,7 @@ export async function GET(request: NextRequest) {
     console.error("Error fetching buildings:", error);
     return NextResponse.json(
       { message: error instanceof Error ? error.message : "Error fetching buildings" },
-      { status: (error as any)?.status || 500 }
+      { status: (error as HttpError)?.status || 500 }
     );
   }
 }
@@ -88,7 +93,7 @@ export async function POST(request: NextRequest) {
     console.error("Error creating building:", error);
     return NextResponse.json(
       { message: error instanceof Error ? error.message : "Error creating building" },
-      { status: (error as any)?.status || 500 }
+      { status: (error as HttpError)?.status || 500 }
     );
   }
 }
