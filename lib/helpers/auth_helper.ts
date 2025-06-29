@@ -35,7 +35,8 @@ export async function requireAuth(req: { headers?: Record<string, string | strin
   // Parse cookies to check for loggedIn status
   let isLoggedInViaCookie = false;
   if (cookies) {
-    const cookieObj = cookies.split(";").reduce((acc: Record<string, string>, cookie: string) => {
+    const cookieString = Array.isArray(cookies) ? cookies[0] : cookies;
+    const cookieObj = cookieString.split(";").reduce((acc: Record<string, string>, cookie: string) => {
       const [key, value] = cookie.trim().split("=");
       acc[key] = value;
       return acc;
@@ -43,7 +44,7 @@ export async function requireAuth(req: { headers?: Record<string, string | strin
     isLoggedInViaCookie = cookieObj.loggedIn === "true";
   }
 
-  if (authHeader && authHeader.startsWith("Bearer ")) {
+  if (authHeader && typeof authHeader === 'string' && authHeader.startsWith("Bearer ")) {
     // Extract user ID from token (simplified for development)
     const token = authHeader.substring(7);
     // In a real implementation, you would verify the JWT token here
@@ -64,7 +65,7 @@ export async function requireAuth(req: { headers?: Record<string, string | strin
     // Allow direct user ID for testing
     console.log("[DEBUG] Direct userId auth - returning user:", userId);
     return {
-      _id: userId,
+      _id: String(userId),
       email: "temp@example.com",
       name: "Temp User",
       role: {
@@ -208,7 +209,7 @@ export async function authenticateUser(
  */
 export function sanitizeUser(user: IUser): AuthenticatedUser {
   return {
-    _id: user._id,
+    _id: String(user._id),
     email: user.email!,
     name: user.name,
     role: user.role,

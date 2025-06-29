@@ -23,7 +23,7 @@ export default function DisplaySelector() {
     screenResolution: '',
     ipAddress: 'Detecting...',
     ipMethod: '',
-    networkInfo: null as any,
+    networkInfo: null as ReturnType<typeof getDeviceNetworkInfo> | null,
   });
   const [ipDetectionResult, setIpDetectionResult] = useState<IPDetectionResult | null>(null);
 
@@ -265,7 +265,7 @@ export default function DisplaySelector() {
             </Card>
           ) : (
             <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 w-full'>
-              {layouts.map((layout: any) => (
+              {layouts.map((layout) => (
                 <Card
                   key={layout._id}
                   className={cn(
@@ -359,7 +359,7 @@ export default function DisplaySelector() {
                   <div className='text-center sm:text-left min-w-0'>
                     <h3 className='text-lg font-semibold text-green-900'>Ready to Start</h3>
                     <p className='text-sm text-green-700 break-words'>
-                      Layout &quot;{layouts.find((l: any) => l._id === selectedLayout)?.name}&quot; selected
+                      Layout &quot;{layouts.find((l) => l._id === selectedLayout)?.name}&quot; selected
                     </p>
                   </div>
                 </div>

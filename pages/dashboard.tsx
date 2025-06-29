@@ -93,8 +93,8 @@ const DashboardPage = () => {
       
       const result = await response.json();
       setData(result);
-    } catch (err: any) {
-      setError(err.message || "Failed to load dashboard");
+    } catch (err) {
+      setError((err as Error).message || "Failed to load dashboard");
     } finally {
       setLoading(false);
     }

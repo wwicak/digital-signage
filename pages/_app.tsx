@@ -14,7 +14,7 @@ const queryClient = new QueryClient({
     queries: {
       staleTime: 5 * 60 * 1000, // 5 minutes
       gcTime: 10 * 60 * 1000, // 10 minutes (renamed from cacheTime)
-      retry: (failureCount, error: any) => {
+      retry: (failureCount, error: Error & { status?: number }) => {
         // Don't retry on network errors or 4xx errors
         if (
           error.message.includes('Failed to fetch') ||
@@ -32,7 +32,7 @@ const queryClient = new QueryClient({
       refetchOnMount: true,
     },
     mutations: {
-      retry: (failureCount, error: any) => {
+      retry: (failureCount, error: Error & { status?: number }) => {
         // Don't retry mutations on network errors
         if (
           error.message.includes('Failed to fetch') ||

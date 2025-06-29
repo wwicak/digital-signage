@@ -118,7 +118,7 @@ interface DisplayContextType {
   reorderStatusBarItems: (startIndex: number, endIndex: number) => void;
   refreshDisplayData: () => void;
   isLoading: boolean;
-  error: any;
+  error: Error | null;
 }
 
 const DisplayContext = createContext<DisplayContextType | undefined>(undefined)

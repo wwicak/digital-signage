@@ -185,10 +185,12 @@ export class DisplayMonitoringService {
             offlineMinutes,
             {
               lastSeen: status.lastSeen,
-              lastHeartbeat: status.lastHeartbeat,
-              disconnectionReason,
-              ipAddress: status.ipAddress,
-              userAgent: status.userAgent,
+              errorDetails: disconnectionReason,
+              clientInfo: {
+                ip: status.ipAddress,
+                userAgent: status.userAgent,
+                lastHeartbeat: status.lastHeartbeat?.toISOString(),
+              }
             }
           );
 

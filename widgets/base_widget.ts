@@ -4,13 +4,13 @@ import EmptyWidget from '../components/Widgets/EmptyWidget'
 import EmptyWidgetOptions from '../components/Widgets/EmptyWidgetOptions'
 
 // Generic widget content props interface
-export interface IWidgetContentProps<T = Record<string, any>> {
+export interface IWidgetContentProps<T = Record<string, unknown>> {
   data?: T;
   isPreview?: boolean;
 }
 
 // Generic widget options props interface
-export interface IWidgetOptionsProps<T = Record<string, any>> {
+export interface IWidgetOptionsProps<T = Record<string, unknown>> {
   data: T;
   onChange: (
     name: string,
@@ -24,13 +24,13 @@ export interface IWidgetOptionsProps<T = Record<string, any>> {
 }
 
 // Interface that matches what WidgetEditDialog expects
-export interface IWidgetOptionsEditorProps<T = Record<string, any>> {
+export interface IWidgetOptionsEditorProps<T = Record<string, unknown>> {
   data: T | undefined;
   onChange: (newData: T) => void;
 }
 
 // Interface for the arguments passed to the BaseWidget constructor
-export interface IWidgetDefinitionArgs<TData = Record<string, any>> {
+export interface IWidgetDefinitionArgs<TData = Record<string, unknown>> {
   name: string; // Human-readable name of the widget
   type: string; // Unique type identifier for the widget (e.g., 'clock', 'weather-map')
   version: string; // Version of the widget definition
@@ -45,7 +45,7 @@ export interface IWidgetDefinitionArgs<TData = Record<string, any>> {
  * Interface for the BaseWidget instance structure
  * This defines what properties an instance of BaseWidget (or its derivatives) will have.
  */
-export interface IBaseWidget<TData = Record<string, any>> {
+export interface IBaseWidget<TData = Record<string, unknown>> {
   name: string;
   type: string;
   version: string;

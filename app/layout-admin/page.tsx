@@ -24,15 +24,17 @@ import { addWidgetToLayout, updateWidgetPositions, removeWidgetFromLayout } from
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { getWidget } from '../../actions/widgets'
 
-import { WidgetType } from '../../lib/models/Widget'
+import { WidgetType, IWidget } from '../../lib/models/Widget'
+import { ILayoutCreateData } from '../../actions/layouts'
 
-// Widget interface for layout widgets
+// Widget interface for layout widgets  
 interface LayoutWidget {
-  widget_id: string | { _id: string } | null;
+  widget_id: string | { _id: string } | { toString(): string } | null;
   x?: number;
   y?: number;
   w?: number;
   h?: number;
+  widget?: IWidget;
   [key: string]: unknown;
 }
 
@@ -41,8 +43,13 @@ const getWidgetId = (widget: LayoutWidget): string | null => {
   if (typeof widget.widget_id === 'string') {
     return widget.widget_id
   }
-  if (typeof widget.widget_id === 'object' && widget.widget_id?._id) {
-    return widget.widget_id._id
+  if (typeof widget.widget_id === 'object' && widget.widget_id !== null) {
+    if ('_id' in widget.widget_id) {
+      return widget.widget_id._id
+    }
+    if ('toString' in widget.widget_id) {
+      return widget.widget_id.toString()
+    }
   }
   return null
 }
@@ -85,7 +92,7 @@ function LayoutAdminContent() {
     description: '',
     orientation: 'landscape' as 'landscape' | 'portrait',
     layoutType: 'spaced' as 'spaced' | 'compact',
-    widgets: [] as any[],
+    widgets: [] as ILayoutCreateData['widgets'],
     statusBar: {
       enabled: true,
       elements: [] as string[],
@@ -119,7 +126,13 @@ function LayoutAdminContent() {
         // Use existingLayout.orientation only if it's the initial load (layoutData.name is empty)
         orientation: layoutData.name ? currentOrientation : existingLayout.orientation || 'landscape',
         layoutType: existingLayout.layoutType || 'spaced',
-        widgets: existingLayout.widgets || [],
+        widgets: (existingLayout.widgets || []).map(widget => ({
+          widget_id: getWidgetId({ ...widget, widget_id: widget.widget_id } as LayoutWidget) || '',
+          x: widget.x || 0,
+          y: widget.y || 0,
+          w: widget.w || 2,
+          h: widget.h || 2,
+        })),
         statusBar: existingLayout.statusBar || { enabled: true, elements: [] },
         isActive: existingLayout.isActive ?? true,
         isTemplate: existingLayout.isTemplate ?? true,
@@ -141,17 +154,17 @@ function LayoutAdminContent() {
     }
 
     const filteredWidgets = existingLayout.widgets.filter((widget) => {
-      const widgetId = getWidgetId(widget)
+      const widgetId = getWidgetId({ ...widget, widget_id: widget.widget_id } as LayoutWidget)
       return widgetId && /^[0-9a-fA-F]{24}$/.test(widgetId)
     })
 
     // Simplified position validation - trust GridStack to handle collisions
     const items = filteredWidgets.map((widget, index) => {
-      const widgetId = getWidgetId(widget)!
+      const widgetId = getWidgetId({ ...widget, widget_id: widget.widget_id } as LayoutWidget)!
       let widgetType = 'unknown'
 
-      if (typeof widget.widget_id === 'object' && widget.widget_id) {
-        widgetType = (widget.widget_id as any).type || 'unknown'
+      if (typeof widget.widget_id === 'object' && widget.widget_id && 'type' in widget.widget_id) {
+        widgetType = (widget.widget_id as unknown as IWidget).type || 'unknown'
       }
 
       // Basic validation only - let GridStack handle positioning

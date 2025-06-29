@@ -13,7 +13,7 @@ import DisplayStatusCard from '../components/Admin/DisplayStatusCard'
 import { protect, ProtectProps } from '../helpers/auth'
 import { useLayouts } from '../hooks/useLayouts'
 import { useLayoutMutations } from '../hooks/useLayoutMutations'
-import { ILayoutQueryParams } from '../actions/layouts'
+import { ILayoutQueryParams, ILayoutData } from '../actions/layouts'
 
 interface LayoutsProps extends ProtectProps {}
 
@@ -52,7 +52,7 @@ const LayoutsComponent = memo(function LayoutsComponent({ loggedIn }: LayoutsPro
   };
 
   const handleDuplicateLayout = (layoutId: string) => {
-    const layout = layouts.find((l: any) => l._id === layoutId);
+    const layout = layouts.find((l) => l._id === layoutId);
     if (layout) {
       const newName = `${layout.name} (Copy)`;
       duplicateLayout({ id: layoutId, newName });
@@ -60,7 +60,7 @@ const LayoutsComponent = memo(function LayoutsComponent({ loggedIn }: LayoutsPro
   };
 
   const handleDeleteLayout = (layoutId: string) => {
-    const layout = layouts.find((l: any) => l._id === layoutId);
+    const layout = layouts.find((l) => l._id === layoutId);
     if (layout && window.confirm(`Are you sure you want to delete "${layout.name}"?`)) {
       deleteLayout(layoutId);
     }
@@ -103,7 +103,7 @@ const LayoutsComponent = memo(function LayoutsComponent({ loggedIn }: LayoutsPro
                 {isLoading ? '...' : layoutsResponse?.pagination.total || 0}
               </div>
               <p className='text-xs text-muted-foreground'>
-                {isLoading ? '...' : layouts.filter((l: any) => l.isActive).length} active
+                {isLoading ? '...' : layouts.filter((l) => l.isActive).length} active
               </p>
             </CardContent>
           </Card>
@@ -115,7 +115,7 @@ const LayoutsComponent = memo(function LayoutsComponent({ loggedIn }: LayoutsPro
             </CardHeader>
             <CardContent>
               <div className='text-2xl font-bold'>
-                {isLoading ? '...' : layouts.reduce((total: number, layout: any) => total + (layout.displays?.length || 0), 0)}
+                {isLoading ? '...' : layouts.reduce((total, layout) => total + (layout.displays?.length || 0), 0)}
               </div>
               <p className='text-xs text-muted-foreground'>
                 Displays using these layouts
@@ -130,7 +130,7 @@ const LayoutsComponent = memo(function LayoutsComponent({ loggedIn }: LayoutsPro
             </CardHeader>
             <CardContent>
               <div className='text-2xl font-bold'>
-                {isLoading ? '...' : layouts.filter((l: any) => {
+                {isLoading ? '...' : layouts.filter((l) => {
                   const dayAgo = new Date();
                   dayAgo.setDate(dayAgo.getDate() - 1);
                   return new Date(l.last_update) > dayAgo;
@@ -156,7 +156,7 @@ const LayoutsComponent = memo(function LayoutsComponent({ loggedIn }: LayoutsPro
               />
             </div>
 
-            <Select value={orientationFilter} onValueChange={(value: any) => setOrientationFilter(value)}>
+            <Select value={orientationFilter} onValueChange={(value) => setOrientationFilter(value as 'all' | 'landscape' | 'portrait')}>
               <SelectTrigger className='w-full sm:w-48'>
                 <SelectValue placeholder='Filter by orientation' />
               </SelectTrigger>
@@ -167,7 +167,7 @@ const LayoutsComponent = memo(function LayoutsComponent({ loggedIn }: LayoutsPro
               </SelectContent>
             </Select>
 
-            <Select value={statusFilter} onValueChange={(value: any) => setStatusFilter(value)}>
+            <Select value={statusFilter} onValueChange={(value) => setStatusFilter(value as 'all' | 'active' | 'inactive')}>
               <SelectTrigger className='w-full sm:w-48'>
                 <SelectValue placeholder='Filter by status' />
               </SelectTrigger>
@@ -240,7 +240,7 @@ const LayoutsComponent = memo(function LayoutsComponent({ loggedIn }: LayoutsPro
             </Card>
           ) : (
             <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6'>
-              {layouts.map((layout: any) => (
+              {layouts.map((layout) => (
                 <Card key={layout._id} className='group hover:shadow-lg transition-shadow'>
                   <CardHeader>
                     <div className='flex items-center justify-between'>

@@ -6,7 +6,7 @@ import { ParsedUrlQuery } from 'querystring'
 
 // Define our own context type based on Next.js patterns
 interface PageContext {
-  req?: IncomingMessage & { user?: any };
+  req?: IncomingMessage & { user?: unknown };
   res?: ServerResponse;
   query: ParsedUrlQuery;
 }
@@ -31,7 +31,7 @@ export interface IAuthSuccessResponse {
   message?: string;
   // other fields like token, user data, etc.
   token?: string;
-  user?: any; // Define a proper IUser interface if user data is returned
+  user?: unknown; // Define a proper IUser interface if user data is returned
 }
 
 // For login, assuming it might return more specific data upon success
@@ -49,7 +49,7 @@ export interface IProtectedPageProps {
   host: string;
   loggedIn: boolean;
   // Plus any props returned by Component.getInitialProps
-  [key: string]: any; // To allow other props
+  [key: string]: unknown; // To allow other props
 }
 
 // Legacy alias for compatibility
@@ -85,13 +85,13 @@ export const login = async (
       // Removed automatic redirect to allow login page to control navigation
     }
     return response.data
-  } catch (error: any) {
+  } catch (error) {
     // Handle or transform error as needed
-    if (error.response) {
+    if (axios.isAxiosError(error) && error.response) {
       return error.response.data as ILoginAuthResponse // API might return { success: false, message: '...' }
     }
     // Fallback for network errors or other issues
-    return { success: false, message: error.message || 'Login failed due to an unexpected error.' }
+    return { success: false, message: (error as Error).message || 'Login failed due to an unexpected error.' }
   }
 }
 
@@ -110,11 +110,11 @@ export const logout = async (host: string = ''): Promise<ILogoutAuthResponse> =>
     window.location.href = '/login' // Kept original behavior
 
     return response.data // Should ideally indicate success/failure from server
-  } catch (error: any) {
-    if (error.response) {
+  } catch (error) {
+    if (axios.isAxiosError(error) && error.response) {
       return error.response.data as ILogoutAuthResponse
     }
-    return { success: false, message: error.message || 'Logout failed due to an unexpected error.' }
+    return { success: false, message: (error as Error).message || 'Logout failed due to an unexpected error.' }
   }
 }
 
@@ -122,7 +122,7 @@ export const logout = async (host: string = ''): Promise<ILogoutAuthResponse> =>
  * Check if user is currently authenticated
  * This function checks both cookies and makes an API call to verify the session
  */
-export const checkAuthStatus = async (host: string = ''): Promise<{ isAuthenticated: boolean; user?: any }> => {
+export const checkAuthStatus = async (host: string = ''): Promise<{ isAuthenticated: boolean; user?: unknown }> => {
   try {
     // First check if we have a login cookie
     const cookies = parseCookies()
@@ -148,7 +148,7 @@ export const checkAuthStatus = async (host: string = ''): Promise<{ isAuthentica
       destroyCookie(null, 'loggedIn', { path: '/' })
       return { isAuthenticated: false }
     }
-  } catch (error: any) {
+  } catch (error) {
     // If API call fails, assume not authenticated and clean up cookie
     destroyCookie(null, 'loggedIn', { path: '/' })
     return { isAuthenticated: false }
@@ -165,7 +165,7 @@ export const protect = <P extends object>(
   return class ProtectedPage extends React.Component<P> { // HOC component takes P as props
     static async getInitialProps(ctx: PageContext): Promise<Partial<IProtectedPageProps> | {}> {
       const { req, res, query } = ctx
-      const cookies = parseCookies(ctx as any)
+      const cookies = parseCookies(ctx as Parameters<typeof parseCookies>[0])
       const alreadyLoggedIn = !!cookies.loggedIn // Convert to boolean
 
       // Determine host (safer check for window)
@@ -181,11 +181,11 @@ export const protect = <P extends object>(
        * The original 'req.user' check implies server-side Passport.js or similar.
        * For development, we'll be more permissive with authentication
        */
-      const isAuthenticated = (req && (req as any).user) || alreadyLoggedIn || process.env.NODE_ENV === 'development'
+      const isAuthenticated = (req && (req as IncomingMessage & { user?: unknown }).user) || alreadyLoggedIn || process.env.NODE_ENV === 'development'
 
       if (isAuthenticated) {
         if (!alreadyLoggedIn && typeof window === 'undefined') { // Only set cookie on server-side if not already set
-          setCookie(ctx as any, 'loggedIn', 'true', { // Nookies ctx for server-side
+          setCookie(ctx as Parameters<typeof setCookie>[0], 'loggedIn', 'true', { // Nookies ctx for server-side
             maxAge: 30 * 24 * 60 * 60, // 30 days
             path: '/',
             /*
@@ -211,9 +211,9 @@ export const protect = <P extends object>(
         }
 
         // Call wrapped component's getInitialProps if it exists
-        const wrappedComponentWithInitialProps = WrappedComponent as any
+        const wrappedComponentWithInitialProps = WrappedComponent as NextPageWithInitialProps<P>
         const componentProps = wrappedComponentWithInitialProps.getInitialProps
-          ? await wrappedComponentWithInitialProps.getInitialProps(ctx as any) // Cast ctx if WrappedComponent expects a simpler NextPageContext
+          ? await wrappedComponentWithInitialProps.getInitialProps(ctx) // Cast ctx if WrappedComponent expects a simpler NextPageContext
           : {}
 
         return {

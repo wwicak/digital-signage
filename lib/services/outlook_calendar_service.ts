@@ -43,6 +43,39 @@ export interface CalendarAttendee {
 }
 
 /**
+ * Microsoft Graph API Event interface (partial)
+ */
+interface GraphEvent {
+  id: string;
+  subject: string;
+  start?: {
+    dateTime: string;
+    timeZone: string;
+  };
+  end?: {
+    dateTime: string;
+    timeZone: string;
+  };
+  attendees?: Array<{
+    emailAddress?: {
+      address?: string;
+      name?: string;
+    };
+    status?: {
+      response?: string;
+    };
+  }>;
+}
+
+/**
+ * Microsoft Graph API response interface
+ */
+interface GraphApiResponse {
+  value: GraphEvent[];
+  '@odata.nextLink'?: string;
+}
+
+/**
  * Interface for auth initiation response
  */
 export interface AuthInitiationResponse {
@@ -378,7 +411,7 @@ export class OutlookCalendarService {
   private async makeAuthenticatedRequest(
     url: string,
     accessToken: string
-  ): Promise<any> {
+  ): Promise<GraphApiResponse> {
     try {
       const response = await axios.get(url, {
         headers: {
@@ -399,15 +432,15 @@ export class OutlookCalendarService {
    * @param events - Raw events from Microsoft Graph API
    * @returns Transformed meetings array
    */
-  private transformMeetings(events: any[]): CalendarMeeting[] {
+  private transformMeetings(events: GraphEvent[]): CalendarMeeting[] {
     return events
       .filter((event) => event.start && event.end) // Only events with valid times
       .map((event) => {
         const attendees: CalendarAttendee[] = (event.attendees || []).map(
-          (attendee: any) => ({
+          (attendee) => ({
             email: attendee.emailAddress?.address || "",
-            responseStatus: this.mapResponseStatus(attendee.status?.response),
-            displayName: attendee.emailAddress?.name || undefined,
+            responseStatus: this.mapResponseStatus(attendee.status?.response || "needsAction"),
+            displayName: attendee.emailAddress?.name || "",
           })
         );
 
@@ -449,7 +482,7 @@ export class OutlookCalendarService {
    * Handles API errors with specific Microsoft Graph error codes
    * @param error - The error to handle
    */
-  private handleApiError(error: any): void {
+  private handleApiError(error: unknown): void {
     if (axios.isAxiosError(error)) {
       const axiosError = error as AxiosError;
       const status = axiosError.response?.status;
@@ -483,7 +516,7 @@ export class OutlookCalendarService {
    * @param error - The error to check
    * @returns Whether the error is unauthorized
    */
-  private isUnauthorizedError(error: any): boolean {
+  private isUnauthorizedError(error: unknown): boolean {
     return axios.isAxiosError(error) && error.response?.status === 401;
   }
 }

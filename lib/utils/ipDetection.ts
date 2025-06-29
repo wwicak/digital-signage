@@ -3,6 +3,19 @@
  * Provides multiple methods to detect the client's IP address
  */
 
+// NetworkInformation API interface for TypeScript
+interface NetworkInformation {
+  effectiveType?: '2g' | '3g' | '4g' | 'slow-2g';
+  downlink?: number;
+  rtt?: number;
+  saveData?: boolean;
+}
+
+// Extend Navigator interface for connection property
+interface ExtendedNavigator extends Navigator {
+  connection?: NetworkInformation;
+}
+
 export interface IPDetectionResult {
   ip: string | null;
   method: 'webrtc' | 'api' | 'local' | 'fallback';
@@ -96,7 +109,7 @@ export const detectLocalNetworkInfo = (): Promise<IPDetectionResult> => {
       // Try to get network information if available
       if ('connection' in navigator) {
         // NetworkInformation API type
-        const connection = (navigator as Navigator & { connection?: NetworkInformation }).connection;
+        const connection = (navigator as ExtendedNavigator).connection;
         if (connection && 'effectiveType' in connection) {
           // This doesn't give us IP but gives us network info
           resolve({ ip: null, method: 'local', error: 'Network info available but no IP' });
@@ -176,7 +189,7 @@ export const getDeviceNetworkInfo = () => {
 
   // Add connection info if available
   if ('connection' in navigator) {
-    const connection = (navigator as Navigator & { connection?: NetworkInformation }).connection;
+    const connection = (navigator as ExtendedNavigator).connection;
     if (connection) {
       return {
         ...info,
