@@ -32,15 +32,15 @@ export async function GET(
     }
 
     return NextResponse.json(slide);
-  } catch (error: any) {
-    if (error.message === "Authentication required") {
+  } catch (error: unknown) {
+    if (error instanceof Error && error.message === "Authentication required") {
       return NextResponse.json(
         { message: "Authentication required" },
         { status: 401 }
       );
     }
     return NextResponse.json(
-      { message: "Error fetching slide.", error: error.message },
+      { message: "Error fetching slide.", error: error instanceof Error ? error.message : "Unknown error" },
       { status: 500 }
     );
   }
@@ -83,8 +83,8 @@ export async function PUT(
       const slideshowsContainingSlide = await Slideshow.find({
         slides: slideToUpdate._id,
       }).select("_id");
-      originalSlideshowIds = slideshowsContainingSlide.map((s: any) =>
-        s._id.toString()
+      originalSlideshowIds = slideshowsContainingSlide.map((s) =>
+        String(s._id)
       );
     }
 
@@ -115,14 +115,14 @@ export async function PUT(
     // Notify relevant displays via SSE
     try {
       const displayIds = await getDisplayIdsForSlide(
-        (savedSlide._id as any).toString()
+        String(savedSlide._id)
       );
       for (const displayId of displayIds) {
         sendEventToDisplay(displayId, "display_updated", {
           displayId,
           action: "update",
           reason: "slide_change",
-          slideId: (savedSlide._id as any).toString(),
+          slideId: String(savedSlide._id),
         });
       }
     } catch (notifyError) {
@@ -134,21 +134,21 @@ export async function PUT(
     }
 
     return NextResponse.json(savedSlide);
-  } catch (error: any) {
-    if (error.message === "Authentication required") {
+  } catch (error: unknown) {
+    if (error instanceof Error && error.message === "Authentication required") {
       return NextResponse.json(
         { message: "Authentication required" },
         { status: 401 }
       );
     }
-    if (error.name === "ValidationError") {
+    if (error instanceof Error && error.name === "ValidationError") {
       return NextResponse.json(
-        { message: "Validation Error", errors: error.errors },
+        { message: "Validation Error", errors: (error as any).errors },
         { status: 400 }
       );
     }
     return NextResponse.json(
-      { message: "Error updating slide", error: error.message },
+      { message: "Error updating slide", error: error instanceof Error ? error.message : "Unknown error" },
       { status: 500 }
     );
   }
@@ -210,15 +210,15 @@ export async function DELETE(
     }
 
     return NextResponse.json({ message: "Slide deleted successfully" });
-  } catch (error: any) {
-    if (error.message === "Authentication required") {
+  } catch (error: unknown) {
+    if (error instanceof Error && error.message === "Authentication required") {
       return NextResponse.json(
         { message: "Authentication required" },
         { status: 401 }
       );
     }
     return NextResponse.json(
-      { message: "Error deleting slide", error: error.message },
+      { message: "Error deleting slide", error: error instanceof Error ? error.message : "Unknown error" },
       { status: 500 }
     );
   }

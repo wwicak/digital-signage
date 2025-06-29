@@ -1,9 +1,12 @@
 import type { NextApiRequest, NextApiResponse } from "next/types";
-import type { NextRequest } from "next/server";
+import type { NextRequest, NextResponse } from "next/server";
 import { IncomingMessage } from "http";
 import User, { IUser, IUserRole, UserRoleName } from "./models/User";
 import * as jwt from "jsonwebtoken";
 import dbConnect from "./mongodb";
+
+// Type for response objects that can set cookies (both App Router and Pages Router)
+type CookieResponse = NextResponse | NextApiResponse | { cookies: { set: (name: string, value: string, options?: any) => void } };
 
 const JWT_SECRET =
   process.env.JWT_SECRET ||
@@ -11,7 +14,7 @@ const JWT_SECRET =
   "fallback-secret-for-dev";
 
 export interface AuthenticatedUser {
-  _id: any;
+  _id: string; // MongoDB ObjectId as string for serialization
   email: string;
   name?: string;
   role: IUserRole;
@@ -82,14 +85,14 @@ export function extractToken(
 
   // Handle NextApiRequest and IncomingMessage (Pages Router)
   // Try Authorization header first
-  const authHeader = (req.headers as any).authorization;
+  const authHeader = req.headers.authorization;
   if (authHeader && authHeader.startsWith("Bearer ")) {
     return authHeader.substring(7);
   }
 
   // Try cookie
-  const cookies = (req.headers as any).cookie;
-  if (cookies) {
+  const cookies = req.headers.cookie;
+  if (cookies && typeof cookies === 'string') {
     const tokenMatch = cookies.match(/auth-token=([^;]+)/);
     if (tokenMatch) {
       return tokenMatch[1];
@@ -160,9 +163,10 @@ export function withAuth(
     try {
       const user = await requireAuth(req);
       return await handler(req, res, user);
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : "Authentication required";
       return res.status(401).json({
-        message: error.message || "Authentication required",
+        message: errorMessage,
       });
     }
   };
@@ -171,7 +175,7 @@ export function withAuth(
 /**
  * Set authentication cookie
  */
-export function setAuthCookie(res: any, token: string) {
+export function setAuthCookie(res: CookieResponse, token: string) {
   // Check if this is a NextResponse (App Router) or ServerResponse (Pages Router)
   if (res.cookies && typeof res.cookies.set === "function") {
     // App Router - use NextResponse.cookies.set()
@@ -200,7 +204,7 @@ export function setAuthCookie(res: any, token: string) {
 /**
  * Clear authentication cookie
  */
-export function clearAuthCookie(res: any) {
+export function clearAuthCookie(res: CookieResponse) {
   // Check if this is a NextResponse (App Router) or ServerResponse (Pages Router)
   if (res.cookies && typeof res.cookies.set === "function") {
     // App Router - use NextResponse.cookies.set()

@@ -316,11 +316,11 @@ export async function GET(request: NextRequest) {
       recentActivity,
       lastUpdated: new Date().toISOString(),
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Error fetching dashboard data:", error);
     return NextResponse.json(
-      { message: error.message || "Error fetching dashboard data" },
-      { status: error.status || 500 }
+      { message: error instanceof Error ? error.message : "Error fetching dashboard data" },
+      { status: (error as any)?.status || 500 }
     );
   }
 }

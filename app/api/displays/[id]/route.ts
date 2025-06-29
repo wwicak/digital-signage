@@ -67,10 +67,15 @@ export async function GET(
     }
 
     return NextResponse.json(display);
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const errorMessage = error instanceof Error ? error.message : "Error fetching display";
+    const errorStatus = error && typeof error === 'object' && 'status' in error && typeof error.status === 'number' 
+      ? error.status 
+      : 500;
+    
     return NextResponse.json(
-      { message: error.message || "Error fetching display" },
-      { status: error.status || 500 }
+      { message: errorMessage },
+      { status: errorStatus }
     );
   }
 }

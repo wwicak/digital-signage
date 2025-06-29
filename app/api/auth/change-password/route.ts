@@ -63,12 +63,12 @@ export async function POST(request: NextRequest) {
         // Use type assertion for passport-local-mongoose authenticate method
         const authenticateMethod = (dbUser as any).authenticate as (
           password: string,
-          callback: (err: Error | null, user: any, passwordErr: Error | null) => void
+          callback: (err: Error | null, user: unknown, passwordErr: Error | null) => void
         ) => void;
         
         authenticateMethod(
           currentPassword,
-          (err: Error | null, user: any, passwordErr: Error | null) => {
+          (err: Error | null, user: unknown, passwordErr: Error | null) => {
             if (err) {
               reject(err);
             } else if (passwordErr) {

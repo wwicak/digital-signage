@@ -274,7 +274,7 @@ export async function updateWidgetPositions(
     w: number;
     h: number;
   }>
-): Promise<any> {
+): Promise<{ message: string; updatedWidgets: number }> {
   const response = await fetch(`/api/layouts/${layoutId}/widgets`, {
     method: "PUT",
     headers: {

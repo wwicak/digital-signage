@@ -23,7 +23,7 @@ export async function GET(request: NextRequest) {
     const isTemplate = searchParams.get("isTemplate");
 
     // Build query
-    const query: any = {};
+    const query: Record<string, unknown> = {};
 
     if (search) {
       query.$or = [

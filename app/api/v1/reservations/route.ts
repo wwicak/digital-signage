@@ -28,7 +28,7 @@ export async function GET(request: NextRequest) {
     const endDate = searchParams.get("end_date");
     const skip = (page - 1) * limit;
 
-    const query: any = {};
+    const query: Record<string, unknown> = {};
 
     if (roomId && mongoose.Types.ObjectId.isValid(roomId)) {
       query.room_id = roomId;
@@ -73,11 +73,11 @@ export async function GET(request: NextRequest) {
         pages: Math.ceil(total / limit),
       },
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Error fetching reservations:", error);
     return NextResponse.json(
-      { message: error.message || "Error fetching reservations" },
-      { status: error.status || 500 }
+      { message: error instanceof Error ? error.message : "Error fetching reservations" },
+      { status: (error as any)?.status || 500 }
     );
   }
 }
@@ -164,11 +164,11 @@ export async function POST(request: NextRequest) {
     sendEventToDisplay("all", "reservationCreated", reservation);
 
     return NextResponse.json(reservation, { status: 201 });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Error creating reservation:", error);
     return NextResponse.json(
-      { message: error.message || "Error creating reservation" },
-      { status: error.status || 500 }
+      { message: error instanceof Error ? error.message : "Error creating reservation" },
+      { status: (error as any)?.status || 500 }
     );
   }
 }

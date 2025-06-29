@@ -14,15 +14,15 @@ export async function GET(request: NextRequest) {
     const user = await requireAuth(request);
     const slides = await Slide.find({ creator_id: user._id });
     return NextResponse.json(slides);
-  } catch (error: any) {
-    if (error.message === "Authentication required") {
+  } catch (error: unknown) {
+    if (error instanceof Error && error.message === "Authentication required") {
       return NextResponse.json(
         { message: "Authentication required" },
         { status: 401 }
       );
     }
     return NextResponse.json(
-      { message: "Error fetching slides.", error: error.message },
+      { message: "Error fetching slides.", error: error instanceof Error ? error.message : "Unknown error" },
       { status: 500 }
     );
   }
@@ -103,14 +103,14 @@ export async function POST(request: NextRequest) {
       // Notify relevant displays via SSE after adding to slideshows
       try {
         const displayIds = await getDisplayIdsForSlide(
-          (savedSlide._id as any).toString()
+          String(savedSlide._id)
         );
         for (const displayId of displayIds) {
           sendEventToDisplay(displayId, "display_updated", {
             displayId,
             action: "update",
             reason: "slide_added",
-            slideId: (savedSlide._id as any).toString(),
+            slideId: String(savedSlide._id),
           });
         }
       } catch (notifyError) {
@@ -122,21 +122,21 @@ export async function POST(request: NextRequest) {
     }
 
     return NextResponse.json(savedSlide, { status: 201 });
-  } catch (error: any) {
-    if (error.message === "Authentication required") {
+  } catch (error: unknown) {
+    if (error instanceof Error && error.message === "Authentication required") {
       return NextResponse.json(
         { message: "Authentication required" },
         { status: 401 }
       );
     }
-    if (error.name === "ValidationError") {
+    if (error instanceof Error && error.name === "ValidationError") {
       return NextResponse.json(
-        { message: "Validation Error", errors: error.errors },
+        { message: "Validation Error", errors: (error as any).errors },
         { status: 400 }
       );
     }
     return NextResponse.json(
-      { message: "Error creating slide", error: error.message },
+      { message: "Error creating slide", error: error instanceof Error ? error.message : "Unknown error" },
       { status: 500 }
     );
   }

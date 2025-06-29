@@ -27,11 +27,11 @@ export async function GET(request: NextRequest) {
       calendarLinks,
       total: calendarLinks.length,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Error fetching calendar links:", error);
     return NextResponse.json(
-      { message: error.message || "Error fetching calendar connections" },
-      { status: error.status || 500 }
+      { message: error instanceof Error ? error.message : "Error fetching calendar connections" },
+      { status: (error as any)?.status || 500 }
     );
   }
 }

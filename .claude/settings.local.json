@@ -40,7 +40,11 @@
       "Bash(cg:*)",
       "Bash(cg:*)",
       "Bash(npm *)",
-      "Bash(grep:*)"
+      "Bash(grep:*)",
+      "Bash(for:*)",
+      "Bash(do echo \"=== $file ===\")",
+      "Bash(sed:*)",
+      "Bash(done)"
     ],
     "deny": []
   }

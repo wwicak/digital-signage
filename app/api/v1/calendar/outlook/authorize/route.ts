@@ -46,11 +46,11 @@ export async function GET(request: NextRequest) {
       configured: true,
       message: "Redirect to this URL to authorize Outlook calendar access",
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Error initiating Outlook OAuth:", error);
     return NextResponse.json(
-      { message: error.message || "Error initiating Outlook authorization" },
-      { status: error.status || 500 }
+      { message: error instanceof Error ? error.message : "Error initiating Outlook authorization" },
+      { status: (error as any)?.status || 500 }
     );
   }
 }

@@ -126,10 +126,10 @@ export async function POST(
         changeTimestamp: updatedDisplay.layoutChangeTimestamp,
       },
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Change layout error:", error);
     return NextResponse.json(
-      { error: "Internal server error", message: error.message },
+      { error: "Internal server error", message: error instanceof Error ? error.message : "Unknown error" },
       { status: 500 }
     );
   }
@@ -187,10 +187,10 @@ export async function GET(
       layoutChangeTimestamp: display.layoutChangeTimestamp,
       lastSeen: display.last_update,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Get layout change status error:", error);
     return NextResponse.json(
-      { error: "Internal server error", message: error.message },
+      { error: "Internal server error", message: error instanceof Error ? error.message : "Unknown error" },
       { status: 500 }
     );
   }
@@ -234,10 +234,10 @@ export async function PATCH(
       message: "Layout change flag cleared",
       displayId: updatedDisplay._id,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Clear layout change flag error:", error);
     return NextResponse.json(
-      { error: "Internal server error", message: error.message },
+      { error: "Internal server error", message: error instanceof Error ? error.message : "Unknown error" },
       { status: 500 }
     );
   }

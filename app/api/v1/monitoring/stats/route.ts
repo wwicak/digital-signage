@@ -52,7 +52,7 @@ export async function GET(request: NextRequest) {
       },
       lastUpdated: new Date().toISOString(),
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Monitoring stats error:", error);
     return NextResponse.json({
       displays: {

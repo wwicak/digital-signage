@@ -1,12 +1,13 @@
 import axios, { AxiosResponse } from "axios";
 import * as z from "zod";
-import { SlideTypeZod, SlideDataZod } from "@/lib/models/Slide"; // Using Zod schemas from the model
+import { SlideTypeZod, SlideDataZod, ISlide } from "@/lib/models/Slide"; // Using Zod schemas from the model
+
 // Local slideshow schema to avoid circular dependency
 const LocalSlideshowSchema = z.object({
   _id: z.string(),
   name: z.string(),
   description: z.string().optional(),
-  slides: z.array(z.any()), // Will contain slide objects or IDs
+  slides: z.array(z.union([z.string(), z.any()])), // Can contain slide IDs (strings) or full slide objects
   creator_id: z.string().optional(),
   creation_date: z
     .preprocess(
@@ -92,7 +93,8 @@ export const getSlides = (
         // Extract slides from the slideshow, ensuring they are full slide objects, not just IDs
         if (slideshow.slides && Array.isArray(slideshow.slides)) {
           const fullSlides = slideshow.slides.filter(
-            (slide: any) => typeof slide === "object" && slide !== null
+            (slide: unknown): slide is Record<string, unknown> => 
+              typeof slide === "object" && slide !== null
           ) as ISlideData[];
           return fullSlides;
         }
@@ -133,9 +135,9 @@ export const deleteSlide = (
         return { message: "Slide deleted successfully" }; // Provide a default success message
       }
       // Fallback for unexpected cases
-      const responseData = res.data as any;
+      const responseData = res.data as Record<string, unknown>;
       throw new Error(
-        responseData?.message ||
+        (typeof responseData?.message === 'string' ? responseData.message : null) ||
           `Failed to delete slide ${id}: no confirmation received`
       );
     })
@@ -161,7 +163,7 @@ export type SlideUpdatePayload = Omit<
    * This allows other string keys for FormData compatibility but is not strictly type-safe for those extra keys.
    * It's a common pattern for FormData.
    */
-  [key: string]: any;
+  [key: string]: unknown;
 };
 
 // Export types that are expected by components
@@ -177,7 +179,7 @@ export const updateSlide = (
   const formData = new FormData();
   // Append metadata
   Object.keys(payload).forEach((key) => {
-    const value = (payload as any)[key];
+    const value = (payload as Record<string, unknown>)[key];
     if (
       value !== undefined &&
       typeof value !== "object" &&
@@ -221,7 +223,7 @@ export type SlideAddPayload = Omit<
   | "data" // SlideData complex object
   | "slideshow_ids"
 > & {
-  [key: string]: any;
+  [key: string]: unknown;
 };
 
 export const addSlide = (
@@ -232,7 +234,7 @@ export const addSlide = (
 ): Promise<ISlideData> => {
   const formData = new FormData();
   Object.keys(payload).forEach((key) => {
-    const value = (payload as any)[key];
+    const value = (payload as Record<string, unknown>)[key];
     if (
       value !== undefined &&
       typeof value !== "object" &&

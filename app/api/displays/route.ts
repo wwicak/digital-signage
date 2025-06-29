@@ -56,7 +56,7 @@ export async function GET(request: NextRequest) {
     const withHeartbeat = searchParams.get("withHeartbeat") === "true";
 
     // Apply access filter based on user's role
-    let query: any = {};
+    let query: Record<string, unknown> = {};
     query = addAccessFilter(user, "display", query);
 
     // Add layout filter if specified

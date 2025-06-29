@@ -148,10 +148,10 @@ export async function POST(
       responseTime,
       clientIP,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Heartbeat error:", error);
     return NextResponse.json(
-      { error: "Internal server error", message: error.message },
+      { error: "Internal server error", message: error instanceof Error ? error.message : "Unknown error" },
       { status: 500 }
     );
   }
@@ -196,10 +196,10 @@ export async function GET(
       recentHeartbeats,
       stats,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Get heartbeat error:", error);
     return NextResponse.json(
-      { error: "Internal server error", message: error.message },
+      { error: "Internal server error", message: error instanceof Error ? error.message : "Unknown error" },
       { status: 500 }
     );
   }

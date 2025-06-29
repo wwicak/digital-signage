@@ -18,15 +18,15 @@ export async function GET(request: NextRequest) {
     }).populate("slides");
 
     return NextResponse.json(slideshows);
-  } catch (error: any) {
-    if (error.message === "Authentication required") {
+  } catch (error: unknown) {
+    if (error instanceof Error && error.message === "Authentication required") {
       return NextResponse.json(
         { message: "Authentication required" },
         { status: 401 }
       );
     }
     return NextResponse.json(
-      { message: "Error fetching slideshows.", error: error.message },
+      { message: "Error fetching slideshows.", error: error instanceof Error ? error.message : "Unknown error" },
       { status: 500 }
     );
   }
@@ -77,21 +77,21 @@ export async function POST(request: NextRequest) {
     const populatedSlideshow = await populateSlideshowSlides(savedSlideshow);
 
     return NextResponse.json(populatedSlideshow, { status: 201 });
-  } catch (error: any) {
-    if (error.message === "Authentication required") {
+  } catch (error: unknown) {
+    if (error instanceof Error && error.message === "Authentication required") {
       return NextResponse.json(
         { message: "Authentication required" },
         { status: 401 }
       );
     }
-    if (error.name === "ValidationError") {
+    if (error instanceof Error && error.name === "ValidationError") {
       return NextResponse.json(
-        { message: "Validation Error", errors: error.errors },
+        { message: "Validation Error", errors: (error as any).errors },
         { status: 400 }
       );
     }
     return NextResponse.json(
-      { message: "Error creating slideshow", error: error.message },
+      { message: "Error creating slideshow", error: error instanceof Error ? error.message : "Unknown error" },
       { status: 500 }
     );
   }

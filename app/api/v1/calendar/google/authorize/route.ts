@@ -48,11 +48,11 @@ export async function GET(request: NextRequest) {
       configured: true,
       message: "Redirect to this URL to authorize Google calendar access",
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Error initiating Google OAuth:", error);
     return NextResponse.json(
-      { message: error.message || "Error initiating Google authorization" },
-      { status: error.status || 500 }
+      { message: error instanceof Error ? error.message : "Error initiating Google authorization" },
+      { status: (error as any)?.status || 500 }
     );
   }
 }

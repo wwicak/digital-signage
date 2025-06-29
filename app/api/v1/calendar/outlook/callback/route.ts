@@ -144,11 +144,11 @@ export async function GET(request: NextRequest) {
         )
       );
     }
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Error handling Outlook OAuth callback:", error);
     return NextResponse.redirect(
       new URL(
-        `/calendar-integration?error=${encodeURIComponent(error.message)}`,
+        `/calendar-integration?error=${encodeURIComponent(error instanceof Error ? error.message : "Unknown error")}`,
         request.url
       )
     );

@@ -24,7 +24,7 @@ export async function GET(request: NextRequest) {
     const buildingId = searchParams.get("building_id");
     const skip = (page - 1) * limit;
 
-    const query: any = {};
+    const query: Record<string, unknown> = {};
     if (buildingId && mongoose.Types.ObjectId.isValid(buildingId)) {
       query.building_id = buildingId;
     }
@@ -46,11 +46,11 @@ export async function GET(request: NextRequest) {
         pages: Math.ceil(total / limit),
       },
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Error fetching rooms:", error);
     return NextResponse.json(
-      { message: error.message || "Error fetching rooms" },
-      { status: error.status || 500 }
+      { message: error instanceof Error ? error.message : "Error fetching rooms" },
+      { status: (error as any)?.status || 500 }
     );
   }
 }
@@ -111,11 +111,11 @@ export async function POST(request: NextRequest) {
     await room.populate("building_id", "name address");
 
     return NextResponse.json(room, { status: 201 });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Error creating room:", error);
     return NextResponse.json(
-      { message: error.message || "Error creating room" },
-      { status: error.status || 500 }
+      { message: error instanceof Error ? error.message : "Error creating room" },
+      { status: (error as any)?.status || 500 }
     );
   }
 }

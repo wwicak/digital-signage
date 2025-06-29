@@ -51,11 +51,11 @@ export async function GET(
     return NextResponse.json({
       user: sanitizeUser(targetUser),
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Error fetching user:", error);
     return NextResponse.json(
-      { message: error.message || "Error fetching user" },
-      { status: error.status || 500 }
+      { message: error instanceof Error ? error.message : "Error fetching user" },
+      { status: (error as any)?.status || 500 }
     );
   }
 }
@@ -250,12 +250,12 @@ export async function PUT(
       message: "User updated successfully",
       user: sanitizeUser(targetUser),
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Error updating user:", error);
     return NextResponse.json(
       {
         message: "Error updating user",
-        error: error.message,
+        error: error instanceof Error ? error.message : "Unknown error",
       },
       { status: 500 }
     );
@@ -309,12 +309,12 @@ export async function DELETE(
     return NextResponse.json({
       message: "User deleted successfully",
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Error deleting user:", error);
     return NextResponse.json(
       {
         message: "Error deleting user",
-        error: error.message,
+        error: error instanceof Error ? error.message : "Unknown error",
       },
       { status: 500 }
     );
