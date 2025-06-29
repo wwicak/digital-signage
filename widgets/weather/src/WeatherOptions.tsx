@@ -62,7 +62,7 @@ class WeatherOptions extends Component<IWeatherOptionsProps, IWeatherOptionsStat
     }
   }
 
-  handleChange = (name: string, value: any): void => {
+  handleChange = (name: string, value: unknown): void => {
     const { onChange } = this.props
     this.setState(
       { [name]: value } as Pick<IWeatherOptionsState, keyof IWeatherOptionsState>,

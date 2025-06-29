@@ -32,7 +32,7 @@ class MockComplexWidgetOptions extends Component<MockWidgetOptionsProps> {
     customField5: this.props.data?.customField5 || "",
   };
 
-  handleChange = (name: string, value: any) => {
+  handleChange = (name: string, value: unknown) => {
     this.setState({ [name]: value }, () => {
       if (this.props.onChange) {
         this.props.onChange(this.state);

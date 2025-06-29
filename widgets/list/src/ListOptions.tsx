@@ -62,7 +62,7 @@ class ListOptions extends Component<IListOptionsProps, IListOptionsState> {
   }
 
   // Handles changes for top-level properties like title, color, etc.
-  handleChange = (name: string, value: any): void => {
+  handleChange = (name: string, value: unknown): void => {
     const updatedPartOfState = { [name]: value }
     this.setState(
       updatedPartOfState as Pick<IListOptionsState, keyof IListOptionsState>,

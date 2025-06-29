@@ -14,10 +14,10 @@ export interface IChoice {
 // Base props common to all input types
 export interface IBaseInputProps {
   name: string; // Name of the input field, passed to onChange
-  value?: any; // Current value of the input
+  value?: unknown; // Current value of the input
   onChange: (
     name: string,
-    value: any,
+    value: unknown,
     event?: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement> | File // File for photo/upload
   ) => void;
   label?: string;
@@ -121,8 +121,8 @@ class Input extends Component<IInputProps> {
     }
   }
 
-  handlePhotoDropRejected = (rejectedFiles: any[]): void => {
-    // Using any[] for rejectedFiles as FileRejection type might need specific import from dropzone
+  handlePhotoDropRejected = (rejectedFiles: Array<{file: File; errors: Array<{code: string; message: string}>}>): void => {
+    // Properly typed rejectedFiles for dropzone FileRejection interface
     if (rejectedFiles.length > 0) {
       const rejection = rejectedFiles[0]
       const file = rejection?.file
@@ -130,7 +130,7 @@ class Input extends Component<IInputProps> {
 
       let errorMessage = `File "${file?.name || 'Unknown'}" was rejected:\n`
 
-      errors.forEach((error: any) => {
+      errors.forEach((error: {code: string; message: string}) => {
         switch (error.code) {
           case 'file-invalid-type':
             errorMessage += '• Invalid file type. Please select an image file (JPG, PNG, GIF, WebP, SVG, BMP, TIFF)\n'

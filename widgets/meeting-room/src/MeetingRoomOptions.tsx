@@ -42,7 +42,7 @@ const MeetingRoomOptions: React.FC<IWidgetOptionsEditorProps<IMeetingRoomData>> 
     }
   }
 
-  const handleChange = (name: string, value: any) => {
+  const handleChange = (name: string, value: unknown) => {
     onChange({
       ...data,
       [name]: value,

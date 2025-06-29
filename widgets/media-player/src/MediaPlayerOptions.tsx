@@ -96,7 +96,7 @@ class MediaPlayerOptions extends Component<IWidgetOptionsEditorProps<MediaPlayer
     }
   }
 
-  handleChange = async (name: string, value: any): Promise<void> => {
+  handleChange = async (name: string, value: unknown): Promise<void> => {
     const { onChange } = this.props;
     let finalName: keyof IMediaPlayerOptionsState = name as keyof IMediaPlayerOptionsState;
     let finalValue = value;
@@ -122,10 +122,11 @@ class MediaPlayerOptions extends Component<IWidgetOptionsEditorProps<MediaPlayer
           }
           
           this.setState({ isUploading: false });
-        } catch (error: any) {
+        } catch (error: unknown) {
           console.error('Media upload failed:', error);
+          const axiosError = error as {response?: {data?: {message?: string}}};
           this.setState({
-            uploadError: error.response?.data?.message || 'Upload failed',
+            uploadError: axiosError.response?.data?.message || 'Upload failed',
             isUploading: false
           });
           finalValue = this.state.url; // Keep existing URL

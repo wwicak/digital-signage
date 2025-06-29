@@ -124,7 +124,7 @@ const ScreenCard: React.FC<IScreenCardProps> = ({
             setIsUpdatingOrientation(false);
             refresh();
           },
-          onError: (error: any) => {
+          onError: (error: Error) => {
             console.error("Failed to update orientation:", error);
             setIsUpdatingOrientation(false);
           },
@@ -179,10 +179,10 @@ const ScreenCard: React.FC<IScreenCardProps> = ({
         setLayoutChangeStatus('idle');
       }, 3000);
 
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error changing layout:', error);
       setLayoutChangeStatus('error');
-      setLayoutChangeError(error.message || 'Failed to change layout');
+      setLayoutChangeError(error instanceof Error ? error.message : 'Failed to change layout');
     } finally {
       setIsChangingLayout(false);
     }
@@ -218,7 +218,7 @@ const ScreenCard: React.FC<IScreenCardProps> = ({
             // but we still call refresh in case the parent needs to do something
             refresh();
           },
-          onError: (error: any) => {
+          onError: (error: Error) => {
             console.error("Failed to delete display:", error);
             // Optionally, provide user feedback here
           },
@@ -310,7 +310,7 @@ const ScreenCard: React.FC<IScreenCardProps> = ({
               onClick={(e) => {
                 e.preventDefault();
                 e.stopPropagation();
-                handleEdit(e as any);
+                handleEdit(e as React.MouseEvent<HTMLButtonElement>);
               }}
               aria-label='Edit Display'
               className='h-8 w-8'
@@ -326,7 +326,7 @@ const ScreenCard: React.FC<IScreenCardProps> = ({
                 onClick={(e) => {
                   e.preventDefault();
                   e.stopPropagation();
-                  handleLayoutSectionToggle(e as any);
+                  handleLayoutSectionToggle(e as React.MouseEvent<HTMLButtonElement>);
                 }}
                 aria-label='Toggle Layout Controls'
                 className='h-8 w-8'
@@ -373,7 +373,7 @@ const ScreenCard: React.FC<IScreenCardProps> = ({
               onClick={(e) => {
                 e.preventDefault();
                 e.stopPropagation();
-                handleDelete(e as any);
+                handleDelete(e as React.MouseEvent<HTMLButtonElement>);
               }}
               aria-label='Delete Display'
               className='h-8 w-8 text-destructive hover:text-destructive'

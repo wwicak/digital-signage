@@ -140,11 +140,12 @@ const WeatherContent: React.FC<IWeatherContentProps> = React.memo(({ data, isPre
       } else {
         throw new Error('Invalid weather data structure received.')
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Failed to fetch weather data:', error)
       let errorMessage = 'Could not retrieve weather information.'
-      if (error.response) {
-        errorMessage = `Error ${error.response.status}: ${error.response.data?.message || error.message}`
+      const errorWithResponse = error as {response?: {status: number; data?: {message?: string}}; message?: string};
+      if (errorWithResponse.response) {
+        errorMessage = `Error ${errorWithResponse.response.status}: ${errorWithResponse.response.data?.message || errorWithResponse.message || 'Unknown error'}`
       } else if (error instanceof Error) {
         errorMessage = error.message
       }

@@ -67,7 +67,7 @@ class WebOptionsEnhanced extends Component<IWebOptionsProps, IWebOptionsState> {
     }
   }
 
-  handleChange = (name: string, value: any): void => {
+  handleChange = (name: string, value: unknown): void => {
     const { onChange } = this.props
     
     let processedValue = value

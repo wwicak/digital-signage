@@ -81,7 +81,7 @@ class PriorityVideoOptions extends Component<IWidgetOptionsEditorProps<PriorityV
     }
   }
 
-  handleChange = async (name: string, value: any): Promise<void> => {
+  handleChange = async (name: string, value: unknown): Promise<void> => {
     const { onChange } = this.props;
     let finalName: keyof IPriorityVideoOptionsState = name as keyof IPriorityVideoOptionsState;
     let finalValue = value;
@@ -107,10 +107,11 @@ class PriorityVideoOptions extends Component<IWidgetOptionsEditorProps<PriorityV
           }
           
           this.setState({ isUploading: false });
-        } catch (error: any) {
+        } catch (error: unknown) {
           console.error('Media upload failed:', error);
+          const axiosError = error as {response?: {data?: {message?: string}}};
           this.setState({
-            uploadError: error.response?.data?.message || 'Upload failed',
+            uploadError: axiosError.response?.data?.message || 'Upload failed',
             isUploading: false
           });
           finalValue = this.state.url; // Keep existing URL

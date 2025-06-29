@@ -1,8 +1,33 @@
 import React from 'react';
 import { Monitor, Image, Type, List, Video, Calendar, Clock, BarChart3, Users } from 'lucide-react';
 
+interface LayoutWidget {
+  x?: number;
+  y?: number;
+  w?: number;
+  h?: number;
+  widget_id?: {
+    _id?: string;
+    type?: string;
+    name?: string;
+  };
+}
+
+interface LayoutData {
+  orientation?: string;
+  gridConfig?: {
+    cols?: number;
+    rows?: number;
+  };
+  widgets?: LayoutWidget[];
+  statusBar?: {
+    enabled?: boolean;
+    color?: string;
+  };
+}
+
 interface LayoutPreviewProps {
-  layout: any;
+  layout: LayoutData | null | undefined;
   className?: string;
   scale?: number;
 }
@@ -118,7 +143,7 @@ const LayoutPreview: React.FC<LayoutPreviewProps> = ({
         />
 
         {/* Render widgets */}
-        {widgets.map((widget: any, index: number) => {
+        {widgets.map((widget: LayoutWidget, index: number) => {
           const widgetData = widget.widget_id;
           if (!widgetData || !widgetData.type) return null;
 

@@ -14,7 +14,7 @@ export interface IWidgetOptionsProps<T = Record<string, any>> {
   data: T;
   onChange: (
     name: string,
-    value: any,
+    value: unknown,
     event?:
       | React.ChangeEvent<
           HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
@@ -38,7 +38,7 @@ export interface IWidgetDefinitionArgs<TData = Record<string, any>> {
   defaultData?: TData; // Default configuration data for a new instance of this widget
   WidgetComponent?: ComponentType<IWidgetContentProps<TData>>; // The actual React component to render the widget
   OptionsComponent?: ComponentType<IWidgetOptionsEditorProps<TData>>; // The React component to render widget-specific options/settings
-  [key: string]: any; // Allow other properties specific to the widget definition
+  [key: string]: unknown; // Allow other properties specific to the widget definition
 }
 
 /*
@@ -53,7 +53,7 @@ export interface IBaseWidget<TData = Record<string, any>> {
   defaultData?: TData;
   Widget: ComponentType<IWidgetContentProps<TData>>; // Getter for the widget display component
   Options: ComponentType<IWidgetOptionsEditorProps<TData>>; // Getter for the widget options component
-  [key: string]: any; // Allow other properties from definition
+  [key: string]: unknown; // Allow other properties from definition
 }
 
 const REQUIRED_DEF_FIELDS: Array<
@@ -66,14 +66,14 @@ class BaseWidget implements IBaseWidget {
   public type: string
   public version: string
   public icon: LucideIcon
-  public defaultData?: Record<string, any>
+  public defaultData?: Record<string, unknown>
 
   // Store the components passed in definition, or use defaults
-  private _WidgetComponent: ComponentType<IWidgetContentProps<any>>
-  private _OptionsComponent: ComponentType<IWidgetOptionsEditorProps<any>>;
+  private _WidgetComponent: ComponentType<IWidgetContentProps<Record<string, unknown>>>
+  private _OptionsComponent: ComponentType<IWidgetOptionsEditorProps<Record<string, unknown>>>;
 
   // Index signature to allow dynamic properties
-  [key: string]: any;
+  [key: string]: unknown;
 
   constructor(definition: IWidgetDefinitionArgs) {
     for (const reqField of REQUIRED_DEF_FIELDS) {
@@ -97,9 +97,9 @@ class BaseWidget implements IBaseWidget {
 
     // Assign other fields from definition dynamically
     for (const defField of Object.keys(definition)) {
-      if (!(this as any).hasOwnProperty(defField)) {
+      if (!(this as Record<string, unknown>).hasOwnProperty(defField)) {
         // Avoid re-assigning already declared properties
-        (this as any)[defField] = definition[defField]
+        (this as Record<string, unknown>)[defField] = (definition as Record<string, unknown>)[defField]
       }
     }
 
@@ -108,12 +108,12 @@ class BaseWidget implements IBaseWidget {
   }
 
   // Getter for the React component that renders the widget
-  public get Widget(): ComponentType<IWidgetContentProps<any>> {
+  public get Widget(): ComponentType<IWidgetContentProps<Record<string, unknown>>> {
     return this._WidgetComponent
   }
 
   // Getter for the React component that renders the widget's options/settings form
-  public get Options(): ComponentType<IWidgetOptionsEditorProps<any>> {
+  public get Options(): ComponentType<IWidgetOptionsEditorProps<Record<string, unknown>>> {
     return this._OptionsComponent
   }
 }

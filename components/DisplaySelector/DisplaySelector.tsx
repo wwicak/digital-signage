@@ -124,7 +124,7 @@ const DisplaySelector: React.FC<DisplaySelectorProps> = ({
             className='w-full'
           />
         </div>
-        <Select value={statusFilter} onValueChange={(value: any) => setStatusFilter(value)}>
+        <Select value={statusFilter} onValueChange={(value: unknown) => setStatusFilter(value)}>
           <SelectTrigger className='w-full sm:w-[180px]'>
             <SelectValue placeholder='Filter by status' />
           </SelectTrigger>

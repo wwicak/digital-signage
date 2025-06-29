@@ -59,7 +59,7 @@ class CongratsOptions extends Component<ICongratsOptionsProps, ICongratsOptionsS
     }
   }
 
-  handleChange = (name: string, value: any): void => {
+  handleChange = (name: string, value: unknown): void => {
     this.setState(
       { [name]: value } as Pick<ICongratsOptionsState, keyof ICongratsOptionsState>,
       () => {

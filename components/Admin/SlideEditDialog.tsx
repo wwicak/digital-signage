@@ -155,7 +155,7 @@ class SlideEditDialog
     }
   };
 
-  handleChange = (name: string, value: any): void => {
+  handleChange = (name: string, value: unknown): void => {
     // name: string
     this.setState(
       (prevState) => {

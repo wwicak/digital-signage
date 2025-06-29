@@ -47,7 +47,10 @@
       "Bash(done)",
       "mcp__ide__getDiagnostics",
       "Bash(npm run build:*)",
-      "Bash(rg:*)"
+      "Bash(rg:*)",
+      "Bash(do if [ -f \"$file\" ])",
+      "Bash(then echo \"Fixing $file\")",
+      "Bash(fi)"
     ],
     "deny": []
   }

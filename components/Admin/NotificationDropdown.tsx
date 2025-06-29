@@ -209,7 +209,7 @@ const NotificationDropdown: React.FC<NotificationDropdownProps> = ({
             {/* Filters */}
             <div className='space-y-2'>
               <div className='flex gap-2'>
-                <Select value={filterType} onValueChange={(value: any) => setFilterType(value)}>
+                <Select value={filterType} onValueChange={(value: unknown) => setFilterType(value)}>
                   <SelectTrigger className='h-8 text-xs'>
                     <SelectValue />
                   </SelectTrigger>
