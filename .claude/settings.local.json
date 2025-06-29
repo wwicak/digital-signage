@@ -50,7 +50,8 @@
       "Bash(rg:*)",
       "Bash(do if [ -f \"$file\" ])",
       "Bash(then echo \"Fixing $file\")",
-      "Bash(fi)"
+      "Bash(fi)",
+      "Bash(then echo \"Checking $file:\")"
     ],
     "deny": []
   }

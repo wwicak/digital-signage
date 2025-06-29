@@ -77,7 +77,7 @@ export const RemoteLayoutChanger: React.FC<RemoteLayoutChangerProps> = ({
         setChangeStatus('idle');
       }, 3000);
 
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error changing layout:', error);
       setChangeStatus('error');
       setErrorMessage(error.message || 'Failed to change layout');

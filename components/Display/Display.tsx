@@ -183,7 +183,7 @@ const Display: React.FC<IDisplayComponentProps> = React.memo(({ display }) => {
   // Memoize layout for GridStack to prevent unnecessary re-renders
   const gridStackItems: GridStackItem[] = useMemo(
     () =>
-      (layoutData?.widgets || []).map((widget: any) => {
+      (layoutData?.widgets || []).map((widget: {widget_id?: unknown; x?: number; y?: number; w?: number; h?: number}) => {
         // Skip if no widget data
         if (!widget?.widget_id) return null;
 

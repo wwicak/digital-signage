@@ -72,7 +72,7 @@ const LayoutAssignment: React.FC<LayoutAssignmentProps> = ({
         setAssignmentStatus({ type: null, message: '' })
       }, 3000)
 
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Layout assignment error:', error)
 
       setAssignmentStatus({

@@ -106,7 +106,7 @@ const MeetingRoomDisplay: React.FC<IMeetingRoomDisplayProps> = ({
       if (buildingId && data.reservations.length > 0) {
         setBuildingName(data.reservations[0].room_id.building_id.name);
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Error fetching reservations:", error);
       // Show a more user-friendly error message
       if (error.message.includes("fetch")) {
