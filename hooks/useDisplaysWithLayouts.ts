@@ -65,7 +65,7 @@ export const useDisplaysWithLayouts = (options?: {
       
       // Enhance displays with layout names if needed
       const enhancedDisplays = await Promise.all(
-        data.displays.map(async (display: any) => {
+        data.displays.map(async (display: IDisplayWithLayout) => {
           let layoutName = 'No Layout'
           
           if (display.layout) {

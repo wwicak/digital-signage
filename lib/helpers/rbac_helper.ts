@@ -6,7 +6,7 @@ import mongoose from "mongoose";
 
 // Types for MongoDB queries
 type MongoQueryFilter = {
-  [key: string]: any;
+  [key: string]: unknown;
   _id?: {
     $in: mongoose.Types.ObjectId[];
   };

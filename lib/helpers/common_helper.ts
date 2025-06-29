@@ -6,18 +6,18 @@ import mongoose, { FilterQuery } from "mongoose";
 import { Response } from "express";
 
 // Generic type for Mongoose documents - simplified to work with Mongoose types
-type MongooseDocument<T = any> = mongoose.Document & {
+type MongooseDocument<T = Record<string, unknown>> = mongoose.Document & {
   _id: mongoose.Types.ObjectId | string;
-  toObject?: () => any;
+  toObject?: () => T & { _id: mongoose.Types.ObjectId | string };
 } & T;
 
 // Generic type for Mongoose query results
-type MongooseQueryResult<T = any> = (mongoose.Document & T) | null;
+type MongooseQueryResult<T = Record<string, unknown>> = (mongoose.Document & T) | null;
 
 // Type for Express-like response objects
 interface ExpressResponse {
   status: (code: number) => ExpressResponse;
-  json: (data: any) => void;
+  json: (data: unknown) => void;
   getHeader?: (name: string) => string | undefined;
   write?: (data: string) => void;
 }
@@ -25,7 +25,12 @@ interface ExpressResponse {
 // Type for validation errors
 interface ValidationError extends Error {
   name: "ValidationError";
-  errors: Record<string, any>;
+  errors: Record<string, {
+    message?: string;
+    kind?: string;
+    path?: string;
+    value?: unknown;
+  }>;
 }
 
 // Type for SSE response
@@ -35,11 +40,11 @@ interface SSEResponse {
 }
 
 // Type for MongoDB filter query
-type MongoFilterQuery<T = any> = FilterQuery<T>;
+type MongoFilterQuery<T = Record<string, unknown>> = FilterQuery<T>;
 
 // Type for update data
 interface UpdateData {
-  [key: string]: any;
+  [key: string]: unknown;
   last_update?: Date;
 }
 
@@ -51,7 +56,7 @@ interface UpdateData {
  * @param {string} [populateField] - Optional field name to populate.
  * @returns {Promise<void>}
  */
-export const findByIdAndSend = async <T = any>(
+export const findByIdAndSend = async <T = Record<string, unknown>>(
   model: mongoose.Model<T>,
   id: string | mongoose.Types.ObjectId,
   res: ExpressResponse,
@@ -85,7 +90,7 @@ export const findByIdAndSend = async <T = any>(
  * @param {QueryOptions} [queryOptions] - Optional query options (e.g., filter, sort).
  * @returns {Promise<void>}
  */
-export const findAllAndSend = async <T = any>(
+export const findAllAndSend = async <T = Record<string, unknown>>(
   model: mongoose.Model<T>,
   res: ExpressResponse,
   populateField?: string,
@@ -114,7 +119,7 @@ export const findAllAndSend = async <T = any>(
  * @param {ExpressResponse} res - The Express response object.
  * @returns {Promise<void>}
  */
-export const createAndSend = async <T = any>(
+export const createAndSend = async <T = Record<string, unknown>>(
   model: mongoose.Model<T>,
   data: Partial<T>,
   res: ExpressResponse
@@ -150,7 +155,7 @@ export const createAndSend = async <T = any>(
  * @param {string} [populateField] - Optional field name to populate after update.
  * @returns {Promise<void>}
  */
-export const findByIdAndUpdateAndSend = async <T = any>(
+export const findByIdAndUpdateAndSend = async <T = Record<string, unknown>>(
   model: mongoose.Model<T>,
   id: string | mongoose.Types.ObjectId,
   data: Partial<T>,
@@ -210,7 +215,7 @@ export const findByIdAndUpdateAndSend = async <T = any>(
  * @param {ExpressResponse} res - The Express response object.
  * @returns {Promise<void>}
  */
-export const findByIdAndDeleteAndSend = async <T = any>(
+export const findByIdAndDeleteAndSend = async <T = Record<string, unknown>>(
   model: mongoose.Model<T>,
   id: string | mongoose.Types.ObjectId,
   res: ExpressResponse
@@ -285,7 +290,7 @@ export const parseQueryParams = (query: Record<string, unknown>): ParsedQueryPar
  * @param {Function} getClientCount - Function to get client count for a display ID
  * @returns {(T & { clientCount: number; isOnline: boolean })[]} - Augmented display objects
  */
-export const augmentDisplaysWithClientInfo = <T extends { _id: any; toObject?: () => any }>(
+export const augmentDisplaysWithClientInfo = <T extends { _id: mongoose.Types.ObjectId | string; toObject?: () => T & { _id: mongoose.Types.ObjectId | string } }>(
   displays: T[],
   getClientCount: (displayId: string) => number
 ): (T & { clientCount: number; isOnline: boolean })[] => {
@@ -306,7 +311,7 @@ export const augmentDisplaysWithClientInfo = <T extends { _id: any; toObject?: (
  * @param {Function} getClientCount - Function to get client count for a display ID
  * @returns {T & { clientCount: number; isOnline: boolean }} - Augmented display object
  */
-export const augmentDisplayWithClientInfo = <T extends { _id: any; toObject?: () => any }>(
+export const augmentDisplayWithClientInfo = <T extends { _id: mongoose.Types.ObjectId | string; toObject?: () => T & { _id: mongoose.Types.ObjectId | string } }>(
   display: T,
   getClientCount: (displayId: string) => number
 ): T & { clientCount: number; isOnline: boolean } => {

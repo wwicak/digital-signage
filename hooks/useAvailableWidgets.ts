@@ -1,13 +1,15 @@
 import { useMemo } from "react";
 import widgets from "@/widgets";
 
+import type { LucideIcon } from "lucide-react";
+
 interface AvailableWidget {
   key: string;
   name: string;
   type: string;
-  icon: any; // LucideIcon component
+  icon: LucideIcon;
   version: string;
-  defaultData?: Record<string, any>;
+  defaultData?: Record<string, unknown>;
 }
 
 // Hook to get widget choices formatted for dropdowns

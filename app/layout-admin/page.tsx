@@ -26,8 +26,18 @@ import { getWidget } from '../../actions/widgets'
 
 import { WidgetType } from '../../lib/models/Widget'
 
+// Widget interface for layout widgets
+interface LayoutWidget {
+  widget_id: string | { _id: string } | null;
+  x?: number;
+  y?: number;
+  w?: number;
+  h?: number;
+  [key: string]: unknown;
+}
+
 // Helper function to get widget ID
-const getWidgetId = (widget: any): string | null => {
+const getWidgetId = (widget: LayoutWidget): string | null => {
   if (typeof widget.widget_id === 'string') {
     return widget.widget_id
   }

@@ -62,11 +62,12 @@ export const useDisplaySelector = () => {
         success: true,
         message: 'Layout assigned successfully. The display will update shortly.',
       }
-    } catch (error: any) {
+    } catch (error) {
       console.error('Layout assignment error:', error)
+      const errorMessage = error instanceof Error ? error.message : 'Failed to assign layout. Please try again.'
       return {
         success: false,
-        message: error.message || 'Failed to assign layout. Please try again.',
+        message: errorMessage,
       }
     } finally {
       setIsAssigning(false)

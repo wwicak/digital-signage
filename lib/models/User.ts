@@ -31,24 +31,24 @@ export interface IUser extends Document {
 // Interface for the User Model (statics) - Manually define PLM methods
 export interface IUserModel extends Model<IUser> {
   createStrategy(): passport.Strategy;
-  serializeUser(): (user: IUser, done: (err: any, id?: any) => void) => void;
+  serializeUser(): (user: IUser, done: (err: Error | null, id?: string) => void) => void;
   deserializeUser(): (
-    id: any,
-    done: (err: any, user?: IUser | false | null) => void
+    id: string,
+    done: (err: Error | null, user?: IUser | false | null) => void
   ) => void;
   register(
-    user: any,
+    user: IUser | Record<string, unknown>,
     password_deprecated: string,
-    cb?: (err: any, user?: IUser) => void
+    cb?: (err: Error | null, user?: IUser) => void
   ): Promise<IUser>;
   findByUsername(
     username: string,
-    callback?: (err: any, user: IUser | null) => void
+    callback?: (err: Error | null, user: IUser | null) => void
   ): Promise<IUser | null>;
   authenticate(): (
     username: string,
     password: string,
-    cb: (err: any, user?: IUser | false, options?: any) => void
+    cb: (err: Error | null, user?: IUser | false, options?: { message?: string }) => void
   ) => void;
 }
 

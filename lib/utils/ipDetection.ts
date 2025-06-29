@@ -67,8 +67,9 @@ export const detectIPViaAPI = async (): Promise<IPDetectionResult> => {
     try {
       const response = await fetch(apiUrl, { 
         method: 'GET',
-        timeout: 3000 
-      } as any);
+        // Note: fetch doesn't support timeout directly, would need AbortController
+        // timeout: 3000 
+      });
       
       if (response.ok) {
         const data = await response.json();
@@ -94,8 +95,9 @@ export const detectLocalNetworkInfo = (): Promise<IPDetectionResult> => {
     try {
       // Try to get network information if available
       if ('connection' in navigator) {
-        const connection = (navigator as any).connection;
-        if (connection && connection.effectiveType) {
+        // NetworkInformation API type
+        const connection = (navigator as Navigator & { connection?: NetworkInformation }).connection;
+        if (connection && 'effectiveType' in connection) {
           // This doesn't give us IP but gives us network info
           resolve({ ip: null, method: 'local', error: 'Network info available but no IP' });
           return;
@@ -174,12 +176,17 @@ export const getDeviceNetworkInfo = () => {
 
   // Add connection info if available
   if ('connection' in navigator) {
-    const connection = (navigator as any).connection;
-    (info as any).connection = {
-      effectiveType: connection?.effectiveType,
-      downlink: connection?.downlink,
-      rtt: connection?.rtt,
-    };
+    const connection = (navigator as Navigator & { connection?: NetworkInformation }).connection;
+    if (connection) {
+      return {
+        ...info,
+        connection: {
+          effectiveType: 'effectiveType' in connection ? connection.effectiveType : undefined,
+          downlink: 'downlink' in connection ? connection.downlink : undefined,
+          rtt: 'rtt' in connection ? connection.rtt : undefined,
+        }
+      };
+    }
   }
 
   return info;

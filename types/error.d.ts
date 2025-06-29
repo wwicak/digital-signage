@@ -16,8 +16,8 @@ export interface HttpError extends Error {
 export function isHttpError(error: unknown): error is HttpError {
   return (
     error instanceof Error &&
-    (typeof (error as any).status === 'number' ||
-     typeof (error as any).statusCode === 'number')
+    ('status' in error && typeof error.status === 'number' ||
+     'statusCode' in error && typeof error.statusCode === 'number')
   );
 }
 
@@ -29,7 +29,7 @@ export function hasErrorMessage(error: unknown): error is { message: string } {
     typeof error === 'object' &&
     error !== null &&
     'message' in error &&
-    typeof (error as any).message === 'string'
+    typeof (error as Record<string, unknown>).message === 'string'
   );
 }
 

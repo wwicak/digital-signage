@@ -406,7 +406,7 @@ class PriorityVideoContent extends Component<IPriorityVideoContentProps, IPriori
     }
 
     const commonProps = {
-      ref: this.mediaRef as any,
+      ref: this.mediaRef as RefObject<HTMLVideoElement | HTMLAudioElement>,
       src: processedUrl,
       controls: false, // Priority video doesn't show controls
       autoPlay: false, // We control autoplay manually

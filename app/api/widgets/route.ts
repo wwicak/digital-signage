@@ -29,8 +29,12 @@ export async function GET(request: NextRequest) {
 
       // Filter widgets to only include those owned by the current user
       const userWidgets = display.widgets.filter(
-        (widget: IWidget) =>
-          widget.creator_id && widget.creator_id.toString() === user._id
+        (widget): widget is IWidget =>
+          typeof widget === 'object' && 
+          widget !== null && 
+          'creator_id' in widget &&
+          widget.creator_id && 
+          widget.creator_id.toString() === user._id
       );
 
       return NextResponse.json(userWidgets);
@@ -149,7 +153,7 @@ export async function POST(request: NextRequest) {
           displayId: display_id,
           action: "update",
           reason: "widget_added",
-          widgetId: (savedWidget._id as any).toString(),
+          widgetId: String(savedWidget._id),
         });
       } catch (sseError) {
         console.error("SSE notification failed:", sseError);

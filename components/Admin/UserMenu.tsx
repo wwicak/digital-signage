@@ -34,9 +34,9 @@ import { cn } from "@/lib/utils";
 interface UserMenuProps {
   className?: string;
   user?: {
-    name?: string | any;
+    name?: string;
     email: string;
-    role?: string | any;
+    role?: string | { name?: string };
     _id?: string;
   };
 }

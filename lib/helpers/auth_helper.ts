@@ -5,7 +5,7 @@ import mongoose from "mongoose";
 // Use the functions from @/lib/auth instead
 
 export interface AuthenticatedUser {
-  _id: any;
+  _id: mongoose.Types.ObjectId | string;
   email: string;
   name?: string;
   role: IUserRole;
@@ -15,7 +15,7 @@ export interface AuthenticatedUser {
  * @deprecated Use requireAuth from @/lib/auth instead
  * Placeholder authentication function - DEPRECATED
  */
-export async function requireAuth(req: any): Promise<AuthenticatedUser> {
+export async function requireAuth(req: { headers?: Record<string, string | string[] | undefined>; query?: Record<string, unknown>; body?: Record<string, unknown> }): Promise<AuthenticatedUser> {
   console.warn("DEPRECATED: requireAuth from auth_helper.ts is deprecated. Use requireAuth from @/lib/auth instead.");
   // Temporary implementation for development/testing
   // TODO: Replace with next-auth integration in production
@@ -35,7 +35,7 @@ export async function requireAuth(req: any): Promise<AuthenticatedUser> {
   // Parse cookies to check for loggedIn status
   let isLoggedInViaCookie = false;
   if (cookies) {
-    const cookieObj = cookies.split(";").reduce((acc: any, cookie: string) => {
+    const cookieObj = cookies.split(";").reduce((acc: Record<string, string>, cookie: string) => {
       const [key, value] = cookie.trim().split("=");
       acc[key] = value;
       return acc;
@@ -131,16 +131,17 @@ export async function requireAuth(req: any): Promise<AuthenticatedUser> {
  * Middleware to protect API routes - DEPRECATED
  */
 export function withAuth(
-  handler: (req: any, res: any, user: AuthenticatedUser) => Promise<void>
+  handler: (req: { headers?: Record<string, string | string[] | undefined>; query?: Record<string, unknown>; body?: Record<string, unknown> }, res: { status: (code: number) => { json: (data: Record<string, unknown>) => void } }, user: AuthenticatedUser) => Promise<void>
 ) {
   console.warn("DEPRECATED: withAuth from auth_helper.ts is deprecated. Use withAuth from @/lib/auth instead.");
-  return async (req: any, res: any) => {
+  return async (req: { headers?: Record<string, string | string[] | undefined>; query?: Record<string, unknown>; body?: Record<string, unknown> }, res: { status: (code: number) => { json: (data: Record<string, unknown>) => void } }) => {
     try {
       const user = await requireAuth(req);
       return await handler(req, res, user);
-    } catch (error: any) {
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : "Authentication required";
       return res.status(401).json({
-        message: error.message || "Authentication required",
+        message: errorMessage,
       });
     }
   };
@@ -160,7 +161,7 @@ export async function registerUser(
   });
 
   return new Promise<IUser>((resolve, reject) => {
-    User.register(userToRegister, password, (err: any, user?: IUser) => {
+    User.register(userToRegister, password, (err: Error | null, user?: IUser) => {
       if (err) {
         reject(err);
       } else if (!user) {
@@ -181,11 +182,12 @@ export async function authenticateUser(
 ): Promise<IUser> {
   return new Promise<IUser>((resolve, reject) => {
     try {
-      const authenticateFunction = (User as any).authenticate();
+      // Type assertion for passport-local-mongoose authenticate method
+      const authenticateFunction = (User as typeof User & { authenticate: () => (username: string, password: string, callback: (err: Error | null, user?: IUser | false, options?: { message?: string }) => void) => void }).authenticate();
       authenticateFunction(
         email,
         password,
-        (err: any, user?: IUser | false, options?: any) => {
+        (err: Error | null, user?: IUser | false, options?: { message?: string }) => {
           if (err) {
             reject(err);
           } else if (!user) {

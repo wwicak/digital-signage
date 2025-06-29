@@ -10,11 +10,12 @@ import { getHttpStatusFromError, getErrorMessage } from "@/types/error";
 
 // Interface for MongoDB query filters
 interface ReservationQuery {
-  room_id?: string;
+  room_id?: string | { $in: unknown[] };
   building_id?: string;
   start_time?: { $gte?: Date; $lte?: Date };
   end_time?: { $gte?: Date; $lte?: Date };
   status?: string;
+  $and?: Array<Record<string, unknown>>;
 }
 
 export async function GET(request: NextRequest) {

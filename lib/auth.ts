@@ -5,11 +5,20 @@ import User, { IUser, IUserRole, UserRoleName } from "./models/User";
 import * as jwt from "jsonwebtoken";
 import dbConnect from "./mongodb";
 
+// Cookie options interface
+interface CookieOptions {
+  httpOnly?: boolean;
+  path?: string;
+  maxAge?: number;
+  sameSite?: 'strict' | 'lax' | 'none';
+  secure?: boolean;
+}
+
 // Type for response objects that can set cookies (both App Router and Pages Router)
 type CookieResponse = 
   | NextResponse 
   | NextApiResponse 
-  | { cookies: { set: (name: string, value: string, options?: any) => void } }
+  | { cookies: { set: (name: string, value: string, options?: CookieOptions) => void } }
   | { setHeader: (name: string, value: string) => void };
 
 const JWT_SECRET =
@@ -91,7 +100,7 @@ export function extractToken(
   // Try Authorization header first
   const authHeader = 'authorization' in req.headers 
     ? req.headers.authorization 
-    : (req.headers as any).get?.('authorization');
+    : undefined;
   if (authHeader && authHeader.startsWith("Bearer ")) {
     return authHeader.substring(7);
   }
@@ -99,7 +108,7 @@ export function extractToken(
   // Try cookie
   const cookies = 'cookie' in req.headers 
     ? req.headers.cookie 
-    : (req.headers as any).get?.('cookie');
+    : undefined;
   if (cookies && typeof cookies === 'string') {
     const tokenMatch = cookies.match(/auth-token=([^;]+)/);
     if (tokenMatch) {
