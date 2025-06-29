@@ -1,6 +1,6 @@
 import { ComponentType } from 'react'
 
-import BaseWidget, { IBaseWidget, IWidgetDefinitionArgs } from '../base_widget'
+import BaseWidget, { IBaseWidget, IWidgetDefinitionArgs, IWidgetContentProps, IWidgetOptionsEditorProps } from '../base_widget'
 import CongratsContent from './src/CongratsContent' // Assuming .js for now
 import CongratsOptions from './src/CongratsOptions' // Assuming .js for now
 import { Gift } from 'lucide-react'
@@ -29,8 +29,8 @@ const congratsDefinitionArgs: IWidgetDefinitionArgs = {
     fontSize: 16,
     recipient: '', // Default recipient to empty string
   } as ICongratsDefaultData,
-  WidgetComponent: CongratsContent as ComponentType<any>, // Cast as ComponentType<any> for now
-  OptionsComponent: CongratsOptions as ComponentType<any>, // Cast as ComponentType<any> for now
+  WidgetComponent: CongratsContent as ComponentType<IWidgetContentProps<ICongratsDefaultData>>,
+  OptionsComponent: CongratsOptions as ComponentType<IWidgetOptionsEditorProps<ICongratsDefaultData>>
 }
 
 class Congrats extends BaseWidget {

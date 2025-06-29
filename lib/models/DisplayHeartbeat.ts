@@ -92,8 +92,19 @@ DisplayHeartbeatSchema.index(
 DisplayHeartbeatSchema.statics.recordHeartbeat = function (
   displayId: string,
   responseTime: number,
-  clientInfo?: any,
-  serverInfo?: any,
+  clientInfo?: {
+    screenResolution?: string;
+    browserVersion?: string;
+    platform?: string;
+    memoryUsage?: number;
+    cpuUsage?: number;
+    networkType?: string;
+  },
+  serverInfo?: {
+    serverTime?: Date;
+    processingTime?: number;
+    activeConnections?: number;
+  },
   connectionInfo?: {
     ipAddress?: string;
     userAgent?: string;
@@ -195,9 +206,15 @@ DisplayHeartbeatSchema.statics.cleanupOldHeartbeats = function (
 
 // Static methods interface
 interface IDisplayHeartbeatModel extends Model<IDisplayHeartbeat> {
-  getRecentHeartbeats(displayId: string, limitMinutes?: number): any;
-  getHeartbeatStats(displayId: string, periodHours?: number): any;
-  cleanupOldHeartbeats(daysToKeep?: number): any;
+  getRecentHeartbeats(displayId: string, limitMinutes?: number): Promise<IDisplayHeartbeat[]>;
+  getHeartbeatStats(displayId: string, periodHours?: number): Promise<Array<{
+    _id: { hour: number; date: string };
+    count: number;
+    avgResponseTime: number;
+    maxResponseTime: number;
+    minResponseTime: number;
+  }>>;
+  cleanupOldHeartbeats(daysToKeep?: number): Promise<{ deletedCount: number }>;
 }
 
 const DisplayHeartbeatModel: IDisplayHeartbeatModel =

@@ -129,7 +129,7 @@ export interface YoutubeWidgetData {
 }
 
 export interface EmptyWidgetData {
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 // Union type for all widget data types

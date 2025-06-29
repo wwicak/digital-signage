@@ -1,6 +1,6 @@
 import { ComponentType } from "react";
 import { Zap } from "lucide-react";
-import BaseWidget, { IWidgetDefinitionArgs } from "../base_widget";
+import BaseWidget, { IWidgetDefinitionArgs, IWidgetContentProps, IWidgetOptionsEditorProps } from "../base_widget";
 import { PriorityVideoContent, PriorityVideoOptions } from "./src";
 
 // Define the default data interface for the Priority Video widget
@@ -48,8 +48,8 @@ const priorityVideoDefinitionArgs: IWidgetDefinitionArgs = {
     priority: 100, // High priority
     playOnce: true, // Play only once per activation
   } as IPriorityVideoDefaultData,
-  WidgetComponent: PriorityVideoContent as ComponentType<any>,
-  OptionsComponent: PriorityVideoOptions as ComponentType<any>,
+  WidgetComponent: PriorityVideoContent as ComponentType<IWidgetContentProps<IPriorityVideoDefaultData>>,
+  OptionsComponent: PriorityVideoOptions as ComponentType<IWidgetOptionsEditorProps<IPriorityVideoDefaultData>>,
 };
 
 // Create and export the widget instance

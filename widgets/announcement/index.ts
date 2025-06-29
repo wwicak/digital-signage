@@ -1,7 +1,7 @@
 import { ComponentType } from 'react'
 import { AlertTriangle } from 'lucide-react'
 
-import BaseWidget, { IBaseWidget, IWidgetDefinitionArgs } from '../base_widget'
+import BaseWidget, { IBaseWidget, IWidgetDefinitionArgs, IWidgetContentProps, IWidgetOptionsEditorProps } from '../base_widget'
 import AnnouncementContent from './src/AnnouncementContent'
 import AnnouncementOptions from './src/AnnouncementOptions'
 
@@ -29,8 +29,8 @@ const announcementDefinitionArgs: IWidgetDefinitionArgs = {
     accentColor: '#EDC951', // Goldenrod
     title: 'Announcement', // Default title
   } as IAnnouncementDefaultData,
-  WidgetComponent: AnnouncementContent as ComponentType<any>, // Cast as ComponentType<any> for now
-  OptionsComponent: AnnouncementOptions as ComponentType<any>, // Cast as ComponentType<any> for now
+  WidgetComponent: AnnouncementContent as ComponentType<IWidgetContentProps<IAnnouncementDefaultData>>,
+  OptionsComponent: AnnouncementOptions as ComponentType<IWidgetOptionsEditorProps<IAnnouncementDefaultData>>
 }
 
 class Announcement extends BaseWidget {

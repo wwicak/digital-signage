@@ -21,7 +21,7 @@ interface DisplayState {
     y: number;
     w: number;
     h: number;
-    options?: Record<string, any>;
+    options?: Record<string, unknown>;
   }>;
 }
 

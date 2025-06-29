@@ -1,6 +1,6 @@
 import { ComponentType } from 'react'
 
-import BaseWidget, { IBaseWidget, IWidgetDefinitionArgs } from '../base_widget'
+import BaseWidget, { IBaseWidget, IWidgetDefinitionArgs, IWidgetContentProps, IWidgetOptionsEditorProps } from '../base_widget'
 import WeatherContent from './src/WeatherContent' // Assuming .js for now
 import WeatherOptions from './src/WeatherOptions' // Assuming .js for now
 import { Cloud } from 'lucide-react'
@@ -29,8 +29,8 @@ const weatherDefinitionArgs: IWidgetDefinitionArgs = {
     apiKey: '', // API key might be needed
     locationName: '', // Will be updated after fetching weather
   } as IWeatherDefaultData,
-  WidgetComponent: WeatherContent as ComponentType<any>,
-  OptionsComponent: WeatherOptions as ComponentType<any>,
+  WidgetComponent: WeatherContent as ComponentType<IWidgetContentProps<IWeatherDefaultData>>,
+  OptionsComponent: WeatherOptions as ComponentType<IWidgetOptionsEditorProps<IWeatherDefaultData>>,
 }
 
 // Renamed from Weather to WeatherWidget for consistency

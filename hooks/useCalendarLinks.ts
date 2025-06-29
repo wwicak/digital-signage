@@ -35,8 +35,8 @@ export const useCalendarLinks = () => {
       
       const result: ICalendarLinksResponse = await response.json();
       setData(result.calendarLinks);
-    } catch (err: any) {
-      setError(err.message || "Failed to fetch calendar connections");
+    } catch (err) {
+      setError((err as Error).message || "Failed to fetch calendar connections");
       setData([]);
     } finally {
       setIsLoading(false);
@@ -79,7 +79,7 @@ export const useCalendarLinks = () => {
     await refetch();
   };
 
-  const syncCalendar = async (linkId: string): Promise<any> => {
+  const syncCalendar = async (linkId: string): Promise<{ success: boolean; message?: string; syncedCount?: number }> => {
     const response = await fetch(`/api/v1/calendar/${linkId}/sync`, {
       method: "POST",
     });

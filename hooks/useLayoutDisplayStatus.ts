@@ -87,7 +87,7 @@ export const useLayoutDisplayStatus = (
     },
     staleTime: 60000, // 1 minute
     refetchInterval: enableRealTimeUpdates ? refreshInterval : false,
-    retry: (failureCount, error: any) => {
+    retry: (failureCount, error) => {
       // Don't retry on network errors or client errors
       if (
         error.message.includes("Failed to fetch") ||
@@ -127,7 +127,16 @@ export const useLayoutDisplayStatus = (
       });
 
       const results = await Promise.all(heartbeatPromises);
-      const heartbeatMap: Record<string, any> = {};
+      const heartbeatMap: Record<string, {
+        isOnline?: boolean;
+        lastHeartbeat?: string;
+        recentHeartbeats?: Array<{
+          ipAddress?: string;
+          responseTime?: number;
+          connectionType?: "sse" | "websocket" | "polling";
+        }>;
+        stats?: Array<{ count: number }>;
+      } | null> = {};
 
       results.forEach(({ displayId, heartbeatData }) => {
         heartbeatMap[displayId] = heartbeatData;
@@ -152,11 +161,17 @@ export const useLayoutDisplayStatus = (
       setError(null);
 
       try {
-        const displayIds = allDisplays.displays.map((d: any) => d._id);
+        const displayIds = allDisplays.displays.map((d: { _id: string }) => d._id);
         const heartbeatData = await fetchDisplayHeartbeats(displayIds);
 
         const enhancedDisplays: DisplayWithLayout[] = allDisplays.displays.map(
-          (display: any) => {
+          (display: {
+            _id: string;
+            name?: string;
+            layout?: string;
+            location?: string;
+            building?: string;
+          }) => {
             const statusDetail = displayStatus[display._id];
             const heartbeat = heartbeatData[display._id];
 
@@ -182,7 +197,7 @@ export const useLayoutDisplayStatus = (
             const uptimePercentage =
               heartbeat?.stats?.length > 0
                 ? heartbeat.stats.reduce(
-                    (acc: number, stat: any) =>
+                    (acc: number, stat: { count: number }) =>
                       acc + (stat.count > 0 ? 100 : 0),
                     0
                   ) / heartbeat.stats.length
@@ -212,7 +227,7 @@ export const useLayoutDisplayStatus = (
         );
 
         setDisplaysWithLayout(enhancedDisplays);
-      } catch (err: any) {
+      } catch (err) {
         // Provide more user-friendly error messages
         let errorMessage = "Failed to update display status";
 

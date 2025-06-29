@@ -1,6 +1,6 @@
 import { ComponentType } from 'react'
 
-import BaseWidget, { IBaseWidget, IWidgetDefinitionArgs } from '../base_widget'
+import BaseWidget, { IBaseWidget, IWidgetDefinitionArgs, IWidgetContentProps, IWidgetOptionsEditorProps } from '../base_widget'
 import ImageContent from './src/ImageContent' // Assuming .js for now
 import ImageOptions from './src/ImageOptions' // Assuming .js for now
 import { Image } from 'lucide-react'
@@ -29,8 +29,8 @@ const imageDefinitionArgs: IWidgetDefinitionArgs = {
     color: '#2d3436', // Default background: Dark Gray
     altText: '',
   } as IImageDefaultData,
-  WidgetComponent: ImageContent as ComponentType<any>, // Cast as ComponentType<any> for now
-  OptionsComponent: ImageOptions as ComponentType<any>, // Cast as ComponentType<any> for now
+  WidgetComponent: ImageContent as ComponentType<IWidgetContentProps<IImageDefaultData>>,
+  OptionsComponent: ImageOptions as ComponentType<IWidgetOptionsEditorProps<IImageDefaultData>>
 }
 
 // Renamed from Image to ImageWidget to avoid potential naming conflicts with global Image type

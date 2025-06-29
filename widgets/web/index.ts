@@ -1,6 +1,6 @@
 import { ComponentType } from "react";
 
-import BaseWidget, { IBaseWidget, IWidgetDefinitionArgs } from "../base_widget";
+import BaseWidget, { IBaseWidget, IWidgetDefinitionArgs, IWidgetContentProps, IWidgetOptionsEditorProps } from "../base_widget";
 import WebContent from "./src/WebContent"; // Assuming .js for now
 import WebOptions from "./src/WebOptions"; // Assuming .js for now
 import { Globe } from "lucide-react";
@@ -33,8 +33,8 @@ const webDefinitionArgs: IWidgetDefinitionArgs = {
     useProxy: false, // Default to direct loading
     showErrorMessage: true, // Default to showing error messages
   } as IWebDefaultData,
-  WidgetComponent: WebContent as ComponentType<any>,
-  OptionsComponent: WebOptions as ComponentType<any>,
+  WidgetComponent: WebContent as ComponentType<IWidgetContentProps<IWebDefaultData>>,
+  OptionsComponent: WebOptions as ComponentType<IWidgetOptionsEditorProps<IWebDefaultData>>,
 };
 // Renamed from Web to WebWidget for consistency
 class WebWidget extends BaseWidget {

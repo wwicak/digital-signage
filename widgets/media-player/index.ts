@@ -1,6 +1,6 @@
 import { ComponentType } from "react";
 import { Play } from "lucide-react";
-import BaseWidget, { IWidgetDefinitionArgs } from "../base_widget";
+import BaseWidget, { IWidgetDefinitionArgs, IWidgetContentProps, IWidgetOptionsEditorProps } from "../base_widget";
 import { MediaPlayerContent, MediaPlayerOptions } from "./src";
 
 // Define the default data interface for the Media Player widget
@@ -54,8 +54,8 @@ const mediaPlayerDefinitionArgs: IWidgetDefinitionArgs = {
       backgroundColor: "#000000",
     },
   } as IMediaPlayerDefaultData,
-  WidgetComponent: MediaPlayerContent as ComponentType<any>,
-  OptionsComponent: MediaPlayerOptions as ComponentType<any>,
+  WidgetComponent: MediaPlayerContent as ComponentType<IWidgetContentProps<IMediaPlayerDefaultData>>,
+  OptionsComponent: MediaPlayerOptions as ComponentType<IWidgetOptionsEditorProps<IMediaPlayerDefaultData>>,
 };
 
 // Create and export the widget instance

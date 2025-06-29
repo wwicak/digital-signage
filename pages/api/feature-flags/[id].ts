@@ -1,3 +1,4 @@
+import { NextApiRequest, NextApiResponse } from "next";
 import dbConnect from "@/lib/mongodb";
 import { requireAuth } from "@/lib/auth";
 import FeatureFlag, {
@@ -10,7 +11,7 @@ import {
 import { clearFeatureFlagCache } from "@/lib/helpers/feature_flag_helper";
 import mongoose from "mongoose";
 
-export default async function handler(req: any, res: any) {
+export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   try {
     await dbConnect();
     const user = await requireAuth(req);
@@ -117,16 +118,16 @@ export default async function handler(req: any, res: any) {
     }
 
     return res.status(405).json({ message: "Method not allowed" });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Error handling feature flag:", error);
 
-    if (error.message === "Authentication required") {
+    if (error instanceof Error && error.message === "Authentication required") {
       return res.status(401).json({ message: "Authentication required" });
     }
 
     return res.status(500).json({
       message: "Failed to handle feature flag request",
-      error: error.message,
+      error: error instanceof Error ? error.message : "Unknown error",
     });
   }
 }

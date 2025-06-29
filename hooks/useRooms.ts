@@ -59,8 +59,8 @@ export const useRooms = (
       const result: IRoomsResponse = await response.json();
       setData(result.rooms);
       setPagination(result.pagination);
-    } catch (err: any) {
-      setError(err.message || "Failed to fetch rooms");
+    } catch (err) {
+      setError((err as Error).message || "Failed to fetch rooms");
       setData([]);
     } finally {
       setIsLoading(false);

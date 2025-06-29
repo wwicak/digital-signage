@@ -42,8 +42,8 @@ export const useBuildings = (page: number = 1, limit: number = 10) => {
       const result: IBuildingsResponse = await response.json();
       setData(result.buildings);
       setPagination(result.pagination);
-    } catch (err: any) {
-      setError(err.message || "Failed to fetch buildings");
+    } catch (err) {
+      setError((err as Error).message || "Failed to fetch buildings");
       setData([]);
     } finally {
       setIsLoading(false);

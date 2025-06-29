@@ -1,6 +1,6 @@
 import { ComponentType } from 'react'
 
-import BaseWidget, { IBaseWidget, IWidgetDefinitionArgs } from '../base_widget'
+import BaseWidget, { IBaseWidget, IWidgetDefinitionArgs, IWidgetContentProps, IWidgetOptionsEditorProps } from '../base_widget'
 import YoutubeContent from './src/YoutubeContent' // Assuming .js for now
 import YoutubeOptions from './src/YoutubeOptions' // Assuming .js for now
 import { Play } from 'lucide-react'
@@ -35,8 +35,8 @@ const youtubeDefinitionArgs: IWidgetDefinitionArgs = {
     end_time: 0, // 0 typically means play to end
     show_captions: false,
   } as IYoutubeDefaultData,
-  WidgetComponent: YoutubeContent as ComponentType<any>,
-  OptionsComponent: YoutubeOptions as ComponentType<any>,
+  WidgetComponent: YoutubeContent as ComponentType<IWidgetContentProps<IYoutubeDefaultData>>,
+  OptionsComponent: YoutubeOptions as ComponentType<IWidgetOptionsEditorProps<IYoutubeDefaultData>>,
 }
 
 // Renamed from Web (in original JS) to YoutubeWidget

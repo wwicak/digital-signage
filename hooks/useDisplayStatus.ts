@@ -100,7 +100,20 @@ export const useDisplayStatus = (options?: {
       const data = await response.json();
 
       const statusMap: DisplayStatus = {};
-      data.displays?.forEach((display: any) => {
+      data.displays?.forEach((display: {
+        displayId: string;
+        isOnline: boolean;
+        clientCount?: number;
+        lastSeen?: string;
+        lastHeartbeat?: string;
+        consecutiveFailures?: number;
+        responseTime?: number;
+        uptimePercentage?: number;
+        connectionType?: "sse" | "websocket" | "polling";
+        ipAddress?: string;
+        disconnectionReason?: string;
+        alertCount?: number;
+      }) => {
         statusMap[display.displayId] = {
           isOnline: display.isOnline,
           clientCount: display.clientCount || 0,
@@ -120,7 +133,7 @@ export const useDisplayStatus = (options?: {
 
       setDisplayStatus(statusMap);
       setLastUpdateTime(new Date());
-    } catch (error: any) {
+    } catch (error) {
       console.error("Error fetching display statuses:", error);
       // Don't retry on network errors
       if (
@@ -214,7 +227,7 @@ export const useDisplayStatus = (options?: {
   }, [displayStatus]);
 
   const sendHeartbeat = useCallback(
-    async (displayId: string, clientInfo?: any): Promise<boolean> => {
+    async (displayId: string, clientInfo?: Record<string, unknown>): Promise<boolean> => {
       try {
         const response = await fetch(
           `/api/v1/displays/${displayId}/heartbeat`,

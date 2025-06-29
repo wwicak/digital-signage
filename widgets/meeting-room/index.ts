@@ -1,7 +1,7 @@
 import { ComponentType } from 'react'
 import { Calendar } from 'lucide-react'
 
-import BaseWidget, { IBaseWidget, IWidgetDefinitionArgs } from '../base_widget'
+import BaseWidget, { IBaseWidget, IWidgetDefinitionArgs, IWidgetContentProps, IWidgetOptionsEditorProps } from '../base_widget'
 import MeetingRoomContent from './src/MeetingRoomContent'
 import MeetingRoomOptions from './src/MeetingRoomOptions'
 
@@ -27,8 +27,8 @@ const meetingRoomDefinitionArgs: IWidgetDefinitionArgs = {
     maxReservations: 10,
     title: "Today's Meetings",
   } as IMeetingRoomDefaultData,
-  WidgetComponent: MeetingRoomContent as ComponentType<any>,
-  OptionsComponent: MeetingRoomOptions as ComponentType<any>,
+  WidgetComponent: MeetingRoomContent as ComponentType<IWidgetContentProps<IMeetingRoomDefaultData>>,
+  OptionsComponent: MeetingRoomOptions as ComponentType<IWidgetOptionsEditorProps<IMeetingRoomDefaultData>>,
 }
 
 class MeetingRoom extends BaseWidget {

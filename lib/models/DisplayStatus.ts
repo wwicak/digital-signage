@@ -118,7 +118,7 @@ DisplayStatusSchema.methods.markOnline = function (clientInfo?: {
     if (clientInfo.ipAddress) this.ipAddress = clientInfo.ipAddress;
     if (clientInfo.userAgent) this.userAgent = clientInfo.userAgent;
     if (clientInfo.connectionType)
-      this.connectionType = clientInfo.connectionType as any;
+      this.connectionType = clientInfo.connectionType as "sse" | "websocket" | "polling";
   }
 
   return this.save();

@@ -1,6 +1,6 @@
 import { ComponentType } from 'react'
 
-import BaseWidget, { IBaseWidget, IWidgetDefinitionArgs } from '../base_widget'
+import BaseWidget, { IBaseWidget, IWidgetDefinitionArgs, IWidgetContentProps, IWidgetOptionsEditorProps } from '../base_widget'
 import ListContent from './src/ListContent' // Assuming .js for now
 import ListOptions from './src/ListOptions' // Assuming .js for now
 import { List } from 'lucide-react'
@@ -36,8 +36,8 @@ const listDefinitionArgs: IWidgetDefinitionArgs = {
     ordered: false, // Default to unordered list
     fontSize: 16, // Default font size
   } as IListDefaultData,
-  WidgetComponent: ListContent as ComponentType<any>,
-  OptionsComponent: ListOptions as ComponentType<any>,
+  WidgetComponent: ListContent as ComponentType<IWidgetContentProps<IListDefaultData>>,
+  OptionsComponent: ListOptions as ComponentType<IWidgetOptionsEditorProps<IListDefaultData>>,
 }
 
 // Renamed from List to ListWidget for consistency and to avoid potential conflicts

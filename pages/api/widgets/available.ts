@@ -1,8 +1,9 @@
+import { NextApiRequest, NextApiResponse } from "next";
 import { requireAuth } from "@/lib/auth";
 import { filterWidgetsByFeatureFlags } from "@/lib/helpers/widget_filter_helper";
 import widgets from "@/widgets";
 
-export default async function handler(req: any, res: any) {
+export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== "GET") {
     return res.status(405).json({ message: "Method not allowed" });
   }
@@ -30,16 +31,16 @@ export default async function handler(req: any, res: any) {
       widgets: widgetChoices,
       total: widgetChoices.length,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Error fetching available widgets:", error);
 
-    if (error.message === "Authentication required") {
+    if (error instanceof Error && error.message === "Authentication required") {
       return res.status(401).json({ message: "Authentication required" });
     }
 
     return res.status(500).json({
       message: "Failed to fetch available widgets",
-      error: error.message,
+      error: error instanceof Error ? error.message : "Unknown error",
     });
   }
 }

@@ -1,6 +1,6 @@
 import { ComponentType } from 'react'
 
-import BaseWidget, { IBaseWidget, IWidgetDefinitionArgs } from '../base_widget'
+import BaseWidget, { IBaseWidget, IWidgetDefinitionArgs, IWidgetContentProps, IWidgetOptionsEditorProps } from '../base_widget'
 import SlideshowContent from './src/Slideshow' // Assuming .js for now, will be .tsx later
 import SlideshowOptions from './src/SlideshowOptions' // Assuming .js for now, will be .tsx later
 import { Images } from 'lucide-react'
@@ -25,8 +25,8 @@ const slideshowWidgetDefinitionArgs: IWidgetDefinitionArgs = {
     transition_time: 1, // Default 1 second
     random_order: false,
   } as ISlideshowWidgetDefaultData,
-  WidgetComponent: SlideshowContent as ComponentType<any>,
-  OptionsComponent: SlideshowOptions as ComponentType<any>,
+  WidgetComponent: SlideshowContent as ComponentType<IWidgetContentProps<ISlideshowWidgetDefaultData>>,
+  OptionsComponent: SlideshowOptions as ComponentType<IWidgetOptionsEditorProps<ISlideshowWidgetDefaultData>>,
 }
 
 // Renamed from Slideshow to SlideshowWidget for consistency

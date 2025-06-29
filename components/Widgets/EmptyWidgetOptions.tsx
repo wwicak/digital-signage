@@ -3,7 +3,7 @@ import { IWidgetOptionsEditorProps } from "../../widgets/base_widget";
 
 // Define prop types to match the expected interface
 interface EmptyWidgetOptionsProps
-  extends IWidgetOptionsEditorProps<Record<string, any>> {}
+  extends IWidgetOptionsEditorProps<Record<string, unknown>> {}
 
 // Define state types, even if empty
 interface EmptyWidgetOptionsState {}
