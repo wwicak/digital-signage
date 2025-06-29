@@ -88,10 +88,11 @@ export async function PUT(
       message: "Layout updated successfully",
       layout: updatedLayout,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Update layout error:", error);
+    const errorMessage = error instanceof Error ? error.message : "Unknown error occurred";
     return NextResponse.json(
-      { error: "Internal server error", message: error.message },
+      { error: "Internal server error", message: errorMessage },
       { status: 500 }
     );
   }
@@ -133,10 +134,11 @@ export async function DELETE(
     return NextResponse.json({
       message: "Layout deleted successfully",
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Delete layout error:", error);
+    const errorMessage = error instanceof Error ? error.message : "Unknown error occurred";
     return NextResponse.json(
-      { error: "Internal server error", message: error.message },
+      { error: "Internal server error", message: errorMessage },
       { status: 500 }
     );
   }

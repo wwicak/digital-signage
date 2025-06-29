@@ -125,7 +125,7 @@ export async function GET(request: NextRequest) {
     });
 
     // Group by layout if no specific layout requested
-    const groupedByLayout: Record<string, any[]> = {};
+    const groupedByLayout: Record<string, (typeof enhancedDisplays)[number][]> = {};
     if (!layoutId) {
       enhancedDisplays.forEach((display) => {
         const layout = display.layout?.toString() || "default";
@@ -150,30 +150,32 @@ export async function GET(request: NextRequest) {
         offline: enhancedDisplays.filter((d) => !d.isOnline).length,
       },
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Error in displays API:", error);
 
-    // Provide more specific error messages
+    // Provide more specific error messages with proper type checking
     let statusCode = 500;
     let message = "Error fetching displays";
 
-    if (
-      error.name === "MongoNetworkError" ||
-      error.name === "MongoTimeoutError"
-    ) {
-      message = "Database connection error. Please try again.";
-      statusCode = 503;
-    } else if (error.name === "ValidationError") {
-      message = "Invalid request parameters.";
-      statusCode = 400;
-    } else if (error.message) {
-      message = error.message;
+    if (error instanceof Error) {
+      if (
+        error.name === "MongoNetworkError" ||
+        error.name === "MongoTimeoutError"
+      ) {
+        message = "Database connection error. Please try again.";
+        statusCode = 503;
+      } else if (error.name === "ValidationError") {
+        message = "Invalid request parameters.";
+        statusCode = 400;
+      } else if (error.message) {
+        message = error.message;
+      }
     }
 
     return NextResponse.json(
       {
         message,
-        error: process.env.NODE_ENV === "development" ? error.stack : undefined,
+        error: process.env.NODE_ENV === "development" && error instanceof Error ? error.stack : undefined,
         timestamp: new Date().toISOString(),
       },
       { status: statusCode }
@@ -241,10 +243,12 @@ export async function POST(request: NextRequest) {
     }
 
     return NextResponse.json(populatedDisplay, { status: 201 });
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const errorMessage = error instanceof Error ? error.message : "Error creating display";
+    const statusCode = error instanceof Error && 'status' in error ? (error as { status: number }).status : 500;
     return NextResponse.json(
-      { message: error.message || "Error creating display" },
-      { status: error.status || 500 }
+      { message: errorMessage },
+      { status: statusCode }
     );
   }
 }

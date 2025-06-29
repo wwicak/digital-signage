@@ -154,8 +154,20 @@ const WeatherContent: React.FC<IWeatherContentProps> = React.memo(({ data, isPre
   }, [data])
 
   useEffect(() => {
-    fetchWeatherData()
-  }, [fetchWeatherData])
+    // If in preview mode, show mock data instead of making API calls
+    if (isPreview) {
+      setWeatherState({
+        isLoading: false,
+        error: null,
+        locationName: data?.locationName || 'Sample Location',
+        iconCode: '01d', // Clear sky day icon
+        temperature: 72,
+        description: 'Clear sky (Preview)'
+      });
+    } else {
+      fetchWeatherData();
+    }
+  }, [fetchWeatherData, isPreview, data?.locationName])
 
   const { locationName, iconCode, temperature, description, isLoading, error } = weatherState
 

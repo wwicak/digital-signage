@@ -69,14 +69,15 @@ const WebContentWithFallback: React.FC<IWebContentProps> = React.memo(({ data, i
   }, [])
 
   const setupRefreshInterval = useCallback((): void => {
-    if (refreshInterval > 0) {
+    // Don't set up auto-refresh in preview mode to avoid unnecessary reloads
+    if (refreshInterval > 0 && !isPreview) {
       refreshTimerRef.current = setInterval(() => {
         setIframeKey(Date.now())
         setIsLoading(true)
         setFrameError({ hasError: false, errorType: 'unknown', message: '' })
       }, refreshInterval * 1000)
     }
-  }, [refreshInterval])
+  }, [refreshInterval, isPreview])
 
   const handleIframeLoad = useCallback(() => {
     setIsLoading(false)
