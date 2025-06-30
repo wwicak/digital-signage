@@ -20,23 +20,10 @@ import {
   XCircle
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { IDisplayWithLayout } from '@/hooks/useDisplaysWithLayouts'
 
 interface IDisplayConfigSidebarProps {
-  selectedDisplay?: {
-    _id: string
-    name: string
-    layout?: {
-      _id: string
-      name: string
-    }
-    status?: 'online' | 'offline' | 'maintenance'
-    lastSeen?: string
-    settings?: {
-      brightness?: number
-      orientation?: 'landscape' | 'portrait'
-      refreshRate?: number
-    }
-  }
+  selectedDisplay?: IDisplayWithLayout | null
   onRefreshDisplay?: (displayId: string) => void
   onPreviewDisplay?: (displayId: string) => void
   onEditLayout?: (displayId: string) => void
@@ -52,30 +39,24 @@ const DisplayConfigSidebar: React.FC<IDisplayConfigSidebarProps> = ({
   onDisplaySettings,
   className
 }) => {
-  const getStatusIcon = (status?: string) => {
-    switch (status) {
-      case 'online':
-        return <CheckCircle className="h-4 w-4 text-green-500" />
-      case 'offline':
-        return <XCircle className="h-4 w-4 text-red-500" />
-      case 'maintenance':
-        return <AlertCircle className="h-4 w-4 text-yellow-500" />
-      default:
-        return <Monitor className="h-4 w-4 text-muted-foreground" />
+  const getStatusIcon = (isOnline?: boolean) => {
+    if (isOnline) {
+      return <CheckCircle className="h-4 w-4 text-green-500" />
+    } else {
+      return <XCircle className="h-4 w-4 text-red-500" />
     }
   }
 
-  const getStatusColor = (status?: string) => {
-    switch (status) {
-      case 'online':
-        return 'bg-green-100 text-green-700 border-green-200'
-      case 'offline':
-        return 'bg-red-100 text-red-700 border-red-200'
-      case 'maintenance':
-        return 'bg-yellow-100 text-yellow-700 border-yellow-200'
-      default:
-        return 'bg-gray-100 text-gray-700 border-gray-200'
+  const getStatusColor = (isOnline?: boolean) => {
+    if (isOnline) {
+      return 'bg-green-100 text-green-700 border-green-200'
+    } else {
+      return 'bg-red-100 text-red-700 border-red-200'
     }
+  }
+
+  const getStatusText = (isOnline?: boolean) => {
+    return isOnline ? 'ONLINE' : 'OFFLINE'
   }
 
   if (!selectedDisplay) {
@@ -108,19 +89,26 @@ const DisplayConfigSidebar: React.FC<IDisplayConfigSidebarProps> = ({
           <div>
             <h4 className="font-semibold text-base mb-2">{selectedDisplay.name}</h4>
             <div className="flex items-center gap-2 mb-3">
-              {getStatusIcon(selectedDisplay.status)}
-              <Badge 
-                variant="outline" 
-                className={cn('text-xs font-medium truncate max-w-[120px]', getStatusColor(selectedDisplay.status))}
+              {getStatusIcon(selectedDisplay.isOnline)}
+              <Badge
+                variant="outline"
+                className={cn('text-xs font-medium truncate max-w-[120px]', getStatusColor(selectedDisplay.isOnline))}
               >
-                {selectedDisplay.status?.toUpperCase() || 'UNKNOWN'}
+                {getStatusText(selectedDisplay.isOnline)}
               </Badge>
             </div>
-            
-            {selectedDisplay.lastSeen && (
+
+            {selectedDisplay.last_update && (
               <div className="flex items-center gap-2 text-sm text-muted-foreground">
                 <Clock className="h-4 w-4" />
-                Last seen: {new Date(selectedDisplay.lastSeen).toLocaleString()}
+                Last seen: {new Date(selectedDisplay.last_update).toLocaleString()}
+              </div>
+            )}
+
+            {selectedDisplay.location && (
+              <div className="flex items-center gap-2 text-sm text-muted-foreground mt-2">
+                <Monitor className="h-4 w-4" />
+                Location: {selectedDisplay.location}
               </div>
             )}
           </div>
@@ -135,7 +123,7 @@ const DisplayConfigSidebar: React.FC<IDisplayConfigSidebarProps> = ({
             </div>
             {selectedDisplay.layout ? (
               <p className="text-sm text-muted-foreground pl-6">
-                {selectedDisplay.layout.name}
+                {selectedDisplay.layoutName || 'Unknown Layout'}
               </p>
             ) : (
               <p className="text-sm text-muted-foreground italic pl-6">
@@ -144,32 +132,26 @@ const DisplayConfigSidebar: React.FC<IDisplayConfigSidebarProps> = ({
             )}
           </div>
 
-          {/* Display Settings */}
-          {selectedDisplay.settings && (
+          {/* Display Details */}
+          {(selectedDisplay.building || selectedDisplay.created_at) && (
             <>
               <Separator />
               <div>
                 <div className="flex items-center gap-2 mb-2">
                   <Settings className="h-4 w-4" />
-                  <span className="font-medium text-sm">Settings</span>
+                  <span className="font-medium text-sm">Details</span>
                 </div>
                 <div className="space-y-1 pl-6 text-sm text-muted-foreground">
-                  {selectedDisplay.settings.brightness && (
+                  {selectedDisplay.building && (
                     <div className="flex justify-between">
-                      <span>Brightness:</span>
-                      <span>{selectedDisplay.settings.brightness}%</span>
+                      <span>Building:</span>
+                      <span>{selectedDisplay.building}</span>
                     </div>
                   )}
-                  {selectedDisplay.settings.orientation && (
+                  {selectedDisplay.created_at && (
                     <div className="flex justify-between">
-                      <span>Orientation:</span>
-                      <span className="capitalize">{selectedDisplay.settings.orientation}</span>
-                    </div>
-                  )}
-                  {selectedDisplay.settings.refreshRate && (
-                    <div className="flex justify-between">
-                      <span>Refresh Rate:</span>
-                      <span>{selectedDisplay.settings.refreshRate}Hz</span>
+                      <span>Created:</span>
+                      <span>{new Date(selectedDisplay.created_at).toLocaleDateString()}</span>
                     </div>
                   )}
                 </div>
@@ -197,7 +179,7 @@ const DisplayConfigSidebar: React.FC<IDisplayConfigSidebarProps> = ({
             <Eye className="h-4 w-4" />
             Preview Display
           </Button>
-          
+
           <Button
             variant="outline"
             size="sm"
@@ -207,7 +189,7 @@ const DisplayConfigSidebar: React.FC<IDisplayConfigSidebarProps> = ({
             <Layout className="h-4 w-4" />
             Edit Layout
           </Button>
-          
+
           <Button
             variant="outline"
             size="sm"
@@ -217,9 +199,9 @@ const DisplayConfigSidebar: React.FC<IDisplayConfigSidebarProps> = ({
             <Settings className="h-4 w-4" />
             Display Settings
           </Button>
-          
+
           <Separator />
-          
+
           <Button
             variant="outline"
             size="sm"
@@ -245,26 +227,24 @@ const DisplayConfigSidebar: React.FC<IDisplayConfigSidebarProps> = ({
             <div className="flex items-center justify-between">
               <span className="text-sm font-medium">Connection</span>
               <div className="flex items-center gap-2">
-                {getStatusIcon(selectedDisplay.status)}
+                {getStatusIcon(selectedDisplay.isOnline)}
                 <span className="text-sm text-muted-foreground">
-                  {selectedDisplay.status === 'online' ? 'Connected' : 
-                   selectedDisplay.status === 'offline' ? 'Disconnected' : 
-                   'Maintenance Mode'}
+                  {selectedDisplay.isOnline ? 'Connected' : 'Disconnected'}
                 </span>
               </div>
             </div>
-            
+
             <div className="flex items-center justify-between">
               <span className="text-sm font-medium">Layout</span>
               <span className="text-sm text-muted-foreground">
                 {selectedDisplay.layout ? 'Assigned' : 'Not Assigned'}
               </span>
             </div>
-            
+
             <div className="flex items-center justify-between">
               <span className="text-sm font-medium">Configuration</span>
               <span className="text-sm text-muted-foreground">
-                {selectedDisplay.settings ? 'Configured' : 'Default'}
+                {selectedDisplay.updated_at ? 'Configured' : 'Default'}
               </span>
             </div>
           </div>
