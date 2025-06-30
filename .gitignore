@@ -64,3 +64,4 @@ repomix-output.xml
 public/uploads/
 # Claude-Gemini
 .claude-gemini/
+.env
