@@ -60,9 +60,37 @@ interface MockWidgetData {
  * @returns {Promise<boolean>} True if data is valid, false otherwise.
  * @throws {Error} If validation fails with a specific message.
  */
+// Define union type for all widget data structures
+type WidgetData = 
+  | { text: string; title?: string } // Announcement, Congrats
+  | { text: string; recipient?: string } // Congrats specific
+  | { url: string | null } // Image, Web
+  | { list: Array<{ text: string }>; title?: string | null } // List
+  | { // Media Player
+      url?: string | null;
+      mediaType?: 'video' | 'audio';
+      volume?: number;
+      fit?: 'contain' | 'cover' | 'fill';
+      schedule?: {
+        daysOfWeek?: number[];
+        timeSlots?: Array<{ startTime: string; endTime: string }>;
+      };
+    }
+  | { // Meeting Room
+      buildingId?: string;
+      refreshInterval?: number;
+      showUpcoming?: boolean;
+      maxReservations?: number;
+      title?: string;
+    }
+  | { slideshow_id: string | null } // Slideshow
+  | { zip: string; unit?: 'metric' | 'imperial' } // Weather
+  | { video_id: string } // YouTube
+  | Record<string, unknown>; // Generic fallback
+
 export const validateWidgetData = async (
   type: WidgetType,
-  data: any
+  data: WidgetData
 ): Promise<boolean> => {
   if (!data) {
     /*
@@ -127,8 +155,11 @@ export const validateWidgetData = async (
       if (
         !Array.isArray(data.list) ||
         !data.list.every(
-          (item: any) =>
-            typeof item === "object" && typeof item.text === "string"
+          (item: unknown) =>
+            typeof item === "object" && 
+            item !== null &&
+            'text' in item &&
+            typeof (item as { text: unknown }).text === "string"
         )
       ) {
         throw new Error(
@@ -185,7 +216,7 @@ export const validateWidgetData = async (
           if (
             !Array.isArray(data.schedule.daysOfWeek) ||
             !data.schedule.daysOfWeek.every(
-              (day: any) => typeof day === "number" && day >= 0 && day <= 6
+              (day: unknown) => typeof day === "number" && day >= 0 && day <= 6
             )
           ) {
             throw new Error(
@@ -197,12 +228,16 @@ export const validateWidgetData = async (
           if (
             !Array.isArray(data.schedule.timeSlots) ||
             !data.schedule.timeSlots.every(
-              (slot: any) =>
-                slot &&
-                typeof slot.startTime === "string" &&
-                typeof slot.endTime === "string" &&
-                /^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/.test(slot.startTime) &&
-                /^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/.test(slot.endTime)
+              (slot: unknown) => {
+                if (!slot || typeof slot !== 'object') return false;
+                const s = slot as { startTime?: unknown; endTime?: unknown };
+                return (
+                  typeof s.startTime === "string" &&
+                  typeof s.endTime === "string" &&
+                  /^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/.test(s.startTime) &&
+                  /^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/.test(s.endTime)
+                );
+              }
             )
           ) {
             throw new Error(
@@ -329,7 +364,7 @@ export const removeWidgetFromAllDisplays = async (
       { widgets: idToRemove },
       { $pull: { widgets: idToRemove } }
     );
-  } catch (error: any) {
+  } catch (error) { // TypeScript will infer error as unknown
     console.error(`Error removing widget ${idToRemove} from displays:`, error);
     throw new Error("Failed to remove widget from displays.");
   }
@@ -395,7 +430,7 @@ export const deleteWidgetAndCleanReferences = async (
     }
 
     return widget; // Return the (now deleted) widget document
-  } catch (error: any) {
+  } catch (error) { // TypeScript will infer error as unknown
     console.error("Error deleting widget and cleaning references:", error);
     // Consider if specific error types should be thrown or if a generic error is okay
     throw new Error(
@@ -404,7 +439,13 @@ export const deleteWidgetAndCleanReferences = async (
   }
 };
 
-export async function addWidget(req: Request, res: Response, widgetData: any) {
+// Define widget data interface for add/delete operations
+interface WidgetOperationData {
+  _id: string | mongoose.Types.ObjectId;
+  display: string;
+}
+
+export async function addWidget(req: Request, res: Response, widgetData: WidgetOperationData) {
   if (!widgetData || !widgetData._id || !widgetData.display) {
     return res
       .status(400)
@@ -436,7 +477,7 @@ export async function addWidget(req: Request, res: Response, widgetData: any) {
 export async function deleteWidget(
   req: Request,
   res: Response,
-  widgetData: any
+  widgetData: WidgetOperationData
 ) {
   if (!widgetData || !widgetData._id || !widgetData.display) {
     return res
@@ -448,7 +489,7 @@ export async function deleteWidget(
   const widgetId =
     typeof widgetData._id === "string"
       ? widgetData._id
-      : (widgetData._id as any).equals(widgetData._id) && widgetData._id;
+      : (widgetData._id as mongoose.Types.ObjectId).equals(widgetData._id) ? widgetData._id : widgetData._id.toString(); // Properly type ObjectId equals method
 
   try {
     const display = await Display.findById(displayId);
@@ -457,7 +498,7 @@ export async function deleteWidget(
       return res.status(404).json({ error: "Display not found" });
     }
 
-    display.widgets = display.widgets.filter((id: any) => {
+    display.widgets = display.widgets.filter((id: mongoose.Types.ObjectId) => { // Widgets array contains ObjectIds
       // Handle both string IDs and Mongoose ObjectIds with an .equals method
       if (typeof id === "string") {
         return id !== widgetId;

@@ -3,7 +3,7 @@
  */
 
 import mongoose, { FilterQuery } from "mongoose";
-import { Response } from "express";
+// Removed unused import: Response from express
 
 // Generic type for Mongoose documents - simplified to work with Mongoose types
 type MongooseDocument<T = Record<string, unknown>> = mongoose.Document & {

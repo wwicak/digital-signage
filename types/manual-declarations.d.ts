@@ -5,15 +5,15 @@ declare module 'next';
 
 // Fix for styled-jsx/server module
 declare module 'styled-jsx/server' {
-  export function flushToHTML(): any;
-  export default function flush(): any
+  export function flushToHTML(): string; // Returns HTML string with styled-jsx styles
+  export default function flush(): string; // Returns HTML string with styled-jsx styles
 }
 
 // Fix for react-easy-state Store import
 declare module 'react-easy-state' {
   export function store<T extends object>(obj: T): T;
   export const Store: typeof store // Add Store as alias to store
-  export function view<T extends React.ComponentType<any>>(component: T): T;
+  export function view<T extends React.ComponentType<unknown>>(component: T): T; // Wraps component for reactive updates
   export function batch(fn: () => void): void;
 }
 
@@ -78,8 +78,29 @@ declare module 'react-dropzone' {
   }
 
   export function useDropzone(options?: DropzoneOptions): DropzoneState & {
-    getRootProps: (props?: any) => any;
-    getInputProps: (props?: any) => any;
+    getRootProps: <T extends React.HTMLAttributes<HTMLElement> = React.HTMLAttributes<HTMLElement>>(props?: T) => T & {
+      ref: React.RefObject<HTMLElement>;
+      role: string;
+      tabIndex: number;
+      onKeyDown: (event: React.KeyboardEvent<HTMLElement>) => void;
+      onFocus: () => void;
+      onBlur: () => void;
+      onClick: () => void;
+      onDragEnter: (event: React.DragEvent<HTMLElement>) => void;
+      onDragOver: (event: React.DragEvent<HTMLElement>) => void;
+      onDragLeave: (event: React.DragEvent<HTMLElement>) => void;
+      onDrop: (event: React.DragEvent<HTMLElement>) => void;
+    }; // Returns props for the root element
+    getInputProps: <T extends React.InputHTMLAttributes<HTMLInputElement> = React.InputHTMLAttributes<HTMLInputElement>>(props?: T) => T & {
+      ref: React.RefObject<HTMLInputElement>;
+      type: 'file';
+      style: React.CSSProperties;
+      multiple: boolean;
+      onChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
+      onClick: (event: React.MouseEvent<HTMLInputElement>) => void;
+      autoComplete: 'off';
+      tabIndex: -1;
+    }; // Returns props for the input element
     open: () => void;
   };
 
@@ -87,8 +108,29 @@ declare module 'react-dropzone' {
     props: DropzoneOptions & {
       children: (
         state: DropzoneState & {
-          getRootProps: any;
-          getInputProps: any;
+          getRootProps: <T extends React.HTMLAttributes<HTMLElement> = React.HTMLAttributes<HTMLElement>>(props?: T) => T & {
+            ref: React.RefObject<HTMLElement>;
+            role: string;
+            tabIndex: number;
+            onKeyDown: (event: React.KeyboardEvent<HTMLElement>) => void;
+            onFocus: () => void;
+            onBlur: () => void;
+            onClick: () => void;
+            onDragEnter: (event: React.DragEvent<HTMLElement>) => void;
+            onDragOver: (event: React.DragEvent<HTMLElement>) => void;
+            onDragLeave: (event: React.DragEvent<HTMLElement>) => void;
+            onDrop: (event: React.DragEvent<HTMLElement>) => void;
+          }; // Returns props for the root element
+          getInputProps: <T extends React.InputHTMLAttributes<HTMLInputElement> = React.InputHTMLAttributes<HTMLInputElement>>(props?: T) => T & {
+            ref: React.RefObject<HTMLInputElement>;
+            type: 'file';
+            style: React.CSSProperties;
+            multiple: boolean;
+            onChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
+            onClick: (event: React.MouseEvent<HTMLInputElement>) => void;
+            autoComplete: 'off';
+            tabIndex: -1;
+          }; // Returns props for the input element
           open: () => void;
         }
       ) => React.ReactNode;
@@ -179,8 +221,8 @@ declare module 'react-youtube' {
 declare module 'ts-jest' {
   export interface InitialOptions {
     preset?: string;
-    globals?: Record<string, any>;
-    transform?: Record<string, any>;
+    globals?: Record<string, unknown>; // Global variables for tests
+    transform?: Record<string, string | [string, Record<string, unknown>]>; // Transform configuration
     testEnvironment?: string;
     setupFilesAfterEnv?: string[];
     moduleNameMapping?: Record<string, string>;

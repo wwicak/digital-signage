@@ -2,27 +2,27 @@
 
 import React, { useState, useCallback, useRef, useEffect, useMemo, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { Grid3X3, Plus, Save, Trash2, RotateCcw, ArrowLeft } from 'lucide-react'
+import { Grid3X3, Plus, Save, RotateCcw, ArrowLeft } from 'lucide-react' // Removed unused Trash2
 
 import Frame from '../../components/Admin/Frame'
 import GridStackWrapper, { GridStackItem, GridStackWrapperRef } from '../../components/GridStack/GridStackWrapper'
 import GridStackEditableWidget from '../../components/GridStack/GridStackEditableWidget'
-import StatusBarElement from '../../components/Admin/StatusBarElement'
+// Removed unused import: StatusBarElement
 import DropdownButton from '../../components/DropdownButton'
 import { Form, Switch } from '../../components/Form'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent, CardHeader } from '@/components/ui/card' // Removed unused CardTitle
 
-import { StatusBarElementTypes } from '../../helpers/statusbar'
-import Widgets from '../../widgets'
+// Removed unused import: StatusBarElementTypes
+// Removed unused import: Widgets
 import { useWidgetChoices } from '../../hooks/useAvailableWidgets'
 import { useLayout } from '../../hooks/useLayout'
 import { useLayouts } from '../../hooks/useLayouts'
 import { useLayoutMutations } from '../../hooks/useLayoutMutations'
 import { addWidgetToLayout, updateWidgetPositions, removeWidgetFromLayout } from '../../actions/layouts'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { getWidget } from '../../actions/widgets'
+// Removed unused import: getWidget
 
 import { WidgetType, IWidget } from '../../lib/models/Widget'
 import { ILayoutCreateData } from '../../actions/layouts'

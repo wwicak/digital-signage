@@ -1,5 +1,6 @@
 import DisplayAlert from "../models/DisplayAlert";
 import dbConnect from "../mongodb";
+import mongoose from "mongoose";
 
 export interface NotificationConfig {
   email?: {
@@ -23,7 +24,7 @@ export interface NotificationConfig {
   sms?: {
     enabled: boolean;
     provider: "twilio" | "aws-sns";
-    config: any;
+    config: Record<string, unknown>; // SMS provider configuration
     recipients: string[];
   };
 }
@@ -37,7 +38,7 @@ export interface AlertNotification {
   title: string;
   message: string;
   timestamp: Date;
-  metadata?: any;
+  metadata?: Record<string, unknown>; // Alert metadata
 }
 
 export class NotificationService {
@@ -74,7 +75,12 @@ export class NotificationService {
         return;
       }
 
-      const display = alert.displayId as any;
+      // Type assertion for populated display document
+      interface PopulatedDisplay {
+        _id: mongoose.Types.ObjectId;
+        name?: string;
+      }
+      const display = alert.displayId as PopulatedDisplay;
       const notification: AlertNotification = {
         alertId: String(alert._id),
         displayId: display._id.toString(),
@@ -108,9 +114,16 @@ export class NotificationService {
     }
   }
 
+  // Define interface for alert document with notification methods
+  interface AlertDocument {
+    _id: mongoose.Types.ObjectId;
+    shouldSendNotification(type: string, cooldownMinutes: number): boolean;
+    addNotification(type: string): Promise<void>;
+  }
+
   private async sendEmailNotification(
     notification: AlertNotification,
-    alert: any
+    alert: AlertDocument
   ): Promise<void> {
     try {
       if (!this.config.email?.recipients.length) {
@@ -148,7 +161,7 @@ export class NotificationService {
 
   private async sendWebhookNotification(
     notification: AlertNotification,
-    alert: any
+    alert: AlertDocument
   ): Promise<void> {
     try {
       if (!this.config.webhook?.url) {
@@ -196,7 +209,7 @@ export class NotificationService {
 
   private async sendSMSNotification(
     notification: AlertNotification,
-    alert: any
+    alert: AlertDocument
   ): Promise<void> {
     try {
       if (!this.config.sms?.recipients.length) {

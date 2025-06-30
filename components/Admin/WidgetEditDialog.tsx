@@ -1,7 +1,7 @@
 import React, { Component, ComponentType } from "react";
 import Dialog, { DialogMethods } from "../Dialog";
 import { Form, Button } from "../Form";
-import { getWidget, updateWidget, IWidgetData, IUpdateWidgetData } from "../../actions/widgets";
+import { getWidget, updateWidget, IWidgetData } from "../../actions/widgets"; // Removed unused IUpdateWidgetData
 import { updateWidgetPositions } from "../../actions/layouts";
 
 // GridStack types

@@ -7,8 +7,8 @@ import Widgets from "../../widgets";
 
 // Debug log available widgets
 console.log('Available widgets:', Object.keys(Widgets));
-import EmptyWidget from "../Widgets/EmptyWidget";
-import { IBaseWidget } from "../../widgets/base_widget";
+// Removed unused import: EmptyWidget
+// Removed unused import: IBaseWidget
 import { useDisplayContext } from "../../contexts/DisplayContext";
 
 // --- Component Props and State ---
