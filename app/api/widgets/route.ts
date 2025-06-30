@@ -30,10 +30,10 @@ export async function GET(request: NextRequest) {
       // Filter widgets to only include those owned by the current user
       const userWidgets = display.widgets.filter(
         (widget): widget is IWidget =>
-          typeof widget === 'object' && 
-          widget !== null && 
+          typeof widget === 'object' &&
+          widget !== null &&
           'creator_id' in widget &&
-          widget.creator_id && 
+          widget.creator_id &&
           widget.creator_id.toString() === user._id
       );
 

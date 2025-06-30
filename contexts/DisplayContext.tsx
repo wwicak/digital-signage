@@ -28,7 +28,7 @@ interface IStatusBar {
 interface DisplayState {
   id: string | null;
   name: string | null;
-  layout: 'spaced' | 'compact' | null;
+  layout: string | null;
   orientation: 'landscape' | 'portrait' | null;
   statusBar: IStatusBar;
   widgets: IDisplayWidget[];

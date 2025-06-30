@@ -291,8 +291,8 @@ const ScreenCard: React.FC<IScreenCardProps> = ({
                       disabled={isUpdatingOrientation}
                       onClick={(e) => e.stopPropagation()}
                     >
-                      <option value="landscape">Landscape</option>
-                      <option value="portrait">Portrait</option>
+                      <option value='landscape'>Landscape</option>
+                      <option value='portrait'>Portrait</option>
                     </select>
                   )}
                   {isUpdatingOrientation && (
@@ -430,13 +430,13 @@ const ScreenCard: React.FC<IScreenCardProps> = ({
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="landscape">
+                    <SelectItem value='landscape'>
                       <div className='flex items-center gap-2'>
                         <div className='w-4 h-3 border rounded bg-muted'></div>
                         <span>Landscape</span>
                       </div>
                     </SelectItem>
-                    <SelectItem value="portrait">
+                    <SelectItem value='portrait'>
                       <div className='flex items-center gap-2'>
                         <div className='w-3 h-4 border rounded bg-muted'></div>
                         <span>Portrait</span>

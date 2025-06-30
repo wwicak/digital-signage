@@ -269,7 +269,7 @@ const GridStackWrapper = forwardRef<GridStackWrapperRef, GridStackWrapperProps>(
         <div
           key={item.id}
           ref={itemRefs.current[item.id]}
-          className="grid-stack-item"
+          className='grid-stack-item'
           gs-id={item.id}
           gs-x={item.x}
           gs-y={item.y}
@@ -283,7 +283,7 @@ const GridStackWrapper = forwardRef<GridStackWrapperRef, GridStackWrapperProps>(
           gs-no-move={item.noMove}
           gs-locked={item.locked}
         >
-          <div className="grid-stack-item-content">
+          <div className='grid-stack-item-content'>
             {item.content || children}
           </div>
         </div>

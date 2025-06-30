@@ -28,7 +28,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { WidgetType, IWidget } from '../../lib/models/Widget'
 import { ILayoutCreateData } from '../../actions/layouts'
 
-// Widget interface for layout widgets  
+// Widget interface for layout widgets
 interface LayoutWidget {
   widget_id: string | { _id: string } | { toString(): string } | null;
   x?: number;
@@ -57,8 +57,8 @@ const getWidgetId = (widget: LayoutWidget): string | null => {
 
 // Helper function to get widget type
 const getWidgetType = (widgetType: string): WidgetType => {
-  return Object.values(WidgetType).includes(widgetType as WidgetType) 
-    ? (widgetType as WidgetType) 
+  return Object.values(WidgetType).includes(widgetType as WidgetType)
+    ? (widgetType as WidgetType)
     : WidgetType.SLIDESHOW
 }
 
@@ -407,7 +407,7 @@ function LayoutAdminContent() {
 
   if (layoutsLoading) {
     return (
-      <Frame loggedIn={true} title="Layout Designer">
+      <Frame loggedIn={true} title='Layout Designer'>
         <div className='flex items-center justify-center h-64'>
           <div className='text-center'>Loading layouts...</div>
         </div>
@@ -416,7 +416,7 @@ function LayoutAdminContent() {
   }
 
   return (
-    <Frame loggedIn={true} title="Layout Designer">
+    <Frame loggedIn={true} title='Layout Designer'>
       <div className='p-6'>
         <Card>
         <CardHeader>
@@ -480,7 +480,7 @@ function LayoutAdminContent() {
             <div>
               <label className='block text-sm font-medium mb-2'>Add Widget</label>
               <DropdownButton
-                text="Add Widget"
+                text='Add Widget'
                 icon={Plus}
                 disabled={!savedLayoutId}
                 choices={widgetChoices.map((choice) => ({
@@ -567,7 +567,7 @@ function LayoutAdminContent() {
                   items={gridStackItems}
                   options={gridStackOptions}
                   onLayoutChange={handleLayoutChange}
-                  className="h-full w-full"
+                  className='h-full w-full'
                 />
               )}
             </div>
@@ -582,7 +582,7 @@ function LayoutAdminContent() {
 export default function LayoutAdmin() {
   return (
     <Suspense fallback={
-     <Frame loggedIn={true} title="Layout Designer">
+     <Frame loggedIn={true} title='Layout Designer'>
        <div className='flex items-center justify-center h-64'>
          <div className='text-center'>Loading...</div>
        </div>

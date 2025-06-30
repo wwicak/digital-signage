@@ -28,7 +28,7 @@ export interface IDisplayData {
   _id: string;
   name: string;
   description?: string;
-  layout?: "spaced" | "compact"; // Assuming these are the possible layouts
+  layout?: string; // Layout ID reference
   orientation?: "landscape" | "portrait"; // Display orientation
   location?: string; // Physical location of the display
   building?: string; // Building where the display is located
@@ -39,6 +39,16 @@ export interface IDisplayData {
   last_update?: string; // Or Date
   clientCount: number; // Number of clients paired to this display
   isOnline: boolean; // Online status of the display
+  refreshInterval?: number; // In seconds
+  settings?: {
+    volume?: number;
+    brightness?: number;
+    autoRestart?: boolean;
+    maintenanceMode?: boolean;
+    allowRemoteControl?: boolean;
+    contentFiltering?: boolean;
+    emergencyMessageEnabled?: boolean;
+  };
   // Add any other fields that are part of the display object
 }
 

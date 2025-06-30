@@ -88,17 +88,17 @@ const getWidgetColor = (widgetType: string) => {
   }
 };
 
-const LayoutPreview: React.FC<LayoutPreviewProps> = ({ 
-  layout, 
-  className = '', 
-  scale = 0.3 
+const LayoutPreview: React.FC<LayoutPreviewProps> = ({
+  layout,
+  className = '',
+  scale = 0.3
 }) => {
   if (!layout) {
     return (
       <div className={`bg-gray-100 rounded-lg flex items-center justify-center ${className}`}>
-        <div className="text-center text-gray-500">
-          <Monitor className="h-8 w-8 mx-auto mb-2" />
-          <p className="text-sm">No layout data</p>
+        <div className='text-center text-gray-500'>
+          <Monitor className='h-8 w-8 mx-auto mb-2' />
+          <p className='text-sm'>No layout data</p>
         </div>
       </div>
     );
@@ -123,16 +123,16 @@ const LayoutPreview: React.FC<LayoutPreviewProps> = ({
   return (
     <div className={`relative bg-black rounded-lg overflow-hidden ${className}`}>
       {/* Container with proper aspect ratio */}
-      <div 
-        className="relative"
+      <div
+        className='relative'
         style={{
           width: `${containerWidth}px`,
           height: `${containerHeight}px`,
         }}
       >
         {/* Grid background (optional, for debugging) */}
-        <div 
-          className="absolute inset-0 opacity-10"
+        <div
+          className='absolute inset-0 opacity-10'
           style={{
             backgroundImage: `
               linear-gradient(to right, #fff 1px, transparent 1px),
@@ -171,17 +171,17 @@ const LayoutPreview: React.FC<LayoutPreviewProps> = ({
                 height: `${height}px`,
               }}
             >
-              <div className="text-center">
-                <IconComponent 
-                  className="mx-auto mb-1" 
-                  style={{ 
+              <div className='text-center'>
+                <IconComponent
+                  className='mx-auto mb-1'
+                  style={{
                     width: `${Math.min(width * 0.3, height * 0.3, 16)}px`,
                     height: `${Math.min(width * 0.3, height * 0.3, 16)}px`
-                  }} 
+                  }}
                 />
-                <div 
-                  className="font-medium leading-tight"
-                  style={{ 
+                <div
+                  className='font-medium leading-tight'
+                  style={{
                     fontSize: `${Math.max(8, Math.min(width * 0.08, height * 0.08))}px`,
                     lineHeight: '1.1'
                   }}
@@ -195,18 +195,18 @@ const LayoutPreview: React.FC<LayoutPreviewProps> = ({
 
         {/* Empty state if no widgets */}
         {widgets.length === 0 && (
-          <div className="absolute inset-0 flex items-center justify-center">
-            <div className="text-center text-white opacity-50">
-              <Monitor className="h-8 w-8 mx-auto mb-2" />
-              <p className="text-xs">Empty Layout</p>
+          <div className='absolute inset-0 flex items-center justify-center'>
+            <div className='text-center text-white opacity-50'>
+              <Monitor className='h-8 w-8 mx-auto mb-2' />
+              <p className='text-xs'>Empty Layout</p>
             </div>
           </div>
         )}
 
         {/* Status bar (if enabled) */}
         {layout.statusBar?.enabled && (
-          <div 
-            className="absolute bottom-0 left-0 right-0 opacity-80"
+          <div
+            className='absolute bottom-0 left-0 right-0 opacity-80'
             style={{
               height: `${containerHeight * 0.05}px`,
               backgroundColor: layout.statusBar.color || '#000000',
@@ -216,7 +216,7 @@ const LayoutPreview: React.FC<LayoutPreviewProps> = ({
       </div>
 
       {/* Layout info overlay */}
-      <div className="absolute top-2 left-2 bg-black bg-opacity-70 text-white text-xs px-2 py-1 rounded">
+      <div className='absolute top-2 left-2 bg-black bg-opacity-70 text-white text-xs px-2 py-1 rounded'>
         {widgets.length} widget{widgets.length !== 1 ? 's' : ''} • {layout.orientation}
       </div>
     </div>

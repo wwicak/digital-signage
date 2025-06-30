@@ -78,10 +78,10 @@ export const detectIPViaAPI = async (): Promise<IPDetectionResult> => {
 
   for (const apiUrl of apis) {
     try {
-      const response = await fetch(apiUrl, { 
+      const response = await fetch(apiUrl, {
         method: 'GET',
         // Note: fetch doesn't support timeout directly, would need AbortController
-        // timeout: 3000 
+        // timeout: 3000
       });
       
       if (response.ok) {
@@ -162,10 +162,10 @@ export const detectIPAddress = async (): Promise<IPDetectionResult> => {
   }
 
   // Final fallback
-  return { 
-    ip: 'Unable to detect', 
-    method: 'fallback', 
-    error: 'All detection methods failed' 
+  return {
+    ip: 'Unable to detect',
+    method: 'fallback',
+    error: 'All detection methods failed'
   };
 };
 

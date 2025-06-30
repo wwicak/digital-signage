@@ -46,10 +46,10 @@ const ScreenList = forwardRef<IScreenListRef, IScreenListProps>(
     return (
       <div className='space-y-6'>
         {/* Real-time connection status */}
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
+        <div className='flex items-center justify-between'>
+          <div className='flex items-center gap-2'>
             <div className={`w-2 h-2 rounded-full ${sseConnected ? 'bg-green-500' : 'bg-red-500'}`} />
-            <span className="text-sm text-muted-foreground">
+            <span className='text-sm text-muted-foreground'>
               {sseConnected ? 'Real-time updates connected' : 'Real-time updates disconnected'}
             </span>
           </div>

@@ -280,7 +280,7 @@ const Display: React.FC<IDisplayComponentProps> = React.memo(({ display }) => {
               isPreview={false}
             />
           ) : (
-            <div className="flex items-center justify-center h-full bg-red-100 text-red-600">
+            <div className='flex items-center justify-center h-full bg-red-100 text-red-600'>
               Unknown Widget Type: {widgetData.type} (Available types: {Object.keys(Widgets).join(', ')})
             </div>
           )
@@ -313,7 +313,7 @@ const Display: React.FC<IDisplayComponentProps> = React.memo(({ display }) => {
         statusBar={state.statusBar?.elements || DEFAULT_STATUS_BAR}
         orientation={state.orientation}
       >
-        <div className="flex items-center justify-center h-full">
+        <div className='flex items-center justify-center h-full'>
           <div className='animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600'></div>
         </div>
       </Frame>
@@ -348,7 +348,7 @@ const Display: React.FC<IDisplayComponentProps> = React.memo(({ display }) => {
             disableResize: true,
             animate: false, // Disable animations for better performance
           }}
-          className="display-grid w-full h-full"
+          className='display-grid w-full h-full'
         />
       </div>
     </Frame>

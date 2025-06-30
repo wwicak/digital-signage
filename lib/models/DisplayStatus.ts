@@ -19,6 +19,20 @@ export interface IDisplayStatus extends Document {
   consecutiveFailures: number;
   totalUptime: number; // in milliseconds
   totalDowntime: number; // in milliseconds
+  // Performance metrics
+  performance?: {
+    cpuUsage?: number; // percentage
+    memoryUsage?: number; // percentage
+    diskUsage?: number; // percentage
+    temperature?: number; // celsius
+  };
+  // Additional metadata
+  metadata?: {
+    resolution?: string; // e.g., "1920x1080"
+    browser?: string; // e.g., "Chrome 96"
+    appVersion?: string; // Application version
+    screenSize?: string; // Physical screen size
+  };
   createdAt: Date;
   updatedAt: Date;
 }
@@ -82,6 +96,18 @@ const DisplayStatusSchema = new Schema<IDisplayStatus>(
       type: Number,
       default: 0,
       min: 0,
+    },
+    performance: {
+      cpuUsage: { type: Number, min: 0, max: 100 },
+      memoryUsage: { type: Number, min: 0, max: 100 },
+      diskUsage: { type: Number, min: 0, max: 100 },
+      temperature: { type: Number },
+    },
+    metadata: {
+      resolution: String,
+      browser: String,
+      appVersion: String,
+      screenSize: String,
     },
   },
   {
@@ -215,6 +241,18 @@ export const DisplayStatusSchemaZod = z.object({
   consecutiveFailures: z.number().min(0).default(0),
   totalUptime: z.number().min(0).default(0),
   totalDowntime: z.number().min(0).default(0),
+  performance: z.object({
+    cpuUsage: z.number().min(0).max(100).optional(),
+    memoryUsage: z.number().min(0).max(100).optional(),
+    diskUsage: z.number().min(0).max(100).optional(),
+    temperature: z.number().optional(),
+  }).optional(),
+  metadata: z.object({
+    resolution: z.string().optional(),
+    browser: z.string().optional(),
+    appVersion: z.string().optional(),
+    screenSize: z.string().optional(),
+  }).optional(),
   createdAt: z.date().optional(),
   updatedAt: z.date().optional(),
   __v: z.number().optional(),

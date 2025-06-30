@@ -139,7 +139,7 @@ const RoomsPage = () => {
 
       const response = await fetch("/api/v1/rooms", {
         method: "POST",
-        headers: { 
+        headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({

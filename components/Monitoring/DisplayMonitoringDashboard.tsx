@@ -316,9 +316,9 @@ const DisplayMonitoringDashboard: React.FC<DisplayMonitoringDashboardProps> = ({
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead className="w-12">
+                  <TableHead className='w-12'>
                     <input
-                      type="checkbox"
+                      type='checkbox'
                       checked={selectedDisplays.length === filteredDisplays.length && filteredDisplays.length > 0}
                       onChange={(e) => {
                         if (e.target.checked) {
@@ -327,7 +327,7 @@ const DisplayMonitoringDashboard: React.FC<DisplayMonitoringDashboardProps> = ({
                           setSelectedDisplays([]);
                         }
                       }}
-                      className="rounded border-gray-300"
+                      className='rounded border-gray-300'
                     />
                   </TableHead>
                   <TableHead>Display</TableHead>
@@ -348,7 +348,7 @@ const DisplayMonitoringDashboard: React.FC<DisplayMonitoringDashboardProps> = ({
                     <TableRow key={displayId}>
                       <TableCell>
                         <input
-                          type="checkbox"
+                          type='checkbox'
                           checked={selectedDisplays.includes(displayId)}
                           onChange={(e) => {
                             if (e.target.checked) {
@@ -357,7 +357,7 @@ const DisplayMonitoringDashboard: React.FC<DisplayMonitoringDashboardProps> = ({
                               setSelectedDisplays(selectedDisplays.filter(id => id !== displayId));
                             }
                           }}
-                          className="rounded border-gray-300"
+                          className='rounded border-gray-300'
                         />
                       </TableCell>
                       <TableCell>

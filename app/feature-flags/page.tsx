@@ -87,7 +87,7 @@ const FeatureFlagsPage: React.FC = () => {
       toast.success(`${flag.displayName} ${!flag.enabled ? 'enabled' : 'disabled'}`);
     } catch (error) { // TypeScript will infer error as unknown
       console.error('Failed to update feature flag:', error);
-      const errorMessage = error instanceof Error ? error.message : 
+      const errorMessage = error instanceof Error ? error.message :
         (error as { response?: { data?: { message?: string } } })?.response?.data?.message || 'An error occurred'; // Type-safe error handling
       if (errorMessage.includes('Access denied') || errorMessage.includes('Cannot update')) {
         toast.error(`Permission denied: Only super admins can modify feature flags`);
@@ -121,7 +121,7 @@ const FeatureFlagsPage: React.FC = () => {
       setEditingFlag(null);
     } catch (error) { // TypeScript will infer error as unknown
       console.error('Failed to update feature flag:', error);
-      const errorMessage = error instanceof Error ? error.message : 
+      const errorMessage = error instanceof Error ? error.message :
         (error as { response?: { data?: { message?: string } } })?.response?.data?.message || 'An error occurred'; // Type-safe error handling
       if (errorMessage.includes('Access denied') || errorMessage.includes('Cannot update')) {
         toast.error(`Permission denied: Only super admins can modify feature flags`);
@@ -162,7 +162,7 @@ const FeatureFlagsPage: React.FC = () => {
       toast.success(`${flag.displayName} deleted successfully`);
     } catch (error) { // TypeScript will infer error as unknown
       console.error('Failed to delete feature flag:', error);
-      const errorMessage = error instanceof Error ? error.message : 
+      const errorMessage = error instanceof Error ? error.message :
         (error as { response?: { data?: { message?: string } } })?.response?.data?.message || 'An error occurred'; // Type-safe error handling
       if (errorMessage.includes('Access denied') || errorMessage.includes('Cannot delete')) {
         toast.error(`Permission denied: Only super admins can delete feature flags`);

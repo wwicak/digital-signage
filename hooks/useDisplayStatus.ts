@@ -14,6 +14,21 @@ interface DisplayStatusDetail {
   ipAddress?: string;
   disconnectionReason?: string;
   alertCount?: number;
+  // Performance metrics
+  performance?: {
+    cpuUsage?: number;
+    memoryUsage?: number;
+    diskUsage?: number;
+    temperature?: number;
+  };
+  // Additional metadata
+  metadata?: {
+    resolution?: string;
+    browser?: string;
+    appVersion?: string;
+    screenSize?: string;
+    ipAddress?: string;
+  };
 }
 
 interface DisplayStatus {
@@ -112,6 +127,18 @@ export const useDisplayStatus = (options?: {
         ipAddress?: string;
         disconnectionReason?: string;
         alertCount?: number;
+        performance?: {
+          cpuUsage?: number;
+          memoryUsage?: number;
+          diskUsage?: number;
+          temperature?: number;
+        };
+        metadata?: {
+          resolution?: string;
+          browser?: string;
+          appVersion?: string;
+          screenSize?: string;
+        };
       }) => {
         statusMap[display.displayId] = {
           isOnline: display.isOnline,
@@ -127,6 +154,8 @@ export const useDisplayStatus = (options?: {
           ipAddress: display.ipAddress,
           disconnectionReason: display.disconnectionReason,
           alertCount: display.alertCount || 0,
+          performance: display.performance,
+          metadata: display.metadata,
         };
       });
 
@@ -177,6 +206,8 @@ export const useDisplayStatus = (options?: {
           ipAddress: undefined,
           disconnectionReason: undefined,
           alertCount: 0,
+          performance: undefined,
+          metadata: undefined,
         }
       );
     },

@@ -65,7 +65,7 @@ class ListContent extends Component<IListContentProps> {
         )}
         <div className='pl-3 flex'> {/* Renamed class */}
           <AutoScroll
-            className="block py-3 flex-1 overflow-y-auto min-h-0"
+            className='block py-3 flex-1 overflow-y-auto min-h-0'
           >
             <ListTag className={`list-tag ${ordered ? 'ordered' : 'unordered'}`}>
               {list.map((item, index) => (

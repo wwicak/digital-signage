@@ -23,7 +23,7 @@ function isListData(data: WidgetData): data is { list: Array<{ text: string }>; 
   return 'list' in data;
 }
 
-function isMediaPlayerData(data: WidgetData): data is { 
+function isMediaPlayerData(data: WidgetData): data is {
   url?: string | null;
   mediaType?: 'video' | 'audio';
   volume?: number;
@@ -109,7 +109,7 @@ export const validateWidgetData = async (
       if (!isListData(data)) {
         throw new Error("Invalid data for List widget: must contain list property.");
       }
-      if (!Array.isArray(data.list) || !data.list.every(item => 
+      if (!Array.isArray(data.list) || !data.list.every(item =>
         typeof item === "object" && item !== null && 'text' in item && typeof item.text === "string"
       )) {
         throw new Error("Invalid data for List widget: list must be an array of objects with text property.");
@@ -135,16 +135,16 @@ export const validateWidgetData = async (
         }
         if (data.schedule !== undefined) {
           if (data.schedule.daysOfWeek !== undefined) {
-            if (!Array.isArray(data.schedule.daysOfWeek) || 
+            if (!Array.isArray(data.schedule.daysOfWeek) ||
                 !data.schedule.daysOfWeek.every(day => typeof day === "number" && day >= 0 && day <= 6)) {
               throw new Error("Invalid data for Media Player widget: schedule.daysOfWeek must be an array of numbers 0-6.");
             }
           }
           if (data.schedule.timeSlots !== undefined) {
-            if (!Array.isArray(data.schedule.timeSlots) || 
-                !data.schedule.timeSlots.every(slot => 
+            if (!Array.isArray(data.schedule.timeSlots) ||
+                !data.schedule.timeSlots.every(slot =>
                   slot && typeof slot === 'object' &&
-                  typeof slot.startTime === "string" && 
+                  typeof slot.startTime === "string" &&
                   typeof slot.endTime === "string" &&
                   /^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/.test(slot.startTime) &&
                   /^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/.test(slot.endTime)

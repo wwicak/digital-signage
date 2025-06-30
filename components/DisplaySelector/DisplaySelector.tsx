@@ -38,12 +38,12 @@ const DisplaySelector: React.FC<DisplaySelectorProps> = ({
     if (!data?.displays) return []
 
     return data.displays.filter((display) => {
-      const matchesSearch = 
+      const matchesSearch =
         display.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
         display.location?.toLowerCase().includes(searchTerm.toLowerCase()) ||
         display.building?.toLowerCase().includes(searchTerm.toLowerCase())
 
-      const matchesStatus = 
+      const matchesStatus =
         statusFilter === 'all' ||
         (statusFilter === 'online' && display.isOnline) ||
         (statusFilter === 'offline' && !display.isOnline)
@@ -150,8 +150,8 @@ const DisplaySelector: React.FC<DisplaySelectorProps> = ({
         <Card>
           <CardContent className='pt-6'>
             <div className='text-center text-muted-foreground'>
-              {searchTerm || statusFilter !== 'all' 
-                ? 'No displays match your filters' 
+              {searchTerm || statusFilter !== 'all'
+                ? 'No displays match your filters'
                 : 'No displays found'
               }
             </div>

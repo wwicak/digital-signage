@@ -103,6 +103,13 @@ const Sidebar: React.FC<ISidebarProps> = ({ loggedIn, displayId, collapsed = fal
           featureFlag: FeatureFlagName.MENU_SCREENS,
         },
         {
+          id: "display-config",
+          name: "Display Configuration",
+          path: `/display-config`,
+          icon: Settings,
+          featureFlag: FeatureFlagName.MENU_SCREENS,
+        },
+        {
           id: "dashboard",
           name: "Dashboard",
           path: `/dashboard`,

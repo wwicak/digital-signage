@@ -293,7 +293,7 @@ export default function DisplaySelector() {
                         <LayoutPreview
                           layout={layout as unknown as any}
                           scale={0.25}
-                          className="border border-gray-200"
+                          className='border border-gray-200'
                         />
                       </div>
 

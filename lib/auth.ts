@@ -15,9 +15,9 @@ interface CookieOptions {
 }
 
 // Type for response objects that can set cookies (both App Router and Pages Router)
-type CookieResponse = 
-  | NextResponse 
-  | NextApiResponse 
+type CookieResponse =
+  | NextResponse
+  | NextApiResponse
   | { cookies: { set: (name: string, value: string, options?: CookieOptions) => void } }
   | { setHeader: (name: string, value: string) => void };
 
@@ -98,16 +98,16 @@ export function extractToken(
 
   // Handle NextApiRequest and IncomingMessage (Pages Router)
   // Try Authorization header first
-  const authHeader = 'authorization' in req.headers 
-    ? req.headers.authorization 
+  const authHeader = 'authorization' in req.headers
+    ? req.headers.authorization
     : undefined;
   if (authHeader && authHeader.startsWith("Bearer ")) {
     return authHeader.substring(7);
   }
 
   // Try cookie
-  const cookies = 'cookie' in req.headers 
-    ? req.headers.cookie 
+  const cookies = 'cookie' in req.headers
+    ? req.headers.cookie
     : undefined;
   if (cookies && typeof cookies === 'string') {
     const tokenMatch = cookies.match(/auth-token=([^;]+)/);

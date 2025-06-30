@@ -338,12 +338,12 @@ class PriorityVideoContent extends Component<IPriorityVideoContentProps, IPriori
     return (
       <iframe
         src={embedUrl.toString()}
-        className="w-full h-full"
+        className='w-full h-full'
         style={{
           backgroundColor: data?.backgroundColor || '#000000',
         }}
-        frameBorder="0"
-        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+        frameBorder='0'
+        allow='accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture'
         allowFullScreen
         title={data?.title || 'Priority Video'}
         onLoad={() => {
@@ -461,7 +461,7 @@ class PriorityVideoContent extends Component<IPriorityVideoContentProps, IPriori
     // Hide widget completely when not scheduled (unless in preview mode)
     if (!isPreview && !isScheduleActive) {
       return (
-        <div className="w-full h-full" style={{ display: 'none' }}>
+        <div className='w-full h-full' style={{ display: 'none' }}>
           {/* Widget is hidden when not scheduled */}
         </div>
       );

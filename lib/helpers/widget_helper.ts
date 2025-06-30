@@ -171,8 +171,8 @@ export async function addWidget(req: Request, res: Response, widgetData: WidgetO
 
   const displayId = widgetData.display;
   // Ensure widgetId is an ObjectId for the display.widgets array
-  const widgetId = typeof widgetData._id === 'string' 
-    ? new mongoose.Types.ObjectId(widgetData._id) 
+  const widgetId = typeof widgetData._id === 'string'
+    ? new mongoose.Types.ObjectId(widgetData._id)
     : widgetData._id;
 
   try {

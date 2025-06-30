@@ -273,8 +273,8 @@ const DisplayEditDialog: React.FC<DisplayEditDialogProps> = ({
                 onChange={handleInputChange}
                 className='w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent'
               >
-                <option value="landscape">Landscape</option>
-                <option value="portrait">Portrait</option>
+                <option value='landscape'>Landscape</option>
+                <option value='portrait'>Portrait</option>
               </select>
               <p className='text-xs text-gray-500 mt-1'>
                 Choose the orientation for this display. This affects how content is displayed.
@@ -296,7 +296,7 @@ const DisplayEditDialog: React.FC<DisplayEditDialogProps> = ({
                 className='w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent'
                 disabled={loadingLayouts}
               >
-                <option value="">
+                <option value=''>
                   {loadingLayouts ? "Loading layouts..." : "Select a layout"}
                 </option>
                 {layouts.map((layout) => (

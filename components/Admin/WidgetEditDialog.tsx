@@ -356,7 +356,7 @@ class WidgetEditDialog
       <Dialog
         ref={this.dialogRef}
         title={dialogTitle}
-        description="Configure widget settings and properties"
+        description='Configure widget settings and properties'
         className='widget-settings-modal'
       >
         <div className='flex flex-col h-full max-h-[calc(90vh-8rem)]'>
