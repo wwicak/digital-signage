@@ -41,6 +41,13 @@ export interface AlertNotification {
   metadata?: Record<string, unknown>; // Alert metadata
 }
 
+// Define interface for alert document with notification methods
+interface AlertDocument {
+  _id: mongoose.Types.ObjectId;
+  shouldSendNotification(type: string, cooldownMinutes: number): boolean;
+  addNotification(type: string): Promise<void>;
+}
+
 export class NotificationService {
   private static instance: NotificationService;
   private config: NotificationConfig;
@@ -112,13 +119,6 @@ export class NotificationService {
     } catch (error) {
       console.error("Error sending alert notification:", error);
     }
-  }
-
-  // Define interface for alert document with notification methods
-  interface AlertDocument {
-    _id: mongoose.Types.ObjectId;
-    shouldSendNotification(type: string, cooldownMinutes: number): boolean;
-    addNotification(type: string): Promise<void>;
   }
 
   private async sendEmailNotification(

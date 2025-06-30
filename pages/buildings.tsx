@@ -90,9 +90,9 @@ const BuildingsPage = () => {
       setIsCreateDialogOpen(false);
       setFormData({ name: "", address: "" });
       fetchBuildings();
-    } catch (error: any) {
+    } catch (error) { // TypeScript will infer error as unknown
       console.error("Error creating building:", error);
-      toast.error(error.message || "Failed to create building");
+      toast.error(error instanceof Error ? error.message : "Failed to create building"); // Type-safe error handling
     }
   };
 
@@ -119,9 +119,9 @@ const BuildingsPage = () => {
       setEditingBuilding(null);
       setFormData({ name: "", address: "" });
       fetchBuildings();
-    } catch (error: any) {
+    } catch (error) { // TypeScript will infer error as unknown
       console.error("Error updating building:", error);
-      toast.error(error.message || "Failed to update building");
+      toast.error(error instanceof Error ? error.message : "Failed to update building"); // Type-safe error handling
     }
   };
 
@@ -142,9 +142,9 @@ const BuildingsPage = () => {
 
       toast.success("Building deleted successfully");
       fetchBuildings();
-    } catch (error: any) {
+    } catch (error) { // TypeScript will infer error as unknown
       console.error("Error deleting building:", error);
-      toast.error(error.message || "Failed to delete building");
+      toast.error(error instanceof Error ? error.message : "Failed to delete building"); // Type-safe error handling
     }
   };
 

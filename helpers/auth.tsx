@@ -12,7 +12,7 @@ interface PageContext {
 }
 
 // Define the component type with getInitialProps
-type NextPageWithInitialProps<P = {}> = ComponentType<P> & {
+type NextPageWithInitialProps<P = Record<string, unknown>> = ComponentType<P> & {
   getInitialProps?: (ctx: PageContext) => Promise<P> | P;
 };
 
@@ -163,7 +163,7 @@ export const protect = <P extends object>(
   WrappedComponent: ComponentType<P> // Accept any component type
 ): ComponentType<P> => { // The HOC itself receives original props P
   return class ProtectedPage extends React.Component<P> { // HOC component takes P as props
-    static async getInitialProps(ctx: PageContext): Promise<Partial<IProtectedPageProps> | {}> {
+    static async getInitialProps(ctx: PageContext): Promise<Partial<IProtectedPageProps> | Record<string, never>> {
       const { req, res, query } = ctx
       const cookies = parseCookies(ctx as Parameters<typeof parseCookies>[0])
       const alreadyLoggedIn = !!cookies.loggedIn // Convert to boolean

@@ -1,4 +1,4 @@
-import React, { Component, CSSProperties } from 'react'
+import React, { Component } from 'react' // Removed unused CSSProperties
 // FontAwesome configuration is handled globally
 
 import AutoScroll from '../../../components/AutoScroll' // Assuming .js or .tsx

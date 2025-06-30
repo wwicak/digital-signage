@@ -87,7 +87,12 @@ export const configureGoogleStrategy = (): void => {
 
           // Return profile and tokens for handling in the callback route
           // The actual user linking and token storage will be handled in the service
-          return done(null, { profile: googleProfile, tokens } as any);
+          // Define user object type for Passport
+          interface GoogleAuthUser {
+            profile: GoogleProfile;
+            tokens: GoogleTokens;
+          }
+          return done(null, { profile: googleProfile, tokens } as GoogleAuthUser); // Typed user object
         } catch (error) {
           console.error("Error in Google OAuth verify callback:", error);
           return done(error, false);
@@ -102,7 +107,14 @@ export const configureGoogleStrategy = (): void => {
  * For Google OAuth, we'll store minimal session data
  */
 export const configureGoogleSerialization = (): void => {
-  passport.serializeUser((user: any, done) => {
+  // Define session user type
+  interface SessionUser {
+    profile?: GoogleProfile;
+    id?: string;
+    tokens?: GoogleTokens;
+  }
+  
+  passport.serializeUser((user: Express.User, done) => { // Express.User is the standard Passport user type
     // Store minimal data in session
     done(null, {
       id: user.profile?.id || user.id,
@@ -110,7 +122,7 @@ export const configureGoogleSerialization = (): void => {
     });
   });
 
-  passport.deserializeUser((sessionUser: any, done) => {
+  passport.deserializeUser((sessionUser: { id: string; source: string }, done) => { // Typed session data
     // For Google OAuth flow, we don't need full user deserialization
     // as tokens are handled separately in the service
     done(null, sessionUser);

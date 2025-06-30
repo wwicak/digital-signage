@@ -26,7 +26,12 @@ export function removeClient(displayId: string, response: Response): void {
   }
 }
 
-export function initializeSSE(app: any): void {
+// Define Express app type
+interface ExpressApp {
+  get(path: string, handler: (req: unknown, res: Response) => void): void;
+}
+
+export function initializeSSE(app: ExpressApp): void { // Express app type
   // app should be Express
   /*
    * In a real scenario, this would set up the app.get('/api/v1/events/:displayId', handler) route.
@@ -38,7 +43,7 @@ export function initializeSSE(app: any): void {
    */
 }
 
-export function sendSSEUpdate(data: any): void {
+export function sendSSEUpdate(data: Record<string, unknown>): void { // SSE update data type
   /*
    * This function is expected by tests to send an 'adminUpdate' event to ALL clients.
    * This is a broad cast to every client connected for any displayId.
@@ -57,7 +62,7 @@ export function sendSSEUpdate(data: any): void {
 export function sendEventToDisplay(
   displayId: string,
   eventName: string,
-  data: any
+  data: Record<string, unknown> // Event data payload
 ): void {
   // Try to use the new SSE implementation first
   try {

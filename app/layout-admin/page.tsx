@@ -548,7 +548,7 @@ function LayoutAdminContent() {
                   <div className='text-center text-gray-500'>
                     <Grid3X3 className='mx-auto h-12 w-12 mb-4 opacity-50' />
                     <p className='text-lg font-medium'>No widgets added yet</p>
-                    <p className='text-sm'>Click "Add Widget" to start designing your layout</p>
+                    <p className='text-sm'>Click &ldquo;Add Widget&rdquo; to start designing your layout</p>
                   </div>
                 </div>
               ) : (

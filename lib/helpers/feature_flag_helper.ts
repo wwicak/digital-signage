@@ -375,7 +375,14 @@ export async function getUserAccessibleFeatureFlags(
   }
 
   // For other users, filter by their role and enabled status
-  const query: Record<string, any> = {
+  // Define query type for feature flag search
+  interface FeatureFlagQuery {
+    enabled: boolean;
+    allowedRoles: { $in: string[] };
+    type?: string;
+  }
+  
+  const query: FeatureFlagQuery = {
     enabled: true,
     allowedRoles: { $in: [user.role.name] },
   };

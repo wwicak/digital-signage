@@ -205,7 +205,7 @@ const Display: React.FC<IDisplayComponentProps> = React.memo(({ display }) => {
         if (!widget?.widget_id) return null;
 
         // Get the widget definition data - handle both string ID and embedded object
-        let widgetData = widget.widget_id;
+        const widgetData = widget.widget_id; // Widget data is not reassigned
         if (typeof widgetData !== 'object' || widgetData === null) {
           console.error('Widget data is not an object:', widgetData);
           return null;

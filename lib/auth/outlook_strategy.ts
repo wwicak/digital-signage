@@ -65,7 +65,7 @@ export const configureOutlookStrategy = (): void => {
       async (
         accessToken: string,
         refreshToken: string,
-        profile: any,
+        profile: unknown, // OAuth2Strategy doesn't provide typed profile
         done: VerifyCallback
       ) => {
         try {
@@ -105,7 +105,12 @@ export const configureOutlookStrategy = (): void => {
 
           // Return profile and tokens for handling in the callback route
           // The actual user linking and token storage will be handled in the service
-          return done(null, { profile: outlookProfile, tokens } as any);
+          // Define user object type for Passport
+          interface OutlookAuthUser {
+            profile: OutlookProfile;
+            tokens: OutlookTokens;
+          }
+          return done(null, { profile: outlookProfile, tokens } as OutlookAuthUser); // Typed user object
         } catch (error) {
           console.error(
             "Error in Microsoft Outlook OAuth verify callback:",
@@ -123,7 +128,14 @@ export const configureOutlookStrategy = (): void => {
  * For Microsoft OAuth, we'll store minimal session data
  */
 export const configureOutlookSerialization = (): void => {
-  passport.serializeUser((user: any, done) => {
+  // Define session user type
+  interface SessionUser {
+    profile?: OutlookProfile;
+    id?: string;
+    tokens?: OutlookTokens;
+  }
+  
+  passport.serializeUser((user: Express.User, done) => { // Express.User is the standard Passport user type
     // Store minimal data in session
     done(null, {
       id: user.profile?.id || user.id,
@@ -131,7 +143,7 @@ export const configureOutlookSerialization = (): void => {
     });
   });
 
-  passport.deserializeUser((sessionUser: any, done) => {
+  passport.deserializeUser((sessionUser: { id: string; source: string }, done) => { // Typed session data
     // For Microsoft OAuth flow, we don't need full user deserialization
     // as tokens are handled separately in the service
     done(null, sessionUser);

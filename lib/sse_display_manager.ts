@@ -45,7 +45,7 @@ export function removeDisplayConnection(
 export function sendEventToDisplay(
   displayId: string,
   eventName: string,
-  data: any
+  data: Record<string, unknown> // Event data payload
 ) {
   const connections = sseConnections.get(displayId);
   if (!connections || connections.size === 0) {
@@ -82,7 +82,7 @@ export function sendEventToDisplay(
 }
 
 // Helper to broadcast event to all displays
-export function broadcastEventToAllDisplays(eventName: string, data: any) {
+export function broadcastEventToAllDisplays(eventName: string, data: Record<string, unknown>) { // Broadcast event data
   let totalSent = 0;
   sseConnections.forEach((connections, displayId) => {
     if (sendEventToDisplay(displayId, eventName, data)) {

@@ -13,6 +13,20 @@ export interface MonitoringConfig {
   notificationCooldownMinutes: number;
 }
 
+// Define DisplayStatus document type
+interface DisplayStatusDoc {
+  _id: string;
+  displayId: {
+    _id: string;
+    name: string;
+  };
+  lastSeen: Date;
+  lastHeartbeat: Date;
+  ipAddress?: string;
+  userAgent?: string;
+  markOffline(reason: string): Promise<void>;
+}
+
 export class DisplayMonitoringService {
   private static instance: DisplayMonitoringService;
   private config: MonitoringConfig;
@@ -134,7 +148,7 @@ export class DisplayMonitoringService {
       }).populate("displayId");
 
       for (const status of failingDisplays) {
-        await this.handleFailingDisplay(status);
+        await this.handleFailingDisplay(status as DisplayStatusDoc); // Type assertion for populated document
       }
     } catch (error) {
       console.error("Error checking display statuses:", error);
@@ -142,7 +156,7 @@ export class DisplayMonitoringService {
   }
 
   private async handleOfflineDisplay(
-    status: any,
+    status: DisplayStatusDoc,
     alertCutoffTime: Date
   ): Promise<void> {
     try {

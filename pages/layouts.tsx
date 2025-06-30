@@ -13,7 +13,7 @@ import DisplayStatusCard from '../components/Admin/DisplayStatusCard'
 import { protect, ProtectProps } from '../helpers/auth'
 import { useLayouts } from '../hooks/useLayouts'
 import { useLayoutMutations } from '../hooks/useLayoutMutations'
-import { ILayoutQueryParams, ILayoutData } from '../actions/layouts'
+import { ILayoutQueryParams } from '../actions/layouts' // Removed unused ILayoutData
 
 interface LayoutsProps extends ProtectProps {}
 

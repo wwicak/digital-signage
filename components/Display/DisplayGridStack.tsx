@@ -15,7 +15,7 @@ interface DisplayWidget {
   y: number;
   w: number;
   h: number;
-  options?: WidgetData;
+  options?: WidgetData | Record<string, unknown>; // Allow both specific widget data and generic objects
 }
 
 interface DisplayGridStackProps {

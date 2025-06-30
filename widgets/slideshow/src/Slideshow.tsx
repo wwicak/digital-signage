@@ -14,6 +14,14 @@ import { getSlides, ISlideData, SlideActionDataSchema } from '../../../actions/s
 
 const DEFAULT_SLIDE_DURATION_MS = 5000
 
+// Define slide component props interface
+interface SlideComponentProps {
+  slide: ISlideData;
+  isActive: boolean;
+  display?: string;
+  ref?: React.RefObject<{ onSlideLoaded?: () => void; onSlideEnded?: () => void }>;
+}
+
 // Interface for slide component refs - Zod not typically used here
 export interface ISlideInstance {
   play: () => void;
@@ -197,15 +205,15 @@ class Slideshow extends Component<ISlideshowWidgetContentProps, ISlideshowWidget
   }
 
   // Memoize component selection for better performance in class components
-  private componentCache = new Map<string, ComponentType<any>>()
+  private componentCache = new Map<string, ComponentType<SlideComponentProps>>()
   
-  getSlideComponent = (type: string): ComponentType<any> => {
+  getSlideComponent = (type: string): ComponentType<SlideComponentProps> => { // Typed component return
     // Use manual caching for performance optimization in class components
     if (this.componentCache.has(type)) {
       return this.componentCache.get(type)!
     }
     
-    let component: ComponentType<any>
+    let component: ComponentType<SlideComponentProps> // Typed component variable
     switch (type) {
       case 'photo':
       case 'image':

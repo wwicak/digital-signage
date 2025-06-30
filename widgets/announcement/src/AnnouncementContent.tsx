@@ -36,15 +36,15 @@ const AnnouncementContent: React.FC<IAnnouncementContentProps> = React.memo(({ d
   const accentColor = data.accentColor ?? DEFAULT_ACCENT_COLOR
 
   return (
-    <div className='relative box-border h-full w-full'>
-      <div className='title-bar'>
+    <div className='relative box-border h-full w-full' style={{ backgroundColor: color }}>
+      <div className='title-bar' style={{ color: titleTextColor, borderLeftColor: accentColor }}>
         <div className='icon'>
-          <AlertTriangle style={{ fontSize: '0.9em' }} className={accentColor} />
+          <AlertTriangle style={{ fontSize: '0.9em', color: accentColor }} />
         </div>
         <span>Announcement</span>
       </div>
       <AutoScroll style={{ display: 'block', flex: 1, overflowY: 'auto', minHeight: 0 }}>
-        <div className='text-content'>
+        <div className='text-content' style={{ color: textColor }}>
           {text.split('\n').map((line, index) => (
             <div key={`line-${index}`}>{line || <br />}</div>
           ))}
