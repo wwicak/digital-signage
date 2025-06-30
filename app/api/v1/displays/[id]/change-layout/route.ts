@@ -145,15 +145,6 @@ export async function GET(
   try {
     await dbConnect();
 
-    // Require authentication
-    const user = await requireAuth(request);
-    if (!user) {
-      return NextResponse.json(
-        { error: "Authentication required" },
-        { status: 401 }
-      );
-    }
-
     const { id: displayId } = await params;
     if (!displayId) {
       return NextResponse.json(

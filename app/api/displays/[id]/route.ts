@@ -47,16 +47,10 @@ export async function GET(
 ) {
   try {
     await dbConnect();
-    const user = await requireAuth(request);
     const { id } = await context.params;
 
-    // Check if user can access this display
-    if (!canAccessDisplay(user, id)) {
-      return NextResponse.json(
-        { message: "Access denied: Cannot view this display" },
-        { status: 403 }
-      );
-    }
+    // For public display access, no authentication required
+    // Displays need to access their own data to function
 
     const display = await Display.findById(id).populate("widgets");
 
