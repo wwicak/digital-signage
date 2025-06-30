@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, memo } from 'react'
 import { Tv, Layout, Settings } from 'lucide-react'
+import { NextPageContext } from 'next'
 
 import Frame from '../components/Admin/Frame.tsx' // Assuming .tsx
 import ScreenListComponent, { IScreenListRef } from '../components/Admin/ScreenList.tsx' // Renamed, Assuming .tsx
@@ -107,7 +108,7 @@ const ScreensComponent = memo(function ScreensComponent({ loggedIn, displayId }:
 const Screens = (props: ScreensProps) => <ScreensComponent {...props} />
 
 // Add getInitialProps to the wrapper component
-Screens.getInitialProps = async (ctx: any): Promise<{ displayId?: string }> => {
+Screens.getInitialProps = async (ctx: NextPageContext): Promise<{ displayId?: string }> => {
   const displayId = ctx.query.id as string | undefined
   return { displayId }
 }

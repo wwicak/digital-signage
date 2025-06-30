@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef, memo } from 'react'
 import _ from 'lodash'
+import { NextPageContext } from 'next'
 import { Edit } from 'lucide-react'
 
 import Frame from '../components/Admin/Frame'
@@ -118,7 +119,7 @@ const SlideshowPageComponent = memo(function SlideshowPageComponent({ slideshow:
 // Create a wrapper component for getInitialProps
 const SlideshowPage = (props: SlideshowProps) => <SlideshowPageComponent {...props} />
 
-SlideshowPage.getInitialProps = async (ctx: any): Promise<Partial<SlideshowProps>> => {
+SlideshowPage.getInitialProps = async (ctx: NextPageContext): Promise<Partial<SlideshowProps>> => {
   const id = ctx.query.id as string | undefined
   const host =
     ctx.req && ctx.req.headers && ctx.req.headers.host

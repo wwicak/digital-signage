@@ -92,9 +92,9 @@ const CalendarIntegrationPage = () => {
       }
       const data = await response.json();
       window.location.href = data.authUrl;
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Error connecting to Google:", error);
-      toast.error(error.message || "Failed to connect to Google Calendar");
+      toast.error(error instanceof Error ? error.message : "Failed to connect to Google Calendar");
       setConnectingProvider(null);
     }
   };
@@ -108,9 +108,9 @@ const CalendarIntegrationPage = () => {
       }
       const data = await response.json();
       window.location.href = data.authUrl;
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Error connecting to Outlook:", error);
-      toast.error(error.message || "Failed to connect to Outlook Calendar");
+      toast.error(error instanceof Error ? error.message : "Failed to connect to Outlook Calendar");
       setConnectingProvider(null);
     }
   };
@@ -131,9 +131,9 @@ const CalendarIntegrationPage = () => {
 
       toast.success(`${provider} calendar disconnected successfully`);
       fetchCalendarLinks();
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Error disconnecting calendar:", error);
-      toast.error(error.message || "Failed to disconnect calendar");
+      toast.error(error instanceof Error ? error.message : "Failed to disconnect calendar");
     }
   };
 
@@ -153,9 +153,9 @@ const CalendarIntegrationPage = () => {
       setTimeout(() => {
         fetchCalendarLinks();
       }, 2000);
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Error syncing calendar:", error);
-      toast.error(error.message || "Failed to sync calendar");
+      toast.error(error instanceof Error ? error.message : "Failed to sync calendar");
     } finally {
       setSyncingLinkId(null);
     }

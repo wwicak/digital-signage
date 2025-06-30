@@ -1,5 +1,6 @@
 import React, { useEffect } from 'react'
 import { useRouter } from 'next/router'
+import { NextPageContext } from 'next'
 
 import Frame from '../components/Admin/Frame.tsx' // Assuming .tsx
 import DisplayComponent from '../components/Display/Display.tsx' // Renamed to avoid conflict, assuming .tsx
@@ -39,7 +40,7 @@ const PreviewPage = ({ host, loggedIn, displayId: initialDisplayId }: PreviewPro
 }
 
 // Static method for getting initial props
-PreviewPage.getInitialProps = async (ctx: any): Promise<{ displayId: string; host: string }> => {
+PreviewPage.getInitialProps = async (ctx: NextPageContext): Promise<{ displayId: string; host: string }> => {
   const displayId = ctx.query.id as string // Example: get id from query
   const host =
     ctx.req && ctx.req.headers && ctx.req.headers.host

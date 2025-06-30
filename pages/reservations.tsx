@@ -223,9 +223,9 @@ const ReservationsPage = () => {
       setIsCreateDialogOpen(false);
       resetForm();
       fetchReservations();
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Error creating reservation:", error);
-      toast.error(error.message || "Failed to create reservation");
+      toast.error(error instanceof Error ? error.message : "Failed to create reservation");
     }
   };
 
@@ -260,9 +260,9 @@ const ReservationsPage = () => {
       setEditingReservation(null);
       resetForm();
       fetchReservations();
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Error updating reservation:", error);
-      toast.error(error.message || "Failed to update reservation");
+      toast.error(error instanceof Error ? error.message : "Failed to update reservation");
     }
   };
 
@@ -281,9 +281,9 @@ const ReservationsPage = () => {
 
       toast.success("Reservation deleted successfully");
       fetchReservations();
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Error deleting reservation:", error);
-      toast.error(error.message || "Failed to delete reservation");
+      toast.error(error instanceof Error ? error.message : "Failed to delete reservation");
     }
   };
 

@@ -1,5 +1,6 @@
 import React, { memo, useEffect, useState } from 'react'
 import { useRouter } from 'next/router'
+import { NextPageContext } from 'next'
 
 import DisplayComponent from '../components/Display/Display' // Renamed to DisplayComponent to avoid conflict
 
@@ -146,7 +147,7 @@ const DisplayPageComponent = memo(function DisplayPageComponent({
 // Create a wrapper component for getInitialProps
 const DisplayPage = (props: IDisplayPageProps) => <DisplayPageComponent {...props} />
 
-DisplayPage.getInitialProps = async (ctx: any): Promise<IDisplayPageProps> => {
+DisplayPage.getInitialProps = async (ctx: NextPageContext): Promise<IDisplayPageProps> => {
   const displayId = ctx.query && typeof ctx.query.display === 'string' ? ctx.query.display : undefined
   const layoutId = ctx.query && typeof ctx.query.layout === 'string' ? ctx.query.layout : undefined
   const autostart = ctx.query && ctx.query.autostart === 'true'

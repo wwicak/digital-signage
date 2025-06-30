@@ -166,9 +166,9 @@ const RoomsPage = () => {
       setIsCreateDialogOpen(false);
       resetForm();
       fetchRooms();
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Error creating room:", error);
-      toast.error(error.message || "Failed to create room");
+      toast.error(error instanceof Error ? error.message : "Failed to create room");
     }
   };
 
@@ -193,7 +193,7 @@ const RoomsPage = () => {
 
       if (!response.ok) {
         const error = await response.json();
-        throw new Error(error.message || "Failed to update room");
+        throw new Error(error instanceof Error ? error.message : "Failed to update room");
       }
 
       toast.success("Room updated successfully");
@@ -201,9 +201,9 @@ const RoomsPage = () => {
       setEditingRoom(null);
       resetForm();
       fetchRooms();
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Error updating room:", error);
-      toast.error(error.message || "Failed to update room");
+      toast.error(error instanceof Error ? error.message : "Failed to update room");
     }
   };
 
@@ -217,14 +217,14 @@ const RoomsPage = () => {
 
       if (!response.ok) {
         const error = await response.json();
-        throw new Error(error.message || "Failed to delete room");
+        throw new Error(error instanceof Error ? error.message : "Failed to delete room");
       }
 
       toast.success("Room deleted successfully");
       fetchRooms();
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Error deleting room:", error);
-      toast.error(error.message || "Failed to delete room");
+      toast.error(error instanceof Error ? error.message : "Failed to delete room");
     }
   };
 

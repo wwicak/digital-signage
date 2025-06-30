@@ -13,18 +13,30 @@ export interface MonitoringConfig {
   notificationCooldownMinutes: number;
 }
 
-// Define DisplayStatus document type
+// Define DisplayStatus document type based on the actual model
 interface DisplayStatusDoc {
   _id: string;
   displayId: {
     _id: string;
     name: string;
   };
+  isOnline: boolean;
   lastSeen: Date;
   lastHeartbeat: Date;
+  clientCount: number;
   ipAddress?: string;
   userAgent?: string;
-  markOffline(reason: string): Promise<void>;
+  connectionType: "sse" | "websocket" | "polling";
+  disconnectionReason?: "timeout" | "network_error" | "power_off" | "manual" | "unknown";
+  consecutiveFailures: number;
+  totalUptime: number;
+  totalDowntime: number;
+  createdAt: Date;
+  updatedAt: Date;
+  markOnline(clientInfo?: { ipAddress?: string; userAgent?: string; connectionType?: string }): Promise<void>;
+  markOffline(reason?: string): Promise<void>;
+  updateHeartbeat(): Promise<void>;
+  getUptimePercentage(periodMs?: number): number;
 }
 
 export class DisplayMonitoringService {
@@ -138,7 +150,7 @@ export class DisplayMonitoringService {
       }).populate("displayId");
 
       for (const status of staleStatuses) {
-        await this.handleOfflineDisplay(status, alertCutoffTime);
+        await this.handleOfflineDisplay(status as DisplayStatusDoc, alertCutoffTime);
       }
 
       // Check for displays with consecutive failures
@@ -284,27 +296,26 @@ export class DisplayMonitoringService {
     }
   }
 
-  // Define monitoring stats interface
-  interface MonitoringStats {
-    totalDisplays: number;
-    onlineDisplays: number;
-    offlineDisplays: number;
-    activeAlerts: number;
-    recentHeartbeats: Array<{
-      displayId: string;
-      displayName: string;
-      timestamp: Date;
-      responseTime: number;
-    }>;
-    displayHealth: Array<{
-      displayId: string;
-      status: string;
-      uptime: number;
-      consecutiveFailures: number;
-    }>;
-  }
-
-  public async getMonitoringStats(): Promise<MonitoringStats> { // Return typed stats
+  // Get monitoring statistics with proper return type
+  public async getMonitoringStats(): Promise<{
+    displays: {
+      total: number;
+      online: number;
+      offline: number;
+      uptimePercentage: number;
+    };
+    alerts: {
+      active: number;
+    };
+    heartbeats: {
+      lastHour: number;
+    };
+    service: {
+      isRunning: boolean;
+      config: MonitoringConfig;
+    };
+    lastUpdated: string;
+  }> {
     try {
       await dbConnect();
 
