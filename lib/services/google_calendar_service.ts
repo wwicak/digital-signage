@@ -342,8 +342,8 @@ export class GoogleCalendarService {
   private async makeAuthenticatedRequest(
     endpoint: string,
     accessToken: string,
-    params: Record<string, any> = {}
-  ): Promise<any> {
+    params: Record<string, string | number | boolean> = {} // API request parameters
+  ): Promise<unknown> { // API responses can vary
     try {
       const response = await axios.get(`${this.baseUrl}${endpoint}`, {
         headers: {

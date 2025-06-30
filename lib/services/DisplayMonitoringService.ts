@@ -221,7 +221,7 @@ export class DisplayMonitoringService {
     }
   }
 
-  private async handleFailingDisplay(status: any): Promise<void> {
+  private async handleFailingDisplay(status: DisplayStatusDoc): Promise<void> { // Use typed status document
     try {
       // Check if we already have an active connection alert
       const existingAlert = await DisplayAlert.findOne({
@@ -284,7 +284,27 @@ export class DisplayMonitoringService {
     }
   }
 
-  public async getMonitoringStats(): Promise<any> {
+  // Define monitoring stats interface
+  interface MonitoringStats {
+    totalDisplays: number;
+    onlineDisplays: number;
+    offlineDisplays: number;
+    activeAlerts: number;
+    recentHeartbeats: Array<{
+      displayId: string;
+      displayName: string;
+      timestamp: Date;
+      responseTime: number;
+    }>;
+    displayHealth: Array<{
+      displayId: string;
+      status: string;
+      uptime: number;
+      consecutiveFailures: number;
+    }>;
+  }
+
+  public async getMonitoringStats(): Promise<MonitoringStats> { // Return typed stats
     try {
       await dbConnect();
 

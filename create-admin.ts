@@ -31,8 +31,16 @@ async function createAdmin() {
       role: "admin",
     });
 
-    const registeredUser = await new Promise<any>((resolve, reject) => {
-      User.register(adminUser, "admin123", (err: any, user: any) => {
+    // Define user type based on User model
+    interface RegisteredUser {
+      _id: string;
+      email: string;
+      name: string;
+      role: string;
+    }
+    
+    const registeredUser = await new Promise<RegisteredUser>((resolve, reject) => {
+      User.register(adminUser, "admin123", (err: Error | null, user: RegisteredUser) => { // Typed callback parameters
         if (err) {
           reject(err);
         } else {
