@@ -125,6 +125,13 @@ export default function HomePage() {
               </Link>
             </Button>
 
+            <Button asChild variant='outline' size='lg' className='text-lg px-8 py-6'>
+              <Link href='/display-selector'>
+                <Tv className='mr-2 h-5 w-5' />
+                Setup Display
+              </Link>
+            </Button>
+
             {displays.length > 0 && (
               <div className='flex items-center gap-4'>
                 <span className='text-sm text-muted-foreground'>or view a display:</span>
