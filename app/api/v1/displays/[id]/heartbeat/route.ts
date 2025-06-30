@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import dbConnect from "@/lib/mongodb";
 import DisplayHeartbeat from "@/lib/models/DisplayHeartbeat";
 import Display from "@/lib/models/Display";
+import DisplayStatus from "@/lib/models/DisplayStatus";
 import { z } from "zod";
 
 // Force dynamic rendering
@@ -150,6 +151,33 @@ export async function POST(
     await Display.findByIdAndUpdate(displayId, {
       last_update: serverTime,
     });
+
+    // Update or create DisplayStatus record with IP address
+    let displayStatus = await DisplayStatus.findOne({ displayId });
+    
+    if (!displayStatus) {
+      // Create new status record
+      displayStatus = await DisplayStatus.create({
+        displayId,
+        isOnline: true,
+        lastSeen: serverTime,
+        lastHeartbeat: serverTime,
+        clientCount: 1,
+        ipAddress: clientIP,
+        userAgent,
+        connectionType: "sse",
+        consecutiveFailures: 0,
+        totalUptime: 0,
+        totalDowntime: 0
+      });
+    } else {
+      // Update existing status with new IP and mark online
+      await (displayStatus as any).markOnline({
+        ipAddress: clientIP,
+        userAgent,
+        connectionType: "sse"
+      });
+    }
 
     return NextResponse.json({
       success: true,

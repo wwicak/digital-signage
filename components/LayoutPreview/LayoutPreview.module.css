@@ -1,0 +1,49 @@
+/* Layout Preview Styles */
+.previewContainer {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
+.widgetPreviewContainer {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  border-radius: 4px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.previewGrid {
+  background: #f8f9fa;
+}
+
+.previewGrid .grid-stack-item {
+  border-radius: 4px;
+}
+
+.previewGrid .grid-stack-item-content {
+  border-radius: 4px;
+  overflow: hidden;
+  background: white;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+/* Override GridStack styles for preview mode */
+.previewGrid .grid-stack-item.ui-draggable-disabled {
+  cursor: default;
+}
+
+.previewGrid .grid-stack-item:hover {
+  z-index: auto;
+}
+
+/* Ensure widgets scale properly in preview */
+.widgetPreviewContainer * {
+  pointer-events: none; /* Disable interactions in preview */
+}
+
+/* Allow scrolling in web widgets */
+.widgetPreviewContainer iframe {
+  pointer-events: auto;
+}

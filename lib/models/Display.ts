@@ -32,6 +32,11 @@ export interface IDisplay extends Document {
     emergencyMessageEnabled?: boolean;
   };
   refreshInterval?: number; // In seconds
+  // Registration status
+  registrationStatus?: 'pending' | 'configured';
+  configuredBy?: mongoose.Types.ObjectId; // Admin who configured
+  configuredAt?: Date;
+  registrationIP?: string; // IP address when registered
   // Dynamic properties (not stored in database)
   clientCount?: number;
   isOnline?: boolean;
@@ -106,6 +111,21 @@ const DisplaySchema = new Schema<IDisplay>(
       min: 30,
       max: 3600,
     },
+    registrationStatus: {
+      type: String,
+      enum: ['pending', 'configured'],
+      default: 'pending',
+    },
+    configuredBy: {
+      type: Schema.Types.ObjectId,
+      ref: 'User',
+    },
+    configuredAt: {
+      type: Date,
+    },
+    registrationIP: {
+      type: String,
+    },
   },
   {
     timestamps: { createdAt: "creation_date", updatedAt: "last_update" }, // Automatically manage creation_date and last_update
@@ -165,6 +185,11 @@ export const DisplaySchemaZod = z.object({
     emergencyMessageEnabled: z.boolean().optional(),
   }).optional(),
   refreshInterval: z.number().min(30).max(3600).optional(),
+  // Registration status
+  registrationStatus: z.enum(['pending', 'configured']).optional(),
+  configuredBy: z.instanceof(mongoose.Types.ObjectId).optional(),
+  configuredAt: z.date().optional(),
+  registrationIP: z.string().optional(),
   // Dynamic properties (calculated at runtime)
   clientCount: z.number().optional(),
   isOnline: z.boolean().optional(),
