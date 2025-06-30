@@ -1,6 +1,6 @@
 import dbConnect from '../lib/mongodb';
 import Layout from '../lib/models/Layout';
-import Widget from '../lib/models/Widget';
+import Widget, { WidgetType } from '../lib/models/Widget';
 
 async function seedSampleLayouts() {
   try {
