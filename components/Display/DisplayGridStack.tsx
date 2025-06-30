@@ -56,7 +56,7 @@ const DisplayGridStack: React.FC<DisplayGridStackProps> = memo(({
         content: WidgetComponent ? (
           <WidgetComponent
             key={widget._id}
-            data={widget.options || {}}
+            data={(widget.options || {}) as Record<string, unknown>}
             isPreview={false}
           />
         ) : (

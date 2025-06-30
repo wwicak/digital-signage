@@ -114,7 +114,11 @@ const DisplayHeartbeat: React.FC<DisplayHeartbeatProps> = ({
     let connectionQuality: 'excellent' | 'good' | 'fair' | 'poor' = 'good';
     
     if ('connection' in nav) {
-      const connection = nav.connection;
+      // Type the connection object with proper interface
+      const connection = nav.connection as {
+        effectiveType?: string;
+        type?: string;
+      };
       networkType = connection.effectiveType || connection.type;
       
       // Determine connection quality based on effective type

@@ -182,11 +182,8 @@ const Sidebar: React.FC<ISidebarProps> = ({ loggedIn, displayId, collapsed = fal
         },
       ];
 
-  // Custom hook to check feature flag access
-  const useMenuItemAccess = (featureFlag?: FeatureFlagName) => {
-    const { hasAccess, isLoading } = useFeatureFlagAccess(featureFlag || FeatureFlagName.MENU_DASHBOARD);
-    return featureFlag ? hasAccess : true; // If no feature flag, always show
-  };
+  // Get feature flag access for menu filtering
+  const { hasAccess: hasMenuAccess } = useFeatureFlagAccess(FeatureFlagName.MENU_DASHBOARD);
 
   // Filter menu items based on feature flag access
   const menu = allMenuItems.filter((item) => {

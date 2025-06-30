@@ -367,7 +367,7 @@ export class OutlookCalendarService {
       // 3. Or use the enterprise app management if available
 
       console.log(
-        "Microsoft access tokens should be cleared locally. Direct token revocation not available via API."
+        `Microsoft access tokens should be cleared locally. Direct token revocation not available via API. Token: ${accessToken.substring(0, 10)}...`
       );
 
       // For enterprise applications, you could potentially use:

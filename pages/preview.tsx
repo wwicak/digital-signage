@@ -22,8 +22,10 @@ const PreviewPage = ({ host, loggedIn, displayId: initialDisplayId }: PreviewPro
   useEffect(() => {
     if (displayId) {
       setId(displayId)
+      // Log preview initialization with host information for debugging
+      console.log(`Preview page initialized for display ${displayId} on host: ${host}`);
     }
-  }, [displayId, setId])
+  }, [displayId, setId, host])
 
   return (
     <Frame loggedIn={loggedIn}>

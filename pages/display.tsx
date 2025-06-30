@@ -25,7 +25,9 @@ const DisplayPageComponent = memo(function DisplayPageComponent({
   // Handle client-side hydration
   useEffect(() => {
     setIsClient(true);
-  }, []);
+    // Log host information for debugging display connectivity
+    console.log(`Display page initialized on host: ${host}`);
+  }, [host]);
 
   useEffect(() => {
     // Only run registration on client side to avoid hydration mismatch

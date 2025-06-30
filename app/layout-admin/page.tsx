@@ -174,8 +174,8 @@ function LayoutAdminContent() {
       const x = Math.max(0, Math.min(layoutData.gridConfig.cols - w, Math.floor(widget.x || 0)))
       const y = Math.max(0, Math.floor(widget.y || 0))
 
-      // Check if widget type is valid/supported
-      const isValidWidget = widgetType && widgetType !== 'unknown' && getWidgetType(widgetType) !== 'unknown';
+      // Check if widget type is valid/supported - getWidgetType never returns 'unknown'
+      const isValidWidget = widgetType && widgetType !== 'unknown';
       
       return {
         id: widgetId,
@@ -460,7 +460,7 @@ function LayoutAdminContent() {
                 <SelectContent>
                   <SelectItem value='new'>Create New Layout</SelectItem>
                   {layouts?.layouts?.map((layout: ILayoutData) => (
-                    <SelectItem key={layout._id} value={layout._id}>
+                    <SelectItem key={String(layout._id)} value={String(layout._id)}>
                       {layout.name}
                     </SelectItem>
                   ))}

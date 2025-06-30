@@ -24,8 +24,9 @@ function testSSEEndpoint(path, displayId = null) {
     };
 
     const req = http.request(options, (res) => {
+      const testInfo = displayId ? ` for display ${displayId}` : '';
       console.log(
-        `✅ SSE endpoint ${path} is accessible (Status: ${res.statusCode})`
+        `✅ SSE endpoint ${path}${testInfo} is accessible (Status: ${res.statusCode})`
       );
 
       if (res.statusCode === 200) {
@@ -59,14 +60,16 @@ function testSSEEndpoint(path, displayId = null) {
     });
 
     req.on("error", (err) => {
-      console.log(`❌ SSE endpoint ${path} failed: ${err.message}`);
-      resolve(false);
+      const testInfo = displayId ? ` for display ${displayId}` : '';
+      console.log(`❌ SSE endpoint ${path}${testInfo} failed: ${err.message}`);
+      reject(err);
     });
 
     req.setTimeout(5000, () => {
-      console.log(`⏰ SSE endpoint ${path} timed out`);
+      const testInfo = displayId ? ` for display ${displayId}` : '';
+      console.log(`⏰ SSE endpoint ${path}${testInfo} timed out`);
       req.destroy();
-      resolve(false);
+      reject(new Error('Request timeout'));
     });
 
     req.end();

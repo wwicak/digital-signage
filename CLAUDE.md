@@ -1,5 +1,59 @@
 # CLAUDE.md
 
+
+# Using Claude-Gemini CLI
+
+This project uses the claude-gemini CLI for large codebase analysis. When analyzing files that exceed my context limits, I will automatically use this tool.
+
+## Quick Reference
+
+```bash
+# ✅ CORRECT - Waits for results
+claude-gemini sync "@src/ @lib/ Find all API endpoints"
+cg sync "@src/ @lib/ Find all API endpoints"
+cg "@src/ @lib/ Find all API endpoints"  # Short form (defaults to sync)
+
+# ❌ WRONG - May not wait for results
+gemini -p "@src/ @lib/ Find all API endpoints"
+```
+
+## Usage Examples
+
+```bash
+# Enhanced codebase analysis (automatic code2prompt) - both forms work
+cg sync "Analyze the project architecture"
+cg "Review security patterns in the codebase"  # Short form
+
+# Specific file/directory analysis
+cg sync "@src/auth.ts @src/middleware.ts Analyze authentication flow"
+cg "@src/ @lib/ Find all WebSocket implementations"
+
+# Advanced filtering with code2prompt
+cg sync "Audit authentication logic" --include "*.ts,*.js" --exclude "**/tests/**"
+
+# Use ripgrep for targeted searches (legacy mode)
+cg sync -r "@src/ Find all useState hooks"
+
+# Custom analysis with line numbers
+cg sync "Review API endpoints" --line-numbers
+
+# Force legacy mode if needed
+cg sync "@src/ Find endpoints" --no-code2prompt
+
+# Analyze with timeout
+cg sync -t 600 "@./ Comprehensive security audit"
+
+## Important for Claude
+
+When I detect that a task requires analyzing large portions of the codebase, I MUST:
+1. Use `claude-gemini` or `cg` command (NOT direct gemini)
+2. Wait for "✅ Analysis complete!" message
+3. Use the comprehensive results to answer your question
+4. NOT proceed with limited analysis while waiting
+
+The tool is globally installed and available in all your projects.
+
+
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
 ## Common Development Commands

@@ -150,10 +150,28 @@ DisplayStatusSchema.methods.updateHeartbeat = function () {
 };
 
 DisplayStatusSchema.methods.getUptimePercentage = function (periodMs?: number) {
-  const total = this.totalUptime + this.totalDowntime;
-  if (total === 0) return 100; // No data means 100% uptime
+  // If no period is specified, use total uptime
+  if (!periodMs) {
+    const total = this.totalUptime + this.totalDowntime;
+    if (total === 0) return 100; // No data means 100% uptime
+    return (this.totalUptime / total) * 100;
+  }
 
-  return (this.totalUptime / total) * 100;
+  // Calculate uptime for the specified period
+  const now = new Date();
+  const periodStart = new Date(now.getTime() - periodMs);
+  
+  // If the display was created after the period start, use its entire lifetime
+  if (this.createdAt > periodStart) {
+    const lifetimeMs = now.getTime() - this.createdAt.getTime();
+    const uptime = this.isOnline ? lifetimeMs : Math.max(0, lifetimeMs - (now.getTime() - this.lastSeen.getTime()));
+    return (uptime / lifetimeMs) * 100;
+  }
+
+  // For displays older than the period, calculate based on recent activity
+  const recentDowntime = this.isOnline ? 0 : Math.min(periodMs, now.getTime() - this.lastSeen.getTime());
+  const uptime = periodMs - recentDowntime;
+  return (uptime / periodMs) * 100;
 };
 
 // Static methods

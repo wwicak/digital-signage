@@ -20,13 +20,7 @@ const ButtonGroup: React.FC<IButtonGroupProps> = ({
   className = "", // Default className to empty string
   ...restDivProps // Capture other standard div attributes
 }) => {
-  // Determine justifyContent based on align prop
-  const justifyContent =
-    align === "center"
-      ? "center"
-      : align === "left"
-        ? "flex-start"
-        : "flex-end";
+  // Note: Using Tailwind classes for alignment instead of inline styles
 
   /*
    * Base styles are applied via JSX style tag for dynamic properties like justifyContent.

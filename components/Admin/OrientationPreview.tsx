@@ -7,7 +7,6 @@ interface OrientationPreviewProps {
 const OrientationPreview: React.FC<OrientationPreviewProps> = ({
   orientation,
 }) => {
-  const isLandscape = orientation === "landscape";
   const isPortrait = orientation === "portrait";
 
   return (

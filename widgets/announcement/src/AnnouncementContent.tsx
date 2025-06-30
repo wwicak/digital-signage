@@ -41,7 +41,7 @@ const AnnouncementContent: React.FC<IAnnouncementContentProps> = React.memo(({ d
         <div className='icon'>
           <AlertTriangle style={{ fontSize: '0.9em', color: accentColor }} />
         </div>
-        <span>Announcement</span>
+        <span>Announcement{isPreview ? ' (Preview)' : ''}</span>
       </div>
       <AutoScroll style={{ display: 'block', flex: 1, overflowY: 'auto', minHeight: 0 }}>
         <div className='text-content' style={{ color: textColor }}>

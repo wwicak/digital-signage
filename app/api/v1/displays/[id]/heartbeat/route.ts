@@ -29,6 +29,9 @@ const HeartbeatRequestSchema = z.object({
       renderTime: z.number().optional(),
       loadTime: z.number().optional(),
       errorCount: z.number().optional(),
+      // Extended performance metrics for comprehensive monitoring
+      memoryHeapUsed: z.number().optional(),
+      networkLatency: z.number().optional(),
     })
     .optional(),
   disconnect: z.boolean().optional(),

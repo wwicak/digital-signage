@@ -32,15 +32,29 @@ interface ExpressApp {
 }
 
 export function initializeSSE(app: ExpressApp): void { // Express app type
-  // app should be Express
-  /*
-   * In a real scenario, this would set up the app.get('/api/v1/events/:displayId', handler) route.
-   * The handler would then use addClient and removeClient.
-   * For testing purposes, if tests call this, it needs to exist.
-   * The tests seem to grab the handler from mockApp.get().mock.calls[0][1],
-   * so this function might not need to do much if the test setup is self-contained for the handler logic.
-   * console.log("initializeSSE called on app (placeholder)");
-   */
+  // Set up SSE endpoint for display events
+  app.get('/api/v1/events/:displayId', (req: unknown, res: Response) => {
+    const displayId = (req as { params?: { displayId?: string } }).params?.displayId;
+    if (!displayId) {
+      res.status(400).json({ error: 'Display ID required' });
+      return;
+    }
+    
+    // Set up SSE headers
+    res.writeHead(200, {
+      'Content-Type': 'text/event-stream',
+      'Cache-Control': 'no-cache',
+      'Connection': 'keep-alive'
+    });
+    
+    // Add client to our registry
+    addClient(displayId, res);
+    
+    // Handle client disconnect
+    res.on('close', () => {
+      removeClient(displayId, res);
+    });
+  });
 }
 
 export function sendSSEUpdate(data: Record<string, unknown>): void { // SSE update data type

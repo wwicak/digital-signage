@@ -174,7 +174,8 @@ export async function POST(request: NextRequest) {
       },
     });
 
-    sendEventToDisplay("all", "reservationCreated", reservation);
+    // Convert the populated Mongoose document to a plain object for SSE transmission
+    sendEventToDisplay("all", "reservationCreated", reservation.toObject() as unknown as Record<string, unknown>);
 
     return NextResponse.json(reservation, { status: 201 });
   } catch (error: unknown) {

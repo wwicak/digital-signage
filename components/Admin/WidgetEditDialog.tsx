@@ -27,6 +27,7 @@ interface GridStackElement extends Element {
 import * as z from "zod";
 import { WidgetDataZod, WidgetTypeZod } from "@/lib/models/Widget"; // Import Zod schema for widget's 'data' field and type
 import { Loader2, AlertCircle } from "lucide-react";
+import { IWidgetOptionsEditorProps } from '../../widgets/base_widget';
 
 // Widget data cache to avoid repeated API calls
 const widgetDataCache = new Map<string, { data: IWidgetData; timestamp: number }>();
@@ -55,17 +56,6 @@ export interface IWidgetEditDialog {
   close: (e?: React.MouseEvent) => Promise<void>;
 }
 
-/*
- * Zod schema for props of the generic OptionsComponent
- * TData is effectively Record<string, any> based on original usage
- */
-export const WidgetOptionsEditorPropsSchema = z.object({
-  data: z.record(z.string(), z.unknown()).optional(),
-  onChange: z.function().args(z.record(z.string(), z.unknown())).returns(z.void()),
-});
-export type IWidgetOptionsEditorProps = z.infer<
-  typeof WidgetOptionsEditorPropsSchema
->;
 
 // Zod schema for WidgetEditDialog props
 export const WidgetEditDialogPropsSchema = z.object({
@@ -409,8 +399,8 @@ class WidgetEditDialog
               ) : (
                 <div className='space-y-6'>
                   <OptionsComponent
-                    data={widgetConfigData || {}}
-                    onChange={this.handleOptionsChange}
+                    data={widgetConfigData}
+                    onChange={this.handleOptionsChange as (newData: unknown) => void}
                   />
                 </div>
               )}

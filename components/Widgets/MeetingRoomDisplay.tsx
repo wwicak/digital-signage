@@ -379,7 +379,7 @@ const ReservationCard: React.FC<IReservationCardProps> = ({
               <div className='flex items-center'>
                 <Clock className='mr-1 h-3 w-3' />
                 <span>
-                  {formatTime(reservation.start_time)} - {formatTime(reservation.end_time)}
+                  {formatDate(reservation.start_time)} {formatTime(reservation.start_time)} - {formatTime(reservation.end_time)}
                 </span>
               </div>
             </div>
