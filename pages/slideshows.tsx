@@ -1,6 +1,6 @@
 import React, { useRef, useEffect } from 'react'
 import { Images } from 'lucide-react'
-import type { NextPageContext } from 'next'
+import type { NextPageContext } from 'next/types'
 
 import Frame from '../components/Admin/Frame.tsx'
 import SlideshowListComponent from '../components/Admin/SlideshowList.tsx' // Renamed

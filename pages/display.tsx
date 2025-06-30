@@ -1,6 +1,6 @@
 import React, { memo, useEffect, useState } from 'react'
 import { useRouter } from 'next/router'
-import { NextPageContext } from 'next'
+import type { NextPageContext } from 'next/types'
 
 import DisplayComponent from '../components/Display/Display' // Renamed to DisplayComponent to avoid conflict
 

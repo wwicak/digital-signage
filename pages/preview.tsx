@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react'
 import { useRouter } from 'next/router'
-import { NextPageContext } from 'next'
+import type { NextPageContext } from 'next/types'
 
 import Frame from '../components/Admin/Frame.tsx' // Assuming .tsx
 import DisplayComponent from '../components/Display/Display.tsx' // Renamed to avoid conflict, assuming .tsx

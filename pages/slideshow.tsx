@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, memo } from 'react'
 import _ from 'lodash'
-import { NextPageContext } from 'next'
+import type { NextPageContext } from 'next/types'
 import { Edit } from 'lucide-react'
 
 import Frame from '../components/Admin/Frame'

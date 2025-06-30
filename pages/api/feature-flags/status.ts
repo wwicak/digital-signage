@@ -1,4 +1,4 @@
-import { NextApiRequest, NextApiResponse } from "next";
+import type { NextApiRequest, NextApiResponse } from "next/types";
 import dbConnect from "@/lib/mongodb";
 import FeatureFlag from "@/lib/models/FeatureFlag";
 

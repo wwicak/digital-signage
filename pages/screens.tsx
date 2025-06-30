@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, memo } from 'react'
 import { Tv, Layout, Settings } from 'lucide-react'
-import { NextPageContext } from 'next'
+import type { NextPageContext } from 'next/types'
 
 import Frame from '../components/Admin/Frame.tsx' // Assuming .tsx
 import ScreenListComponent, { IScreenListRef } from '../components/Admin/ScreenList.tsx' // Renamed, Assuming .tsx

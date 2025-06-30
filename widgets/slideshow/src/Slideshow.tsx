@@ -217,20 +217,20 @@ class Slideshow extends Component<ISlideshowWidgetContentProps, ISlideshowWidget
     switch (type) {
       case 'photo':
       case 'image':
-        component = PhotoSlide
+        component = PhotoSlide as unknown as ComponentType<SlideComponentProps>
         break
       case 'video':
-        component = VideoSlide
+        component = VideoSlide as unknown as ComponentType<SlideComponentProps>
         break
       case 'youtube':
-        component = YoutubeSlide
+        component = YoutubeSlide as unknown as ComponentType<SlideComponentProps>
         break
       case 'web':
-        component = WebSlide
+        component = WebSlide as unknown as ComponentType<SlideComponentProps>
         break
       // Add cases for 'announcement', 'list', 'congrats' etc. if they can be part of a slideshow
       default:
-        component = GenericSlide // Fallback for unknown or generic types
+        component = GenericSlide as unknown as ComponentType<SlideComponentProps> // Fallback for unknown or generic types
     }
     
     this.componentCache.set(type, component)
@@ -246,7 +246,7 @@ class Slideshow extends Component<ISlideshowWidgetContentProps, ISlideshowWidget
         key={slide._id || `slide-${index}`} // Use slide._id for key
         slide={slide} // Pass full slide data
         show={index === currentSlideIndex} // Prop to control visibility/activity
-        ref={(ref: ISlideInstance | null) => (this.slideRefs[index] = ref)}
+        ref={(ref: { onSlideLoaded?: () => void; onSlideEnded?: () => void } | null) => (this.slideRefs[index] = ref as ISlideInstance | null)}
         // Other props like isPreview can be passed here if needed
       />
     )
