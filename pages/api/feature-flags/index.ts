@@ -30,7 +30,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       // Build query
       const query: { type?: string; enabled?: boolean } = {};
       if (type) {
-        query.type = type;
+        query.type = Array.isArray(type) ? type[0] : type;
       }
       if (enabled !== undefined) {
         query.enabled = enabled === "true";

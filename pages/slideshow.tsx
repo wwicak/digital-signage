@@ -123,7 +123,7 @@ SlideshowPage.getInitialProps = async (ctx: NextPageContext): Promise<Partial<Sl
   const id = ctx.query.id as string | undefined
   const host =
     ctx.req && ctx.req.headers && ctx.req.headers.host
-      ? (ctx.req.socket?.encrypted ? 'https://' : 'http://') + ctx.req.headers.host
+      ? ((ctx.req.socket as any)?.encrypted ? 'https://' : 'http://') + ctx.req.headers.host
       : (typeof window !== 'undefined' ? window.location.origin : '')
   
   if (id) {

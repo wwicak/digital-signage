@@ -18,8 +18,8 @@ const DEFAULT_SLIDE_DURATION_MS = 5000
 interface SlideComponentProps {
   slide: ISlideData;
   isActive: boolean;
+  show?: boolean;
   display?: string;
-  ref?: React.RefObject<{ onSlideLoaded?: () => void; onSlideEnded?: () => void }>;
 }
 
 // Interface for slide component refs - Zod not typically used here
@@ -245,8 +245,8 @@ class Slideshow extends Component<ISlideshowWidgetContentProps, ISlideshowWidget
       <SlideComponent
         key={slide._id || `slide-${index}`} // Use slide._id for key
         slide={slide} // Pass full slide data
+        isActive={index === currentSlideIndex} // Use isActive instead of show
         show={index === currentSlideIndex} // Prop to control visibility/activity
-        ref={(ref: { onSlideLoaded?: () => void; onSlideEnded?: () => void } | null) => (this.slideRefs[index] = ref as ISlideInstance | null)}
         // Other props like isPreview can be passed here if needed
       />
     )

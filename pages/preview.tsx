@@ -46,7 +46,7 @@ PreviewPage.getInitialProps = async (ctx: NextPageContext): Promise<{ displayId:
   const displayId = ctx.query.id as string // Example: get id from query
   const host =
     ctx.req && ctx.req.headers && ctx.req.headers.host
-      ? (ctx.req.socket?.encrypted ? 'https://' : 'http://') + ctx.req.headers.host
+      ? ((ctx.req.socket as any)?.encrypted ? 'https://' : 'http://') + ctx.req.headers.host
       : (typeof window !== 'undefined' ? window.location.origin : '')
   return { displayId: displayId || 'defaultDisplayId', host } // Ensure displayId has a fallback or handle if undefined
 }

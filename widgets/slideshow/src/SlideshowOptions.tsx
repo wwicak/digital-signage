@@ -120,14 +120,14 @@ class SlideshowOptions extends Component<ISlideshowWidgetOptionsProps, ISlidesho
                 name='show_progressbar'
                 label='Show Progress Bar'
                 checked={show_progressbar}
-                onChange={(name, checked) => this.handleChange(name as keyof ISlideshowWidgetDefaultData, checked)}
+                onChange={(name, checked) => this.handleChange(name as string, checked)}
             />
             <Input
                 type='checkbox'
                 name='random_order'
                 label='Random Slide Order'
                 checked={random_order}
-                onChange={(name, checked) => this.handleChange(name as keyof ISlideshowWidgetDefaultData, checked)}
+                onChange={(name, checked) => this.handleChange(name as string, checked)}
             />
         </InlineInputGroup>
         
