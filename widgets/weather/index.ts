@@ -17,7 +17,7 @@ export interface IWeatherDefaultData extends Record<string, unknown> {
 }
 
 // Define the widget definition arguments for the Weather widget
-const weatherDefinitionArgs: IWidgetDefinitionArgs<IWeatherDefaultData> = {
+const weatherDefinitionArgs: IWidgetDefinitionArgs<Record<string, unknown>> = {
   name: 'Weather',
   type: 'weather',
   version: '0.1',
@@ -28,9 +28,9 @@ const weatherDefinitionArgs: IWidgetDefinitionArgs<IWeatherDefaultData> = {
     showForecast: true, // Default to show forecast
     apiKey: '', // API key might be needed
     locationName: '', // Will be updated after fetching weather
-  },
-  WidgetComponent: WeatherContent as ComponentType<IWidgetContentProps<IWeatherDefaultData>>,
-  OptionsComponent: WeatherOptions as ComponentType<IWidgetOptionsEditorProps<IWeatherDefaultData>>,
+  } as Record<string, unknown>,
+  WidgetComponent: WeatherContent as unknown as ComponentType<IWidgetContentProps<Record<string, unknown>>>,
+  OptionsComponent: WeatherOptions as unknown as ComponentType<IWidgetOptionsEditorProps<Record<string, unknown>>>,
 }
 
 // Renamed from Weather to WeatherWidget for consistency

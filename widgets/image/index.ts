@@ -17,7 +17,7 @@ export interface IImageDefaultData extends Record<string, unknown> {
 }
 
 // Define the widget definition arguments for the Image widget
-const imageDefinitionArgs: IWidgetDefinitionArgs<IImageDefaultData> = {
+const imageDefinitionArgs: IWidgetDefinitionArgs<Record<string, unknown>> = {
   name: 'Image',
   type: 'image',
   version: '0.1',
@@ -28,9 +28,9 @@ const imageDefinitionArgs: IWidgetDefinitionArgs<IImageDefaultData> = {
     fit: 'contain',
     color: '#2d3436', // Default background: Dark Gray
     altText: '',
-  },
-  WidgetComponent: ImageContent as ComponentType<IWidgetContentProps<IImageDefaultData>>,
-  OptionsComponent: ImageOptions as ComponentType<IWidgetOptionsEditorProps<IImageDefaultData>>
+  } as Record<string, unknown>,
+  WidgetComponent: ImageContent as unknown as ComponentType<IWidgetContentProps<Record<string, unknown>>>,
+  OptionsComponent: ImageOptions as unknown as ComponentType<IWidgetOptionsEditorProps<Record<string, unknown>>>
 }
 
 // Renamed from Image to ImageWidget to avoid potential naming conflicts with global Image type

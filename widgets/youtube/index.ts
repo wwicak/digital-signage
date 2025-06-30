@@ -21,7 +21,7 @@ export interface IYoutubeDefaultData extends Record<string, unknown> {
 }
 
 // Define the widget definition arguments for the YouTube widget
-const youtubeDefinitionArgs: IWidgetDefinitionArgs<IYoutubeDefaultData> = {
+const youtubeDefinitionArgs: IWidgetDefinitionArgs<Record<string, unknown>> = {
   name: 'YouTube Video', // More descriptive name
   type: 'youtube',
   version: '0.1',
@@ -34,9 +34,9 @@ const youtubeDefinitionArgs: IWidgetDefinitionArgs<IYoutubeDefaultData> = {
     start_time: 0,
     end_time: 0, // 0 typically means play to end
     show_captions: false,
-  },
-  WidgetComponent: YoutubeContent as ComponentType<IWidgetContentProps<IYoutubeDefaultData>>,
-  OptionsComponent: YoutubeOptions as ComponentType<IWidgetOptionsEditorProps<IYoutubeDefaultData>>,
+  } as Record<string, unknown>,
+  WidgetComponent: YoutubeContent as unknown as ComponentType<IWidgetContentProps<Record<string, unknown>>>,
+  OptionsComponent: YoutubeOptions as unknown as ComponentType<IWidgetOptionsEditorProps<Record<string, unknown>>>,
 }
 
 // Renamed from Web (in original JS) to YoutubeWidget

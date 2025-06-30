@@ -16,7 +16,7 @@ export interface ICongratsDefaultData extends Record<string, unknown> {
 }
 
 // Define the widget definition arguments for the Congrats widget
-const congratsDefinitionArgs: IWidgetDefinitionArgs<ICongratsDefaultData> = {
+const congratsDefinitionArgs: IWidgetDefinitionArgs<Record<string, unknown>> = {
   name: 'Congratulations',
   type: 'congrats',
   version: '0.1',
@@ -28,9 +28,9 @@ const congratsDefinitionArgs: IWidgetDefinitionArgs<ICongratsDefaultData> = {
     textColor: '#ffffff', // White
     fontSize: 16,
     recipient: '', // Default recipient to empty string
-  },
-  WidgetComponent: CongratsContent as ComponentType<IWidgetContentProps<ICongratsDefaultData>>,
-  OptionsComponent: CongratsOptions as ComponentType<IWidgetOptionsEditorProps<ICongratsDefaultData>>
+  } as Record<string, unknown>,
+  WidgetComponent: CongratsContent as unknown as ComponentType<IWidgetContentProps<Record<string, unknown>>>,
+  OptionsComponent: CongratsOptions as unknown as ComponentType<IWidgetOptionsEditorProps<Record<string, unknown>>>
 }
 
 class Congrats extends BaseWidget {

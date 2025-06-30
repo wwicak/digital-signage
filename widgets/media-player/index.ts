@@ -30,7 +30,7 @@ export interface IMediaPlayerDefaultData extends Record<string, unknown> {
 }
 
 // Define the widget definition arguments for the Media Player widget
-const mediaPlayerDefinitionArgs: IWidgetDefinitionArgs<IMediaPlayerDefaultData> = {
+const mediaPlayerDefinitionArgs: IWidgetDefinitionArgs<Record<string, unknown>> = {
   name: "Media Player",
   type: "media-player",
   version: "1.0.0",
@@ -53,9 +53,9 @@ const mediaPlayerDefinitionArgs: IWidgetDefinitionArgs<IMediaPlayerDefaultData> 
       message: "Media content is not available",
       backgroundColor: "#000000",
     },
-  },
-  WidgetComponent: MediaPlayerContent as ComponentType<IWidgetContentProps<IMediaPlayerDefaultData>>,
-  OptionsComponent: MediaPlayerOptions as ComponentType<IWidgetOptionsEditorProps<IMediaPlayerDefaultData>>,
+  } as Record<string, unknown>,
+  WidgetComponent: MediaPlayerContent as unknown as ComponentType<IWidgetContentProps<Record<string, unknown>>>,
+  OptionsComponent: MediaPlayerOptions as unknown as ComponentType<IWidgetOptionsEditorProps<Record<string, unknown>>>,
 };
 
 // Create and export the widget instance

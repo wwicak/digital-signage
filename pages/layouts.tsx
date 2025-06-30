@@ -241,7 +241,7 @@ const LayoutsComponent = memo(function LayoutsComponent({ loggedIn }: LayoutsPro
           ) : (
             <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6'>
               {layouts.map((layout) => (
-                <Card key={layout._id} className='group hover:shadow-lg transition-shadow'>
+                <Card key={String(layout._id)} className='group hover:shadow-lg transition-shadow'>
                   <CardHeader>
                     <div className='flex items-center justify-between'>
                       <CardTitle className='text-lg'>{layout.name}</CardTitle>
@@ -286,7 +286,7 @@ const LayoutsComponent = memo(function LayoutsComponent({ loggedIn }: LayoutsPro
                         <Button
                           variant='outline'
                           size='sm'
-                          onClick={() => handleViewLayout(layout._id)}
+                          onClick={() => handleViewLayout(String(layout._id))}
                         >
                           <Eye className='h-3 w-3 mr-1' />
                           Preview
@@ -295,7 +295,7 @@ const LayoutsComponent = memo(function LayoutsComponent({ loggedIn }: LayoutsPro
                         <Button
                           variant='outline'
                           size='sm'
-                          onClick={() => handleEditLayout(layout._id)}
+                          onClick={() => handleEditLayout(String(layout._id))}
                         >
                           <Edit className='h-3 w-3 mr-1' />
                           Edit
@@ -304,7 +304,7 @@ const LayoutsComponent = memo(function LayoutsComponent({ loggedIn }: LayoutsPro
                         <Button
                           variant='outline'
                           size='sm'
-                          onClick={() => handleDuplicateLayout(layout._id)}
+                          onClick={() => handleDuplicateLayout(String(layout._id))}
                           disabled={isDuplicating}
                         >
                           <Copy className='h-3 w-3 mr-1' />
@@ -314,7 +314,7 @@ const LayoutsComponent = memo(function LayoutsComponent({ loggedIn }: LayoutsPro
                         <Button
                           variant='outline'
                           size='sm'
-                          onClick={() => handleDeleteLayout(layout._id)}
+                          onClick={() => handleDeleteLayout(String(layout._id))}
                           disabled={isDeleting}
                           className='text-destructive hover:text-destructive'
                         >
@@ -328,7 +328,7 @@ const LayoutsComponent = memo(function LayoutsComponent({ loggedIn }: LayoutsPro
                           Display URL:
                         </p>
                         <code className='text-xs bg-background px-2 py-1 rounded border break-all'>
-                          {typeof window !== 'undefined' ? window.location.origin : ''}/display-selector?layout={layout._id}
+                          {typeof window !== 'undefined' ? window.location.origin : ''}/display-selector?layout={String(layout._id)}
                         </code>
                         <p className='text-xs text-muted-foreground mt-1'>
                           Open this URL on your display device to auto-register and show this layout

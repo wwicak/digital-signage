@@ -14,7 +14,7 @@ export interface ISlideshowWidgetDefaultData extends Record<string, unknown> {
 }
 
 // Define the widget definition arguments for the Slideshow widget
-const slideshowWidgetDefinitionArgs: IWidgetDefinitionArgs<ISlideshowWidgetDefaultData> = {
+const slideshowWidgetDefinitionArgs: IWidgetDefinitionArgs<Record<string, unknown>> = {
   name: 'Slideshow',
   type: 'slideshow',
   version: '0.1',
@@ -24,9 +24,9 @@ const slideshowWidgetDefinitionArgs: IWidgetDefinitionArgs<ISlideshowWidgetDefau
     show_progressbar: true,
     transition_time: 1, // Default 1 second
     random_order: false,
-  },
-  WidgetComponent: SlideshowContent as ComponentType<IWidgetContentProps<ISlideshowWidgetDefaultData>>,
-  OptionsComponent: SlideshowOptions as ComponentType<IWidgetOptionsEditorProps<ISlideshowWidgetDefaultData>>,
+  } as Record<string, unknown>,
+  WidgetComponent: SlideshowContent as unknown as ComponentType<IWidgetContentProps<Record<string, unknown>>>,
+  OptionsComponent: SlideshowOptions as unknown as ComponentType<IWidgetOptionsEditorProps<Record<string, unknown>>>,
 }
 
 // Renamed from Slideshow to SlideshowWidget for consistency

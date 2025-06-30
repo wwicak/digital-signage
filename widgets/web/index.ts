@@ -18,7 +18,7 @@ export interface IWebDefaultData extends Record<string, unknown> {
 }
 
 // Define the widget definition arguments for the Web widget
-const webDefinitionArgs: IWidgetDefinitionArgs<IWebDefaultData> = {
+const webDefinitionArgs: IWidgetDefinitionArgs<Record<string, unknown>> = {
   name: "Web Page", // Changed name to be more descriptive
   type: "web",
   version: "0.1",
@@ -32,9 +32,9 @@ const webDefinitionArgs: IWidgetDefinitionArgs<IWebDefaultData> = {
     allowInteraction: false, // Default to no interaction
     useProxy: false, // Default to direct loading
     showErrorMessage: true, // Default to showing error messages
-  },
-  WidgetComponent: WebContent as ComponentType<IWidgetContentProps<IWebDefaultData>>,
-  OptionsComponent: WebOptions as ComponentType<IWidgetOptionsEditorProps<IWebDefaultData>>,
+  } as Record<string, unknown>,
+  WidgetComponent: WebContent as unknown as ComponentType<IWidgetContentProps<Record<string, unknown>>>,
+  OptionsComponent: WebOptions as unknown as ComponentType<IWidgetOptionsEditorProps<Record<string, unknown>>>,
 };
 
 // Renamed from Web to WebWidget for consistency

@@ -23,7 +23,7 @@ export interface IListDefaultData extends Record<string, unknown> {
 }
 
 // Define the widget definition arguments for the List widget
-const listDefinitionArgs: IWidgetDefinitionArgs<IListDefaultData> = {
+const listDefinitionArgs: IWidgetDefinitionArgs<Record<string, unknown>> = {
   name: 'List',
   type: 'list',
   version: '0.1',
@@ -35,9 +35,9 @@ const listDefinitionArgs: IWidgetDefinitionArgs<IListDefaultData> = {
     list: [{ text: 'First item', label: null }], // Default with one item
     ordered: false, // Default to unordered list
     fontSize: 16, // Default font size
-  },
-  WidgetComponent: ListContent as ComponentType<IWidgetContentProps<IListDefaultData>>,
-  OptionsComponent: ListOptions as ComponentType<IWidgetOptionsEditorProps<IListDefaultData>>,
+  } as Record<string, unknown>,
+  WidgetComponent: ListContent as unknown as ComponentType<IWidgetContentProps<Record<string, unknown>>>,
+  OptionsComponent: ListOptions as unknown as ComponentType<IWidgetOptionsEditorProps<Record<string, unknown>>>,
 }
 
 // Renamed from List to ListWidget for consistency and to avoid potential conflicts

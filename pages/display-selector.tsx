@@ -267,14 +267,14 @@ export default function DisplaySelector() {
             <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 w-full'>
               {layouts.map((layout) => (
                 <Card
-                  key={layout._id}
+                  key={String(layout._id)}
                   className={cn(
                     "cursor-pointer transition-all duration-200 hover:shadow-lg w-full max-w-full",
                     selectedLayout === layout._id
                       ? "ring-2 ring-blue-500 bg-blue-50"
                       : "hover:shadow-md"
                   )}
-                  onClick={() => handleLayoutSelect(layout._id)}
+                  onClick={() => handleLayoutSelect(String(layout._id))}
                 >
                   <CardHeader>
                     <div className='flex items-center justify-between'>
@@ -291,7 +291,7 @@ export default function DisplaySelector() {
                       {/* Layout Preview */}
                       <div className='flex justify-center'>
                         <LayoutPreview
-                          layout={layout}
+                          layout={layout as unknown as any}
                           scale={0.25}
                           className="border border-gray-200"
                         />

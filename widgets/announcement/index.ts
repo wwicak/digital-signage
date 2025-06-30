@@ -16,7 +16,7 @@ export interface IAnnouncementDefaultData extends Record<string, unknown> {
 }
 
 // Define the widget definition arguments for the Announcement widget
-const announcementDefinitionArgs: IWidgetDefinitionArgs<IAnnouncementDefaultData> = {
+const announcementDefinitionArgs: IWidgetDefinitionArgs<Record<string, unknown>> = {
   name: 'Announcement',
   type: 'announcement',
   version: '0.1',
@@ -28,9 +28,9 @@ const announcementDefinitionArgs: IWidgetDefinitionArgs<IAnnouncementDefaultData
     titleColor: '#fff0f0', // Snow
     accentColor: '#EDC951', // Goldenrod
     title: 'Announcement', // Default title
-  },
-  WidgetComponent: AnnouncementContent as ComponentType<IWidgetContentProps<IAnnouncementDefaultData>>,
-  OptionsComponent: AnnouncementOptions as ComponentType<IWidgetOptionsEditorProps<IAnnouncementDefaultData>>
+  } as Record<string, unknown>,
+  WidgetComponent: AnnouncementContent as unknown as ComponentType<IWidgetContentProps<Record<string, unknown>>>,
+  OptionsComponent: AnnouncementOptions as unknown as ComponentType<IWidgetOptionsEditorProps<Record<string, unknown>>>
 }
 
 class Announcement extends BaseWidget {

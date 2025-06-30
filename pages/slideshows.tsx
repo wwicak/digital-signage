@@ -1,6 +1,6 @@
 import React, { useRef, useEffect } from 'react'
 import { Images } from 'lucide-react'
-import { NextPageContext } from 'next'
+import type { NextPageContext } from 'next'
 
 import Frame from '../components/Admin/Frame.tsx'
 import SlideshowListComponent from '../components/Admin/SlideshowList.tsx' // Renamed
@@ -66,7 +66,7 @@ const Slideshows: React.FC<SlideshowsProps> = ({ loggedIn, displayId }) => {
 
         {/* Slideshows List */}
         <div className='space-y-6'>
-          <SlideshowListComponent ref={slideshowList} />
+          <SlideshowListComponent ref={slideshowList as any} />
         </div>
         
         <Dialog><div></div></Dialog>

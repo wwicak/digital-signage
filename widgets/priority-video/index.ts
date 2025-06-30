@@ -26,7 +26,7 @@ export interface IPriorityVideoDefaultData extends Record<string, unknown> {
 }
 
 // Define the widget definition arguments for the Priority Video widget
-const priorityVideoDefinitionArgs: IWidgetDefinitionArgs<IPriorityVideoDefaultData> = {
+const priorityVideoDefinitionArgs: IWidgetDefinitionArgs<Record<string, unknown>> = {
   name: "Priority Scheduled Video",
   type: "priority-video",
   version: "1.0.0",
@@ -47,9 +47,9 @@ const priorityVideoDefinitionArgs: IWidgetDefinitionArgs<IPriorityVideoDefaultDa
     },
     priority: 100, // High priority
     playOnce: true, // Play only once per activation
-  },
-  WidgetComponent: PriorityVideoContent as ComponentType<IWidgetContentProps<IPriorityVideoDefaultData>>,
-  OptionsComponent: PriorityVideoOptions as ComponentType<IWidgetOptionsEditorProps<IPriorityVideoDefaultData>>,
+  } as Record<string, unknown>,
+  WidgetComponent: PriorityVideoContent as unknown as ComponentType<IWidgetContentProps<Record<string, unknown>>>,
+  OptionsComponent: PriorityVideoOptions as unknown as ComponentType<IWidgetOptionsEditorProps<Record<string, unknown>>>,
 };
 
 // Create and export the widget instance

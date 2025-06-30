@@ -15,7 +15,7 @@ export interface IMeetingRoomDefaultData extends Record<string, unknown> {
 }
 
 // Define the widget definition arguments for the Meeting Room widget
-const meetingRoomDefinitionArgs: IWidgetDefinitionArgs<IMeetingRoomDefaultData> = {
+const meetingRoomDefinitionArgs: IWidgetDefinitionArgs<Record<string, unknown>> = {
   name: 'Meeting Room Display',
   type: 'meeting-room',
   version: '1.0.0',
@@ -26,9 +26,9 @@ const meetingRoomDefinitionArgs: IWidgetDefinitionArgs<IMeetingRoomDefaultData> 
     showUpcoming: true,
     maxReservations: 10,
     title: "Today's Meetings",
-  },
-  WidgetComponent: MeetingRoomContent as ComponentType<IWidgetContentProps<IMeetingRoomDefaultData>>,
-  OptionsComponent: MeetingRoomOptions as ComponentType<IWidgetOptionsEditorProps<IMeetingRoomDefaultData>>,
+  } as Record<string, unknown>,
+  WidgetComponent: MeetingRoomContent as unknown as ComponentType<IWidgetContentProps<Record<string, unknown>>>,
+  OptionsComponent: MeetingRoomOptions as unknown as ComponentType<IWidgetOptionsEditorProps<Record<string, unknown>>>,
 }
 
 class MeetingRoom extends BaseWidget {
