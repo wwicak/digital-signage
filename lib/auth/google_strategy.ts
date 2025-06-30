@@ -115,9 +115,10 @@ export const configureGoogleSerialization = (): void => {
   }
   
   passport.serializeUser((user: Express.User, done) => { // Express.User is the standard Passport user type
+    const googleUser = user as GoogleAuthUser;
     // Store minimal data in session
     done(null, {
-      id: user.profile?.id || user.id,
+      id: googleUser.profile?.id || (user as any).id,
       source: "google",
     });
   });

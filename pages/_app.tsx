@@ -20,7 +20,7 @@ const queryClient = new QueryClient({
           error.message.includes('Failed to fetch') ||
           error.message.includes('ERR_NETWORK') ||
           error.message.includes('NetworkError') ||
-          (error.status >= 400 && error.status < 500)
+          (error.status !== undefined && error.status >= 400 && error.status < 500)
         ) {
           return false;
         }

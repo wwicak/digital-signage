@@ -1,12 +1,12 @@
 import { ComponentType } from 'react'
 
 import BaseWidget, { IBaseWidget, IWidgetDefinitionArgs, IWidgetContentProps, IWidgetOptionsEditorProps } from '../base_widget'
-import CongratsContent from './src/CongratsContent' // Assuming .js for now
-import CongratsOptions from './src/CongratsOptions' // Assuming .js for now
+import CongratsContent from './src/CongratsContent'
+import CongratsOptions from './src/CongratsOptions'
 import { Gift } from 'lucide-react'
 
 // Define the structure for the congrats widget's default data
-interface ICongratsDefaultData {
+export interface ICongratsDefaultData extends Record<string, unknown> {
   animation: string; // e.g., 'confetti', 'balloons'
   text: string;
   color: string; // Background color
@@ -16,11 +16,11 @@ interface ICongratsDefaultData {
 }
 
 // Define the widget definition arguments for the Congrats widget
-const congratsDefinitionArgs: IWidgetDefinitionArgs = {
+const congratsDefinitionArgs: IWidgetDefinitionArgs<ICongratsDefaultData> = {
   name: 'Congratulations',
-  type: 'congrats', // Added 'type' field as it's required
+  type: 'congrats',
   version: '0.1',
-  icon: Gift, // Use the imported icon
+  icon: Gift,
   defaultData: {
     animation: 'confetti',
     text: 'Congratulations!',
@@ -28,7 +28,7 @@ const congratsDefinitionArgs: IWidgetDefinitionArgs = {
     textColor: '#ffffff', // White
     fontSize: 16,
     recipient: '', // Default recipient to empty string
-  } as ICongratsDefaultData,
+  },
   WidgetComponent: CongratsContent as ComponentType<IWidgetContentProps<ICongratsDefaultData>>,
   OptionsComponent: CongratsOptions as ComponentType<IWidgetOptionsEditorProps<ICongratsDefaultData>>
 }
@@ -37,13 +37,8 @@ class Congrats extends BaseWidget {
   constructor() {
     super(congratsDefinitionArgs)
   }
-
-  /*
-   * Widget and Options getters are inherited from BaseWidget
-   * and will use WidgetComponent and OptionsComponent from definitionArgs
-   */
 }
 
-// Export an instance of the Congrats widget, typed as IBaseWidget
-const congratsWidget: IBaseWidget = new Congrats()
+// Export an instance of the Congrats widget
+const congratsWidget: IBaseWidget<ICongratsDefaultData> = new Congrats()
 export default congratsWidget

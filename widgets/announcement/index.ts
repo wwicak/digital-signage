@@ -6,21 +6,21 @@ import AnnouncementContent from './src/AnnouncementContent'
 import AnnouncementOptions from './src/AnnouncementOptions'
 
 // Define the structure for the announcement widget's default data
-interface IAnnouncementDefaultData {
+export interface IAnnouncementDefaultData extends Record<string, unknown> {
   text: string;
   color: string;
   textColor: string;
   titleColor: string;
   accentColor: string;
-  title?: string; // Added optional title based on typical announcements
+  title?: string;
 }
 
 // Define the widget definition arguments for the Announcement widget
-const announcementDefinitionArgs: IWidgetDefinitionArgs = {
+const announcementDefinitionArgs: IWidgetDefinitionArgs<IAnnouncementDefaultData> = {
   name: 'Announcement',
-  type: 'announcement', // Added 'type' field as it's required by IWidgetDefinitionArgs
+  type: 'announcement',
   version: '0.1',
-  icon: AlertTriangle, // Use the imported icon
+  icon: AlertTriangle,
   defaultData: {
     text: '',
     color: '#708090', // Slate gray
@@ -28,7 +28,7 @@ const announcementDefinitionArgs: IWidgetDefinitionArgs = {
     titleColor: '#fff0f0', // Snow
     accentColor: '#EDC951', // Goldenrod
     title: 'Announcement', // Default title
-  } as IAnnouncementDefaultData,
+  },
   WidgetComponent: AnnouncementContent as ComponentType<IWidgetContentProps<IAnnouncementDefaultData>>,
   OptionsComponent: AnnouncementOptions as ComponentType<IWidgetOptionsEditorProps<IAnnouncementDefaultData>>
 }
@@ -37,13 +37,8 @@ class Announcement extends BaseWidget {
   constructor() {
     super(announcementDefinitionArgs)
   }
-
-  /*
-   * Widget and Options getters are inherited from BaseWidget
-   * and will use WidgetComponent and OptionsComponent from definitionArgs
-   */
 }
 
-// Export an instance of the Announcement widget, typed as IBaseWidget
-const announcementWidget: IBaseWidget = new Announcement()
+// Export an instance of the Announcement widget
+const announcementWidget: IBaseWidget<IAnnouncementDefaultData> = new Announcement()
 export default announcementWidget

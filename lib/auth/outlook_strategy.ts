@@ -136,9 +136,10 @@ export const configureOutlookSerialization = (): void => {
   }
   
   passport.serializeUser((user: Express.User, done) => { // Express.User is the standard Passport user type
+    const outlookUser = user as OutlookAuthUser;
     // Store minimal data in session
     done(null, {
-      id: user.profile?.id || user.id,
+      id: outlookUser.profile?.id || (user as any).id,
       source: "microsoft",
     });
   });

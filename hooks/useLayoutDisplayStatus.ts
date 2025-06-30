@@ -195,7 +195,7 @@ export const useLayoutDisplayStatus = (
 
             // Calculate uptime percentage
             const uptimePercentage =
-              heartbeat?.stats?.length > 0
+              heartbeat?.stats && heartbeat.stats.length > 0
                 ? heartbeat.stats.reduce(
                     (acc: number, stat: { count: number }) =>
                       acc + (stat.count > 0 ? 100 : 0),
@@ -230,21 +230,22 @@ export const useLayoutDisplayStatus = (
       } catch (err) {
         // Provide more user-friendly error messages
         let errorMessage = "Failed to update display status";
+        const error = err as { message?: string };
 
         if (
-          err.message.includes("Failed to fetch") ||
-          err.message.includes("ERR_NETWORK")
+          error.message?.includes("Failed to fetch") ||
+          error.message?.includes("ERR_NETWORK")
         ) {
           errorMessage =
             "Network connection error. Please check your internet connection.";
-        } else if (err.message.includes("404")) {
+        } else if (error.message?.includes("404")) {
           errorMessage = "Display service not found. Please contact support.";
-        } else if (err.message.includes("500")) {
+        } else if (error.message?.includes("500")) {
           errorMessage = "Server error. Please try again later.";
-        } else if (err.message.includes("401") || err.message.includes("403")) {
+        } else if (error.message?.includes("401") || error.message?.includes("403")) {
           errorMessage = "Authentication error. Please log in again.";
-        } else if (err.message) {
-          errorMessage = err.message;
+        } else if (error.message) {
+          errorMessage = error.message;
         }
 
         setError(errorMessage);

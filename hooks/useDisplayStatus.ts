@@ -136,9 +136,10 @@ export const useDisplayStatus = (options?: {
     } catch (error) {
       console.error("Error fetching display statuses:", error);
       // Don't retry on network errors
+      const errorMessage = error instanceof Error ? error.message : String(error);
       if (
-        !error.message.includes("Failed to fetch") &&
-        !error.message.includes("ERR_NETWORK")
+        !errorMessage.includes("Failed to fetch") &&
+        !errorMessage.includes("ERR_NETWORK")
       ) {
         // Only log non-network errors for debugging
         console.warn("Non-network error in fetchDisplayStatuses:", error);

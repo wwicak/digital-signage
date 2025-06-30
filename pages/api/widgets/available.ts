@@ -1,4 +1,4 @@
-import { NextApiRequest, NextApiResponse } from "next";
+import type { NextApiRequest, NextApiResponse } from "next";
 import { requireAuth } from "@/lib/auth";
 import { filterWidgetsByFeatureFlags } from "@/lib/helpers/widget_filter_helper";
 import widgets from "@/widgets";

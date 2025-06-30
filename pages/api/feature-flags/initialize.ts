@@ -3,7 +3,7 @@ import { requireAuth } from "@/lib/auth";
 import { initializeDefaultFeatureFlags } from "@/lib/helpers/feature_flag_helper";
 import { UserRoleName } from "@/lib/models/User";
 
-import { NextApiRequest, NextApiResponse } from "next";
+import type { NextApiRequest, NextApiResponse } from "next";
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== "POST") {
