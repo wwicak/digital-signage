@@ -68,7 +68,7 @@ class Upload extends Component<IUploadProps, IUploadState> {
   }
 
   // Type for acceptedFiles is File[] which is compatible with FileWithPath[] from react-dropzone
-  handleOnDropAccepted = (acceptedFiles: File[], event: DropEvent): void => {
+  handleOnDropAccepted = (acceptedFiles: File[], _event: DropEvent): void => { // event param required by react-dropzone API but unused
     if (acceptedFiles.length > 0) {
       // Revoke previous object URL if it exists
       if (this.state.lastFile?.preview) {
@@ -98,7 +98,7 @@ class Upload extends Component<IUploadProps, IUploadState> {
 
   handleOnDropRejected = (
     rejectedFiles: FileRejection[],
-    event: DropEvent,
+    _event: DropEvent, // Required by react-dropzone API but unused
   ): void => {
     if (rejectedFiles.length > 0) {
       const rejection = rejectedFiles[0];

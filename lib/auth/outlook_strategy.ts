@@ -139,7 +139,7 @@ export const configureOutlookSerialization = (): void => {
     const outlookUser = user as OutlookAuthUser;
     // Store minimal data in session
     done(null, {
-      id: outlookUser.profile?.id || (user as any).id,
+      id: outlookUser.profile?.id || outlookUser.id,
       source: "microsoft",
     });
   });

@@ -108,12 +108,19 @@ const GridStackWrapper = forwardRef<GridStackWrapperRef, GridStackWrapperProps>(
         }
       };
 
+      // Implement drag and resize event handlers for better UX feedback
+      if (onDragStart) grid.on('dragstart', onDragStart);
       grid.on('dragstop', handleUserChange);
+      if (onDragStop) grid.on('dragstop', onDragStop);
+      
+      if (onResizeStart) grid.on('resizestart', onResizeStart);
       grid.on('resizestop', handleUserChange);
+      if (onResizeStop) grid.on('resizestop', onResizeStop);
+      
       if (onAdded) grid.on('added', onAdded);
       if (onRemoved) grid.on('removed', onRemoved);
     }
-  }, [onLayoutChange, onAdded, onRemoved, defaultOptions]);
+  }, [onLayoutChange, onDragStart, onDragStop, onResizeStart, onResizeStop, onAdded, onRemoved, defaultOptions]);
 
   // Sync items with grid
   useEffect(() => {

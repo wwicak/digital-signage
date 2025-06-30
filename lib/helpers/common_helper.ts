@@ -5,14 +5,7 @@
 import mongoose, { FilterQuery } from "mongoose";
 // Removed unused import: Response from express
 
-// Generic type for Mongoose documents - simplified to work with Mongoose types
-type MongooseDocument<T = Record<string, unknown>> = mongoose.Document & {
-  _id: mongoose.Types.ObjectId | string;
-  toObject?: () => T & { _id: mongoose.Types.ObjectId | string };
-} & T;
-
-// Generic type for Mongoose query results
-type MongooseQueryResult<T = Record<string, unknown>> = (mongoose.Document & T) | null;
+// Removed unused MongooseDocument and MongooseQueryResult types - no references found in codebase
 
 // Type for Express-like response objects
 interface ExpressResponse {

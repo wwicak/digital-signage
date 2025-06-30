@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-import User from "../lib/models/User";
+import User, { IUser } from "../lib/models/User";
 import Building from "../lib/models/Building";
 import Room from "../lib/models/Room";
 
@@ -27,12 +27,14 @@ async function seedMeetingAdmin() {
         role: "admin",
       });
 
-      adminUser = await new Promise<any>((resolve, reject) => {
-        User.register(newAdminUser, "admin123", (err: any, user: any) => {
+      adminUser = await new Promise<IUser>((resolve, reject) => {
+        User.register(newAdminUser, "admin123", (err: Error | null, user?: IUser) => {
           if (err) {
             reject(err);
-          } else {
+          } else if (user) {
             resolve(user);
+          } else {
+            reject(new Error("User registration failed: no user returned"));
           }
         });
       });

@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useMemo, useCallback } from "react";
 import _ from "lodash";
+import { ILayoutData } from "../../actions/layouts";
 
 import Frame from "./Frame";
 import GridStackWrapper, { GridStackItem } from "../GridStack/GridStackWrapper";
@@ -45,7 +46,7 @@ const DEFAULT_LAYOUT: DisplayLayoutType = "spaced";
 
 const Display: React.FC<IDisplayComponentProps> = React.memo(({ display }) => {
   const { state, setId, refreshDisplayData } = useDisplayContext();
-  const [layoutData, setLayoutData] = React.useState<any>(null);
+  const [layoutData, setLayoutData] = React.useState<ILayoutData | null>(null);
 
   // Fetch layout data when display data changes
   React.useEffect(() => {

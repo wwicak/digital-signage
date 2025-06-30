@@ -155,7 +155,7 @@ const RoomsPage = () => {
       if (!response.ok) {
         if (data.errors) {
           // If we have validation errors, show them in detail
-          const errorMessages = data.errors.map((err: any) => err.message).join(", ");
+          const errorMessages = data.errors.map((err: { message: string }) => err.message).join(", ");
           toast.error(errorMessages);
           return;
         }

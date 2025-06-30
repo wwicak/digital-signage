@@ -60,8 +60,8 @@ export interface IWidgetEditDialog {
  * TData is effectively Record<string, any> based on original usage
  */
 export const WidgetOptionsEditorPropsSchema = z.object({
-  data: z.record(z.string(), z.any()).optional(),
-  onChange: z.function().args(z.record(z.string(), z.any())).returns(z.void()),
+  data: z.record(z.string(), z.unknown()).optional(),
+  onChange: z.function().args(z.record(z.string(), z.unknown())).returns(z.void()),
 });
 export type IWidgetOptionsEditorProps = z.infer<
   typeof WidgetOptionsEditorPropsSchema
@@ -90,7 +90,7 @@ const LocalFullWidgetDataSchema = z.object({
   w: z.number(),
   h: z.number(),
 });
-type LocalFullWidgetDataType = z.infer<typeof LocalFullWidgetDataSchema>;
+// Removed unused LocalFullWidgetDataType - no references found in codebase
 
 // Zod schema for WidgetEditDialog state
 const WidgetEditDialogStateSchema = z.object({
@@ -98,7 +98,7 @@ const WidgetEditDialogStateSchema = z.object({
    * widgetConfigData should ideally conform to a part of WidgetDataZod based on widgetType
    * For flexibility with generic OptionsComponent, using record(string, any)
    */
-  widgetConfigData: z.record(z.string(), z.any()).optional(),
+  widgetConfigData: z.record(z.string(), z.unknown()).optional(),
   initialWidgetData: LocalFullWidgetDataSchema.nullable().optional(),
   error: z.string().nullable().optional(),
 });
@@ -277,7 +277,7 @@ class WidgetEditDialog
    * This handleChange is for the widget-specific OptionsComponent
    * It expects the OptionsComponent to call it with the complete, new data object
    */
-  handleOptionsChange = (newConfigData: Record<string, any>): void => {
+  handleOptionsChange = (newConfigData: Record<string, unknown>): void => {
     // newConfigData is generic object
     this.setState((prevState) => {
       /*

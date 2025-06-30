@@ -53,7 +53,7 @@ export async function migrateDisplayLayouts(): Promise<MigrationResult> {
         const layoutDescription = `Auto-generated layout from display: ${display.name}`;
 
         // Map widgets to layout widget format
-        const layoutWidgets = display.widgets.map((widget: any) => ({
+        const layoutWidgets = display.widgets.map((widget: { _id: string; x?: number; y?: number; w?: number; h?: number }) => ({
           widget_id: widget._id,
           x: widget.x || 0,
           y: widget.y || 0,

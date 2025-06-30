@@ -93,7 +93,7 @@ const EditableWidget: React.FC<IEditableWidgetProps> = memo(({
 
       <WidgetEditDialog
         ref={dialogRef}
-        OptionsComponent={widgetDefinition?.Options as any}
+        OptionsComponent={widgetDefinition?.Options}
         widgetId={id}
         widgetType={type}
       />

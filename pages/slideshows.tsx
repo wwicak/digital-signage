@@ -66,7 +66,7 @@ const Slideshows: React.FC<SlideshowsProps> = ({ loggedIn, displayId }) => {
 
         {/* Slideshows List */}
         <div className='space-y-6'>
-          <SlideshowListComponent ref={slideshowList as any} />
+          <SlideshowListComponent ref={slideshowList} />
         </div>
         
         <Dialog><div></div></Dialog>

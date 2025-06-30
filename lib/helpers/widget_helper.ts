@@ -4,7 +4,7 @@
 
 import Widget, { IWidget, WidgetType } from "../models/Widget"; // Assuming Widget.ts exports IWidget and WidgetType enum
 import Display from "../models/Display"; // Assuming Display.ts exports IDisplay
-import Slideshow from "../models/Slideshow"; // For validating slideshow_id in widget data
+// Removed unused Slideshow import - validation not implemented
 import mongoose from "mongoose";
 import { Request, Response } from "express"; // For typing req/res
 import { sendEventToDisplay } from "../sse_manager"; // Added import

@@ -89,7 +89,7 @@ const GridStackEditableWidget: React.FC<IGridStackEditableWidgetProps> = memo(({
 
       <WidgetEditDialog
         ref={dialogRef}
-        OptionsComponent={widgetDefinition?.Options as any}
+        OptionsComponent={widgetDefinition?.Options}
         widgetId={id}
         widgetType={type}
       />

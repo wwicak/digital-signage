@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import { Grid3X3, Plus, Save, RotateCcw, ArrowLeft } from 'lucide-react' // Removed unused Trash2
 
 import Frame from '../../components/Admin/Frame'
+import { ILayoutData } from '../../actions/layouts'
 import GridStackWrapper, { GridStackItem, GridStackWrapperRef } from '../../components/GridStack/GridStackWrapper'
 import GridStackEditableWidget from '../../components/GridStack/GridStackEditableWidget'
 // Removed unused import: StatusBarElement
@@ -159,7 +160,7 @@ function LayoutAdminContent() {
     })
 
     // Simplified position validation - trust GridStack to handle collisions
-    const items = filteredWidgets.map((widget, index) => {
+    const items = filteredWidgets.map((widget, _index) => {
       const widgetId = getWidgetId({ ...widget, widget_id: widget.widget_id } as LayoutWidget)!
       let widgetType = 'unknown'
 
@@ -173,6 +174,9 @@ function LayoutAdminContent() {
       const x = Math.max(0, Math.min(layoutData.gridConfig.cols - w, Math.floor(widget.x || 0)))
       const y = Math.max(0, Math.floor(widget.y || 0))
 
+      // Check if widget type is valid/supported
+      const isValidWidget = widgetType && widgetType !== 'unknown' && getWidgetType(widgetType) !== 'unknown';
+      
       return {
         id: widgetId,
         x: x,
@@ -180,11 +184,17 @@ function LayoutAdminContent() {
         w: w,
         h: h,
         widgetType,
-        content: (
+        content: isValidWidget ? (
           <GridStackEditableWidget
             id={widgetId}
             type={getWidgetType(widgetType)}
             layout={layoutData.layoutType}
+            onDelete={() => handleDeleteWidget(widgetId)}
+          />
+        ) : (
+          // Show broken widget component for invalid/unsupported widgets
+          <BrokenWidget
+            widgetId={widgetId}
             onDelete={() => handleDeleteWidget(widgetId)}
           />
         )
@@ -192,7 +202,7 @@ function LayoutAdminContent() {
     })
     
     return items
-  }, [existingLayout?.widgets, layoutData.layoutType, layoutData.gridConfig.cols])
+  }, [existingLayout?.widgets, layoutData.layoutType, layoutData.gridConfig.cols, isDeletingWidget])
   // Handle layout selection
   const handleLayoutSelect = (layoutId: string) => {
     if (layoutId === 'new') {
@@ -449,7 +459,7 @@ function LayoutAdminContent() {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value='new'>Create New Layout</SelectItem>
-                  {layouts?.layouts?.map((layout: any) => (
+                  {layouts?.layouts?.map((layout: ILayoutData) => (
                     <SelectItem key={layout._id} value={layout._id}>
                       {layout.name}
                     </SelectItem>

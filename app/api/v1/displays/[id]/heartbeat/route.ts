@@ -128,6 +128,13 @@ export async function POST(
         memoryUsage: clientInfo?.memoryUsage,
         cpuUsage: clientInfo?.cpuUsage,
         networkType: clientInfo?.networkType,
+        // Include performance metrics for monitoring and diagnostics
+        performanceMetrics: performanceMetrics ? {
+          loadTime: performanceMetrics.loadTime,
+          renderTime: performanceMetrics.renderTime,
+          memoryHeapUsed: performanceMetrics.memoryHeapUsed,
+          networkLatency: performanceMetrics.networkLatency,
+        } : undefined,
       },
       serverInfo: {
         serverTime,

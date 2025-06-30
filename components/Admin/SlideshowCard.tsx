@@ -113,7 +113,7 @@ const SlideshowCard: React.FC<ISlideshowCardProps> = ({
                 onClick={(e) => {
                   e.preventDefault();
                   e.stopPropagation();
-                  handleDelete(e as any);
+                  handleDelete(e);
                 }}
                 aria-label='Delete Slideshow'
                 className='h-8 w-8 text-destructive hover:text-destructive'

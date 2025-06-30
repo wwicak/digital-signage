@@ -118,7 +118,7 @@ export const configureGoogleSerialization = (): void => {
     const googleUser = user as GoogleAuthUser;
     // Store minimal data in session
     done(null, {
-      id: googleUser.profile?.id || (user as any).id,
+      id: googleUser.profile?.id || googleUser.id,
       source: "google",
     });
   });

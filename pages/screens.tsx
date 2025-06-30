@@ -95,7 +95,7 @@ const ScreensComponent = memo(function ScreensComponent({ loggedIn, displayId }:
 
         {/* Screens List */}
         <div className='space-y-6'>
-          <ScreenListComponent ref={screenListRef as any} />
+          <ScreenListComponent ref={screenListRef} />
         </div>
         
         <Dialog><div></div></Dialog>

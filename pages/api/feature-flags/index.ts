@@ -28,7 +28,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       const { type, enabled } = req.query;
 
       // Build query
-      const query: any = {};
+      const query: { type?: string; enabled?: boolean } = {};
       if (type) {
         query.type = type;
       }
