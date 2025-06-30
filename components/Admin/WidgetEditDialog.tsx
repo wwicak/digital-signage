@@ -279,7 +279,7 @@ class WidgetEditDialog
    */
   handleOptionsChange = (newConfigData: Record<string, unknown>): void => {
     // newConfigData is generic object
-    this.setState((prevState) => {
+    this.setState((_prevState) => { // prevState parameter required by setState API but unused
       /*
        * We could try to parse newConfigData against the specific part of WidgetDataZod
        * if props.widgetType is known, to ensure type safety before setting state.

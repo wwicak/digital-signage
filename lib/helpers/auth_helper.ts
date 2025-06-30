@@ -188,7 +188,7 @@ export async function authenticateUser(
       authenticateFunction(
         email,
         password,
-        (err: Error | null, user?: IUser | false, options?: { message?: string }) => {
+        (err: Error | null, user?: IUser | false, _options?: { message?: string }) => { // options parameter required by passport API but unused
           if (err) {
             reject(err);
           } else if (!user) {

@@ -2,7 +2,7 @@
  * @fileoverview Widget helper functions for the API
  */
 
-import Widget, { IWidget, WidgetType } from "../models/Widget"; // Assuming Widget.ts exports IWidget and WidgetType enum
+import Widget, { IWidget } from "../models/Widget"; // Removed unused WidgetType import
 import Display from "../models/Display"; // Assuming Display.ts exports IDisplay
 // Removed unused Slideshow import - validation not implemented
 import mongoose from "mongoose";
@@ -47,12 +47,7 @@ export async function getDisplayIdsForWidget(
   }
 }
 
-// Define interface for cleaner typing, adjust as needed based on actual widget data structure
-interface MockWidgetData {
-  _id: string | { equals: (val: string) => boolean };
-  display: string;
-  // Add other widget properties if necessary
-}
+// Removed unused MockWidgetData interface - no references found in codebase
 
 /**
  * Validates widget data based on its type.

@@ -3,7 +3,7 @@ import crypto from "crypto";
 const ALGORITHM = "aes-256-gcm";
 const IV_LENGTH = 16; // For GCM, this is always 16 bytes
 const TAG_LENGTH = 16; // Authentication tag length for GCM
-const SALT_LENGTH = 32; // Salt length for key derivation
+const _SALT_LENGTH = 32; // Salt length for key derivation - reserved for future PBKDF2 implementation
 
 /**
  * Get encryption key from environment variable and derive a proper key

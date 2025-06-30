@@ -453,9 +453,9 @@ function LayoutAdminContent() {
           <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4'>
             <div>
               <label className='block text-sm font-medium mb-2'>Select Layout</label>
-              <Select value={selectedLayoutId || 'new'} onValueChange={handleLayoutSelect}>
+              <Select value={selectedLayoutId || 'new'} onValueChange={handleLayoutSelect} disabled={layoutLoading}>
                 <SelectTrigger>
-                  <SelectValue placeholder='Choose layout...' />
+                  <SelectValue placeholder={layoutLoading ? 'Loading layout...' : 'Choose layout...'} />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value='new'>Create New Layout</SelectItem>

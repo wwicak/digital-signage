@@ -10,7 +10,7 @@ import Clock from "react-live-clock";
 import * as z from "zod";
 
 export const DisplayFramePropsSchema = z.object({
-  children: z.custom<ReactNode>((val) => {
+  children: z.custom<ReactNode>((_val) => { // val parameter required by z.custom API but unused in basic validation
     // Basic placeholder validation for ReactNode
     return true;
   }),

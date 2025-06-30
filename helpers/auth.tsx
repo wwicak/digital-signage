@@ -61,7 +61,7 @@ export type ProtectProps = IProtectedPageProps;
 export const login = async (
   credentials: ICredentials,
   host: string = '', // Default host can be empty if API calls are relative or use a base URL
-  displayId?: string | string[] | null // displayId from query can be string or string[] or null
+  _displayId?: string | string[] | null // displayId from query - unused but may be needed for future display-specific authentication
 ): Promise<ILoginAuthResponse> => {
   try {
     const response: AxiosResponse<ILoginAuthResponse> = await axios.post(

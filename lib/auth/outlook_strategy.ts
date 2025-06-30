@@ -128,12 +128,7 @@ export const configureOutlookStrategy = (): void => {
  * For Microsoft OAuth, we'll store minimal session data
  */
 export const configureOutlookSerialization = (): void => {
-  // Define session user type
-  interface SessionUser {
-    profile?: OutlookProfile;
-    id?: string;
-    tokens?: OutlookTokens;
-  }
+  // Removed unused SessionUser interface - no references found in codebase
   
   passport.serializeUser((user: Express.User, done) => { // Express.User is the standard Passport user type
     const outlookUser = user as OutlookAuthUser;

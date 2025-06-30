@@ -107,12 +107,7 @@ export const configureGoogleStrategy = (): void => {
  * For Google OAuth, we'll store minimal session data
  */
 export const configureGoogleSerialization = (): void => {
-  // Define session user type
-  interface SessionUser {
-    profile?: GoogleProfile;
-    id?: string;
-    tokens?: GoogleTokens;
-  }
+  // Removed unused SessionUser interface - no references found in codebase
   
   passport.serializeUser((user: Express.User, done) => { // Express.User is the standard Passport user type
     const googleUser = user as GoogleAuthUser;

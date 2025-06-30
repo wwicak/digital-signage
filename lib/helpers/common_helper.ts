@@ -35,11 +35,7 @@ interface SSEResponse {
 // Type for MongoDB filter query
 type MongoFilterQuery<T = Record<string, unknown>> = FilterQuery<T>;
 
-// Type for update data
-interface UpdateData {
-  [key: string]: unknown;
-  last_update?: Date;
-}
+// Removed unused UpdateData interface - no references found in codebase
 
 /**
  * Finds a document by ID and sends it as a JSON response.

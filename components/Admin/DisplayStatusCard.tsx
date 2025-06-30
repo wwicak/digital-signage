@@ -290,8 +290,7 @@ const DisplayStatusCard: React.FC<DisplayStatusCardProps> = ({
   const {
     displays,
     displaysByLayout,
-    getOnlineDisplays,
-    getOfflineDisplays,
+    // Removed unused getOnlineDisplays and getOfflineDisplays - not needed for current implementation
     onlineCount,
     offlineCount,
     totalCount,
