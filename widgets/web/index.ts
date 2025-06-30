@@ -45,5 +45,5 @@ class WebWidget extends BaseWidget {
 }
 
 // Export an instance of the WebWidget
-const webWidget: IBaseWidget<IWebDefaultData> = new WebWidget();
+const webWidget: IBaseWidget = new WebWidget();
 export default webWidget;

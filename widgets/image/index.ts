@@ -41,5 +41,5 @@ class ImageWidget extends BaseWidget {
 }
 
 // Export an instance of the ImageWidget
-const imageWidget: IBaseWidget<IImageDefaultData> = new ImageWidget()
+const imageWidget: IBaseWidget = new ImageWidget()
 export default imageWidget

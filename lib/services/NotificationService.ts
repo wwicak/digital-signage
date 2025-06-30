@@ -46,6 +46,8 @@ interface AlertDocument {
   _id: mongoose.Types.ObjectId;
   shouldSendNotification(type: string, cooldownMinutes: number): boolean;
   addNotification(type: string): Promise<void>;
+  // Allow additional properties from Mongoose documents
+  [key: string]: unknown;
 }
 
 export class NotificationService {
@@ -104,15 +106,15 @@ export class NotificationService {
       const promises: Promise<void>[] = [];
 
       if (this.config.email?.enabled) {
-        promises.push(this.sendEmailNotification(notification, alert));
+        promises.push(this.sendEmailNotification(notification, alert as unknown as AlertDocument));
       }
 
       if (this.config.webhook?.enabled) {
-        promises.push(this.sendWebhookNotification(notification, alert));
+        promises.push(this.sendWebhookNotification(notification, alert as unknown as AlertDocument));
       }
 
       if (this.config.sms?.enabled) {
-        promises.push(this.sendSMSNotification(notification, alert));
+        promises.push(this.sendSMSNotification(notification, alert as unknown as AlertDocument));
       }
 
       await Promise.allSettled(promises);
@@ -322,9 +324,10 @@ export class NotificationService {
       };
 
       const mockAlert = {
+        _id: new mongoose.Types.ObjectId(),
         shouldSendNotification: () => true,
         addNotification: async () => {},
-      };
+      } as AlertDocument;
 
       switch (type) {
         case "email":

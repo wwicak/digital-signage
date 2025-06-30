@@ -9,6 +9,7 @@ import {
   Profile,
   VerifyCallback,
 } from "passport-google-oauth20";
+// import { IUser } from "../models/User"; // Commented out - not used in OAuth strategy
 
 /**
  * Interface for Google OAuth profile data
@@ -29,6 +30,15 @@ export interface GoogleTokens {
   expires_at?: number;
   token_type: string;
   scope: string;
+}
+
+/**
+ * Interface for Google authenticated user object
+ */
+export interface GoogleAuthUser {
+  profile: GoogleProfile;
+  tokens: GoogleTokens;
+  id?: string; // For compatibility with session serialization
 }
 
 /**
@@ -87,12 +97,8 @@ export const configureGoogleStrategy = (): void => {
 
           // Return profile and tokens for handling in the callback route
           // The actual user linking and token storage will be handled in the service
-          // Define user object type for Passport
-          interface GoogleAuthUser {
-            profile: GoogleProfile;
-            tokens: GoogleTokens;
-          }
-          return done(null, { profile: googleProfile, tokens } as GoogleAuthUser); // Typed user object
+          // Return typed user object for Passport
+          return done(null, { profile: googleProfile, tokens } as unknown as Express.User); // Convert to Express.User type
         } catch (error) {
           console.error("Error in Google OAuth verify callback:", error);
           return done(error, false);
@@ -110,18 +116,29 @@ export const configureGoogleSerialization = (): void => {
   // Removed unused SessionUser interface - no references found in codebase
   
   passport.serializeUser((user: Express.User, done) => { // Express.User is the standard Passport user type
-    const googleUser = user as GoogleAuthUser;
-    // Store minimal data in session
-    done(null, {
-      id: googleUser.profile?.id || googleUser.id,
-      source: "google",
-    });
+    // Handle both GoogleAuthUser and regular IUser types
+    if (user && typeof user === 'object' && 'profile' in user) {
+      const googleUser = user as unknown as GoogleAuthUser;
+      // Store minimal data in session for OAuth users
+      done(null, {
+        id: googleUser.profile?.id || googleUser.id,
+        source: "google",
+      });
+    } else {
+      // Handle regular database users
+      const dbUser = user as { _id?: string; id?: string };
+      done(null, {
+        id: dbUser._id || dbUser.id,
+        source: "database",
+      });
+    }
   });
 
   passport.deserializeUser((sessionUser: { id: string; source: string }, done) => { // Typed session data
     // For Google OAuth flow, we don't need full user deserialization
     // as tokens are handled separately in the service
-    done(null, sessionUser);
+    // Return a minimal user object that matches Express.User expectations
+    done(null, sessionUser as unknown as Express.User);
   });
 };
 

@@ -59,6 +59,6 @@ const mediaPlayerDefinitionArgs: IWidgetDefinitionArgs<IMediaPlayerDefaultData> 
 };
 
 // Create and export the widget instance
-const mediaPlayerWidget: IBaseWidget<IMediaPlayerDefaultData> = new BaseWidget(mediaPlayerDefinitionArgs);
+const mediaPlayerWidget: IBaseWidget = new BaseWidget(mediaPlayerDefinitionArgs);
 
 export default mediaPlayerWidget;

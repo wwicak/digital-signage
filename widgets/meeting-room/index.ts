@@ -38,5 +38,5 @@ class MeetingRoom extends BaseWidget {
 }
 
 // Export an instance of the Meeting Room widget
-const meetingRoomWidget: IBaseWidget<IMeetingRoomDefaultData> = new MeetingRoom()
+const meetingRoomWidget: IBaseWidget = new MeetingRoom()
 export default meetingRoomWidget

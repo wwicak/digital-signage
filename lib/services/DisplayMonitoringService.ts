@@ -150,7 +150,7 @@ export class DisplayMonitoringService {
       }).populate("displayId");
 
       for (const status of staleStatuses) {
-        await this.handleOfflineDisplay(status as DisplayStatusDoc, alertCutoffTime);
+        await this.handleOfflineDisplay(status as unknown as DisplayStatusDoc, alertCutoffTime);
       }
 
       // Check for displays with consecutive failures
@@ -160,7 +160,7 @@ export class DisplayMonitoringService {
       }).populate("displayId");
 
       for (const status of failingDisplays) {
-        await this.handleFailingDisplay(status as DisplayStatusDoc); // Type assertion for populated document
+        await this.handleFailingDisplay(status as unknown as DisplayStatusDoc); // Type assertion for populated document
       }
     } catch (error) {
       console.error("Error checking display statuses:", error);

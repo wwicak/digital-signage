@@ -37,5 +37,5 @@ class SlideshowWidget extends BaseWidget {
 }
 
 // Export an instance of the SlideshowWidget
-const slideshowWidget: IBaseWidget<ISlideshowWidgetDefaultData> = new SlideshowWidget()
+const slideshowWidget: IBaseWidget = new SlideshowWidget()
 export default slideshowWidget

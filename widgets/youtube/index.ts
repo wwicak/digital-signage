@@ -47,5 +47,5 @@ class YoutubeWidget extends BaseWidget {
 }
 
 // Export an instance of the YoutubeWidget
-const youtubeWidget: IBaseWidget<IYoutubeDefaultData> = new YoutubeWidget()
+const youtubeWidget: IBaseWidget = new YoutubeWidget()
 export default youtubeWidget

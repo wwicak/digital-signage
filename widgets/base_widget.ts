@@ -75,7 +75,7 @@ class BaseWidget implements IBaseWidget {
   // Index signature to allow dynamic properties
   [key: string]: unknown;
 
-  constructor(definition: IWidgetDefinitionArgs) {
+  constructor(definition: IWidgetDefinitionArgs<Record<string, unknown>>) {
     for (const reqField of REQUIRED_DEF_FIELDS) {
       if (!(reqField in definition)) {
         throw new Error(
@@ -93,7 +93,8 @@ class BaseWidget implements IBaseWidget {
     this.type = definition.type
     this.version = definition.version
     this.icon = definition.icon
-    this.defaultData = definition.defaultData
+    // Cast specific widget data to the generic Record type for compatibility
+    this.defaultData = definition.defaultData as Record<string, unknown>
 
     // Assign other fields from definition dynamically
     for (const defField of Object.keys(definition)) {
@@ -103,8 +104,9 @@ class BaseWidget implements IBaseWidget {
       }
     }
 
-    this._WidgetComponent = definition.WidgetComponent || EmptyWidget
-    this._OptionsComponent = definition.OptionsComponent || EmptyWidgetOptions
+    // Cast specific widget components to generic types for compatibility
+    this._WidgetComponent = (definition.WidgetComponent || EmptyWidget) as ComponentType<IWidgetContentProps<Record<string, unknown>>>
+    this._OptionsComponent = (definition.OptionsComponent || EmptyWidgetOptions) as ComponentType<IWidgetOptionsEditorProps<Record<string, unknown>>>
   }
 
   // Getter for the React component that renders the widget

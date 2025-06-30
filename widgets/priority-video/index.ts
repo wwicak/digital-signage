@@ -53,6 +53,6 @@ const priorityVideoDefinitionArgs: IWidgetDefinitionArgs<IPriorityVideoDefaultDa
 };
 
 // Create and export the widget instance
-const priorityVideoWidget: IBaseWidget<IPriorityVideoDefaultData> = new BaseWidget(priorityVideoDefinitionArgs);
+const priorityVideoWidget: IBaseWidget = new BaseWidget(priorityVideoDefinitionArgs);
 
 export default priorityVideoWidget;

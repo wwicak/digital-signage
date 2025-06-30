@@ -170,7 +170,10 @@ export async function addWidget(req: Request, res: Response, widgetData: WidgetO
   }
 
   const displayId = widgetData.display;
-  const widgetId = widgetData._id;
+  // Ensure widgetId is an ObjectId for the display.widgets array
+  const widgetId = typeof widgetData._id === 'string' 
+    ? new mongoose.Types.ObjectId(widgetData._id) 
+    : widgetData._id;
 
   try {
     const display = await Display.findById(displayId);
@@ -215,12 +218,14 @@ export async function deleteWidget(
       return res.status(404).json({ error: "Display not found" });
     }
 
-    display.widgets = display.widgets.filter((id: mongoose.Types.ObjectId) => { // Widgets array contains ObjectIds
-      // Handle both string IDs and Mongoose ObjectIds with an .equals method
-      if (typeof id === "string") {
-        return id !== widgetId;
-      } else if (id && typeof id.equals === "function") {
-        return !id.equals(widgetId);
+    display.widgets = display.widgets.filter((item: mongoose.Types.ObjectId | IWidget) => { // Widgets array contains ObjectIds or IWidget
+      // Handle ObjectId references and populated Widget objects
+      const itemId = typeof item === 'object' && '_id' in item ? item._id : item;
+      
+      if (typeof itemId === "string") {
+        return itemId !== widgetId;
+      } else if (itemId && itemId instanceof mongoose.Types.ObjectId && typeof itemId.equals === "function") {
+        return !itemId.equals(widgetId);
       }
       return true;
     });

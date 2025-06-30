@@ -40,5 +40,5 @@ class Announcement extends BaseWidget {
 }
 
 // Export an instance of the Announcement widget
-const announcementWidget: IBaseWidget<IAnnouncementDefaultData> = new Announcement()
+const announcementWidget: IBaseWidget = new Announcement()
 export default announcementWidget

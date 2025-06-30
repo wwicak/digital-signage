@@ -6,6 +6,7 @@
 import passport from "passport";
 import { Strategy as OAuth2Strategy, VerifyCallback } from "passport-oauth2";
 import axios from "axios";
+// import { IUser } from "../models/User"; // Commented out - not used in OAuth strategy
 
 /**
  * Interface for Microsoft Outlook OAuth profile data
@@ -26,6 +27,15 @@ export interface OutlookTokens {
   expires_at?: number;
   token_type: string;
   scope: string;
+}
+
+/**
+ * Interface for Outlook authenticated user object
+ */
+export interface OutlookAuthUser {
+  profile: OutlookProfile;
+  tokens: OutlookTokens;
+  id?: string; // For compatibility with session serialization
 }
 
 /**
@@ -105,12 +115,8 @@ export const configureOutlookStrategy = (): void => {
 
           // Return profile and tokens for handling in the callback route
           // The actual user linking and token storage will be handled in the service
-          // Define user object type for Passport
-          interface OutlookAuthUser {
-            profile: OutlookProfile;
-            tokens: OutlookTokens;
-          }
-          return done(null, { profile: outlookProfile, tokens } as OutlookAuthUser); // Typed user object
+          // Return typed user object for Passport
+          return done(null, { profile: outlookProfile, tokens } as unknown as Express.User); // Convert to Express.User type
         } catch (error) {
           console.error(
             "Error in Microsoft Outlook OAuth verify callback:",
@@ -131,18 +137,29 @@ export const configureOutlookSerialization = (): void => {
   // Removed unused SessionUser interface - no references found in codebase
   
   passport.serializeUser((user: Express.User, done) => { // Express.User is the standard Passport user type
-    const outlookUser = user as OutlookAuthUser;
-    // Store minimal data in session
-    done(null, {
-      id: outlookUser.profile?.id || outlookUser.id,
-      source: "microsoft",
-    });
+    // Handle both OutlookAuthUser and regular IUser types
+    if (user && typeof user === 'object' && 'profile' in user) {
+      const outlookUser = user as unknown as OutlookAuthUser;
+      // Store minimal data in session for OAuth users
+      done(null, {
+        id: outlookUser.profile?.id || outlookUser.id,
+        source: "microsoft",
+      });
+    } else {
+      // Handle regular database users
+      const dbUser = user as { _id?: string; id?: string };
+      done(null, {
+        id: dbUser._id || dbUser.id,
+        source: "database",
+      });
+    }
   });
 
   passport.deserializeUser((sessionUser: { id: string; source: string }, done) => { // Typed session data
     // For Microsoft OAuth flow, we don't need full user deserialization
     // as tokens are handled separately in the service
-    done(null, sessionUser);
+    // Return a minimal user object that matches Express.User expectations
+    done(null, sessionUser as unknown as Express.User);
   });
 };
 

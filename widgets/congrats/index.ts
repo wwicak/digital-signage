@@ -40,5 +40,5 @@ class Congrats extends BaseWidget {
 }
 
 // Export an instance of the Congrats widget
-const congratsWidget: IBaseWidget<ICongratsDefaultData> = new Congrats()
+const congratsWidget: IBaseWidget = new Congrats()
 export default congratsWidget

@@ -41,5 +41,5 @@ class WeatherWidget extends BaseWidget {
 }
 
 // Export an instance of the WeatherWidget
-const weatherWidget: IBaseWidget<IWeatherDefaultData> = new WeatherWidget()
+const weatherWidget: IBaseWidget = new WeatherWidget()
 export default weatherWidget

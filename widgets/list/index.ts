@@ -48,5 +48,5 @@ class ListWidget extends BaseWidget {
 }
 
 // Export an instance of the ListWidget
-const listWidget: IBaseWidget<IListDefaultData> = new ListWidget()
+const listWidget: IBaseWidget = new ListWidget()
 export default listWidget
