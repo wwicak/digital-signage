@@ -1,10 +1,10 @@
 import { ComponentType } from "react";
 import { Zap } from "lucide-react";
-import BaseWidget, { IWidgetDefinitionArgs, IWidgetContentProps, IWidgetOptionsEditorProps } from "../base_widget";
+import BaseWidget, { IBaseWidget, IWidgetDefinitionArgs, IWidgetContentProps, IWidgetOptionsEditorProps } from "../base_widget";
 import { PriorityVideoContent, PriorityVideoOptions } from "./src";
 
 // Define the default data interface for the Priority Video widget
-interface IPriorityVideoDefaultData {
+export interface IPriorityVideoDefaultData extends Record<string, unknown> {
   title?: string;
   url?: string;
   mediaType: "video" | "audio";
@@ -26,7 +26,7 @@ interface IPriorityVideoDefaultData {
 }
 
 // Define the widget definition arguments for the Priority Video widget
-const priorityVideoDefinitionArgs: IWidgetDefinitionArgs = {
+const priorityVideoDefinitionArgs: IWidgetDefinitionArgs<IPriorityVideoDefaultData> = {
   name: "Priority Scheduled Video",
   type: "priority-video",
   version: "1.0.0",
@@ -47,12 +47,12 @@ const priorityVideoDefinitionArgs: IWidgetDefinitionArgs = {
     },
     priority: 100, // High priority
     playOnce: true, // Play only once per activation
-  } as IPriorityVideoDefaultData,
+  },
   WidgetComponent: PriorityVideoContent as ComponentType<IWidgetContentProps<IPriorityVideoDefaultData>>,
   OptionsComponent: PriorityVideoOptions as ComponentType<IWidgetOptionsEditorProps<IPriorityVideoDefaultData>>,
 };
 
 // Create and export the widget instance
-const priorityVideoWidget = new BaseWidget(priorityVideoDefinitionArgs);
+const priorityVideoWidget: IBaseWidget<IPriorityVideoDefaultData> = new BaseWidget(priorityVideoDefinitionArgs);
 
 export default priorityVideoWidget;

@@ -6,7 +6,7 @@ import MeetingRoomContent from './src/MeetingRoomContent'
 import MeetingRoomOptions from './src/MeetingRoomOptions'
 
 // Define the structure for the meeting room widget's default data
-interface IMeetingRoomDefaultData {
+export interface IMeetingRoomDefaultData extends Record<string, unknown> {
   buildingId?: string;
   refreshInterval: number;
   showUpcoming: boolean;
@@ -15,7 +15,7 @@ interface IMeetingRoomDefaultData {
 }
 
 // Define the widget definition arguments for the Meeting Room widget
-const meetingRoomDefinitionArgs: IWidgetDefinitionArgs = {
+const meetingRoomDefinitionArgs: IWidgetDefinitionArgs<IMeetingRoomDefaultData> = {
   name: 'Meeting Room Display',
   type: 'meeting-room',
   version: '1.0.0',
@@ -26,7 +26,7 @@ const meetingRoomDefinitionArgs: IWidgetDefinitionArgs = {
     showUpcoming: true,
     maxReservations: 10,
     title: "Today's Meetings",
-  } as IMeetingRoomDefaultData,
+  },
   WidgetComponent: MeetingRoomContent as ComponentType<IWidgetContentProps<IMeetingRoomDefaultData>>,
   OptionsComponent: MeetingRoomOptions as ComponentType<IWidgetOptionsEditorProps<IMeetingRoomDefaultData>>,
 }
@@ -37,6 +37,6 @@ class MeetingRoom extends BaseWidget {
   }
 }
 
-// Export an instance of the Meeting Room widget, typed as IBaseWidget
-const meetingRoomWidget: IBaseWidget = new MeetingRoom()
+// Export an instance of the Meeting Room widget
+const meetingRoomWidget: IBaseWidget<IMeetingRoomDefaultData> = new MeetingRoom()
 export default meetingRoomWidget

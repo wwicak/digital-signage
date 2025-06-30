@@ -1,14 +1,14 @@
 import { ComponentType } from 'react'
 
 import BaseWidget, { IBaseWidget, IWidgetDefinitionArgs, IWidgetContentProps, IWidgetOptionsEditorProps } from '../base_widget'
-import ImageContent from './src/ImageContent' // Assuming .js for now
-import ImageOptions from './src/ImageOptions' // Assuming .js for now
+import ImageContent from './src/ImageContent'
+import ImageOptions from './src/ImageOptions'
 import { Image } from 'lucide-react'
 
 // Define the structure for the image widget's default data
 export type TImageFit = 'contain' | 'cover' | 'fill' | 'none' | 'scale-down';
 
-export interface IImageDefaultData {
+export interface IImageDefaultData extends Record<string, unknown> {
   title?: string | null; // Optional title for the image/widget
   url: string | null; // URL of the image
   fit: TImageFit; // How the image should fit within its container
@@ -17,18 +17,18 @@ export interface IImageDefaultData {
 }
 
 // Define the widget definition arguments for the Image widget
-const imageDefinitionArgs: IWidgetDefinitionArgs = {
+const imageDefinitionArgs: IWidgetDefinitionArgs<IImageDefaultData> = {
   name: 'Image',
-  type: 'image', // Added 'type' field as it's required
+  type: 'image',
   version: '0.1',
-  icon: Image, // Use the imported icon
+  icon: Image,
   defaultData: {
     title: null,
     url: null,
     fit: 'contain',
     color: '#2d3436', // Default background: Dark Gray
     altText: '',
-  } as IImageDefaultData,
+  },
   WidgetComponent: ImageContent as ComponentType<IWidgetContentProps<IImageDefaultData>>,
   OptionsComponent: ImageOptions as ComponentType<IWidgetOptionsEditorProps<IImageDefaultData>>
 }
@@ -38,13 +38,8 @@ class ImageWidget extends BaseWidget {
   constructor() {
     super(imageDefinitionArgs)
   }
-
-  /*
-   * Widget and Options getters are inherited from BaseWidget
-   * and will use WidgetComponent and OptionsComponent from definitionArgs
-   */
 }
 
-// Export an instance of the ImageWidget, typed as IBaseWidget
-const imageWidget: IBaseWidget = new ImageWidget()
+// Export an instance of the ImageWidget
+const imageWidget: IBaseWidget<IImageDefaultData> = new ImageWidget()
 export default imageWidget

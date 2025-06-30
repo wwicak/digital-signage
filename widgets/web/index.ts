@@ -1,12 +1,12 @@
 import { ComponentType } from "react";
 
 import BaseWidget, { IBaseWidget, IWidgetDefinitionArgs, IWidgetContentProps, IWidgetOptionsEditorProps } from "../base_widget";
-import WebContent from "./src/WebContent"; // Assuming .js for now
-import WebOptions from "./src/WebOptions"; // Assuming .js for now
+import WebContent from "./src/WebContent";
+import WebOptions from "./src/WebOptions";
 import { Globe } from "lucide-react";
 
 // Define the structure for the web widget's default data
-export interface IWebDefaultData {
+export interface IWebDefaultData extends Record<string, unknown> {
   title?: string | null; // Optional title for the web content frame
   url: string; // URL of the web page to display
   color?: string; // Optional background color if iframe transparency is handled
@@ -18,11 +18,11 @@ export interface IWebDefaultData {
 }
 
 // Define the widget definition arguments for the Web widget
-const webDefinitionArgs: IWidgetDefinitionArgs = {
+const webDefinitionArgs: IWidgetDefinitionArgs<IWebDefaultData> = {
   name: "Web Page", // Changed name to be more descriptive
-  type: "web", // Added 'type' field as it's required
+  type: "web",
   version: "0.1",
-  icon: Globe, // Use the imported icon
+  icon: Globe,
   defaultData: {
     title: null,
     url: "https://www.plnindonesiapower.co.id/",
@@ -32,19 +32,18 @@ const webDefinitionArgs: IWidgetDefinitionArgs = {
     allowInteraction: false, // Default to no interaction
     useProxy: false, // Default to direct loading
     showErrorMessage: true, // Default to showing error messages
-  } as IWebDefaultData,
+  },
   WidgetComponent: WebContent as ComponentType<IWidgetContentProps<IWebDefaultData>>,
   OptionsComponent: WebOptions as ComponentType<IWidgetOptionsEditorProps<IWebDefaultData>>,
 };
+
 // Renamed from Web to WebWidget for consistency
 class WebWidget extends BaseWidget {
   constructor() {
     super(webDefinitionArgs);
   }
-
-  // Widget and Options getters are inherited from BaseWidget
 }
 
-// Export an instance of the WebWidget, typed as IBaseWidget
-const webWidget: IBaseWidget = new WebWidget();
+// Export an instance of the WebWidget
+const webWidget: IBaseWidget<IWebDefaultData> = new WebWidget();
 export default webWidget;

@@ -1,10 +1,10 @@
 import { ComponentType } from "react";
 import { Play } from "lucide-react";
-import BaseWidget, { IWidgetDefinitionArgs, IWidgetContentProps, IWidgetOptionsEditorProps } from "../base_widget";
+import BaseWidget, { IBaseWidget, IWidgetDefinitionArgs, IWidgetContentProps, IWidgetOptionsEditorProps } from "../base_widget";
 import { MediaPlayerContent, MediaPlayerOptions } from "./src";
 
 // Define the default data interface for the Media Player widget
-interface IMediaPlayerDefaultData {
+export interface IMediaPlayerDefaultData extends Record<string, unknown> {
   title?: string;
   url?: string;
   mediaType: "video" | "audio";
@@ -30,7 +30,7 @@ interface IMediaPlayerDefaultData {
 }
 
 // Define the widget definition arguments for the Media Player widget
-const mediaPlayerDefinitionArgs: IWidgetDefinitionArgs = {
+const mediaPlayerDefinitionArgs: IWidgetDefinitionArgs<IMediaPlayerDefaultData> = {
   name: "Media Player",
   type: "media-player",
   version: "1.0.0",
@@ -53,12 +53,12 @@ const mediaPlayerDefinitionArgs: IWidgetDefinitionArgs = {
       message: "Media content is not available",
       backgroundColor: "#000000",
     },
-  } as IMediaPlayerDefaultData,
+  },
   WidgetComponent: MediaPlayerContent as ComponentType<IWidgetContentProps<IMediaPlayerDefaultData>>,
   OptionsComponent: MediaPlayerOptions as ComponentType<IWidgetOptionsEditorProps<IMediaPlayerDefaultData>>,
 };
 
 // Create and export the widget instance
-const mediaPlayerWidget = new BaseWidget(mediaPlayerDefinitionArgs);
+const mediaPlayerWidget: IBaseWidget<IMediaPlayerDefaultData> = new BaseWidget(mediaPlayerDefinitionArgs);
 
 export default mediaPlayerWidget;

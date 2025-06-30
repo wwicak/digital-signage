@@ -1,14 +1,14 @@
 import { ComponentType } from 'react'
 
 import BaseWidget, { IBaseWidget, IWidgetDefinitionArgs, IWidgetContentProps, IWidgetOptionsEditorProps } from '../base_widget'
-import WeatherContent from './src/WeatherContent' // Assuming .js for now
-import WeatherOptions from './src/WeatherOptions' // Assuming .js for now
+import WeatherContent from './src/WeatherContent'
+import WeatherOptions from './src/WeatherOptions'
 import { Cloud } from 'lucide-react'
 
 // Define the structure for the weather widget's default data
 export type TWeatherUnit = 'metric' | 'imperial'; // Celsius/Meters/sec vs Fahrenheit/Miles/hour
 
-export interface IWeatherDefaultData {
+export interface IWeatherDefaultData extends Record<string, unknown> {
   zip: string; // Zip code or city name for location
   unit: TWeatherUnit;
   showForecast?: boolean; // Option to show multi-day forecast
@@ -17,18 +17,18 @@ export interface IWeatherDefaultData {
 }
 
 // Define the widget definition arguments for the Weather widget
-const weatherDefinitionArgs: IWidgetDefinitionArgs = {
+const weatherDefinitionArgs: IWidgetDefinitionArgs<IWeatherDefaultData> = {
   name: 'Weather',
-  type: 'weather', // Added 'type' field as it's required
+  type: 'weather',
   version: '0.1',
-  icon: Cloud, // Use the imported icon
+  icon: Cloud,
   defaultData: {
     zip: '10001', // Default to New York
     unit: 'imperial',
     showForecast: true, // Default to show forecast
     apiKey: '', // API key might be needed
     locationName: '', // Will be updated after fetching weather
-  } as IWeatherDefaultData,
+  },
   WidgetComponent: WeatherContent as ComponentType<IWidgetContentProps<IWeatherDefaultData>>,
   OptionsComponent: WeatherOptions as ComponentType<IWidgetOptionsEditorProps<IWeatherDefaultData>>,
 }
@@ -38,10 +38,8 @@ class WeatherWidget extends BaseWidget {
   constructor() {
     super(weatherDefinitionArgs)
   }
-
-  // Widget and Options getters are inherited from BaseWidget
 }
 
-// Export an instance of the WeatherWidget, typed as IBaseWidget
-const weatherWidget: IBaseWidget = new WeatherWidget()
+// Export an instance of the WeatherWidget
+const weatherWidget: IBaseWidget<IWeatherDefaultData> = new WeatherWidget()
 export default weatherWidget
