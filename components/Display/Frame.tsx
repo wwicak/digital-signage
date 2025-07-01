@@ -10,7 +10,7 @@ import Clock from "react-live-clock";
 import * as z from "zod";
 
 export const DisplayFramePropsSchema = z.object({
-  children: z.custom<ReactNode>((val) => {
+  children: z.custom<ReactNode>((_val) => { // val parameter required by z.custom API but unused in basic validation
     // Basic placeholder validation for ReactNode
     return true;
   }),
@@ -79,7 +79,7 @@ const Frame: React.FC<IDisplayFrameProps> = React.memo(
             ))}
           </div>
         )}
-        <div className='flex-1 flex flex-col overflow-hidden'>{children}</div>
+        <div className='flex-1 flex flex-col overflow-hidden w-full h-full'>{children}</div>
       </div>
     );
   },

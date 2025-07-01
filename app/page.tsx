@@ -19,7 +19,6 @@ interface IDisplaySummary {
 
 export default function HomePage() {
   const [displays, setDisplays] = useState<IDisplaySummary[]>([])
-  const [loading, setLoading] = useState(true)
   const router = useRouter()
 
   useEffect(() => {
@@ -28,27 +27,27 @@ export default function HomePage() {
         const host = process.env.NODE_ENV === 'development'
           ? 'http://localhost:3000'
           : 'https://your-domain.com' // Update this with your production domain
-        
+
         const fullDisplayList = await getDisplays(host)
-        
+
         // Ensure fullDisplayList is an array before calling map
         if (!Array.isArray(fullDisplayList)) {
           console.error('getDisplays() did not return an array:', fullDisplayList)
           setDisplays([])
           return
         }
-        
+
         const displaySummaries = fullDisplayList.map(display => ({
           _id: display._id,
           name: display.name,
         }))
-        
+
         setDisplays(displaySummaries)
       } catch (error) {
         console.error('Failed to fetch displays:', error)
         setDisplays([])
       } finally {
-        setLoading(false)
+        // Loading complete
       }
     }
 
@@ -125,7 +124,14 @@ export default function HomePage() {
                 <ArrowRight className='ml-2 h-5 w-5' />
               </Link>
             </Button>
-            
+
+            <Button asChild variant='outline' size='lg' className='text-lg px-8 py-6'>
+              <Link href='/display-selector'>
+                <Tv className='mr-2 h-5 w-5' />
+                Setup Display
+              </Link>
+            </Button>
+
             {displays.length > 0 && (
               <div className='flex items-center gap-4'>
                 <span className='text-sm text-muted-foreground'>or view a display:</span>

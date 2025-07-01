@@ -1,14 +1,8 @@
 import { useMemo } from "react";
 import widgets from "@/widgets";
 
-interface AvailableWidget {
-  key: string;
-  name: string;
-  type: string;
-  icon: any; // LucideIcon component
-  version: string;
-  defaultData?: Record<string, any>;
-}
+// Removed unused LucideIcon import
+// Removed unused AvailableWidget interface - no references found in codebase
 
 // Hook to get widget choices formatted for dropdowns
 export function useWidgetChoices() {

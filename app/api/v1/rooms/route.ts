@@ -2,9 +2,10 @@ import { NextRequest, NextResponse } from "next/server";
 import dbConnect from "@/lib/mongodb";
 import Room, { RoomSchemaZod } from "@/lib/models/Room";
 import Building from "@/lib/models/Building";
-import { requireAuth } from "@/lib/helpers/auth_helper";
+import { requireAuth } from "@/lib/auth";
 import { hasPermission } from "@/lib/helpers/rbac_helper";
 import mongoose from "mongoose";
+import { getHttpStatusFromError, getErrorMessage } from "@/types/error";
 
 export async function GET(request: NextRequest) {
   try {
@@ -24,7 +25,7 @@ export async function GET(request: NextRequest) {
     const buildingId = searchParams.get("building_id");
     const skip = (page - 1) * limit;
 
-    const query: any = {};
+    const query: Record<string, unknown> = {};
     if (buildingId && mongoose.Types.ObjectId.isValid(buildingId)) {
       query.building_id = buildingId;
     }
@@ -46,11 +47,12 @@ export async function GET(request: NextRequest) {
         pages: Math.ceil(total / limit),
       },
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Error fetching rooms:", error);
+    // Use type-safe error handling utilities
     return NextResponse.json(
-      { message: error.message || "Error fetching rooms" },
-      { status: error.status || 500 }
+      { message: getErrorMessage(error) },
+      { status: getHttpStatusFromError(error) }
     );
   }
 }
@@ -111,11 +113,12 @@ export async function POST(request: NextRequest) {
     await room.populate("building_id", "name address");
 
     return NextResponse.json(room, { status: 201 });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Error creating room:", error);
+    // Use type-safe error handling utilities
     return NextResponse.json(
-      { message: error.message || "Error creating room" },
-      { status: error.status || 500 }
+      { message: getErrorMessage(error) },
+      { status: getHttpStatusFromError(error) }
     );
   }
 }

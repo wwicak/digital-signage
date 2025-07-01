@@ -1,16 +1,22 @@
 import mongoose from "mongoose";
-import User from "./lib/models/User";
+import User, { IUser, IUserRole, UserRoleName } from "./lib/models/User";
+import dotenv from "dotenv";
 
-const MONGODB_URI =
-  "mongodb+srv://dimastw:dya0gVD7m9xJNJpo@cluster0.jez3b.mongodb.net/digital-signage?retryWrites=true&w=majority&appName=Cluster0";
+// Load environment variables
+dotenv.config();
+
+const MONGODB_URI = process.env.MONGODB_URI;
+
+if (!MONGODB_URI) {
+  console.error("❌ MONGODB_URI environment variable is not set!");
+  console.error("Please set MONGODB_URI in your .env file");
+  process.exit(1);
+}
 
 async function createAdmin() {
   try {
     console.log("🔗 Connecting to MongoDB...");
-    await mongoose.connect(MONGODB_URI, {
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
-    } as mongoose.ConnectOptions);
+    await mongoose.connect(MONGODB_URI!);
     console.log("✅ Connected to MongoDB successfully");
 
     // Check if admin user already exists
@@ -28,15 +34,19 @@ async function createAdmin() {
     const adminUser = new User({
       email: "admin@example.com",
       name: "Administrator",
-      role: "admin",
+      role: {
+        name: UserRoleName.SUPER_ADMIN,
+      } as IUserRole,
     });
 
-    const registeredUser = await new Promise<any>((resolve, reject) => {
-      User.register(adminUser, "admin123", (err: any, user: any) => {
+    const registeredUser = await new Promise<IUser>((resolve, reject) => {
+      User.register(adminUser, "admin123", (err: Error | null, user?: IUser) => { // Typed callback parameters
         if (err) {
           reject(err);
-        } else {
+        } else if (user) {
           resolve(user);
+        } else {
+          reject(new Error("User registration failed: no user returned"));
         }
       });
     });

@@ -5,17 +5,18 @@ import _ from 'lodash'
 import shortid from 'shortid'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { getDisplay, updateDisplay, IDisplayData } from '../actions/display'
+import { WidgetData, WidgetType } from '../lib/models/Widget'
 
-// Types
-interface IWidget {
+// Types - Display Widget interface for context (simpler than full IWidget model)
+interface IDisplayWidget {
   _id: string;
   name: string;
-  type: string;
+  type: WidgetType;
   x: number;
   y: number;
   w: number;
   h: number;
-  data: any;
+  data: WidgetData;
 }
 
 interface IStatusBar {
@@ -27,10 +28,10 @@ interface IStatusBar {
 interface DisplayState {
   id: string | null;
   name: string | null;
-  layout: 'spaced' | 'compact' | null;
+  layout: string | null;
   orientation: 'landscape' | 'portrait' | null;
   statusBar: IStatusBar;
-  widgets: IWidget[];
+  widgets: IDisplayWidget[];
 }
 
 type DisplayAction =
@@ -40,7 +41,7 @@ type DisplayAction =
   | { type: 'SET_LAYOUT'; payload: 'spaced' | 'compact' }
   | { type: 'SET_ORIENTATION'; payload: 'landscape' | 'portrait' }
   | { type: 'SET_STATUS_BAR'; payload: IStatusBar }
-  | { type: 'SET_WIDGETS'; payload: IWidget[] }
+  | { type: 'SET_WIDGETS'; payload: IDisplayWidget[] }
   | { type: 'ADD_STATUS_BAR_ITEM'; payload: string }
   | { type: 'REMOVE_STATUS_BAR_ITEM'; payload: number }
   | { type: 'REORDER_STATUS_BAR_ITEMS'; payload: { startIndex: number; endIndex: number } };
@@ -111,13 +112,13 @@ interface DisplayContextType {
   updateName: (name: string) => void;
   updateLayout: (layout: 'spaced' | 'compact') => void;
   updateOrientation: (orientation: 'landscape' | 'portrait') => void;
-  updateWidgets: (widgets: IWidget[]) => void;
+  updateWidgets: (widgets: IDisplayWidget[]) => void;
   addStatusBarItem: (type: string) => Promise<void>;
   removeStatusBarItem: (index: number) => void;
   reorderStatusBarItems: (startIndex: number, endIndex: number) => void;
   refreshDisplayData: () => void;
   isLoading: boolean;
-  error: any;
+  error: Error | null;
 }
 
 const DisplayContext = createContext<DisplayContextType | undefined>(undefined)
@@ -229,7 +230,7 @@ export const DisplayProvider: React.FC<{ children: React.ReactNode }> = ({ child
     updateDisplayThrottled(state.id, { orientation })
   }, [state.id, updateDisplayThrottled])
 
-  const updateWidgets = useCallback((widgets: IWidget[]) => {
+  const updateWidgets = useCallback((widgets: IDisplayWidget[]) => {
     if (!state.id) return
     dispatch({ type: 'SET_WIDGETS', payload: widgets })
     updateDisplayThrottled(state.id, { widgets })

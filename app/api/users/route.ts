@@ -3,11 +3,16 @@ import dbConnect from "@/lib/mongodb";
 import User, { UserRoleName, IUserRole } from "@/lib/models/User";
 import Building from "@/lib/models/Building";
 import Display from "@/lib/models/Display";
-import { requireAuth } from "@/lib/helpers/auth_helper";
+import { requireAuth } from "@/lib/auth";
 import { hasPermission, canCreateUsers } from "@/lib/helpers/rbac_helper";
 import { registerUser, sanitizeUser } from "@/lib/helpers/auth_helper";
 import { z } from "zod";
 import mongoose from "mongoose";
+
+// Interface for HTTP-like errors
+interface HttpError extends Error {
+  status?: number;
+}
 
 // Request schema for creating a user
 const CreateUserRequestSchema = z.object({
@@ -69,11 +74,11 @@ export async function GET(request: NextRequest) {
         pages: Math.ceil(totalUsers / limit),
       },
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Error fetching users:", error);
     return NextResponse.json(
-      { message: error.message || "Error fetching users" },
-      { status: error.status || 500 }
+      { message: error instanceof Error ? error.message : "Error fetching users" },
+      { status: (error as HttpError)?.status || 500 }
     );
   }
 }
@@ -231,11 +236,11 @@ export async function POST(request: NextRequest) {
       },
       { status: 201 }
     );
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Error creating user:", error);
 
     // Handle specific passport-local-mongoose errors
-    if (error.name === "UserExistsError") {
+    if (error instanceof Error && error.name === "UserExistsError") {
       return NextResponse.json(
         { message: "User already exists" },
         { status: 409 }
@@ -245,7 +250,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(
       {
         message: "Error creating user",
-        error: error.message,
+        error: error instanceof Error ? error.message : "Unknown error",
       },
       { status: 500 }
     );

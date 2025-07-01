@@ -12,7 +12,7 @@ export async function GET(request: NextRequest) {
     const layoutId = searchParams.get("layoutId");
 
     // Build query for displays
-    const query: any = {};
+    const query: Record<string, unknown> = {};
     if (layoutId) {
       query.layout = layoutId;
     }
@@ -108,7 +108,7 @@ export async function GET(request: NextRequest) {
       offlineCount,
       lastUpdated: new Date().toISOString(),
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Monitoring displays error:", error);
     return NextResponse.json({
       displays: [],
@@ -116,7 +116,7 @@ export async function GET(request: NextRequest) {
       onlineCount: 0,
       offlineCount: 0,
       lastUpdated: new Date().toISOString(),
-      error: error.message,
+      error: error instanceof Error ? error.message : "Unknown error",
     });
   }
 }

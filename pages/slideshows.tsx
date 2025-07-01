@@ -1,5 +1,6 @@
 import React, { useRef, useEffect } from 'react'
 import { Images } from 'lucide-react'
+import type { NextPageContext } from 'next/types'
 
 import Frame from '../components/Admin/Frame.tsx'
 import SlideshowListComponent from '../components/Admin/SlideshowList.tsx' // Renamed
@@ -76,7 +77,7 @@ const Slideshows: React.FC<SlideshowsProps> = ({ loggedIn, displayId }) => {
 
 // Example: If displayId comes from query for this page
 const SlideshowsWithInitialProps = Object.assign(Slideshows, {
-  getInitialProps: async (ctx: any): Promise<{ displayId?: string }> => {
+  getInitialProps: async (ctx: NextPageContext): Promise<{ displayId?: string }> => {
     const displayId = ctx.query.id as string | undefined
     return { displayId }
   }

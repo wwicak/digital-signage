@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useGlobalDisplaySSE } from "./useGlobalDisplaySSE";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 
@@ -14,6 +14,21 @@ interface DisplayStatusDetail {
   ipAddress?: string;
   disconnectionReason?: string;
   alertCount?: number;
+  // Performance metrics
+  performance?: {
+    cpuUsage?: number;
+    memoryUsage?: number;
+    diskUsage?: number;
+    temperature?: number;
+  };
+  // Additional metadata
+  metadata?: {
+    resolution?: string;
+    browser?: string;
+    appVersion?: string;
+    screenSize?: string;
+    ipAddress?: string;
+  };
 }
 
 interface DisplayStatus {
@@ -57,7 +72,6 @@ export const useDisplayStatus = (options?: {
   const [lastUpdateTime, setLastUpdateTime] = useState<Date>(new Date());
   const { isConnected } = useGlobalDisplaySSE(enableRealTimeUpdates);
   const queryClient = useQueryClient();
-  const updateTimeoutRef = useRef<NodeJS.Timeout | undefined>(undefined);
 
   // Fetch monitoring stats
   const {
@@ -100,7 +114,32 @@ export const useDisplayStatus = (options?: {
       const data = await response.json();
 
       const statusMap: DisplayStatus = {};
-      data.displays?.forEach((display: any) => {
+      data.displays?.forEach((display: {
+        displayId: string;
+        isOnline: boolean;
+        clientCount?: number;
+        lastSeen?: string;
+        lastHeartbeat?: string;
+        consecutiveFailures?: number;
+        responseTime?: number;
+        uptimePercentage?: number;
+        connectionType?: "sse" | "websocket" | "polling";
+        ipAddress?: string;
+        disconnectionReason?: string;
+        alertCount?: number;
+        performance?: {
+          cpuUsage?: number;
+          memoryUsage?: number;
+          diskUsage?: number;
+          temperature?: number;
+        };
+        metadata?: {
+          resolution?: string;
+          browser?: string;
+          appVersion?: string;
+          screenSize?: string;
+        };
+      }) => {
         statusMap[display.displayId] = {
           isOnline: display.isOnline,
           clientCount: display.clientCount || 0,
@@ -115,17 +154,20 @@ export const useDisplayStatus = (options?: {
           ipAddress: display.ipAddress,
           disconnectionReason: display.disconnectionReason,
           alertCount: display.alertCount || 0,
+          performance: display.performance,
+          metadata: display.metadata,
         };
       });
 
       setDisplayStatus(statusMap);
       setLastUpdateTime(new Date());
-    } catch (error: any) {
+    } catch (error) {
       console.error("Error fetching display statuses:", error);
       // Don't retry on network errors
+      const errorMessage = error instanceof Error ? error.message : String(error);
       if (
-        !error.message.includes("Failed to fetch") &&
-        !error.message.includes("ERR_NETWORK")
+        !errorMessage.includes("Failed to fetch") &&
+        !errorMessage.includes("ERR_NETWORK")
       ) {
         // Only log non-network errors for debugging
         console.warn("Non-network error in fetchDisplayStatuses:", error);
@@ -164,6 +206,8 @@ export const useDisplayStatus = (options?: {
           ipAddress: undefined,
           disconnectionReason: undefined,
           alertCount: 0,
+          performance: undefined,
+          metadata: undefined,
         }
       );
     },
@@ -214,7 +258,7 @@ export const useDisplayStatus = (options?: {
   }, [displayStatus]);
 
   const sendHeartbeat = useCallback(
-    async (displayId: string, clientInfo?: any): Promise<boolean> => {
+    async (displayId: string, clientInfo?: Record<string, unknown>): Promise<boolean> => {
       try {
         const response = await fetch(
           `/api/v1/displays/${displayId}/heartbeat`,

@@ -1,8 +1,25 @@
 import type { NextApiRequest, NextApiResponse } from "next/types";
+import type { NextRequest, NextResponse } from "next/server";
 import { IncomingMessage } from "http";
 import User, { IUser, IUserRole, UserRoleName } from "./models/User";
 import * as jwt from "jsonwebtoken";
 import dbConnect from "./mongodb";
+
+// Cookie options interface
+interface CookieOptions {
+  httpOnly?: boolean;
+  path?: string;
+  maxAge?: number;
+  sameSite?: 'strict' | 'lax' | 'none';
+  secure?: boolean;
+}
+
+// Type for response objects that can set cookies (both App Router and Pages Router)
+type CookieResponse =
+  | NextResponse
+  | NextApiResponse
+  | { cookies: { set: (name: string, value: string, options?: CookieOptions) => void } }
+  | { setHeader: (name: string, value: string) => void };
 
 const JWT_SECRET =
   process.env.JWT_SECRET ||
@@ -10,7 +27,7 @@ const JWT_SECRET =
   "fallback-secret-for-dev";
 
 export interface AuthenticatedUser {
-  _id: any;
+  _id: string; // MongoDB ObjectId as string for serialization
   email: string;
   name?: string;
   role: IUserRole;
@@ -27,7 +44,7 @@ export interface SessionData {
 export function generateToken(user: IUser): string {
   const payload: SessionData = {
     user: {
-      _id: user._id,
+      _id: String(user._id), // Convert ObjectId to string
       email: user.email!,
       name: user.name,
       role: user.role || {
@@ -58,17 +75,41 @@ export function verifyToken(token: string): SessionData | null {
  * Extract token from request (from Authorization header or cookies)
  */
 export function extractToken(
-  req: NextApiRequest | IncomingMessage
+  req: NextApiRequest | NextRequest | IncomingMessage
 ): string | null {
+  // Handle NextRequest (App Router)
+  if ('cookies' in req && typeof req.cookies.get === 'function') {
+    const nextReq = req as NextRequest;
+
+    // Try Authorization header first
+    const authHeader = nextReq.headers.get('authorization');
+    if (authHeader && authHeader.startsWith("Bearer ")) {
+      return authHeader.substring(7);
+    }
+
+    // Try cookie
+    const authTokenCookie = nextReq.cookies.get('auth-token');
+    if (authTokenCookie) {
+      return authTokenCookie.value;
+    }
+
+    return null;
+  }
+
+  // Handle NextApiRequest and IncomingMessage (Pages Router)
   // Try Authorization header first
-  const authHeader = req.headers.authorization;
+  const authHeader = 'authorization' in req.headers
+    ? req.headers.authorization
+    : undefined;
   if (authHeader && authHeader.startsWith("Bearer ")) {
     return authHeader.substring(7);
   }
 
   // Try cookie
-  const cookies = req.headers.cookie;
-  if (cookies) {
+  const cookies = 'cookie' in req.headers
+    ? req.headers.cookie
+    : undefined;
+  if (cookies && typeof cookies === 'string') {
     const tokenMatch = cookies.match(/auth-token=([^;]+)/);
     if (tokenMatch) {
       return tokenMatch[1];
@@ -82,7 +123,7 @@ export function extractToken(
  * Get authenticated user from request
  */
 export async function getAuthenticatedUser(
-  req: NextApiRequest
+  req: NextApiRequest | NextRequest
 ): Promise<AuthenticatedUser | null> {
   await dbConnect();
 
@@ -114,7 +155,7 @@ export async function getAuthenticatedUser(
  * Require authentication middleware
  */
 export async function requireAuth(
-  req: NextApiRequest
+  req: NextApiRequest | NextRequest
 ): Promise<AuthenticatedUser> {
   const user = await getAuthenticatedUser(req);
 
@@ -139,9 +180,10 @@ export function withAuth(
     try {
       const user = await requireAuth(req);
       return await handler(req, res, user);
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : "Authentication required";
       return res.status(401).json({
-        message: error.message || "Authentication required",
+        message: errorMessage,
       });
     }
   };
@@ -150,9 +192,9 @@ export function withAuth(
 /**
  * Set authentication cookie
  */
-export function setAuthCookie(res: any, token: string) {
+export function setAuthCookie(res: CookieResponse, token: string) {
   // Check if this is a NextResponse (App Router) or ServerResponse (Pages Router)
-  if (res.cookies && typeof res.cookies.set === "function") {
+  if ('cookies' in res && res.cookies && typeof res.cookies.set === "function") {
     // App Router - use NextResponse.cookies.set()
     res.cookies.set("auth-token", token, {
       httpOnly: true,
@@ -161,7 +203,7 @@ export function setAuthCookie(res: any, token: string) {
       sameSite: "strict",
       secure: process.env.NODE_ENV === "production",
     });
-  } else if (res.setHeader && typeof res.setHeader === "function") {
+  } else if ('setHeader' in res && res.setHeader && typeof res.setHeader === "function") {
     // Pages Router - use setHeader
     res.setHeader(
       "Set-Cookie",
@@ -179,9 +221,9 @@ export function setAuthCookie(res: any, token: string) {
 /**
  * Clear authentication cookie
  */
-export function clearAuthCookie(res: any) {
+export function clearAuthCookie(res: CookieResponse) {
   // Check if this is a NextResponse (App Router) or ServerResponse (Pages Router)
-  if (res.cookies && typeof res.cookies.set === "function") {
+  if ('cookies' in res && res.cookies && typeof res.cookies.set === "function") {
     // App Router - use NextResponse.cookies.set()
     res.cookies.set("auth-token", "", {
       httpOnly: true,
@@ -190,7 +232,7 @@ export function clearAuthCookie(res: any) {
       sameSite: "strict",
       secure: process.env.NODE_ENV === "production",
     });
-  } else if (res.setHeader && typeof res.setHeader === "function") {
+  } else if ('setHeader' in res && res.setHeader && typeof res.setHeader === "function") {
     // Pages Router - use setHeader
     res.setHeader(
       "Set-Cookie",

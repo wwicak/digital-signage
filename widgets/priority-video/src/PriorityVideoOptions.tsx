@@ -6,15 +6,12 @@ import { Badge } from '@/components/ui/badge';
 import {
   Zap,
   Clock,
-  Calendar,
   Upload,
   Settings,
   Eye,
   AlertCircle,
   Plus,
   Trash2,
-  FileVideo,
-  FileAudio,
   Volume2,
   VolumeX
 } from 'lucide-react';
@@ -81,7 +78,7 @@ class PriorityVideoOptions extends Component<IWidgetOptionsEditorProps<PriorityV
     }
   }
 
-  handleChange = async (name: string, value: any): Promise<void> => {
+  handleChange = async (name: string, value: unknown): Promise<void> => {
     const { onChange } = this.props;
     let finalName: keyof IPriorityVideoOptionsState = name as keyof IPriorityVideoOptionsState;
     let finalValue = value;
@@ -107,10 +104,11 @@ class PriorityVideoOptions extends Component<IWidgetOptionsEditorProps<PriorityV
           }
           
           this.setState({ isUploading: false });
-        } catch (error: any) {
+        } catch (error: unknown) {
           console.error('Media upload failed:', error);
+          const axiosError = error as {response?: {data?: {message?: string}}};
           this.setState({
-            uploadError: error.response?.data?.message || 'Upload failed',
+            uploadError: axiosError.response?.data?.message || 'Upload failed',
             isUploading: false
           });
           finalValue = this.state.url; // Keep existing URL
@@ -242,8 +240,6 @@ class PriorityVideoOptions extends Component<IWidgetOptionsEditorProps<PriorityV
       fallbackContent = { message: '', backgroundColor: '#000000' },
       priority = 100,
       playOnce = true,
-      uploadError,
-      isUploading,
     } = this.state;
 
     const previewData: PriorityVideoWidgetData = {
@@ -335,16 +331,16 @@ class PriorityVideoOptions extends Component<IWidgetOptionsEditorProps<PriorityV
                       }}
                     />
                   </div>
-                  {isUploading && (
+                  {this.state.isUploading && (
                     <div className='flex items-center gap-2 mt-3 p-3 bg-blue-50 border border-blue-200 rounded-lg'>
                       <div className='w-4 h-4 border-2 border-blue-600 border-t-transparent rounded-full animate-spin'></div>
                       <span className='text-sm text-blue-700 font-medium'>Uploading media file...</span>
                     </div>
                   )}
-                  {uploadError && (
+                  {this.state.uploadError && (
                     <div className='flex items-center gap-2 mt-3 p-3 bg-red-50 border border-red-200 rounded-lg'>
                       <AlertCircle className='w-4 h-4 text-red-600' />
-                      <span className='text-sm text-red-700'>{uploadError}</span>
+                      <span className='text-sm text-red-700'>{this.state.uploadError}</span>
                     </div>
                   )}
                   <div className='mt-3 p-3 bg-gray-50 border border-gray-200 rounded-lg'>

@@ -1,153 +1,157 @@
 # CLAUDE.md
 
+
+# Using Claude-Gemini CLI
+
+This project uses the claude-gemini CLI for large codebase analysis. When analyzing files that exceed my context limits, I will automatically use this tool.
+
+## Quick Reference
+
+```bash
+# ✅ CORRECT - Waits for results
+claude-gemini sync "@src/ @lib/ Find all API endpoints"
+cg sync "@src/ @lib/ Find all API endpoints"
+cg "@src/ @lib/ Find all API endpoints"  # Short form (defaults to sync)
+
+# ❌ WRONG - May not wait for results
+gemini -p "@src/ @lib/ Find all API endpoints"
+```
+
+## Usage Examples
+
+```bash
+# Enhanced codebase analysis (automatic code2prompt) - both forms work
+cg sync "Analyze the project architecture"
+cg "Review security patterns in the codebase"  # Short form
+
+# Specific file/directory analysis
+cg sync "@src/auth.ts @src/middleware.ts Analyze authentication flow"
+cg "@src/ @lib/ Find all WebSocket implementations"
+
+# Advanced filtering with code2prompt
+cg sync "Audit authentication logic" --include "*.ts,*.js" --exclude "**/tests/**"
+
+# Use ripgrep for targeted searches (legacy mode)
+cg sync -r "@src/ Find all useState hooks"
+
+# Custom analysis with line numbers
+cg sync "Review API endpoints" --line-numbers
+
+# Force legacy mode if needed
+cg sync "@src/ Find endpoints" --no-code2prompt
+
+# Analyze with timeout
+cg sync -t 600 "@./ Comprehensive security audit"
+
+## Important for Claude
+
+When I detect that a task requires analyzing large portions of the codebase, I MUST:
+1. Use `claude-gemini` or `cg` command (NOT direct gemini)
+2. Wait for "✅ Analysis complete!" message
+3. Use the comprehensive results to answer your question
+4. NOT proceed with limited analysis while waiting
+
+The tool is globally installed and available in all your projects.
+
+
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-## Digital Signage Application Overview
+## Common Development Commands
 
-This is a Next.js-based digital signage system that allows users to create and manage content displays on screens. The application uses MongoDB for data persistence and features a modular widget-based architecture.
+### Development
+- `npm run dev` - Start Next.js development server
+- `npm run build` - Build for production
+- `npm run build:fast` - Fast build without linting (uses DISABLE_ESLINT_PLUGIN=true)
+- `npm start` - Start production server
 
-## Development Commands
+### Testing
+- `npm test` - Run Jest tests with coverage
+- Jest is configured with separate environments for browser (jsdom) and Node.js components
+- Component tests use jsdom environment, API/model tests use node environment
 
-### Core Development Commands
-- `bun run dev` - Start development server (prefer bun for speed)
-- `bun run build` - Build production application
-- `bun run build:fast` - Fast build without linting (for development)
-- `bun run start` - Start production server
-- `bun run type-check` - TypeScript type checking
-- `bun run lint` - Run ESLint on codebase
-- `bun run lint:fix` - Fix ESLint issues automatically
-- `bun run test` - Run Jest tests with coverage
+### Code Quality
+- `npm run lint` - Run ESLint with caching
+- `npm run lint:fix` - Run ESLint with automatic fixes
+- `npm run type-check` - Run TypeScript type checking without emitting files
 
-### Setup & Maintenance
-- `bun run setup` - Initialize environment configuration
-- `bun run update` - Pull latest changes, install deps, and rebuild
-- `bun run seed:admin` - Create admin user
-- `bun run seed:meeting-rooms` - Set up meeting room demo data
-- `bun run init-feature-flags` - Initialize feature flags
+### Database & Setup
+- `npm run setup` - Initialize configuration using makeconf
+- `npm run seed:admin` - Create admin user (uses create-admin.ts)
+- `npm run seed:meeting-rooms` - Seed meeting room data
+- `npm run setup:meeting-rooms` - Setup meeting rooms system
+- `npm run init-feature-flags` - Initialize feature flags
+
+### Maintenance
+- `npm run update` - Git pull, install dependencies, and build
 
 ## Architecture Overview
 
-### Application Structure
-- **Next.js App Router**: Uses modern App Router architecture (`app/` directory)
-- **API Routes**: RESTful API endpoints in `app/api/` and legacy routes in `pages/api/`
-- **Widget System**: Modular widget architecture in `widgets/` directory
-- **Display Management**: Real-time display updates via Server-Sent Events (SSE)
+### Technology Stack
+- **Framework**: Next.js 15 with App Router
+- **Database**: MongoDB with Mongoose ODM
 - **Authentication**: Passport.js with local, Google OAuth, and Outlook OAuth strategies
+- **UI**: Tailwind CSS with shadcn/ui components
+- **State Management**: React Query (@tanstack/react-query)
+- **Testing**: Jest with Testing Library
+- **Widget System**: GridStack for drag-and-drop layouts
 
-### Key Directories
+### Project Structure
+
+#### Core Directories
 - `app/` - Next.js App Router pages and API routes
-- `widgets/` - Widget definitions with Content and Options components
-- `lib/models/` - MongoDB Mongoose models with Zod schemas
-- `lib/helpers/` - Business logic and utility functions
-- `components/` - Reusable React components (shadcn/ui + custom)
+- `components/` - Reusable React components organized by feature
+- `lib/` - Core business logic, models, services, and utilities
+- `widgets/` - Modular widget system for display content
 - `hooks/` - Custom React hooks for data fetching and state management
+- `pages/` - Legacy Next.js pages (being migrated to App Router)
 
-### Widget Architecture
-Each widget consists of:
-- `index.ts` - Widget definition extending `base_widget`
-- `src/[WidgetName]Content.tsx` - Display component for screens
-- `src/[WidgetName]Options.tsx` - Configuration component for admin panel
+#### Widget Architecture
+The application uses a highly modular widget system:
+- Each widget extends `BaseWidget` class from `widgets/base_widget.ts`
+- Widgets have two main components: `Content` (display) and `Options` (admin configuration)
+- Available widgets are listed in `widgets/widget_list.ts`
+- Widgets support dynamic loading and real-time updates
 
-Available widgets: announcement, congrats, image, list, media-player, meeting-room, priority-video, slideshow, weather, web, youtube
+#### API Structure
+- App Router APIs in `app/api/` (new)
+- Legacy APIs in `pages/api/` (being migrated)
+- OpenAPI/Swagger documentation for meeting room management APIs
+- RESTful endpoints for displays, slides, slideshows, widgets, users, and layouts
 
-### Data Models
-Core models include Display, Widget, Slide, Slideshow, User, Building, Room, Reservation with corresponding Zod schemas for validation.
+#### Authentication & Authorization
+- Session-based authentication with multiple OAuth providers
+- Role-based access control (RBAC) for admin functions
+- User management with calendar integration capabilities
 
-### Real-time Features
-- Server-Sent Events for display updates (`lib/sse_manager.ts`)
-- Display heartbeat monitoring
-- Automatic content refresh on displays
+#### Display System
+- Real-time display updates via Server-Sent Events (SSE)
+- Display heartbeat monitoring and status tracking
+- Layout management with GridStack for responsive widget arrangements
+- Support for multiple display types and orientations
 
-## Testing
+### Key Models
+- `Display` - Digital signage screens with layout and widget configuration
+- `Widget` - Individual content components (slideshow, weather, announcements, etc.)
+- `Slide/Slideshow` - Content slides with support for images, videos, web content
+- `User` - Authentication and user management
+- `Layout` - Reusable widget arrangements
+- `Building/Room/Reservation` - Meeting room management system
 
-The project uses Jest with separate configurations for Node.js (API/backend) and jsdom (React components) environments. Tests are organized in `__tests__/` directory with mocks in `__mocks__/`.
+### Development Patterns
+- Use TypeScript with strict mode enabled
+- Zod schemas for validation alongside Mongoose models
+- Custom hooks for data fetching with React Query
+- Component composition with shadcn/ui base components
+- Real-time updates via SSE for display synchronization
 
-## Technology Stack
-- **Frontend**: Next.js 15, React 18, TypeScript, Tailwind CSS, shadcn/ui
-- **Backend**: Next.js API routes, Mongoose/MongoDB
-- **Authentication**: Passport.js with multiple strategies
-- **State Management**: TanStack Query for server state
-- **Testing**: Jest with React Testing Library
-- **Build**: Bun package manager (preferred over npm/yarn)
+### Testing Strategy
+- Unit tests for utilities and helpers
+- Component tests with React Testing Library
+- API integration tests with supertest
+- Mocked external dependencies (MongoDB, nanoid, shortid)
 
-## Important Notes
-- Always run `bun run type-check` and `bun run lint` before committing
-- Widget development requires registration in `widgets/index.ts`
-- API routes follow OpenAPI/Swagger documentation patterns
-- The application supports multi-tenant buildings and room reservations
-- Feature flags are available for gradual rollouts
-
-# Using Gemini CLI for Large Codebase Analysis
-
-When analyzing large codebases or multiple files that might exceed context limits, use the Gemini CLI with its massive
-context window. Use `gemini -p` to leverage Google Gemini's large context capacity.
-
-## File and Directory Inclusion Syntax
-
-Use the `@` syntax to include files and directories in your Gemini prompts. The paths should be relative to WHERE you run the
-  gemini command:
-
-### Examples:
-
-**Single file analysis:**
-gemini -p "@src/main.py Explain this file's purpose and structure"
-
-Multiple files:
-gemini -p "@package.json @src/index.js Analyze the dependencies used in the code"
-
-Entire directory:
-gemini -p "@src/ Summarize the architecture of this codebase"
-
-Multiple directories:
-gemini -p "@src/ @tests/ Analyze test coverage for the source code"
-
-Current directory and subdirectories:
-gemini -p "@./ Give me an overview of this entire project"
-
-# Or use --all_files flag:
-gemini --all_files -p "Analyze the project structure and dependencies"
-
-Implementation Verification Examples
-
-Check if a feature is implemented:
-gemini -p "@src/ @lib/ Has dark mode been implemented in this codebase? Show me the relevant files and functions"
-
-Verify authentication implementation:
-gemini -p "@src/ @middleware/ Is JWT authentication implemented? List all auth-related endpoints and middleware"
-
-Check for specific patterns:
-gemini -p "@src/ Are there any React hooks that handle WebSocket connections? List them with file paths"
-
-Verify error handling:
-gemini -p "@src/ @api/ Is proper error handling implemented for all API endpoints? Show examples of try-catch blocks"
-
-Check for rate limiting:
-gemini -p "@backend/ @middleware/ Is rate limiting implemented for the API? Show the implementation details"
-
-Verify caching strategy:
-gemini -p "@src/ @lib/ @services/ Is Redis caching implemented? List all cache-related functions and their usage"
-
-Check for specific security measures:
-gemini -p "@src/ @api/ Are SQL injection protections implemented? Show how user inputs are sanitized"
-
-Verify test coverage for features:
-gemini -p "@src/payment/ @tests/ Is the payment processing module fully tested? List all test cases"
-
-When to Use Gemini CLI
-
-Use gemini -p when:
-- Analyzing entire codebases or large directories
-- Comparing multiple large files
-- Need to understand project-wide patterns or architecture
-- Current context window is insufficient for the task
-- Working with files totaling more than 100KB
-- Verifying if specific features, patterns, or security measures are implemented
-- Checking for the presence of certain coding patterns across the entire codebase
-
-Important Notes
-
-- Paths in @ syntax are relative to your current working directory when invoking gemini
-- The CLI will include file contents directly in the context
-- No need for --yolo flag for read-only analysis
-- Gemini's context window can handle entire codebases that would overflow Claude's context
-- When checking implementations, be specific about what you're looking for to get accurate results
+### Configuration
+- Environment variables via .env files
+- Feature flags system for gradual rollouts
+- MongoDB connection via mongoose
+- Next.js configuration supports external packages and custom rewrites

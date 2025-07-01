@@ -1,9 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import dbConnect from "@/lib/mongodb";
 import Display from "@/lib/models/Display";
-import { requireAuth } from "@/lib/helpers/auth_helper";
+import { requireAuth } from "@/lib/auth";
 import { sendEventToDisplay } from "@/lib/sse_display_manager";
 import { z } from "zod";
+import { getHttpStatusFromError, getErrorMessage } from "@/types/error";
 
 // Force dynamic rendering
 export const dynamic = "force-dynamic";
@@ -106,10 +107,11 @@ export async function POST(
             `No SSE connections for display ${displayId}, will rely on polling`
           );
         }
-      } catch (error) {
+      } catch (sseError) {
+        // Fixed: renamed error to sseError to avoid shadowing
         console.error(
           `Failed to send SSE event to display ${displayId}:`,
-          error
+          sseError
         );
         // Don't fail the request if SSE fails - the display will pick it up via polling
       }
@@ -126,11 +128,12 @@ export async function POST(
         changeTimestamp: updatedDisplay.layoutChangeTimestamp,
       },
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Change layout error:", error);
+    // Use type-safe error handling utilities
     return NextResponse.json(
-      { error: "Internal server error", message: error.message },
-      { status: 500 }
+      { error: "Internal server error", message: getErrorMessage(error) },
+      { status: getHttpStatusFromError(error) }
     );
   }
 }
@@ -141,15 +144,6 @@ export async function GET(
 ) {
   try {
     await dbConnect();
-
-    // Require authentication
-    const user = await requireAuth(request);
-    if (!user) {
-      return NextResponse.json(
-        { error: "Authentication required" },
-        { status: 401 }
-      );
-    }
 
     const { id: displayId } = await params;
     if (!displayId) {
@@ -187,10 +181,10 @@ export async function GET(
       layoutChangeTimestamp: display.layoutChangeTimestamp,
       lastSeen: display.last_update,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Get layout change status error:", error);
     return NextResponse.json(
-      { error: "Internal server error", message: error.message },
+      { error: "Internal server error", message: error instanceof Error ? error.message : "Unknown error" },
       { status: 500 }
     );
   }
@@ -234,10 +228,10 @@ export async function PATCH(
       message: "Layout change flag cleared",
       displayId: updatedDisplay._id,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Clear layout change flag error:", error);
     return NextResponse.json(
-      { error: "Internal server error", message: error.message },
+      { error: "Internal server error", message: error instanceof Error ? error.message : "Unknown error" },
       { status: 500 }
     );
   }

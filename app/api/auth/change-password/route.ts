@@ -1,8 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import dbConnect from "@/lib/mongodb";
-import { requireAuth } from "@/lib/helpers/auth_helper";
+import { requireAuth } from "@/lib/auth";
 import User from "@/lib/models/User";
 import { z } from "zod";
+import { getHttpStatusFromError, getErrorMessage } from "@/types/error";
 
 // Force dynamic rendering to prevent static generation errors
 export const dynamic = "force-dynamic";
@@ -57,12 +58,30 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ message: "User not found" }, { status: 404 });
     }
 
+    // Type interfaces for passport-local-mongoose methods
+    interface PassportLocalUser {
+      authenticate: (
+        password: string,
+        callback: (err: Error | null, user: unknown, passwordErr: Error | null) => void
+      ) => void;
+    }
+
+    interface PassportLocalUserWithPassword extends PassportLocalUser {
+      setPassword: (
+        password: string,
+        callback: (err: Error | null) => void
+      ) => void;
+      save: (callback?: (err: Error | null) => void) => void;
+    }
+
     // Verify current password using passport-local-mongoose
     try {
       const isValidPassword = await new Promise<boolean>((resolve, reject) => {
-        (dbUser as any).authenticate(
+        const authenticateMethod = (dbUser as unknown as PassportLocalUser).authenticate;
+        
+        authenticateMethod(
           currentPassword,
-          (err: any, user: any, passwordErr: any) => {
+          (err: Error | null, user: unknown, passwordErr: Error | null) => {
             if (err) {
               reject(err);
             } else if (passwordErr) {
@@ -82,8 +101,9 @@ export async function POST(request: NextRequest) {
           { status: 400 }
         );
       }
-    } catch (error) {
-      console.error("Password verification error:", error);
+    } catch (verificationError) {
+      // Fixed: renamed error to verificationError to avoid shadowing
+      console.error("Password verification error:", verificationError);
       return NextResponse.json(
         { message: "Error verifying current password" },
         { status: 500 }
@@ -93,7 +113,9 @@ export async function POST(request: NextRequest) {
     // Change password using passport-local-mongoose
     try {
       await new Promise<void>((resolve, reject) => {
-        (dbUser as any).setPassword(newPassword, (err: any) => {
+        const setPasswordMethod = (dbUser as unknown as PassportLocalUserWithPassword).setPassword;
+        
+        setPasswordMethod(newPassword, (err: Error | null) => {
           if (err) {
             reject(err);
           } else {
@@ -109,27 +131,32 @@ export async function POST(request: NextRequest) {
         success: true,
         message: "Password changed successfully",
       });
-    } catch (error: any) {
-      console.error("Password change error:", error);
+    } catch (passwordError: unknown) {
+      // Fixed: renamed error to passwordError to avoid shadowing
+      const errorMessage = getErrorMessage(passwordError);
+      console.error("Password change error:", passwordError);
       return NextResponse.json(
-        { message: "Failed to change password" },
-        { status: 500 }
+        { message: errorMessage },
+        { status: getHttpStatusFromError(passwordError) }
       );
     }
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Change password error:", error);
 
-    // Handle specific error types
-    if (error.message === "User not authenticated") {
+    // Handle specific error types with proper type checking
+    const errorMessage = getErrorMessage(error);
+    
+    if (errorMessage === "User not authenticated") {
       return NextResponse.json(
         { message: "User not authenticated" },
         { status: 401 }
       );
     }
 
+    // Use type-safe error handling utilities
     return NextResponse.json(
       { message: "Internal server error" },
-      { status: 500 }
+      { status: getHttpStatusFromError(error) }
     );
   }
 }

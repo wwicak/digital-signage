@@ -42,7 +42,7 @@ export const addSlideToSlideshows = async (
       { _id: { $in: idsToAdd } },
       { $addToSet: { slides: slide._id } } // Use $addToSet to avoid duplicate slides
     )
-  } catch (error: any) {
+  } catch (error) { // TypeScript will infer error as unknown
     console.error('Error adding slide to slideshows:', error)
     throw new Error('Failed to add slide to slideshows.')
   }
@@ -87,7 +87,7 @@ export const removeSlideFromSlideshows = async (
       { _id: { $in: idsToRemoveFrom } },
       { $pull: { slides: slideId } }
     )
-  } catch (error: any) {
+  } catch (error) { // TypeScript will infer error as unknown
     console.error('Error removing slide from slideshows:', error)
     throw new Error('Failed to remove slide from slideshows.')
   }
@@ -139,7 +139,7 @@ export const handleSlideInSlideshows = async (
         toRemove.map((id) => new mongoose.Types.ObjectId(id))
       )
     }
-  } catch (error: any) {
+  } catch (error) { // TypeScript will infer error as unknown
     console.error('Error handling slide in slideshows:', error)
     throw new Error('Failed to update slide presence in slideshows.')
   }
@@ -242,7 +242,7 @@ export const deleteSlideAndCleanReferences = async (
     }
 
     return slide // Return the (now deleted) slide document
-  } catch (error: any) {
+  } catch (error) { // TypeScript will infer error as unknown
     console.error('Error deleting slide and cleaning references:', error)
     throw new Error('Failed to delete slide and update slideshows.')
   }

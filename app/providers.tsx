@@ -11,13 +11,16 @@ const queryClient = new QueryClient({
     queries: {
       staleTime: 5 * 60 * 1000, // 5 minutes
       gcTime: 10 * 60 * 1000, // 10 minutes (renamed from cacheTime)
-      retry: (failureCount, error: any) => {
+      retry: (failureCount, error: unknown) => {
         // Don't retry on network errors or 4xx errors
+        const errorMessage = error instanceof Error ? error.message : String(error);
+        const errorStatus = (error as { status?: number })?.status;
+        
         if (
-          error.message.includes('Failed to fetch') ||
-          error.message.includes('ERR_NETWORK') ||
-          error.message.includes('NetworkError') ||
-          (error.status >= 400 && error.status < 500)
+          errorMessage.includes('Failed to fetch') ||
+          errorMessage.includes('ERR_NETWORK') ||
+          errorMessage.includes('NetworkError') ||
+          (errorStatus && errorStatus >= 400 && errorStatus < 500)
         ) {
           return false;
         }
@@ -29,12 +32,14 @@ const queryClient = new QueryClient({
       refetchOnMount: true,
     },
     mutations: {
-      retry: (failureCount, error: any) => {
+      retry: (failureCount, error: unknown) => {
         // Don't retry mutations on network errors
+        const errorMessage = error instanceof Error ? error.message : String(error);
+        
         if (
-          error.message.includes('Failed to fetch') ||
-          error.message.includes('ERR_NETWORK') ||
-          error.message.includes('NetworkError')
+          errorMessage.includes('Failed to fetch') ||
+          errorMessage.includes('ERR_NETWORK') ||
+          errorMessage.includes('NetworkError')
         ) {
           return false;
         }

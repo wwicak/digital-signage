@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import dbConnect from "../../../../../lib/mongodb";
 import Layout from "../../../../../lib/models/Layout";
 import Widget from "../../../../../lib/models/Widget";
-import { requireAuth } from "../../../../../lib/helpers/auth_helper";
+import { requireAuth } from "../../../../../lib/auth";
 import mongoose from "mongoose";
 
 // Force dynamic rendering
@@ -117,10 +117,11 @@ export async function POST(
       },
       { status: 201 }
     );
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Add widget to layout error:", error);
+    const errorMessage = error instanceof Error ? error.message : "Unknown error occurred";
     return NextResponse.json(
-      { error: "Internal server error", message: error.message },
+      { error: "Internal server error", message: errorMessage },
       { status: 500 }
     );
   }
@@ -147,8 +148,17 @@ export async function PUT(
     // Parse request body - expecting array of widget positions
     const positions = await request.json();
 
+    // Type for widget position updates
+    interface WidgetPosition {
+      widget_id: string;
+      x: number;
+      y: number;
+      w: number;
+      h: number;
+    }
+
     // Update widget positions in layout
-    positions.forEach((pos: any) => {
+    (positions as WidgetPosition[]).forEach((pos) => {
       const widgetIndex = layout.widgets.findIndex(
         (w) => w.widget_id.toString() === pos.widget_id
       );
@@ -167,10 +177,11 @@ export async function PUT(
       message: "Widget positions updated successfully",
       layout,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Update widget positions error:", error);
+    const errorMessage = error instanceof Error ? error.message : "Unknown error occurred";
     return NextResponse.json(
-      { error: "Internal server error", message: error.message },
+      { error: "Internal server error", message: errorMessage },
       { status: 500 }
     );
   }
@@ -216,10 +227,11 @@ export async function DELETE(
     return NextResponse.json({
       message: "Widget removed from layout successfully",
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Remove widget from layout error:", error);
+    const errorMessage = error instanceof Error ? error.message : "Unknown error occurred";
     return NextResponse.json(
-      { error: "Internal server error", message: error.message },
+      { error: "Internal server error", message: errorMessage },
       { status: 500 }
     );
   }

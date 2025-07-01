@@ -1,4 +1,4 @@
-import mongoose, { Document, Model, Schema } from "mongoose";
+import mongoose, { Document, Model, Schema, FilterQuery } from "mongoose";
 import * as z from "zod";
 
 export interface IDisplayAlert extends Document {
@@ -27,7 +27,11 @@ export interface IDisplayAlert extends Document {
     lastSeen?: Date;
     responseTime?: number;
     errorDetails?: string;
-    clientInfo?: any;
+    clientInfo?: {
+      userAgent?: string;
+      ip?: string;
+      [key: string]: unknown;
+    };
   };
   notificationsSent: {
     email?: Date[];
@@ -42,7 +46,7 @@ export interface IDisplayAlert extends Document {
     notificationType: "email" | "webhook" | "sms",
     cooldownMinutes?: number
   ): boolean;
-  addNotification(notificationType: "email" | "webhook" | "sms"): Promise<any>;
+  addNotification(notificationType: "email" | "webhook" | "sms"): Promise<IDisplayAlert>;
 }
 
 const DisplayAlertSchema = new Schema<IDisplayAlert>(
@@ -186,7 +190,7 @@ DisplayAlertSchema.methods.shouldSendNotification = function (
 
 DisplayAlertSchema.methods.addNotification = function (
   notificationType: "email" | "webhook" | "sms"
-): Promise<any> {
+): Promise<IDisplayAlert> {
   if (!this.notificationsSent[notificationType]) {
     this.notificationsSent[notificationType] = [];
   }
@@ -199,7 +203,16 @@ DisplayAlertSchema.methods.addNotification = function (
 DisplayAlertSchema.statics.createOfflineAlert = function (
   displayId: string,
   offlineMinutes: number,
-  metadata?: any
+  metadata?: {
+    lastSeen?: Date;
+    responseTime?: number;
+    errorDetails?: string;
+    clientInfo?: {
+      userAgent?: string;
+      ip?: string;
+      [key: string]: unknown;
+    };
+  }
 ) {
   return this.create({
     displayId: new mongoose.Types.ObjectId(displayId),
@@ -223,7 +236,16 @@ DisplayAlertSchema.statics.createPerformanceAlert = function (
   displayId: string,
   responseTime: number,
   threshold: number,
-  metadata?: any
+  metadata?: {
+    lastSeen?: Date;
+    responseTime?: number;
+    errorDetails?: string;
+    clientInfo?: {
+      userAgent?: string;
+      ip?: string;
+      [key: string]: unknown;
+    };
+  }
 ) {
   return this.create({
     displayId: new mongoose.Types.ObjectId(displayId),
@@ -242,7 +264,7 @@ DisplayAlertSchema.statics.createPerformanceAlert = function (
 };
 
 DisplayAlertSchema.statics.getActiveAlerts = function (displayId?: string) {
-  const query: any = { isActive: true };
+  const query: FilterQuery<IDisplayAlert> = { isActive: true };
   if (displayId) {
     query.displayId = new mongoose.Types.ObjectId(displayId);
   }
@@ -256,7 +278,7 @@ DisplayAlertSchema.statics.getActiveAlerts = function (displayId?: string) {
 DisplayAlertSchema.statics.getUnacknowledgedAlerts = function (
   displayId?: string
 ) {
-  const query: any = { isActive: true, isAcknowledged: false };
+  const query: FilterQuery<IDisplayAlert> = { isActive: true, isAcknowledged: false };
   if (displayId) {
     query.displayId = new mongoose.Types.ObjectId(displayId);
   }
@@ -270,7 +292,7 @@ DisplayAlertSchema.statics.resolveAlertsForDisplay = function (
   displayId: string,
   alertTypes?: string[]
 ) {
-  const query: any = {
+  const query: FilterQuery<IDisplayAlert> = {
     displayId: new mongoose.Types.ObjectId(displayId),
     isActive: true,
   };
@@ -323,18 +345,36 @@ interface IDisplayAlertModel extends Model<IDisplayAlert> {
   createOfflineAlert(
     displayId: string,
     offlineMinutes: number,
-    metadata?: any
+    metadata?: {
+      lastSeen?: Date;
+      responseTime?: number;
+      errorDetails?: string;
+      clientInfo?: {
+        userAgent?: string;
+        ip?: string;
+        [key: string]: unknown;
+      };
+    }
   ): Promise<IDisplayAlert>;
   createPerformanceAlert(
     displayId: string,
     responseTime: number,
     threshold: number,
-    metadata?: any
+    metadata?: {
+      lastSeen?: Date;
+      responseTime?: number;
+      errorDetails?: string;
+      clientInfo?: {
+        userAgent?: string;
+        ip?: string;
+        [key: string]: unknown;
+      };
+    }
   ): Promise<IDisplayAlert>;
-  getActiveAlerts(displayId?: string): any;
-  getUnacknowledgedAlerts(displayId?: string): any;
-  resolveAlertsForDisplay(displayId: string, alertTypes?: string[]): any;
-  getAlertStats(periodDays?: number): any;
+  getActiveAlerts(displayId?: string): mongoose.Query<IDisplayAlert[], IDisplayAlert>;
+  getUnacknowledgedAlerts(displayId?: string): mongoose.Query<IDisplayAlert[], IDisplayAlert>;
+  resolveAlertsForDisplay(displayId: string, alertTypes?: string[]): Promise<{ modifiedCount: number }>;
+  getAlertStats(periodDays?: number): mongoose.Aggregate<unknown[]>;
 }
 
 const DisplayAlertModel: IDisplayAlertModel =
@@ -371,7 +411,15 @@ export const DisplayAlertSchemaZod = z.object({
       consecutiveFailures: z.number().optional(),
     })
     .optional(),
-  metadata: z.any().optional(),
+  metadata: z.object({
+    lastSeen: z.date().optional(),
+    responseTime: z.number().optional(),
+    errorDetails: z.string().optional(),
+    clientInfo: z.object({
+      userAgent: z.string().optional(),
+      ip: z.string().optional(),
+    }).catchall(z.unknown()).optional(),
+  }).optional(),
   notificationsSent: z
     .object({
       email: z.array(z.date()).optional(),

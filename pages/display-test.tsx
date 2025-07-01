@@ -20,7 +20,7 @@ interface MockDisplayData {
     y: number;
     w: number;
     h: number;
-    data: any;
+    data: unknown;
   }>;
 }
 
@@ -145,7 +145,7 @@ const DisplayTestPage: React.FC = () => {
 }
 
 // Wrapper component to inject mock data into the display context
-const TestDisplayWrapper: React.FC<{ displayData: any }> = ({ displayData }) => {
+const TestDisplayWrapper: React.FC<{ displayData: MockDisplayData }> = ({ displayData }) => {
   const [isClient, setIsClient] = React.useState(false)
   
   // Check if we're in a browser environment after component mounts
@@ -163,7 +163,7 @@ const TestDisplayWrapper: React.FC<{ displayData: any }> = ({ displayData }) => 
 }
 
 // Separate client-side component that uses hooks
-const ClientSideDisplayWrapper: React.FC<{ displayData: any }> = ({ displayData }) => {
+const ClientSideDisplayWrapper: React.FC<{ displayData: MockDisplayData }> = ({ displayData }) => {
   const { useDisplayContext } = require('../contexts/DisplayContext')
   const { setId } = useDisplayContext()
   

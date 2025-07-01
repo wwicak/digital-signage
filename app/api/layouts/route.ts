@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import dbConnect from "../../../lib/mongodb";
 import Layout from "../../../lib/models/Layout";
-import { requireAuth } from "../../../lib/helpers/auth_helper";
+// Widget model is now imported via dbConnect in mongodb.ts
+import { requireAuth } from "../../../lib/auth";
 
 // Force dynamic rendering
 export const dynamic = "force-dynamic";
@@ -22,7 +23,7 @@ export async function GET(request: NextRequest) {
     const isTemplate = searchParams.get("isTemplate");
 
     // Build query
-    const query: any = {};
+    const query: Record<string, unknown> = {};
 
     if (search) {
       query.$or = [
@@ -73,10 +74,11 @@ export async function GET(request: NextRequest) {
         hasPrevPage,
       },
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Get layouts error:", error);
+    const errorMessage = error instanceof Error ? error.message : "Unknown error occurred";
     return NextResponse.json(
-      { error: "Internal server error", message: error.message },
+      { error: "Internal server error", message: errorMessage },
       { status: 500 }
     );
   }
@@ -139,10 +141,11 @@ export async function POST(request: NextRequest) {
       },
       { status: 201 }
     );
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Create layout error:", error);
+    const errorMessage = error instanceof Error ? error.message : "Unknown error occurred";
     return NextResponse.json(
-      { error: "Internal server error", message: error.message },
+      { error: "Internal server error", message: errorMessage },
       { status: 500 }
     );
   }

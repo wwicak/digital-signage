@@ -116,7 +116,7 @@ class ImageOptions extends Component<IImageOptionsProps, IImageOptionsState> {
     }
   }
 
-  handleChange = async (name: string, value: any): Promise<void> => {
+  handleChange = async (name: string, value: unknown): Promise<void> => {
     const { onChange } = this.props
     let finalName: keyof IImageOptionsState = name as keyof IImageOptionsState
     let finalValue = value

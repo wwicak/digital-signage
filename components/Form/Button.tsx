@@ -16,7 +16,7 @@ export interface IButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   text?: string; // Text to display on the button
   color?: string; // Background color for the button (legacy support)
   style?: CSSProperties; // Custom styles for the button element
-  onClick?: (event: React.MouseEvent<HTMLButtonElement>) => Promise<any> | void; // onClick can be async
+  onClick?: (event: React.MouseEvent<HTMLButtonElement>) => Promise<void> | void; // onClick can be async
   children?: ReactNode; // Allow children to override text prop if needed
   isLoading?: boolean; // Allow parent to control loading state externally (optional)
   variant?:

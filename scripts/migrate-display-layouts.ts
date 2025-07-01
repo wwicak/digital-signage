@@ -53,7 +53,7 @@ export async function migrateDisplayLayouts(): Promise<MigrationResult> {
         const layoutDescription = `Auto-generated layout from display: ${display.name}`;
 
         // Map widgets to layout widget format
-        const layoutWidgets = display.widgets.map((widget: any) => ({
+        const layoutWidgets = display.widgets.map((widget: { _id: string; x?: number; y?: number; w?: number; h?: number }) => ({
           widget_id: widget._id,
           x: widget.x || 0,
           y: widget.y || 0,
@@ -95,8 +95,8 @@ export async function migrateDisplayLayouts(): Promise<MigrationResult> {
         console.log(
           `Migrated display: ${display.name} -> Layout: ${layout.name}`
         );
-      } catch (error: any) {
-        const errorMsg = `Failed to migrate display ${display.name}: ${error.message}`;
+      } catch (error: unknown) {
+        const errorMsg = `Failed to migrate display ${display.name}: ${error instanceof Error ? error.message : 'Unknown error'}`;
         result.errors.push(errorMsg);
         console.error(errorMsg);
       }
@@ -104,8 +104,8 @@ export async function migrateDisplayLayouts(): Promise<MigrationResult> {
 
     console.log("Migration completed:", result);
     return result;
-  } catch (error: any) {
-    const errorMsg = `Migration failed: ${error.message}`;
+  } catch (error: unknown) {
+    const errorMsg = `Migration failed: ${error instanceof Error ? error.message : 'Unknown error'}`;
     result.errors.push(errorMsg);
     console.error(errorMsg);
     return result;
@@ -178,8 +178,8 @@ export async function createDefaultLayoutTemplates(): Promise<void> {
         console.log(`Created default template: ${template.name}`);
       }
     }
-  } catch (error: any) {
-    console.error("Failed to create default templates:", error.message);
+  } catch (error: unknown) {
+    console.error("Failed to create default templates:", error instanceof Error ? error.message : 'Unknown error');
   }
 }
 
@@ -220,8 +220,8 @@ export async function rollbackMigration(): Promise<void> {
     }
 
     console.log("Rollback completed");
-  } catch (error: any) {
-    console.error("Rollback failed:", error.message);
+  } catch (error: unknown) {
+    console.error("Rollback failed:", error instanceof Error ? error.message : 'Unknown error');
   }
 }
 

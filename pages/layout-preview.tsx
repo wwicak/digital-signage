@@ -10,23 +10,40 @@ import Frame from '../components/Admin/Frame'
 import { protect, ProtectProps } from '../helpers/auth'
 import { useLayout } from '../hooks/useLayout'
 
-interface LayoutPreviewProps extends ProtectProps {}
+interface LayoutPreviewProps extends ProtectProps { }
 
 const LayoutPreviewComponent: React.FC<LayoutPreviewProps> = ({ loggedIn }) => {
   const router = useRouter()
   const { id } = router.query
   const layoutId = typeof id === 'string' ? id : null
-  
+
   const { data: layout, isLoading, error } = useLayout(layoutId)
   const [previewScale, setPreviewScale] = useState(0.5)
+  const [isClient, setIsClient] = useState(false)
+
+  // Handle client-side hydration
+  useEffect(() => {
+    setIsClient(true)
+  }, [])
 
   useEffect(() => {
+    // Only run scaling calculations on client side to avoid hydration mismatch
+    if (!isClient) return
+
     // Adjust preview scale based on screen size
     const updateScale = () => {
-      const containerWidth = Math.min(window.innerWidth - 100, 1200)
+      // Account for sidebar (240px) + padding + margins more conservatively
+      const sidebarWidth = 240
+      const padding = 120 // More generous padding for margins and spacing
+      const availableWidth = Math.max(window.innerWidth - sidebarWidth - padding, 300)
+
+      // Use a more conservative max width to prevent overflow
+      const containerWidth = Math.min(availableWidth, 800)
       const layoutWidth = layout?.orientation === 'portrait' ? 720 : 1280
-      const scale = Math.min(containerWidth / layoutWidth, 0.8)
-      setPreviewScale(scale)
+
+      // More conservative scaling with lower maximum
+      const scale = Math.min(containerWidth / layoutWidth, 0.6)
+      setPreviewScale(Math.max(scale, 0.2)) // Ensure minimum scale
     }
 
     updateScale()
@@ -36,7 +53,7 @@ const LayoutPreviewComponent: React.FC<LayoutPreviewProps> = ({ loggedIn }) => {
     return () => {
       window.removeEventListener('resize', updateScale)
     }
-  }, [layout?.orientation]) // Only depend on orientation, not entire layout object
+  }, [isClient, layout?.orientation]) // Depend on isClient and orientation
 
   if (isLoading) {
     return (
@@ -74,7 +91,7 @@ const LayoutPreviewComponent: React.FC<LayoutPreviewProps> = ({ loggedIn }) => {
 
   return (
     <Frame loggedIn={loggedIn}>
-      <div className='space-y-6'>
+      <div className='space-y-6 overflow-x-hidden max-w-full'>
         {/* Header */}
         <div className='flex items-center justify-between'>
           <div className='flex items-center space-x-4'>
@@ -89,7 +106,7 @@ const LayoutPreviewComponent: React.FC<LayoutPreviewProps> = ({ loggedIn }) => {
               <p className='text-muted-foreground'>{layout.description || 'No description'}</p>
             </div>
           </div>
-          
+
           <div className='flex items-center space-x-2'>
             <Badge variant={layout.isActive ? "default" : "secondary"}>
               {layout.isActive ? "Active" : "Inactive"}
@@ -114,7 +131,7 @@ const LayoutPreviewComponent: React.FC<LayoutPreviewProps> = ({ loggedIn }) => {
               <div className='text-2xl font-bold'>{layout.widgets?.length || 0}</div>
             </CardContent>
           </Card>
-          
+
           <Card>
             <CardHeader className='pb-2'>
               <CardTitle className='text-sm'>Layout Type</CardTitle>
@@ -123,7 +140,7 @@ const LayoutPreviewComponent: React.FC<LayoutPreviewProps> = ({ loggedIn }) => {
               <div className='text-lg font-medium capitalize'>{layout.layoutType}</div>
             </CardContent>
           </Card>
-          
+
           <Card>
             <CardHeader className='pb-2'>
               <CardTitle className='text-sm'>Grid Size</CardTitle>
@@ -134,7 +151,7 @@ const LayoutPreviewComponent: React.FC<LayoutPreviewProps> = ({ loggedIn }) => {
               </div>
             </CardContent>
           </Card>
-          
+
           <Card>
             <CardHeader className='pb-2'>
               <CardTitle className='text-sm'>Displays Using</CardTitle>
@@ -173,32 +190,35 @@ const LayoutPreviewComponent: React.FC<LayoutPreviewProps> = ({ loggedIn }) => {
             </div>
           </CardHeader>
           <CardContent>
-            <div className='bg-muted/30 p-6 rounded-lg'>
+            <div className='bg-muted/30 p-4 sm:p-6 rounded-lg overflow-hidden'>
               <div className='text-center mb-4'>
                 <p className='text-sm text-muted-foreground'>
                   Preview of how this layout will appear on displays
                 </p>
               </div>
-              
+
               {/* Mock Preview Container */}
-              <div
-                className='mx-auto bg-black rounded-lg shadow-lg overflow-hidden'
-                style={{
-                  width: layout.orientation === 'portrait' ? `${720 * previewScale}px` : `${1280 * previewScale}px`,
-                  height: layout.orientation === 'portrait' ? `${1280 * previewScale}px` : `${720 * previewScale}px`,
-                  minHeight: '300px',
-                }}
-              >
-                <div className='w-full h-full bg-gradient-to-br from-blue-900 to-purple-900 flex items-center justify-center'>
-                  <div className='text-center text-white'>
-                    <Monitor className='mx-auto h-16 w-16 mb-4 opacity-50' />
-                    <h3 className='text-xl font-semibold mb-2'>{layout.name}</h3>
-                    <p className='text-sm opacity-75'>
-                      {layout.widgets?.length || 0} widgets • {layout.orientation} • {layout.layoutType}
-                    </p>
-                    <p className='text-xs opacity-50 mt-2'>
-                      Live preview coming soon
-                    </p>
+              <div className='flex justify-center overflow-hidden'>
+                <div
+                  className='bg-black rounded-lg shadow-lg overflow-hidden max-w-full'
+                  style={{
+                    width: !isClient ? '640px' : (layout.orientation === 'portrait' ? `${720 * previewScale}px` : `${1280 * previewScale}px`),
+                    height: !isClient ? '360px' : (layout.orientation === 'portrait' ? `${1280 * previewScale}px` : `${720 * previewScale}px`),
+                    minHeight: '300px',
+                    maxWidth: '100%',
+                  }}
+                >
+                  <div className='w-full h-full bg-gradient-to-br from-blue-900 to-purple-900 flex items-center justify-center'>
+                    <div className='text-center text-white px-4'>
+                      <Monitor className='mx-auto h-12 w-12 sm:h-16 sm:w-16 mb-4 opacity-50' />
+                      <h3 className='text-lg sm:text-xl font-semibold mb-2 break-words'>{layout.name}</h3>
+                      <p className='text-xs sm:text-sm opacity-75 break-words'>
+                        {layout.widgets?.length || 0} widgets • {layout.orientation} • {layout.layoutType}
+                      </p>
+                      <p className='text-xs opacity-50 mt-2'>
+                        Live preview coming soon
+                      </p>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -216,14 +236,15 @@ const LayoutPreviewComponent: React.FC<LayoutPreviewProps> = ({ loggedIn }) => {
               <p className='text-sm text-muted-foreground'>
                 Use this URL to display this layout on physical devices. The device will automatically register with the admin panel.
               </p>
-              <div className='flex items-center space-x-2'>
-                <code className='flex-1 p-3 bg-muted rounded border text-sm break-all'>
+              <div className='flex flex-col sm:flex-row items-stretch sm:items-center gap-2'>
+                <code className='flex-1 p-3 bg-muted rounded border text-sm break-all min-w-0 overflow-hidden'>
                   {displayUrl}
                 </code>
                 <Button
                   variant='outline'
                   size='sm'
                   onClick={() => navigator.clipboard.writeText(displayUrl)}
+                  className='flex-shrink-0'
                 >
                   Copy
                 </Button>

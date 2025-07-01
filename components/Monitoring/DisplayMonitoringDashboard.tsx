@@ -56,7 +56,7 @@ const DisplayMonitoringDashboard: React.FC<DisplayMonitoringDashboardProps> = ({
     statsError,
     isSSEConnected,
   } = useDisplayStatus({
-    enableRealTimeUpdates: true,
+    enableRealTimeUpdates: autoRefresh,
     refreshInterval,
   });
 
@@ -316,6 +316,20 @@ const DisplayMonitoringDashboard: React.FC<DisplayMonitoringDashboardProps> = ({
             <Table>
               <TableHeader>
                 <TableRow>
+                  <TableHead className='w-12'>
+                    <input
+                      type='checkbox'
+                      checked={selectedDisplays.length === filteredDisplays.length && filteredDisplays.length > 0}
+                      onChange={(e) => {
+                        if (e.target.checked) {
+                          setSelectedDisplays([...filteredDisplays]);
+                        } else {
+                          setSelectedDisplays([]);
+                        }
+                      }}
+                      className='rounded border-gray-300'
+                    />
+                  </TableHead>
                   <TableHead>Display</TableHead>
                   <TableHead>Status</TableHead>
                   <TableHead>Last Seen</TableHead>
@@ -332,6 +346,20 @@ const DisplayMonitoringDashboard: React.FC<DisplayMonitoringDashboardProps> = ({
 
                   return (
                     <TableRow key={displayId}>
+                      <TableCell>
+                        <input
+                          type='checkbox'
+                          checked={selectedDisplays.includes(displayId)}
+                          onChange={(e) => {
+                            if (e.target.checked) {
+                              setSelectedDisplays([...selectedDisplays, displayId]);
+                            } else {
+                              setSelectedDisplays(selectedDisplays.filter(id => id !== displayId));
+                            }
+                          }}
+                          className='rounded border-gray-300'
+                        />
+                      </TableCell>
                       <TableCell>
                         <div className='flex items-center space-x-2'>
                           <Monitor className='h-4 w-4' />

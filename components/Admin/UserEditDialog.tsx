@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { X } from "lucide-react";
+import mongoose from "mongoose";
 import useUsers, {
   User,
   CreateUserData,
@@ -107,8 +108,8 @@ const UserEditDialog: React.FC<UserEditDialogProps> = ({
           password: formData.password,
           role: {
             name: formData.roleName,
-            associatedBuildingIds: formData.associatedBuildingIds as any,
-            associatedDisplayIds: formData.associatedDisplayIds as any,
+            associatedBuildingIds: formData.associatedBuildingIds.map(id => new mongoose.Types.ObjectId(id)),
+            associatedDisplayIds: formData.associatedDisplayIds.map(id => new mongoose.Types.ObjectId(id)),
           },
         };
 
@@ -119,8 +120,8 @@ const UserEditDialog: React.FC<UserEditDialogProps> = ({
           email: formData.email,
           role: {
             name: formData.roleName,
-            associatedBuildingIds: formData.associatedBuildingIds as any,
-            associatedDisplayIds: formData.associatedDisplayIds as any,
+            associatedBuildingIds: formData.associatedBuildingIds.map(id => new mongoose.Types.ObjectId(id)),
+            associatedDisplayIds: formData.associatedDisplayIds.map(id => new mongoose.Types.ObjectId(id)),
           },
         };
 
@@ -128,7 +129,7 @@ const UserEditDialog: React.FC<UserEditDialogProps> = ({
       }
 
       onSave();
-    } catch (err) {
+    } catch (err: unknown) {
       setError(err instanceof Error ? err.message : "An error occurred");
     } finally {
       setLoading(false);
@@ -151,7 +152,7 @@ const UserEditDialog: React.FC<UserEditDialogProps> = ({
     >
       <div
         className='bg-white rounded-lg w-full max-w-lg max-h-[90vh] overflow-y-auto shadow-xl'
-        onClick={(e) => e.stopPropagation()}
+        onClick={(e: React.MouseEvent) => e.stopPropagation()}
       >
         <div className='flex justify-between items-center p-6 border-b border-gray-200'>
           <h2 className='text-2xl font-semibold text-gray-800'>
@@ -280,7 +281,7 @@ const UserEditDialog: React.FC<UserEditDialogProps> = ({
                   size={Math.min(displays.length, 6)}
                   className='w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent'
                 >
-                  {displays.map((display: any) => (
+                  {displays.map((display: { _id: string; name: string }) => (
                     <option key={display._id} value={display._id}>
                       {display.name}
                     </option>

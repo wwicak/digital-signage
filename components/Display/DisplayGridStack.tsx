@@ -5,6 +5,18 @@ import Frame from "../Admin/Frame";
 import GridStackWrapper, { GridStackItem } from "../GridStack/GridStackWrapper";
 import Widgets from "../../widgets";
 import { useDisplayState } from "../../hooks/useDisplayState";
+import { WidgetType, type WidgetData } from "../../lib/models/Widget";
+
+// Define a proper widget type for display
+interface DisplayWidget {
+  _id: string;
+  type: WidgetType | string; // Allow both enum and string for flexibility
+  x: number;
+  y: number;
+  w: number;
+  h: number;
+  options?: WidgetData | Record<string, unknown>; // Allow both specific widget data and generic objects
+}
 
 interface DisplayGridStackProps {
   displayId?: string;
@@ -30,8 +42,10 @@ const DisplayGridStack: React.FC<DisplayGridStackProps> = memo(({
   const gridStackItems: GridStackItem[] = useMemo(() => {
     if (!state.widgets || state.widgets.length === 0) return [];
 
-    return state.widgets.map((widget: any) => {
-      const WidgetComponent = Widgets[widget.type]?.Component;
+    return state.widgets.map((widget: DisplayWidget) => {
+      // Get the widget definition from the registry
+      const widgetDef = Widgets[widget.type];
+      const WidgetComponent = widgetDef?.Widget; // Use 'Widget' property instead of 'Component'
       
       return {
         id: widget._id,
@@ -42,11 +56,11 @@ const DisplayGridStack: React.FC<DisplayGridStackProps> = memo(({
         content: WidgetComponent ? (
           <WidgetComponent
             key={widget._id}
-            id={widget._id}
-            options={widget.options || {}}
+            data={(widget.options || {}) as Record<string, unknown>}
+            isPreview={false}
           />
         ) : (
-          <div className="flex items-center justify-center h-full bg-red-100 text-red-600">
+          <div className='flex items-center justify-center h-full bg-red-100 text-red-600'>
             Unknown Widget: {widget.type}
           </div>
         )
@@ -69,10 +83,10 @@ const DisplayGridStack: React.FC<DisplayGridStackProps> = memo(({
   if (isLoading) {
     return (
       <Frame>
-        <div className="flex items-center justify-center h-screen">
-          <div className="text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
-            <p className="text-gray-600">Loading display...</p>
+        <div className='flex items-center justify-center h-screen'>
+          <div className='text-center'>
+            <div className='animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4'></div>
+            <p className='text-gray-600'>Loading display...</p>
           </div>
         </div>
       </Frame>
@@ -82,10 +96,10 @@ const DisplayGridStack: React.FC<DisplayGridStackProps> = memo(({
   if (error) {
     return (
       <Frame>
-        <div className="flex items-center justify-center h-screen">
-          <div className="text-center text-red-600">
-            <p className="text-xl font-semibold mb-2">Error Loading Display</p>
-            <p className="text-sm">{error.message}</p>
+        <div className='flex items-center justify-center h-screen'>
+          <div className='text-center text-red-600'>
+            <p className='text-xl font-semibold mb-2'>Error Loading Display</p>
+            <p className='text-sm'>{error.message}</p>
           </div>
         </div>
       </Frame>
@@ -95,10 +109,10 @@ const DisplayGridStack: React.FC<DisplayGridStackProps> = memo(({
   if (!state.layout) {
     return (
       <Frame>
-        <div className="flex items-center justify-center h-screen">
-          <div className="text-center text-gray-600">
-            <p className="text-xl font-semibold mb-2">No Layout Found</p>
-            <p className="text-sm">Please assign a layout to this display.</p>
+        <div className='flex items-center justify-center h-screen'>
+          <div className='text-center text-gray-600'>
+            <p className='text-xl font-semibold mb-2'>No Layout Found</p>
+            <p className='text-sm'>Please assign a layout to this display.</p>
           </div>
         </div>
       </Frame>
@@ -119,13 +133,13 @@ const DisplayGridStack: React.FC<DisplayGridStackProps> = memo(({
         <GridStackWrapper
           items={gridStackItems}
           options={gridStackOptions}
-          className="display-grid"
+          className='display-grid'
         />
         
         {/* Status Bar */}
         {state.layout.statusBar?.enabled && (
           <div
-            className="status-bar"
+            className='status-bar'
             style={{
               position: "fixed",
               bottom: 0,
@@ -142,10 +156,10 @@ const DisplayGridStack: React.FC<DisplayGridStackProps> = memo(({
               zIndex: 1000,
             }}
           >
-            <div className="status-left">
+            <div className='status-left'>
               {state.layout.name}
             </div>
-            <div className="status-right">
+            <div className='status-right'>
               {new Date().toLocaleTimeString()}
             </div>
           </div>

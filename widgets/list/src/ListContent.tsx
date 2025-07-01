@@ -1,4 +1,4 @@
-import React, { Component, CSSProperties } from 'react'
+import React, { Component } from 'react' // Removed unused CSSProperties
 // FontAwesome configuration is handled globally
 
 import AutoScroll from '../../../components/AutoScroll' // Assuming .js or .tsx
@@ -65,7 +65,7 @@ class ListContent extends Component<IListContentProps> {
         )}
         <div className='pl-3 flex'> {/* Renamed class */}
           <AutoScroll
-            className="block py-3 flex-1 overflow-y-auto min-h-0"
+            className='block py-3 flex-1 overflow-y-auto min-h-0'
           >
             <ListTag className={`list-tag ${ordered ? 'ordered' : 'unordered'}`}>
               {list.map((item, index) => (

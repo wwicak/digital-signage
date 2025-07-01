@@ -63,8 +63,8 @@ const Switch: React.FC<ISwitchProps> = ({
   // handleChange is the direct handler for ReactSwitch's onChange
   const handleChange = (
     newChecked: boolean,
-    event: MouseEvent | SyntheticEvent<MouseEvent | KeyboardEvent>,
-    id: string // id prop from ReactSwitch, usually related to name or generated
+    _event: MouseEvent | SyntheticEvent<MouseEvent | KeyboardEvent>, // Required by ReactSwitch API but unused
+    _id: string // id prop from ReactSwitch, usually related to name or generated - required by API but unused
   ): void => {
     if (onValueChange) {
       onValueChange(name, newChecked)

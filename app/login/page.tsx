@@ -1,12 +1,12 @@
 'use client'
 
-import { useState, Suspense, memo } from 'react'
+import { useState, useEffect, Suspense, memo } from 'react'
 import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
 
 import Frame from '../../components/Admin/Frame'
-import { login } from '../../helpers/auth'
-import { Tv, Check, X, ChevronLeft, Eye, EyeOff } from 'lucide-react'
+import { login, checkAuthStatus } from '../../helpers/auth'
+import { Tv, Check, X, ChevronLeft, Eye, EyeOff, Loader2 } from 'lucide-react'
 
 const LoginContent = memo(function LoginContent() {
   const router = useRouter()
@@ -17,6 +17,44 @@ const LoginContent = memo(function LoginContent() {
   const [password, setPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
   const [alert, setAlert] = useState<'success' | 'error' | 'info' | null>(null)
+  const [isCheckingAuth, setIsCheckingAuth] = useState(true)
+  const [isAlreadyLoggedIn, setIsAlreadyLoggedIn] = useState(false)
+
+  // Check if user is already authenticated on component mount
+  useEffect(() => {
+    const checkAuth = async () => {
+      try {
+        const authStatus = await checkAuthStatus()
+        if (authStatus.isAuthenticated) {
+          setIsAlreadyLoggedIn(true)
+
+          // Determine redirect URL
+          const redirectUrl = searchParams?.get('redirect')
+          let targetUrl = '/dashboard' // Default redirect
+
+          if (redirectUrl) {
+            targetUrl = redirectUrl
+          } else if (displayId) {
+            targetUrl = `/display/${displayId}`
+          }
+
+          // Show a brief message before redirecting
+          setAlert('info')
+          setTimeout(() => {
+            router.push(targetUrl)
+          }, 1500)
+        }
+      } catch (error) {
+        console.error('Auth check failed:', error)
+        // If auth check fails, just proceed to show login form
+        // This handles network errors gracefully
+      } finally {
+        setIsCheckingAuth(false)
+      }
+    }
+
+    checkAuth()
+  }, [router, searchParams, displayId])
 
   const performLogin = async () => {
     try {
@@ -45,6 +83,21 @@ const LoginContent = memo(function LoginContent() {
     performLogin()
   }
 
+  // Show loading state while checking authentication
+  if (isCheckingAuth) {
+    return (
+      <Frame loggedIn={false}>
+        <div className='max-w-2xl m-auto flex flex-col items-center justify-center min-h-[400px]'>
+          <div className='flex flex-col items-center'>
+            <Loader2 className='w-8 h-8 text-primary animate-spin mb-4' />
+            <h2 className='text-xl font-semibold text-gray-700 mb-2'>Checking authentication...</h2>
+            <p className='text-gray-500 text-center'>Please wait while we verify your login status.</p>
+          </div>
+        </div>
+      </Frame>
+    )
+  }
+
   return (
     <Frame loggedIn={false}>
       <h1 className='font-sans text-2xl text-gray-600 m-0'>Login</h1>
@@ -57,7 +110,7 @@ const LoginContent = memo(function LoginContent() {
         <form className='bg-white rounded-lg flex flex-col p-6 font-sans' onSubmit={handleSubmit}>
           {alert && (
             <div className={`${alert === 'error' ? 'bg-red-500' : alert === 'success' ? 'bg-primary' : 'bg-blue-500'} rounded-md mb-4 p-4 flex items-center`}>
-              {alert === 'success' ? (
+              {alert === 'success' || (alert === 'info' && isAlreadyLoggedIn) ? (
                 <Check className='w-4 h-4 text-white mr-2' />
               ) : (
                 <X className='w-4 h-4 text-white mr-2' />
@@ -66,8 +119,10 @@ const LoginContent = memo(function LoginContent() {
                 {alert === 'success'
                   ? 'Successfully logged in to your account.'
                   : alert === 'error'
-                  ? 'Username or password not recognized.'
-                  : 'Use the username "demo" and password "demo"'}
+                    ? 'Username or password not recognized.'
+                    : alert === 'info' && isAlreadyLoggedIn
+                      ? 'You are already logged in. Redirecting to admin panel...'
+                      : 'Use the username "demo" and password "demo"'}
               </span>
             </div>
           )}
@@ -117,7 +172,7 @@ const LoginContent = memo(function LoginContent() {
           </span>
         </Link>
       </div>
-      
+
     </Frame>
   )
 })

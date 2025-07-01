@@ -1,8 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import dbConnect from "@/lib/mongodb";
 import Building, { BuildingSchemaZod } from "@/lib/models/Building";
-import { requireAuth } from "@/lib/helpers/auth_helper";
+import { requireAuth } from "@/lib/auth";
 import { hasPermission } from "@/lib/helpers/rbac_helper";
+
+// Interface for HTTP-like errors
+interface HttpError extends Error {
+  status?: number;
+}
 
 export async function GET(request: NextRequest) {
   try {
@@ -37,11 +42,11 @@ export async function GET(request: NextRequest) {
         pages: Math.ceil(total / limit),
       },
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Error fetching buildings:", error);
     return NextResponse.json(
-      { message: error.message || "Error fetching buildings" },
-      { status: error.status || 500 }
+      { message: error instanceof Error ? error.message : "Error fetching buildings" },
+      { status: (error as HttpError)?.status || 500 }
     );
   }
 }
@@ -84,11 +89,11 @@ export async function POST(request: NextRequest) {
     await building.save();
 
     return NextResponse.json(building, { status: 201 });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Error creating building:", error);
     return NextResponse.json(
-      { message: error.message || "Error creating building" },
-      { status: error.status || 500 }
+      { message: error instanceof Error ? error.message : "Error creating building" },
+      { status: (error as HttpError)?.status || 500 }
     );
   }
 }

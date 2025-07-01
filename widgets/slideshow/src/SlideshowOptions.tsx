@@ -55,7 +55,7 @@ class SlideshowOptions extends Component<ISlideshowWidgetOptionsProps, ISlidesho
   }
 
   // Handles changes for any field in ISlideshowWidgetDefaultData
-  handleChange = (name: string, value: any): void => {
+  handleChange = (name: string, value: unknown): void => {
     const { onChange, data: currentWidgetData } = this.props
     if (onChange) {
       // Create a new data object based on current props.data, then update the changed field
@@ -120,14 +120,14 @@ class SlideshowOptions extends Component<ISlideshowWidgetOptionsProps, ISlidesho
                 name='show_progressbar'
                 label='Show Progress Bar'
                 checked={show_progressbar}
-                onChange={(name, checked) => this.handleChange(name as keyof ISlideshowWidgetDefaultData, checked)}
+                onChange={(name, checked) => this.handleChange(name as string, checked)}
             />
             <Input
                 type='checkbox'
                 name='random_order'
                 label='Random Slide Order'
                 checked={random_order}
-                onChange={(name, checked) => this.handleChange(name as keyof ISlideshowWidgetDefaultData, checked)}
+                onChange={(name, checked) => this.handleChange(name as string, checked)}
             />
         </InlineInputGroup>
         

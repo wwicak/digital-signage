@@ -106,13 +106,15 @@ const MeetingRoomDisplay: React.FC<IMeetingRoomDisplayProps> = ({
       if (buildingId && data.reservations.length > 0) {
         setBuildingName(data.reservations[0].room_id.building_id.name);
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Error fetching reservations:", error);
+      // Type guard to safely access error message
+      const errorMsg = error instanceof Error ? error.message : "";
       // Show a more user-friendly error message
-      if (error.message.includes("fetch")) {
+      if (errorMsg.includes("fetch")) {
         setError("Meeting room system is being set up. Please check back later.");
       } else {
-        setError(error.message || "Failed to load reservations");
+        setError(errorMsg || "Failed to load reservations");
       }
       setReservations([]);
     } finally {
@@ -377,7 +379,7 @@ const ReservationCard: React.FC<IReservationCardProps> = ({
               <div className='flex items-center'>
                 <Clock className='mr-1 h-3 w-3' />
                 <span>
-                  {formatTime(reservation.start_time)} - {formatTime(reservation.end_time)}
+                  {formatDate(reservation.start_time)} {formatTime(reservation.start_time)} - {formatTime(reservation.end_time)}
                 </span>
               </div>
             </div>

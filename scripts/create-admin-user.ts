@@ -1,5 +1,5 @@
 import dbConnect from "@/lib/mongodb";
-import User, { UserRoleName } from "@/lib/models/User";
+import User, { IUser, UserRoleName } from "@/lib/models/User";
 
 async function createAdminUser() {
   try {
@@ -29,7 +29,7 @@ async function createAdminUser() {
 
     // Register the user with password
     await new Promise<void>((resolve, reject) => {
-      User.register(adminUser, password, (err: any, user?: any) => {
+      User.register(adminUser, password, (err: Error | null, user?: IUser) => {
         if (err) {
           reject(err);
         } else {

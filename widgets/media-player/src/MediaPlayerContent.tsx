@@ -264,12 +264,12 @@ class MediaPlayerContent extends Component<IMediaPlayerContentProps, IMediaPlaye
     return (
       <iframe
         src={embedUrl.toString()}
-        className="w-full h-full"
+        className='w-full h-full'
         style={{
           backgroundColor: data?.backgroundColor || 'transparent',
         }}
-        frameBorder="0"
-        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+        frameBorder='0'
+        allow='accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture'
         allowFullScreen
         title={data?.title || 'YouTube Video'}
       />
@@ -347,7 +347,7 @@ class MediaPlayerContent extends Component<IMediaPlayerContentProps, IMediaPlaye
 
     // Video element
     return (
-      <video {...commonProps} crossOrigin="anonymous">
+      <video {...commonProps} crossOrigin='anonymous'>
         Your browser does not support the video tag.
       </video>
     );

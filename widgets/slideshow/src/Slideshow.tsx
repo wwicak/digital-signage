@@ -14,6 +14,14 @@ import { getSlides, ISlideData, SlideActionDataSchema } from '../../../actions/s
 
 const DEFAULT_SLIDE_DURATION_MS = 5000
 
+// Define slide component props interface
+interface SlideComponentProps {
+  slide: ISlideData;
+  isActive: boolean;
+  show?: boolean;
+  display?: string;
+}
+
 // Interface for slide component refs - Zod not typically used here
 export interface ISlideInstance {
   play: () => void;
@@ -197,32 +205,32 @@ class Slideshow extends Component<ISlideshowWidgetContentProps, ISlideshowWidget
   }
 
   // Memoize component selection for better performance in class components
-  private componentCache = new Map<string, ComponentType<any>>()
+  private componentCache = new Map<string, ComponentType<SlideComponentProps>>()
   
-  getSlideComponent = (type: string): ComponentType<any> => {
+  getSlideComponent = (type: string): ComponentType<SlideComponentProps> => { // Typed component return
     // Use manual caching for performance optimization in class components
     if (this.componentCache.has(type)) {
       return this.componentCache.get(type)!
     }
     
-    let component: ComponentType<any>
+    let component: ComponentType<SlideComponentProps> // Typed component variable
     switch (type) {
       case 'photo':
       case 'image':
-        component = PhotoSlide
+        component = PhotoSlide as unknown as ComponentType<SlideComponentProps>
         break
       case 'video':
-        component = VideoSlide
+        component = VideoSlide as unknown as ComponentType<SlideComponentProps>
         break
       case 'youtube':
-        component = YoutubeSlide
+        component = YoutubeSlide as unknown as ComponentType<SlideComponentProps>
         break
       case 'web':
-        component = WebSlide
+        component = WebSlide as unknown as ComponentType<SlideComponentProps>
         break
       // Add cases for 'announcement', 'list', 'congrats' etc. if they can be part of a slideshow
       default:
-        component = GenericSlide // Fallback for unknown or generic types
+        component = GenericSlide as unknown as ComponentType<SlideComponentProps> // Fallback for unknown or generic types
     }
     
     this.componentCache.set(type, component)
@@ -237,8 +245,8 @@ class Slideshow extends Component<ISlideshowWidgetContentProps, ISlideshowWidget
       <SlideComponent
         key={slide._id || `slide-${index}`} // Use slide._id for key
         slide={slide} // Pass full slide data
+        isActive={index === currentSlideIndex} // Use isActive instead of show
         show={index === currentSlideIndex} // Prop to control visibility/activity
-        ref={(ref: ISlideInstance | null) => (this.slideRefs[index] = ref)}
         // Other props like isPreview can be passed here if needed
       />
     )

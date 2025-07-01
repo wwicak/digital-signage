@@ -63,13 +63,7 @@ const CalendarView: React.FC<ICalendarViewProps> = ({
     });
   };
 
-  const formatDate = (date: Date) => {
-    return date.toLocaleDateString([], {
-      weekday: "short",
-      month: "short",
-      day: "numeric",
-    });
-  };
+  // Removed unused formatDate function - component uses formatTime instead
 
   const getSourceBadge = (reservation: IReservation) => {
     if (reservation.isExternallyManaged) {

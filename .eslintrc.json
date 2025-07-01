@@ -88,6 +88,10 @@
     "uploads/",
     "*.config.js",
     "__tests__/**/*",
-    "scripts/**/*"
+    "scripts/**/*",
+    "**/*Test.tsx",
+    "**/*test.tsx",
+    "**/display-test.tsx",
+    "stress-test-monitor.js"
   ]
 }

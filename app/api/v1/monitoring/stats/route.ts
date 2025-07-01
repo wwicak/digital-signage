@@ -3,7 +3,7 @@ import dbConnect from "@/lib/mongodb";
 import Display from "@/lib/models/Display";
 import DisplayHeartbeat from "@/lib/models/DisplayHeartbeat";
 
-export async function GET(request: NextRequest) {
+export async function GET(_request: NextRequest) {
   try {
     await dbConnect();
 
@@ -52,7 +52,7 @@ export async function GET(request: NextRequest) {
       },
       lastUpdated: new Date().toISOString(),
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Monitoring stats error:", error);
     return NextResponse.json({
       displays: {
@@ -71,7 +71,7 @@ export async function GET(request: NextRequest) {
         isRunning: false,
       },
       lastUpdated: new Date().toISOString(),
-      error: error.message,
+      error: error instanceof Error ? error.message : "Unknown error occurred",
     });
   }
 }

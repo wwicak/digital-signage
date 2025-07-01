@@ -60,6 +60,6 @@ if (configResult.error && !process.env.ENVIRON && ENVIRON === 'DEV') {
   console.error(
     `Welcome to digital-signage!\n
 You have not configured your installation yet, please run the setup utility by executing:\n` +
-      boxen('$   npm run setup', { padding: 1, margin: 1, borderStyle: 'double' } as any) // Use 'as any' for the options
+      boxen('$   npm run setup', { padding: 1, margin: 1 }) // Remove borderStyle to avoid type conflicts
   )
 }

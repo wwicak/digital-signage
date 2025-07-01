@@ -62,35 +62,42 @@ export async function POST(request: NextRequest) {
     setAuthCookie(response, token);
 
     return response;
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Registration error:", error);
 
-    // Handle specific passport-local-mongoose errors
-    if (error.name === "UserExistsError") {
-      return NextResponse.json(
-        { message: "User already exists" },
-        { status: 409 }
-      );
+    // Handle specific passport-local-mongoose errors with proper type checking
+    if (error && typeof error === 'object' && 'name' in error) {
+      const typedError = error as { name: string; message?: string };
+      
+      if (typedError.name === "UserExistsError") {
+        return NextResponse.json(
+          { message: "User already exists" },
+          { status: 409 }
+        );
+      }
+
+      if (typedError.name === "MissingPasswordError") {
+        return NextResponse.json(
+          { message: "Password is required" },
+          { status: 400 }
+        );
+      }
+
+      if (typedError.name === "MissingUsernameError") {
+        return NextResponse.json(
+          { message: "Email is required" },
+          { status: 400 }
+        );
+      }
     }
 
-    if (error.name === "MissingPasswordError") {
-      return NextResponse.json(
-        { message: "Password is required" },
-        { status: 400 }
-      );
-    }
-
-    if (error.name === "MissingUsernameError") {
-      return NextResponse.json(
-        { message: "Email is required" },
-        { status: 400 }
-      );
-    }
+    // Extract error message safely
+    const errorMessage = error instanceof Error ? error.message : "Unknown error occurred";
 
     return NextResponse.json(
       {
         message: "Error registering user",
-        error: error.message,
+        error: errorMessage,
       },
       { status: 500 }
     );

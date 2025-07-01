@@ -59,14 +59,16 @@ class WebOptions extends Component<IWebOptionsProps, IWebOptionsState> {
     }
   }
 
-  handleChange = (name: string, value: any): void => {
+  handleChange = (name: string, value: unknown): void => {
     const { onChange } = this.props
-    // Ensure numeric fields are stored as numbers
+    // Ensure numeric fields are stored as numbers with proper type checking
     let processedValue = value
     if (name === 'refreshInterval' || name === 'scale') {
-      processedValue = parseFloat(value as string) || 0
-      if (name === 'scale' && (processedValue < 0.1 || processedValue > 5)) { // Example range for scale
-        processedValue = Math.max(0.1, Math.min(5, processedValue))
+      // Type guard to safely handle unknown value
+      const numValue = typeof value === 'number' ? value : parseFloat(String(value)) || 0;
+      processedValue = numValue;
+      if (name === 'scale' && (numValue < 0.1 || numValue > 5)) { // Example range for scale
+        processedValue = Math.max(0.1, Math.min(5, numValue))
       }
     }
 

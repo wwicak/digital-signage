@@ -1,4 +1,4 @@
-import React, { useRef, useEffect, useCallback, forwardRef, useImperativeHandle } from 'react'
+import React, { useRef, useEffect, forwardRef, useImperativeHandle } from 'react' // Removed unused useCallback
 import { GridStack, GridStackWidget, GridStackOptions } from 'gridstack'
 import 'gridstack/dist/gridstack.min.css'
 
@@ -95,25 +95,32 @@ const GridStackWrapper = forwardRef<GridStackWrapperRef, GridStackWrapperProps>(
   // Initialize GridStack
   useEffect(() => {
     if (!gridRef.current) return;
-    
+
     // Initialize grid
     if (!gridInstanceRef.current) {
-        gridInstanceRef.current = GridStack.init(defaultOptions, gridRef.current);
-        const grid = gridInstanceRef.current;
-        
-        const handleUserChange = () => {
-            if (onLayoutChange) {
-                const currentItems = grid.save(false) as GridStackItem[];
-                onLayoutChange(currentItems);
-            }
-        };
+      gridInstanceRef.current = GridStack.init(defaultOptions, gridRef.current);
+      const grid = gridInstanceRef.current;
 
-        grid.on('dragstop', handleUserChange);
-        grid.on('resizestop', handleUserChange);
-        if (onAdded) grid.on('added', onAdded);
-        if (onRemoved) grid.on('removed', onRemoved);
+      const handleUserChange = () => {
+        if (onLayoutChange) {
+          const currentItems = grid.save(false) as GridStackItem[];
+          onLayoutChange(currentItems);
+        }
+      };
+
+      // Implement drag and resize event handlers for better UX feedback
+      if (onDragStart) grid.on('dragstart', onDragStart);
+      grid.on('dragstop', handleUserChange);
+      if (onDragStop) grid.on('dragstop', onDragStop);
+      
+      if (onResizeStart) grid.on('resizestart', onResizeStart);
+      grid.on('resizestop', handleUserChange);
+      if (onResizeStop) grid.on('resizestop', onResizeStop);
+      
+      if (onAdded) grid.on('added', onAdded);
+      if (onRemoved) grid.on('removed', onRemoved);
     }
-  }, [onLayoutChange, onAdded, onRemoved, defaultOptions]);
+  }, [onLayoutChange, onDragStart, onDragStop, onResizeStart, onResizeStop, onAdded, onRemoved, defaultOptions]);
 
   // Sync items with grid
   useEffect(() => {
@@ -142,11 +149,11 @@ const GridStackWrapper = forwardRef<GridStackWrapperRef, GridStackWrapperProps>(
         if (!el) return;
 
         const existingNode = grid.engine.nodes.find(n => n.id === item.id);
-        
+
         if (existingNode) {
           // Update existing widget if position/size changed
           if (existingNode.x !== item.x || existingNode.y !== item.y ||
-              existingNode.w !== item.w || existingNode.h !== item.h) {
+            existingNode.w !== item.w || existingNode.h !== item.h) {
             grid.update(el, {
               x: item.x,
               y: item.y,
@@ -163,7 +170,7 @@ const GridStackWrapper = forwardRef<GridStackWrapperRef, GridStackWrapperProps>(
             el.setAttribute('gs-w', item.w?.toString() || '1');
             el.setAttribute('gs-h', item.h?.toString() || '1');
             el.setAttribute('gs-id', item.id);
-            
+
             // Then make it a widget
             grid.makeWidget(el);
           } catch (error) {
@@ -185,7 +192,7 @@ const GridStackWrapper = forwardRef<GridStackWrapperRef, GridStackWrapperProps>(
     if (options.column && grid.getColumn() !== options.column) {
       grid.column(options.column as number);
     }
-    if(options.margin && grid.getMargin() !== options.margin) {
+    if (options.margin && grid.getMargin() !== options.margin) {
       grid.margin(options.margin);
     }
   }, [options.column, options.margin]);
@@ -210,7 +217,7 @@ const GridStackWrapper = forwardRef<GridStackWrapperRef, GridStackWrapperProps>(
         gridInstanceRef.current.addWidget(gridWidget)
       }
     },
-    
+
     removeWidget: (id: string) => {
       if (gridInstanceRef.current) {
         const element = gridRef.current?.querySelector(`[gs-id="${id}"]`)
@@ -219,32 +226,32 @@ const GridStackWrapper = forwardRef<GridStackWrapperRef, GridStackWrapperProps>(
         }
       }
     },
-    
+
     removeAll: () => {
       if (gridInstanceRef.current) {
         gridInstanceRef.current.removeAll()
       }
     },
-    
+
     enableMove: (enable: boolean) => {
       if (gridInstanceRef.current) {
         gridInstanceRef.current.enableMove(enable)
       }
     },
-    
+
     enableResize: (enable: boolean) => {
       if (gridInstanceRef.current) {
         gridInstanceRef.current.enableResize(enable)
       }
     },
-    
+
     getGridItems: () => {
       if (gridInstanceRef.current) {
         return gridInstanceRef.current.save(false) as GridStackItem[]
       }
       return []
     },
-    
+
     autoArrange: () => {
       if (gridInstanceRef.current) {
         gridInstanceRef.current.compact()
@@ -253,16 +260,16 @@ const GridStackWrapper = forwardRef<GridStackWrapperRef, GridStackWrapperProps>(
   }), [onLayoutChange]);
 
   return (
-    <div 
-      ref={gridRef} 
-      className={`grid-stack ${className}`}
-      style={{ minHeight: '400px' }}
+    <div
+      ref={gridRef}
+      className={`grid-stack w-full h-full ${className}`}
+      style={{ minHeight: '100vh', width: '100%', height: '100%' }}
     >
       {items.map(item => (
         <div
           key={item.id}
           ref={itemRefs.current[item.id]}
-          className="grid-stack-item"
+          className='grid-stack-item'
           gs-id={item.id}
           gs-x={item.x}
           gs-y={item.y}
@@ -276,7 +283,7 @@ const GridStackWrapper = forwardRef<GridStackWrapperRef, GridStackWrapperProps>(
           gs-no-move={item.noMove}
           gs-locked={item.locked}
         >
-          <div className="grid-stack-item-content">
+          <div className='grid-stack-item-content'>
             {item.content || children}
           </div>
         </div>

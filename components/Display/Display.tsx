@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useMemo, useCallback, useState } from "react";
 import _ from "lodash";
+import { ILayoutData } from "../../actions/layouts";
 
 import Frame from "./Frame";
 import GridStackWrapper, { GridStackItem } from "../GridStack/GridStackWrapper";
@@ -21,12 +22,29 @@ export type IDisplayComponentProps = z.infer<
   typeof DisplayComponentPropsSchema
 >;
 
+// Type for widget data object
+interface WidgetObjectData {
+  _id: string;
+  type: string;
+  data?: Record<string, unknown>;
+  [key: string]: unknown;
+}
+
+// Type for layout widget with position data
+interface LayoutWidget {
+  widget_id?: unknown;
+  x?: number;
+  y?: number;
+  w?: number;
+  h?: number;
+}
+
 // --- Constants ---
 const DEFAULT_STATUS_BAR: string[] = [];
 
 const Display: React.FC<IDisplayComponentProps> = React.memo(({ display }) => {
   const { state, setId, refreshDisplayData } = useDisplayContext();
-  const [layoutData, setLayoutData] = React.useState<any>(null);
+  const [layoutData, setLayoutData] = React.useState<ILayoutData | null>(null);
   const [priorityVideo, setPriorityVideo] = useState<PriorityVideoData | null>(null);
   const [showPriorityVideo, setShowPriorityVideo] = useState(false);
   const priorityCheckRef = useRef<NodeJS.Timeout | null>(null);
@@ -241,27 +259,37 @@ const Display: React.FC<IDisplayComponentProps> = React.memo(({ display }) => {
   // Memoize layout for GridStack to prevent unnecessary re-renders
   const gridStackItems: GridStackItem[] = useMemo(
     () =>
-      (layoutData?.widgets || []).map((widget: any) => {
+      (layoutData?.widgets || [])
+        .map((widget: LayoutWidget) => {
         // Skip if no widget data
         if (!widget?.widget_id) return null;
 
         // Get the widget definition data - handle both string ID and embedded object
-        let widgetData = widget.widget_id;
-        if (typeof widgetData !== 'object') {
+        const widgetData = widget.widget_id; // Widget data is not reassigned
+        if (typeof widgetData !== 'object' || widgetData === null) {
           console.error('Widget data is not an object:', widgetData);
           return null;
         }
 
-        
-        // Skip if corrupted data
-        if (!widgetData || !widgetData.type) {
-          console.error('Invalid widget data:', widget);
+        // Type guard to ensure we have the expected structure
+        const isValidWidgetData = (data: unknown): data is WidgetObjectData => {
+          return (
+            typeof data === 'object' &&
+            data !== null &&
+            typeof (data as WidgetObjectData)._id === 'string' &&
+            typeof (data as WidgetObjectData).type === 'string'
+          );
+        };
+
+        if (!isValidWidgetData(widgetData)) {
+          console.error('Invalid widget data structure:', widget);
           return null;
         }
+
         // Detailed debug logging
         console.log('Full widget data:', JSON.stringify(widgetData, null, 2));
         console.log('Widget instance:', widget);
-        
+
         // Debug log widget type and available widgets
         // Type normalization and debug logging
         const widgetType = (widgetData.type || '').toLowerCase();
@@ -273,7 +301,7 @@ const Display: React.FC<IDisplayComponentProps> = React.memo(({ display }) => {
           lowercased: k.toLowerCase(),
           matches: k.toLowerCase() === widgetType
         })));
-        
+
         // Get the component from our widgets registry
         // Find widget definition regardless of case
         let widgetDef;
@@ -281,12 +309,12 @@ const Display: React.FC<IDisplayComponentProps> = React.memo(({ display }) => {
           key.toLowerCase() === widgetType ||
           key === widgetData.type // try exact match too
         );
-        
+
         if (matchingKey) {
           widgetDef = Widgets[matchingKey];
           console.log('Found widget definition for type:', widgetData.type, 'using key:', matchingKey);
         }
-        
+
         if (!widgetDef) {
           console.error(`Widget type "${widgetData.type}" not found in registry. Available types:`,
             Object.keys(Widgets).join(', '),
@@ -310,12 +338,13 @@ const Display: React.FC<IDisplayComponentProps> = React.memo(({ display }) => {
               isPreview={false}
             />
           ) : (
-            <div className="flex items-center justify-center h-full bg-red-100 text-red-600">
+            <div className='flex items-center justify-center h-full bg-red-100 text-red-600'>
               Unknown Widget Type: {widgetData.type} (Available types: {Object.keys(Widgets).join(', ')})
             </div>
           )
         };
-      }).filter(Boolean), // Remove any null items
+      })
+      .filter(Boolean) as GridStackItem[], // Remove any null items
     [layoutData?.widgets],
   );
 
@@ -329,7 +358,7 @@ const Display: React.FC<IDisplayComponentProps> = React.memo(({ display }) => {
         statusBar={state.statusBar?.elements || DEFAULT_STATUS_BAR}
         orientation={state.orientation}
       >
-        <div className="flex items-center justify-center h-full">
+        <div className='flex items-center justify-center h-full'>
           <div className='animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600'></div>
         </div>
       </Frame>

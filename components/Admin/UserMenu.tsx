@@ -34,9 +34,9 @@ import { cn } from "@/lib/utils";
 interface UserMenuProps {
   className?: string;
   user?: {
-    name?: string | any;
+    name?: string;
     email: string;
-    role?: string | any;
+    role?: string | { name?: string };
     _id?: string;
   };
 }
@@ -51,9 +51,11 @@ const UserMenu: React.FC<UserMenuProps> = ({ className, user }) => {
   const router = useRouter();
 
   // Helper function to safely extract string values from potentially nested objects
-  const safeGetString = (value: any, fallback: string = ""): string => {
+  const safeGetString = (value: unknown, fallback: string = ""): string => {
     if (typeof value === "string") return value;
-    if (value && typeof value === "object" && value.name) return value.name;
+    if (value && typeof value === "object" && (value as { name?: string }).name) {
+      return (value as { name: string }).name;
+    }
     return fallback;
   };
   const [isPasswordDialogOpen, setIsPasswordDialogOpen] = useState(false);

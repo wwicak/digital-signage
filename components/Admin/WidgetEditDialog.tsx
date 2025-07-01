@@ -1,7 +1,7 @@
 import React, { Component, ComponentType } from "react";
 import Dialog, { DialogMethods } from "../Dialog";
 import { Form, Button } from "../Form";
-import { getWidget, updateWidget, IWidgetData, IUpdateWidgetData } from "../../actions/widgets";
+import { getWidget, updateWidget, IWidgetData } from "../../actions/widgets"; // Removed unused IUpdateWidgetData
 import { updateWidgetPositions } from "../../actions/layouts";
 
 // GridStack types
@@ -27,6 +27,7 @@ interface GridStackElement extends Element {
 import * as z from "zod";
 import { WidgetDataZod, WidgetTypeZod } from "@/lib/models/Widget"; // Import Zod schema for widget's 'data' field and type
 import { Loader2, AlertCircle } from "lucide-react";
+import { IWidgetOptionsEditorProps } from '../../widgets/base_widget';
 
 // Widget data cache to avoid repeated API calls
 const widgetDataCache = new Map<string, { data: IWidgetData; timestamp: number }>();
@@ -55,17 +56,6 @@ export interface IWidgetEditDialog {
   close: (e?: React.MouseEvent) => Promise<void>;
 }
 
-/*
- * Zod schema for props of the generic OptionsComponent
- * TData is effectively Record<string, any> based on original usage
- */
-export const WidgetOptionsEditorPropsSchema = z.object({
-  data: z.record(z.string(), z.any()).optional(),
-  onChange: z.function().args(z.record(z.string(), z.any())).returns(z.void()),
-});
-export type IWidgetOptionsEditorProps = z.infer<
-  typeof WidgetOptionsEditorPropsSchema
->;
 
 // Zod schema for WidgetEditDialog props
 export const WidgetEditDialogPropsSchema = z.object({
@@ -90,7 +80,7 @@ const LocalFullWidgetDataSchema = z.object({
   w: z.number(),
   h: z.number(),
 });
-type LocalFullWidgetDataType = z.infer<typeof LocalFullWidgetDataSchema>;
+// Removed unused LocalFullWidgetDataType - no references found in codebase
 
 // Zod schema for WidgetEditDialog state
 const WidgetEditDialogStateSchema = z.object({
@@ -98,7 +88,7 @@ const WidgetEditDialogStateSchema = z.object({
    * widgetConfigData should ideally conform to a part of WidgetDataZod based on widgetType
    * For flexibility with generic OptionsComponent, using record(string, any)
    */
-  widgetConfigData: z.record(z.string(), z.any()).optional(),
+  widgetConfigData: z.record(z.string(), z.unknown()).optional(),
   initialWidgetData: LocalFullWidgetDataSchema.nullable().optional(),
   error: z.string().nullable().optional(),
 });
@@ -277,9 +267,9 @@ class WidgetEditDialog
    * This handleChange is for the widget-specific OptionsComponent
    * It expects the OptionsComponent to call it with the complete, new data object
    */
-  handleOptionsChange = (newConfigData: Record<string, any>): void => {
+  handleOptionsChange = (newConfigData: Record<string, unknown>): void => {
     // newConfigData is generic object
-    this.setState((prevState) => {
+    this.setState((_prevState) => { // prevState parameter required by setState API but unused
       /*
        * We could try to parse newConfigData against the specific part of WidgetDataZod
        * if props.widgetType is known, to ensure type safety before setting state.
@@ -366,7 +356,7 @@ class WidgetEditDialog
       <Dialog
         ref={this.dialogRef}
         title={dialogTitle}
-        description="Configure widget settings and properties"
+        description='Configure widget settings and properties'
         className='widget-settings-modal'
       >
         <div className='flex flex-col h-full max-h-[calc(90vh-8rem)]'>
@@ -409,8 +399,8 @@ class WidgetEditDialog
               ) : (
                 <div className='space-y-6'>
                   <OptionsComponent
-                    data={widgetConfigData || {}}
-                    onChange={this.handleOptionsChange}
+                    data={widgetConfigData}
+                    onChange={this.handleOptionsChange as (newData: unknown) => void}
                   />
                 </div>
               )}

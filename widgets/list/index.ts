@@ -1,8 +1,8 @@
 import { ComponentType } from 'react'
 
-import BaseWidget, { IBaseWidget, IWidgetDefinitionArgs } from '../base_widget'
-import ListContent from './src/ListContent' // Assuming .js for now
-import ListOptions from './src/ListOptions' // Assuming .js for now
+import BaseWidget, { IBaseWidget, IWidgetDefinitionArgs, IWidgetContentProps, IWidgetOptionsEditorProps } from '../base_widget'
+import ListContent from './src/ListContent'
+import ListOptions from './src/ListOptions'
 import { List } from 'lucide-react'
 
 // Define the structure for a single list item
@@ -13,7 +13,7 @@ export interface IListItem {
 }
 
 // Define the structure for the list widget's default data
-export interface IListDefaultData {
+export interface IListDefaultData extends Record<string, unknown> {
   title?: string | null;
   color: string; // Background color for the widget
   textColor: string; // Text color for list items
@@ -23,11 +23,11 @@ export interface IListDefaultData {
 }
 
 // Define the widget definition arguments for the List widget
-const listDefinitionArgs: IWidgetDefinitionArgs = {
+const listDefinitionArgs: IWidgetDefinitionArgs<Record<string, unknown>> = {
   name: 'List',
-  type: 'list', // Added 'type' field as it's required
+  type: 'list',
   version: '0.1',
-  icon: List, // Use the imported icon
+  icon: List,
   defaultData: {
     title: null,
     color: '#34495e', // Wet Asphalt
@@ -35,9 +35,9 @@ const listDefinitionArgs: IWidgetDefinitionArgs = {
     list: [{ text: 'First item', label: null }], // Default with one item
     ordered: false, // Default to unordered list
     fontSize: 16, // Default font size
-  } as IListDefaultData,
-  WidgetComponent: ListContent as ComponentType<any>,
-  OptionsComponent: ListOptions as ComponentType<any>,
+  } as Record<string, unknown>,
+  WidgetComponent: ListContent as unknown as ComponentType<IWidgetContentProps<Record<string, unknown>>>,
+  OptionsComponent: ListOptions as unknown as ComponentType<IWidgetOptionsEditorProps<Record<string, unknown>>>,
 }
 
 // Renamed from List to ListWidget for consistency and to avoid potential conflicts
@@ -45,10 +45,8 @@ class ListWidget extends BaseWidget {
   constructor() {
     super(listDefinitionArgs)
   }
-
-  // Widget and Options getters are inherited from BaseWidget
 }
 
-// Export an instance of the ListWidget, typed as IBaseWidget
+// Export an instance of the ListWidget
 const listWidget: IBaseWidget = new ListWidget()
 export default listWidget

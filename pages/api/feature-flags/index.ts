@@ -1,5 +1,6 @@
+import type { NextApiRequest, NextApiResponse } from "next/types";
 import dbConnect from "@/lib/mongodb";
-import { requireAuth } from "@/lib/helpers/auth_helper";
+import { requireAuth } from "@/lib/auth";
 import FeatureFlag, {
   FeatureFlagSchemaZodServer,
 } from "@/lib/models/FeatureFlag";
@@ -10,7 +11,7 @@ import {
 } from "@/lib/helpers/rbac_helper";
 import { clearFeatureFlagCache } from "@/lib/helpers/feature_flag_helper";
 
-export default async function handler(req: any, res: any) {
+export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   try {
     await dbConnect();
     const user = await requireAuth(req);
@@ -27,9 +28,9 @@ export default async function handler(req: any, res: any) {
       const { type, enabled } = req.query;
 
       // Build query
-      const query: any = {};
+      const query: { type?: string; enabled?: boolean } = {};
       if (type) {
-        query.type = type;
+        query.type = Array.isArray(type) ? type[0] : type;
       }
       if (enabled !== undefined) {
         query.enabled = enabled === "true";
@@ -98,16 +99,16 @@ export default async function handler(req: any, res: any) {
     }
 
     return res.status(405).json({ message: "Method not allowed" });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Error handling feature flags:", error);
 
-    if (error.message === "Authentication required") {
+    if (error instanceof Error && error.message === "Authentication required") {
       return res.status(401).json({ message: "Authentication required" });
     }
 
     return res.status(500).json({
       message: "Failed to handle feature flags request",
-      error: error.message,
+      error: error instanceof Error ? error.message : "Unknown error",
     });
   }
 }

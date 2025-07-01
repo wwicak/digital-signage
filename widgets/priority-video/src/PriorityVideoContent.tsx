@@ -15,7 +15,8 @@ interface IPriorityVideoContentState {
 }
 
 class PriorityVideoContent extends Component<IPriorityVideoContentProps, IPriorityVideoContentState> {
-  private mediaRef: RefObject<HTMLVideoElement | HTMLAudioElement | null>;
+  private videoRef: RefObject<HTMLVideoElement | null>;
+  private audioRef: RefObject<HTMLAudioElement | null>;
   private scheduleCheckInterval: NodeJS.Timeout | null = null;
   private overlayElement: RefObject<HTMLDivElement | null>;
 
@@ -30,9 +31,14 @@ class PriorityVideoContent extends Component<IPriorityVideoContentProps, IPriori
       playStartTime: null,
       showClickToPlay: false,
     };
-    this.mediaRef = React.createRef();
+    this.videoRef = React.createRef();
+    this.audioRef = React.createRef();
     this.overlayElement = React.createRef();
   }
+
+  private getCurrentMediaElement = (): HTMLVideoElement | HTMLAudioElement | null => {
+    return this.videoRef.current || this.audioRef.current;
+  };
 
   componentDidMount() {
     // Initial schedule check and media setup
@@ -154,7 +160,7 @@ class PriorityVideoContent extends Component<IPriorityVideoContentProps, IPriori
     this.setState({ isFullscreen: false });
 
     // Pause media when exiting priority mode
-    const mediaElement = this.mediaRef.current;
+    const mediaElement = this.getCurrentMediaElement();
     if (mediaElement && !mediaElement.paused) {
       mediaElement.pause();
     }
@@ -169,7 +175,7 @@ class PriorityVideoContent extends Component<IPriorityVideoContentProps, IPriori
 
   setupAndPlayMedia = () => {
     const { data } = this.props;
-    const mediaElement = this.mediaRef.current;
+    const mediaElement = this.getCurrentMediaElement();
     
     if (!mediaElement || !data) return;
 
@@ -194,7 +200,7 @@ class PriorityVideoContent extends Component<IPriorityVideoContentProps, IPriori
 
   playMedia = () => {
     const { data } = this.props;
-    const mediaElement = this.mediaRef.current;
+    const mediaElement = this.getCurrentMediaElement();
     
     if (!mediaElement || !data) return;
 
@@ -277,7 +283,7 @@ class PriorityVideoContent extends Component<IPriorityVideoContentProps, IPriori
   };
 
   handleClickToPlay = () => {
-    const mediaElement = this.mediaRef.current;
+    const mediaElement = this.getCurrentMediaElement();
     if (mediaElement) {
       // This is triggered by user interaction, so autoplay restrictions don't apply
       mediaElement.play()
@@ -332,12 +338,12 @@ class PriorityVideoContent extends Component<IPriorityVideoContentProps, IPriori
     return (
       <iframe
         src={embedUrl.toString()}
-        className="w-full h-full"
+        className='w-full h-full'
         style={{
           backgroundColor: data?.backgroundColor || '#000000',
         }}
-        frameBorder="0"
-        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+        frameBorder='0'
+        allow='accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture'
         allowFullScreen
         title={data?.title || 'Priority Video'}
         onLoad={() => {
@@ -406,7 +412,7 @@ class PriorityVideoContent extends Component<IPriorityVideoContentProps, IPriori
     }
 
     const commonProps = {
-      ref: this.mediaRef as any,
+      ref: this.videoRef,
       src: processedUrl,
       controls: false, // Priority video doesn't show controls
       autoPlay: false, // We control autoplay manually
@@ -434,7 +440,7 @@ class PriorityVideoContent extends Component<IPriorityVideoContentProps, IPriori
           <div className='text-center text-white'>
             <div className='text-4xl mb-4'>🎵</div>
             {data.title && <div className='text-lg mb-4'>{data.title}</div>}
-            <audio {...commonProps} className='w-full max-w-md' />
+            <audio {...{ ...commonProps, ref: this.audioRef }} className='w-full max-w-md' />
           </div>
         </div>
       );
@@ -455,7 +461,7 @@ class PriorityVideoContent extends Component<IPriorityVideoContentProps, IPriori
     // Hide widget completely when not scheduled (unless in preview mode)
     if (!isPreview && !isScheduleActive) {
       return (
-        <div className="w-full h-full" style={{ display: 'none' }}>
+        <div className='w-full h-full' style={{ display: 'none' }}>
           {/* Widget is hidden when not scheduled */}
         </div>
       );

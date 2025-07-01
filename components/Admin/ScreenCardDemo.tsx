@@ -6,7 +6,7 @@ interface IDisplayData {
   _id: string;
   name: string;
   orientation?: "landscape" | "portrait";
-  widgets?: any[];
+  widgets?: Array<{widget_id?: {type?: string; _id?: string}; x?: number; y?: number; w?: number; h?: number}>;
 }
 
 interface IScreenCardDemoProps {

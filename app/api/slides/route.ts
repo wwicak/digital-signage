@@ -1,12 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
 import dbConnect from "@/lib/mongodb";
 import Slide, { SlideSchemaZod, SlideTypeZod } from "@/lib/models/Slide";
+import mongoose from "mongoose";
+import { getHttpStatusFromError, getErrorMessage } from "@/types/error";
 import {
   handleSlideInSlideshows,
   getDisplayIdsForSlide,
 } from "@/lib/helpers/slide_helper";
 import { sendEventToDisplay } from "@/lib/sse_manager";
-import { requireAuth } from "@/lib/helpers/auth_helper";
+import { requireAuth } from "@/lib/auth";
 
 export async function GET(request: NextRequest) {
   try {
@@ -14,16 +16,16 @@ export async function GET(request: NextRequest) {
     const user = await requireAuth(request);
     const slides = await Slide.find({ creator_id: user._id });
     return NextResponse.json(slides);
-  } catch (error: any) {
-    if (error.message === "Authentication required") {
+  } catch (error: unknown) {
+    if (error instanceof Error && error.message === "Authentication required") {
       return NextResponse.json(
         { message: "Authentication required" },
         { status: 401 }
       );
     }
     return NextResponse.json(
-      { message: "Error fetching slides.", error: error.message },
-      { status: 500 }
+      { message: "Error fetching slides.", error: getErrorMessage(error) },
+      { status: getHttpStatusFromError(error) }
     );
   }
 }
@@ -103,14 +105,14 @@ export async function POST(request: NextRequest) {
       // Notify relevant displays via SSE after adding to slideshows
       try {
         const displayIds = await getDisplayIdsForSlide(
-          (savedSlide._id as any).toString()
+          String(savedSlide._id)
         );
         for (const displayId of displayIds) {
           sendEventToDisplay(displayId, "display_updated", {
             displayId,
             action: "update",
             reason: "slide_added",
-            slideId: (savedSlide._id as any).toString(),
+            slideId: String(savedSlide._id),
           });
         }
       } catch (notifyError) {
@@ -122,22 +124,22 @@ export async function POST(request: NextRequest) {
     }
 
     return NextResponse.json(savedSlide, { status: 201 });
-  } catch (error: any) {
-    if (error.message === "Authentication required") {
+  } catch (error: unknown) {
+    if (error instanceof Error && error.message === "Authentication required") {
       return NextResponse.json(
         { message: "Authentication required" },
         { status: 401 }
       );
     }
-    if (error.name === "ValidationError") {
+    if (error instanceof mongoose.Error.ValidationError) {
       return NextResponse.json(
         { message: "Validation Error", errors: error.errors },
         { status: 400 }
       );
     }
     return NextResponse.json(
-      { message: "Error creating slide", error: error.message },
-      { status: 500 }
+      { message: "Error creating slide", error: getErrorMessage(error) },
+      { status: getHttpStatusFromError(error) }
     );
   }
 }

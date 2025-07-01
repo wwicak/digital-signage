@@ -49,7 +49,7 @@ class YoutubeOptions extends Component<IYoutubeOptionsProps, IYoutubeOptionsComp
   }
 
   // Handles changes for any field in IYoutubeDefaultData or the local inputUrl
-  handleChange = (name: string, value: any): void => {
+  handleChange = (name: string, value: unknown): void => {
     const { onChange, data: currentWidgetData } = this.props
 
     if (name === 'inputUrl') {

@@ -2,45 +2,63 @@
 
 import React, { useState, useCallback, useRef, useEffect, useMemo, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { Grid3X3, Plus, Save, Trash2, RotateCcw, ArrowLeft } from 'lucide-react'
+import { Grid3X3, Plus, Save, RotateCcw, ArrowLeft } from 'lucide-react' // Removed unused Trash2
 
 import Frame from '../../components/Admin/Frame'
+import { ILayoutData } from '../../actions/layouts'
 import GridStackWrapper, { GridStackItem, GridStackWrapperRef } from '../../components/GridStack/GridStackWrapper'
 import GridStackEditableWidget from '../../components/GridStack/GridStackEditableWidget'
-import StatusBarElement from '../../components/Admin/StatusBarElement'
+// Removed unused import: StatusBarElement
 import DropdownButton from '../../components/DropdownButton'
 import { Form, Switch } from '../../components/Form'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent, CardHeader } from '@/components/ui/card' // Removed unused CardTitle
 
-import { StatusBarElementTypes } from '../../helpers/statusbar'
-import Widgets from '../../widgets'
+// Removed unused import: StatusBarElementTypes
+// Removed unused import: Widgets
 import { useWidgetChoices } from '../../hooks/useAvailableWidgets'
 import { useLayout } from '../../hooks/useLayout'
 import { useLayouts } from '../../hooks/useLayouts'
 import { useLayoutMutations } from '../../hooks/useLayoutMutations'
 import { addWidgetToLayout, updateWidgetPositions, removeWidgetFromLayout } from '../../actions/layouts'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { getWidget } from '../../actions/widgets'
+// Removed unused import: getWidget
 
-import { WidgetType } from '../../lib/models/Widget'
+import { WidgetType, IWidget } from '../../lib/models/Widget'
+import { ILayoutCreateData } from '../../actions/layouts'
+
+// Widget interface for layout widgets
+interface LayoutWidget {
+  widget_id: string | { _id: string } | { toString(): string } | null;
+  x?: number;
+  y?: number;
+  w?: number;
+  h?: number;
+  widget?: IWidget;
+  [key: string]: unknown;
+}
 
 // Helper function to get widget ID
-const getWidgetId = (widget: any): string | null => {
+const getWidgetId = (widget: LayoutWidget): string | null => {
   if (typeof widget.widget_id === 'string') {
     return widget.widget_id
   }
-  if (typeof widget.widget_id === 'object' && widget.widget_id?._id) {
-    return widget.widget_id._id
+  if (typeof widget.widget_id === 'object' && widget.widget_id !== null) {
+    if ('_id' in widget.widget_id) {
+      return widget.widget_id._id
+    }
+    if ('toString' in widget.widget_id) {
+      return widget.widget_id.toString()
+    }
   }
   return null
 }
 
 // Helper function to get widget type
 const getWidgetType = (widgetType: string): WidgetType => {
-  return Object.values(WidgetType).includes(widgetType as WidgetType) 
-    ? (widgetType as WidgetType) 
+  return Object.values(WidgetType).includes(widgetType as WidgetType)
+    ? (widgetType as WidgetType)
     : WidgetType.SLIDESHOW
 }
 
@@ -75,7 +93,7 @@ function LayoutAdminContent() {
     description: '',
     orientation: 'landscape' as 'landscape' | 'portrait',
     layoutType: 'spaced' as 'spaced' | 'compact',
-    widgets: [] as any[],
+    widgets: [] as ILayoutCreateData['widgets'],
     statusBar: {
       enabled: true,
       elements: [] as string[],
@@ -109,7 +127,13 @@ function LayoutAdminContent() {
         // Use existingLayout.orientation only if it's the initial load (layoutData.name is empty)
         orientation: layoutData.name ? currentOrientation : existingLayout.orientation || 'landscape',
         layoutType: existingLayout.layoutType || 'spaced',
-        widgets: existingLayout.widgets || [],
+        widgets: (existingLayout.widgets || []).map(widget => ({
+          widget_id: getWidgetId({ ...widget, widget_id: widget.widget_id } as LayoutWidget) || '',
+          x: widget.x || 0,
+          y: widget.y || 0,
+          w: widget.w || 2,
+          h: widget.h || 2,
+        })),
         statusBar: existingLayout.statusBar || { enabled: true, elements: [] },
         isActive: existingLayout.isActive ?? true,
         isTemplate: existingLayout.isTemplate ?? true,
@@ -131,17 +155,17 @@ function LayoutAdminContent() {
     }
 
     const filteredWidgets = existingLayout.widgets.filter((widget) => {
-      const widgetId = getWidgetId(widget)
+      const widgetId = getWidgetId({ ...widget, widget_id: widget.widget_id } as LayoutWidget)
       return widgetId && /^[0-9a-fA-F]{24}$/.test(widgetId)
     })
 
     // Simplified position validation - trust GridStack to handle collisions
-    const items = filteredWidgets.map((widget, index) => {
-      const widgetId = getWidgetId(widget)!
+    const items = filteredWidgets.map((widget, _index) => {
+      const widgetId = getWidgetId({ ...widget, widget_id: widget.widget_id } as LayoutWidget)!
       let widgetType = 'unknown'
 
-      if (typeof widget.widget_id === 'object' && widget.widget_id) {
-        widgetType = (widget.widget_id as any).type || 'unknown'
+      if (typeof widget.widget_id === 'object' && widget.widget_id && 'type' in widget.widget_id) {
+        widgetType = (widget.widget_id as unknown as IWidget).type || 'unknown'
       }
 
       // Basic validation only - let GridStack handle positioning
@@ -150,6 +174,9 @@ function LayoutAdminContent() {
       const x = Math.max(0, Math.min(layoutData.gridConfig.cols - w, Math.floor(widget.x || 0)))
       const y = Math.max(0, Math.floor(widget.y || 0))
 
+      // Check if widget type is valid/supported - getWidgetType never returns 'unknown'
+      const isValidWidget = widgetType && widgetType !== 'unknown';
+      
       return {
         id: widgetId,
         x: x,
@@ -157,11 +184,17 @@ function LayoutAdminContent() {
         w: w,
         h: h,
         widgetType,
-        content: (
+        content: isValidWidget ? (
           <GridStackEditableWidget
             id={widgetId}
             type={getWidgetType(widgetType)}
             layout={layoutData.layoutType}
+            onDelete={() => handleDeleteWidget(widgetId)}
+          />
+        ) : (
+          // Show broken widget component for invalid/unsupported widgets
+          <BrokenWidget
+            widgetId={widgetId}
             onDelete={() => handleDeleteWidget(widgetId)}
           />
         )
@@ -169,7 +202,7 @@ function LayoutAdminContent() {
     })
     
     return items
-  }, [existingLayout?.widgets, layoutData.layoutType, layoutData.gridConfig.cols])
+  }, [existingLayout?.widgets, layoutData.layoutType, layoutData.gridConfig.cols, isDeletingWidget])
   // Handle layout selection
   const handleLayoutSelect = (layoutId: string) => {
     if (layoutId === 'new') {
@@ -374,7 +407,7 @@ function LayoutAdminContent() {
 
   if (layoutsLoading) {
     return (
-      <Frame loggedIn={true} title="Layout Designer">
+      <Frame loggedIn={true} title='Layout Designer'>
         <div className='flex items-center justify-center h-64'>
           <div className='text-center'>Loading layouts...</div>
         </div>
@@ -383,7 +416,7 @@ function LayoutAdminContent() {
   }
 
   return (
-    <Frame loggedIn={true} title="Layout Designer">
+    <Frame loggedIn={true} title='Layout Designer'>
       <div className='p-6'>
         <Card>
         <CardHeader>
@@ -420,14 +453,14 @@ function LayoutAdminContent() {
           <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4'>
             <div>
               <label className='block text-sm font-medium mb-2'>Select Layout</label>
-              <Select value={selectedLayoutId || 'new'} onValueChange={handleLayoutSelect}>
+              <Select value={selectedLayoutId || 'new'} onValueChange={handleLayoutSelect} disabled={layoutLoading}>
                 <SelectTrigger>
-                  <SelectValue placeholder='Choose layout...' />
+                  <SelectValue placeholder={layoutLoading ? 'Loading layout...' : 'Choose layout...'} />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value='new'>Create New Layout</SelectItem>
-                  {layouts?.layouts?.map((layout: any) => (
-                    <SelectItem key={layout._id} value={layout._id}>
+                  {layouts?.layouts?.map((layout: ILayoutData) => (
+                    <SelectItem key={String(layout._id)} value={String(layout._id)}>
                       {layout.name}
                     </SelectItem>
                   ))}
@@ -447,7 +480,7 @@ function LayoutAdminContent() {
             <div>
               <label className='block text-sm font-medium mb-2'>Add Widget</label>
               <DropdownButton
-                text="Add Widget"
+                text='Add Widget'
                 icon={Plus}
                 disabled={!savedLayoutId}
                 choices={widgetChoices.map((choice) => ({
@@ -525,7 +558,7 @@ function LayoutAdminContent() {
                   <div className='text-center text-gray-500'>
                     <Grid3X3 className='mx-auto h-12 w-12 mb-4 opacity-50' />
                     <p className='text-lg font-medium'>No widgets added yet</p>
-                    <p className='text-sm'>Click "Add Widget" to start designing your layout</p>
+                    <p className='text-sm'>Click &ldquo;Add Widget&rdquo; to start designing your layout</p>
                   </div>
                 </div>
               ) : (
@@ -534,7 +567,7 @@ function LayoutAdminContent() {
                   items={gridStackItems}
                   options={gridStackOptions}
                   onLayoutChange={handleLayoutChange}
-                  className="h-full w-full"
+                  className='h-full w-full'
                 />
               )}
             </div>
@@ -549,7 +582,7 @@ function LayoutAdminContent() {
 export default function LayoutAdmin() {
   return (
     <Suspense fallback={
-     <Frame loggedIn={true} title="Layout Designer">
+     <Frame loggedIn={true} title='Layout Designer'>
        <div className='flex items-center justify-center h-64'>
          <div className='text-center'>Loading...</div>
        </div>

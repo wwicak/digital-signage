@@ -19,6 +19,20 @@ export interface IDisplayStatus extends Document {
   consecutiveFailures: number;
   totalUptime: number; // in milliseconds
   totalDowntime: number; // in milliseconds
+  // Performance metrics
+  performance?: {
+    cpuUsage?: number; // percentage
+    memoryUsage?: number; // percentage
+    diskUsage?: number; // percentage
+    temperature?: number; // celsius
+  };
+  // Additional metadata
+  metadata?: {
+    resolution?: string; // e.g., "1920x1080"
+    browser?: string; // e.g., "Chrome 96"
+    appVersion?: string; // Application version
+    screenSize?: string; // Physical screen size
+  };
   createdAt: Date;
   updatedAt: Date;
 }
@@ -83,6 +97,18 @@ const DisplayStatusSchema = new Schema<IDisplayStatus>(
       default: 0,
       min: 0,
     },
+    performance: {
+      cpuUsage: { type: Number, min: 0, max: 100 },
+      memoryUsage: { type: Number, min: 0, max: 100 },
+      diskUsage: { type: Number, min: 0, max: 100 },
+      temperature: { type: Number },
+    },
+    metadata: {
+      resolution: String,
+      browser: String,
+      appVersion: String,
+      screenSize: String,
+    },
   },
   {
     timestamps: true,
@@ -118,7 +144,7 @@ DisplayStatusSchema.methods.markOnline = function (clientInfo?: {
     if (clientInfo.ipAddress) this.ipAddress = clientInfo.ipAddress;
     if (clientInfo.userAgent) this.userAgent = clientInfo.userAgent;
     if (clientInfo.connectionType)
-      this.connectionType = clientInfo.connectionType as any;
+      this.connectionType = clientInfo.connectionType as "sse" | "websocket" | "polling";
   }
 
   return this.save();
@@ -150,10 +176,28 @@ DisplayStatusSchema.methods.updateHeartbeat = function () {
 };
 
 DisplayStatusSchema.methods.getUptimePercentage = function (periodMs?: number) {
-  const total = this.totalUptime + this.totalDowntime;
-  if (total === 0) return 100; // No data means 100% uptime
+  // If no period is specified, use total uptime
+  if (!periodMs) {
+    const total = this.totalUptime + this.totalDowntime;
+    if (total === 0) return 100; // No data means 100% uptime
+    return (this.totalUptime / total) * 100;
+  }
 
-  return (this.totalUptime / total) * 100;
+  // Calculate uptime for the specified period
+  const now = new Date();
+  const periodStart = new Date(now.getTime() - periodMs);
+  
+  // If the display was created after the period start, use its entire lifetime
+  if (this.createdAt > periodStart) {
+    const lifetimeMs = now.getTime() - this.createdAt.getTime();
+    const uptime = this.isOnline ? lifetimeMs : Math.max(0, lifetimeMs - (now.getTime() - this.lastSeen.getTime()));
+    return (uptime / lifetimeMs) * 100;
+  }
+
+  // For displays older than the period, calculate based on recent activity
+  const recentDowntime = this.isOnline ? 0 : Math.min(periodMs, now.getTime() - this.lastSeen.getTime());
+  const uptime = periodMs - recentDowntime;
+  return (uptime / periodMs) * 100;
 };
 
 // Static methods
@@ -197,6 +241,18 @@ export const DisplayStatusSchemaZod = z.object({
   consecutiveFailures: z.number().min(0).default(0),
   totalUptime: z.number().min(0).default(0),
   totalDowntime: z.number().min(0).default(0),
+  performance: z.object({
+    cpuUsage: z.number().min(0).max(100).optional(),
+    memoryUsage: z.number().min(0).max(100).optional(),
+    diskUsage: z.number().min(0).max(100).optional(),
+    temperature: z.number().optional(),
+  }).optional(),
+  metadata: z.object({
+    resolution: z.string().optional(),
+    browser: z.string().optional(),
+    appVersion: z.string().optional(),
+    screenSize: z.string().optional(),
+  }).optional(),
   createdAt: z.date().optional(),
   updatedAt: z.date().optional(),
   __v: z.number().optional(),

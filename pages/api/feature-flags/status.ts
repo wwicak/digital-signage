@@ -1,7 +1,8 @@
+import type { NextApiRequest, NextApiResponse } from "next/types";
 import dbConnect from "@/lib/mongodb";
 import FeatureFlag from "@/lib/models/FeatureFlag";
 
-export default async function handler(req: any, res: any) {
+export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== "GET") {
     return res.status(405).json({ message: "Method not allowed" });
   }
@@ -34,13 +35,13 @@ export default async function handler(req: any, res: any) {
         ? "Feature flags are initialized and ready to use"
         : "Feature flags have not been initialized yet",
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Error checking feature flag status:", error);
 
     return res.status(500).json({
       initialized: false,
       message: "Failed to check feature flag status",
-      error: error.message,
+      error: error instanceof Error ? error.message : "Unknown error",
     });
   }
 }

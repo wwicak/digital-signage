@@ -50,12 +50,13 @@ const WebContent: React.FC<IWebContentProps> = React.memo(({ data, isPreview }) 
   }, [])
 
   const setupRefreshInterval = useCallback((): void => {
-    if (refreshInterval > 0) {
+    // Don't set up auto-refresh in preview mode to avoid unnecessary reloads
+    if (refreshInterval > 0 && !isPreview) {
       refreshTimerRef.current = setInterval(() => {
         setIframeKey(Date.now())
       }, refreshInterval * 1000)
     }
-  }, [refreshInterval])
+  }, [refreshInterval, isPreview])
 
   useEffect(() => {
     setupRefreshInterval()

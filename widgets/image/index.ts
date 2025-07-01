@@ -1,14 +1,14 @@
 import { ComponentType } from 'react'
 
-import BaseWidget, { IBaseWidget, IWidgetDefinitionArgs } from '../base_widget'
-import ImageContent from './src/ImageContent' // Assuming .js for now
-import ImageOptions from './src/ImageOptions' // Assuming .js for now
+import BaseWidget, { IBaseWidget, IWidgetDefinitionArgs, IWidgetContentProps, IWidgetOptionsEditorProps } from '../base_widget'
+import ImageContent from './src/ImageContent'
+import ImageOptions from './src/ImageOptions'
 import { Image } from 'lucide-react'
 
 // Define the structure for the image widget's default data
 export type TImageFit = 'contain' | 'cover' | 'fill' | 'none' | 'scale-down';
 
-export interface IImageDefaultData {
+export interface IImageDefaultData extends Record<string, unknown> {
   title?: string | null; // Optional title for the image/widget
   url: string | null; // URL of the image
   fit: TImageFit; // How the image should fit within its container
@@ -17,20 +17,20 @@ export interface IImageDefaultData {
 }
 
 // Define the widget definition arguments for the Image widget
-const imageDefinitionArgs: IWidgetDefinitionArgs = {
+const imageDefinitionArgs: IWidgetDefinitionArgs<Record<string, unknown>> = {
   name: 'Image',
-  type: 'image', // Added 'type' field as it's required
+  type: 'image',
   version: '0.1',
-  icon: Image, // Use the imported icon
+  icon: Image,
   defaultData: {
     title: null,
     url: null,
     fit: 'contain',
     color: '#2d3436', // Default background: Dark Gray
     altText: '',
-  } as IImageDefaultData,
-  WidgetComponent: ImageContent as ComponentType<any>, // Cast as ComponentType<any> for now
-  OptionsComponent: ImageOptions as ComponentType<any>, // Cast as ComponentType<any> for now
+  } as Record<string, unknown>,
+  WidgetComponent: ImageContent as unknown as ComponentType<IWidgetContentProps<Record<string, unknown>>>,
+  OptionsComponent: ImageOptions as unknown as ComponentType<IWidgetOptionsEditorProps<Record<string, unknown>>>
 }
 
 // Renamed from Image to ImageWidget to avoid potential naming conflicts with global Image type
@@ -38,13 +38,8 @@ class ImageWidget extends BaseWidget {
   constructor() {
     super(imageDefinitionArgs)
   }
-
-  /*
-   * Widget and Options getters are inherited from BaseWidget
-   * and will use WidgetComponent and OptionsComponent from definitionArgs
-   */
 }
 
-// Export an instance of the ImageWidget, typed as IBaseWidget
+// Export an instance of the ImageWidget
 const imageWidget: IBaseWidget = new ImageWidget()
 export default imageWidget

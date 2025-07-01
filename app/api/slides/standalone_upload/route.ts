@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { writeFile, mkdir } from "fs/promises";
 import { join } from "path";
 import { existsSync } from "fs";
-import { requireAuth } from "@/lib/helpers/auth_helper";
+import { requireAuth } from "@/lib/auth";
 
 // Force dynamic rendering to prevent static generation errors
 export const dynamic = "force-dynamic";
@@ -115,10 +115,10 @@ export async function POST(request: NextRequest) {
       uploadedAt: new Date().toISOString(),
       uploadedBy: user._id,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Error in standalone upload:", error);
 
-    if (error.message === "Authentication required") {
+    if (error instanceof Error && error.message === "Authentication required") {
       return NextResponse.json(
         { message: "Authentication required" },
         { status: 401 }
@@ -127,8 +127,8 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json(
       {
-        message: error.message || "Failed to upload file",
-        error: process.env.NODE_ENV === "development" ? error.stack : undefined,
+        message: error instanceof Error ? error.message : "Failed to upload file",
+        error: process.env.NODE_ENV === "development" && error instanceof Error ? error.stack : undefined,
       },
       { status: 500 }
     );

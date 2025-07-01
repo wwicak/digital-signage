@@ -1,5 +1,6 @@
 import React, { memo, useEffect, useState } from 'react'
 import { useRouter } from 'next/router'
+import type { NextPageContext } from 'next/types'
 
 import DisplayComponent from '../components/Display/Display' // Renamed to DisplayComponent to avoid conflict
 
@@ -27,23 +28,37 @@ const DisplayPageComponent = memo(function DisplayPageComponent({
       document.body.className = '';
     };
   }, []);
+  const [isClient, setIsClient] = useState(false);
+
+  // Handle client-side hydration
+  useEffect(() => {
+    setIsClient(true);
+    // Log host information for debugging display connectivity
+    console.log(`Display page initialized on host: ${host}`);
+  }, [host]);
 
   useEffect(() => {
+    // Only run registration on client side to avoid hydration mismatch
+    if (!isClient) return;
+
     // If we have a layoutId but no displayId, we need to auto-register this display
     if (layoutId && !displayId && autostart) {
       registerDisplay();
     }
-  }, [layoutId, displayId, autostart]);
+  }, [isClient, layoutId, displayId, autostart]);
 
   const registerDisplay = async () => {
+    // Only register on client side
+    if (!isClient) return;
+
     setIsRegistering(true);
 
     try {
-      // Get device information
+      // Get device information (safe to use browser APIs here since we're on client)
       const deviceInfo = {
-        userAgent: navigator.userAgent,
-        screenResolution: `${screen.width}x${screen.height}`,
-        orientation: screen.width > screen.height ? 'landscape' : 'portrait',
+        userAgent: typeof navigator !== 'undefined' ? navigator.userAgent : 'Unknown',
+        screenResolution: typeof screen !== 'undefined' ? `${screen.width}x${screen.height}` : 'Unknown',
+        orientation: typeof screen !== 'undefined' ? (screen.width > screen.height ? 'landscape' : 'portrait') : 'landscape',
       };
 
       // Auto-register this display with the selected layout
@@ -79,6 +94,19 @@ const DisplayPageComponent = memo(function DisplayPageComponent({
       setIsRegistering(false);
     }
   };
+
+  // Show loading state while hydrating
+  if (!isClient) {
+    return (
+      <div className='min-h-screen flex items-center justify-center bg-gray-100'>
+        <div className='text-center'>
+          <div className='animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4'></div>
+          <h2 className='text-xl font-semibold text-gray-900 mb-2'>Loading Display...</h2>
+          <p className='text-gray-600'>Initializing display system</p>
+        </div>
+      </div>
+    );
+  }
 
   // Show registration loading state
   if (isRegistering) {
@@ -129,7 +157,7 @@ const DisplayPageComponent = memo(function DisplayPageComponent({
 // Create a wrapper component for getInitialProps
 const DisplayPage = (props: IDisplayPageProps) => <DisplayPageComponent {...props} />
 
-DisplayPage.getInitialProps = async (ctx: any): Promise<IDisplayPageProps> => {
+DisplayPage.getInitialProps = async (ctx: NextPageContext): Promise<IDisplayPageProps> => {
   const displayId = ctx.query && typeof ctx.query.display === 'string' ? ctx.query.display : undefined
   const layoutId = ctx.query && typeof ctx.query.layout === 'string' ? ctx.query.layout : undefined
   const autostart = ctx.query && ctx.query.autostart === 'true'

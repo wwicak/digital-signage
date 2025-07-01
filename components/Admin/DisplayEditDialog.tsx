@@ -1,14 +1,20 @@
 import React, { useState, useEffect } from "react";
 import { X } from "lucide-react";
 import { useDisplayMutations } from "@/hooks/useDisplayMutations";
+import { getLayouts, ILayoutData } from "@/actions/layouts";
+
+// Define proper types for the display object
+interface Display {
+  _id: string;
+  name: string;
+  orientation?: "landscape" | "portrait";
+  layout?: string; // Can be layout ID or legacy "spaced"/"compact"
+  location?: string;
+  building?: string;
+}
 
 interface DisplayEditDialogProps {
-  display?: {
-    _id: string;
-    name: string;
-    orientation?: "landscape" | "portrait";
-    layout?: "spaced" | "compact";
-  } | null;
+  display?: Display | null;
   isCreateMode: boolean;
   onClose: () => void;
   onSave: () => void;
@@ -24,7 +30,8 @@ const DisplayEditDialog: React.FC<DisplayEditDialogProps> = ({
 
   const [formData, setFormData] = useState({
     name: "",
-    layout: "spaced" as "spaced" | "compact",
+    layout: "", // Will store layout ID
+    orientation: "landscape" as "landscape" | "portrait",
     location: "",
     building: "",
     ipAddress: "",
@@ -32,20 +39,42 @@ const DisplayEditDialog: React.FC<DisplayEditDialogProps> = ({
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [layouts, setLayouts] = useState<ILayoutData[]>([]);
+  const [loadingLayouts, setLoadingLayouts] = useState(true);
+
+  // Fetch available layouts
+  useEffect(() => {
+    const fetchLayouts = async () => {
+      try {
+        setLoadingLayouts(true);
+        const response = await getLayouts({ isActive: true });
+        setLayouts(response.layouts || []);
+      } catch (error: unknown) {
+        console.error("Failed to fetch layouts:", error);
+        setLayouts([]);
+      } finally {
+        setLoadingLayouts(false);
+      }
+    };
+
+    fetchLayouts();
+  }, []);
 
   useEffect(() => {
     if (display && !isCreateMode) {
       setFormData({
         name: display.name || "",
-        layout: display.layout || "spaced",
-        location: "",
-        building: "",
+        layout: display.layout || "",
+        orientation: display.orientation || "landscape",
+        location: display.location || "",
+        building: display.building || "",
         ipAddress: "",
       });
     } else {
       setFormData({
         name: "",
-        layout: "spaced",
+        layout: "",
+        orientation: "landscape",
         location: "",
         building: "",
         ipAddress: "",
@@ -73,23 +102,47 @@ const DisplayEditDialog: React.FC<DisplayEditDialogProps> = ({
         await createDisplay.mutateAsync({
           data: {
             name: formData.name,
-            layout: formData.layout,
+            layout: formData.layout as "spaced" | "compact" | undefined, // Layout type
+            orientation: formData.orientation as "landscape" | "portrait",
             location: formData.location || 'Unknown Location',
             building: formData.building || 'Main Building',
           },
         });
       } else if (display) {
+        // For existing displays, update basic info first
         await updateDisplay.mutateAsync({
           id: display._id,
           data: {
             name: formData.name,
-            layout: formData.layout,
+            orientation: formData.orientation as "landscape" | "portrait",
+            location: formData.location,
+            building: formData.building,
           },
         });
+
+        // If layout changed, use the change-layout API for remote update
+        if (formData.layout && formData.layout !== display.layout) {
+          const response = await fetch(`/api/v1/displays/${display._id}/change-layout`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            credentials: 'include',
+            body: JSON.stringify({
+              layoutId: formData.layout,
+              immediate: true,
+            }),
+          });
+
+          if (!response.ok) {
+            const errorData = await response.json() as { error?: string };
+            throw new Error(errorData.error || 'Failed to change layout');
+          }
+        }
       }
 
       onSave();
-    } catch (err) {
+    } catch (err: unknown) {
       setError(err instanceof Error ? err.message : "An error occurred");
     } finally {
       setLoading(false);
@@ -103,7 +156,7 @@ const DisplayEditDialog: React.FC<DisplayEditDialogProps> = ({
     >
       <div
         className='bg-white rounded-lg w-full max-w-lg max-h-[90vh] overflow-y-auto shadow-xl'
-        onClick={(e) => e.stopPropagation()}
+        onClick={(e: React.MouseEvent) => e.stopPropagation()}
       >
         <div className='flex justify-between items-center p-6 border-b border-gray-200'>
           <div>
@@ -206,14 +259,34 @@ const DisplayEditDialog: React.FC<DisplayEditDialogProps> = ({
               </div>
             </div>
 
-
+            <div className='mb-6'>
+              <label
+                htmlFor='orientation'
+                className='block text-sm font-medium text-gray-700 mb-2'
+              >
+                Display Orientation
+              </label>
+              <select
+                id='orientation'
+                name='orientation'
+                value={formData.orientation}
+                onChange={handleInputChange}
+                className='w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent'
+              >
+                <option value='landscape'>Landscape</option>
+                <option value='portrait'>Portrait</option>
+              </select>
+              <p className='text-xs text-gray-500 mt-1'>
+                Choose the orientation for this display. This affects how content is displayed.
+              </p>
+            </div>
 
             <div className='mb-6'>
               <label
                 htmlFor='layout'
                 className='block text-sm font-medium text-gray-700 mb-2'
               >
-                Layout Style
+                Layout
               </label>
               <select
                 id='layout'
@@ -221,17 +294,25 @@ const DisplayEditDialog: React.FC<DisplayEditDialogProps> = ({
                 value={formData.layout}
                 onChange={handleInputChange}
                 className='w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent'
+                disabled={loadingLayouts}
               >
-                <option value='spaced'>
-                  Spaced - More padding between widgets
+                <option value=''>
+                  {loadingLayouts ? "Loading layouts..." : "Select a layout"}
                 </option>
-                <option value='compact'>
-                  Compact - Minimal spacing between widgets
-                </option>
+                {layouts.map((layout) => (
+                  <option key={layout._id?.toString()} value={layout._id?.toString()}>
+                    {layout.name} ({layout.orientation}) - {layout.widgets?.length || 0} widgets
+                  </option>
+                ))}
               </select>
               <p className='text-xs text-gray-500 mt-1'>
-                Layout style affects widget spacing and visual density
+                Choose the layout that will be displayed on this device. Changes will be applied immediately to connected displays.
               </p>
+              {!isCreateMode && formData.layout && formData.layout !== display?.layout && (
+                <p className='text-xs text-amber-600 mt-1 font-medium'>
+                  ⚠️ Layout change will be applied immediately to the physical display
+                </p>
+              )}
             </div>
           </div>
 

@@ -8,8 +8,8 @@ import { CheckCircle, Settings, Monitor, Play } from "lucide-react";
 
 // Mock complex widget options component to test scrolling
 interface MockWidgetOptionsProps {
-  data: Record<string, any>;
-  onChange: (data: Record<string, any>) => void;
+  data: Record<string, unknown>;
+  onChange: (data: Record<string, unknown>) => void;
 }
 
 class MockComplexWidgetOptions extends Component<MockWidgetOptionsProps> {
@@ -32,7 +32,7 @@ class MockComplexWidgetOptions extends Component<MockWidgetOptionsProps> {
     customField5: this.props.data?.customField5 || "",
   };
 
-  handleChange = (name: string, value: any) => {
+  handleChange = (name: string, value: unknown) => {
     this.setState({ [name]: value }, () => {
       if (this.props.onChange) {
         this.props.onChange(this.state);
@@ -290,7 +290,7 @@ class MockComplexWidgetOptions extends Component<MockWidgetOptionsProps> {
  * Test component to demonstrate the improved WidgetEditDialog with viewport constraints
  */
 const WidgetEditDialogTest: React.FC = () => {
-  const dialogRef = React.useRef<any>(null);
+  const dialogRef = React.useRef<{ open: () => void } | null>(null);
 
   const openDialog = () => {
     dialogRef.current?.open();
@@ -372,7 +372,7 @@ const WidgetEditDialogTest: React.FC = () => {
         ref={dialogRef}
         widgetId='test-widget-id'
         widgetType={WidgetType.WEB}
-        OptionsComponent={MockComplexWidgetOptions as any}
+        OptionsComponent={MockComplexWidgetOptions}
       />
 
       {/* Testing Notes */}

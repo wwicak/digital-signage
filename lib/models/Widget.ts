@@ -17,22 +17,22 @@ export enum WidgetType {
   EMPTY = "empty", // For placeholder/empty widgets
 }
 
-// Define specific data types for each widget type
-export interface AnnouncementWidgetData {
+// Define specific data types for each widget type - extending Record for compatibility
+export interface AnnouncementWidgetData extends Record<string, unknown> {
   title?: string;
   content?: string;
   color?: string;
   backgroundColor?: string;
 }
 
-export interface CongratsWidgetData {
+export interface CongratsWidgetData extends Record<string, unknown> {
   title?: string;
   content?: string;
   animation?: string;
   color?: string;
 }
 
-export interface ImageWidgetData {
+export interface ImageWidgetData extends Record<string, unknown> {
   title?: string | null;
   url: string | null;  // Required but can be null
   fit: "contain" | "cover" | "fill" | "none" | "scale-down";  // Required
@@ -40,13 +40,13 @@ export interface ImageWidgetData {
   altText?: string;  // Optional
 }
 
-export interface ListWidgetData {
+export interface ListWidgetData extends Record<string, unknown> {
   title?: string;
   items?: string[];
   color?: string;
 }
 
-export interface MediaPlayerWidgetData {
+export interface MediaPlayerWidgetData extends Record<string, unknown> {
   title?: string;
   url?: string; // URL for uploaded file or remote media
   mediaType?: "video" | "audio";
@@ -75,7 +75,7 @@ export interface MediaPlayerWidgetData {
   };
 }
 
-export interface PriorityVideoWidgetData {
+export interface PriorityVideoWidgetData extends Record<string, unknown> {
   title?: string;
   url?: string; // URL for uploaded file or remote media
   mediaType?: "video" | "audio";
@@ -100,19 +100,19 @@ export interface PriorityVideoWidgetData {
   playOnce?: boolean; // Play only once per schedule activation
 }
 
-export interface SlideshowWidgetData {
+export interface SlideshowWidgetData extends Record<string, unknown> {
   slideshow_id?: string;
   title?: string;
 }
 
-export interface WeatherWidgetData {
+export interface WeatherWidgetData extends Record<string, unknown> {
   title?: string;
   location?: string;
   units?: "metric" | "imperial";
   color?: string;
 }
 
-export interface WebWidgetData {
+export interface WebWidgetData extends Record<string, unknown> {
   title?: string | null;
   url: string;
   color?: string;
@@ -121,15 +121,15 @@ export interface WebWidgetData {
   allowInteraction?: boolean;
 }
 
-export interface YoutubeWidgetData {
+export interface YoutubeWidgetData extends Record<string, unknown> {
   title?: string;
   url?: string;
   videoId?: string;
   color?: string;
 }
 
-export interface EmptyWidgetData {
-  [key: string]: any;
+export interface EmptyWidgetData extends Record<string, unknown> {
+  [key: string]: unknown;
 }
 
 // Union type for all widget data types

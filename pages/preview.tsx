@@ -1,5 +1,6 @@
 import React, { useEffect } from 'react'
 import { useRouter } from 'next/router'
+import type { NextPageContext } from 'next/types'
 
 import Frame from '../components/Admin/Frame.tsx' // Assuming .tsx
 import DisplayComponent from '../components/Display/Display.tsx' // Renamed to avoid conflict, assuming .tsx
@@ -21,8 +22,10 @@ const PreviewPage = ({ host, loggedIn, displayId: initialDisplayId }: PreviewPro
   useEffect(() => {
     if (displayId) {
       setId(displayId)
+      // Log preview initialization with host information for debugging
+      console.log(`Preview page initialized for display ${displayId} on host: ${host}`);
     }
-  }, [displayId, setId])
+  }, [displayId, setId, host])
 
   return (
     <Frame loggedIn={loggedIn}>
@@ -39,11 +42,11 @@ const PreviewPage = ({ host, loggedIn, displayId: initialDisplayId }: PreviewPro
 }
 
 // Static method for getting initial props
-PreviewPage.getInitialProps = async (ctx: any): Promise<{ displayId: string; host: string }> => {
+PreviewPage.getInitialProps = async (ctx: NextPageContext): Promise<{ displayId: string; host: string }> => {
   const displayId = ctx.query.id as string // Example: get id from query
   const host =
     ctx.req && ctx.req.headers && ctx.req.headers.host
-      ? (ctx.req.socket?.encrypted ? 'https://' : 'http://') + ctx.req.headers.host
+      ? ((ctx.req.socket as any)?.encrypted ? 'https://' : 'http://') + ctx.req.headers.host
       : (typeof window !== 'undefined' ? window.location.origin : '')
   return { displayId: displayId || 'defaultDisplayId', host } // Ensure displayId has a fallback or handle if undefined
 }

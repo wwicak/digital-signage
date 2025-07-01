@@ -21,6 +21,22 @@ export interface IDisplay extends Document {
   // Layout change tracking
   layoutChangeRequested?: boolean;
   layoutChangeTimestamp?: Date;
+  // Settings for display configuration
+  settings?: {
+    volume?: number;
+    brightness?: number;
+    autoRestart?: boolean;
+    maintenanceMode?: boolean;
+    allowRemoteControl?: boolean;
+    contentFiltering?: boolean;
+    emergencyMessageEnabled?: boolean;
+  };
+  refreshInterval?: number; // In seconds
+  // Registration status
+  registrationStatus?: 'pending' | 'configured';
+  configuredBy?: mongoose.Types.ObjectId; // Admin who configured
+  configuredAt?: Date;
+  registrationIP?: string; // IP address when registered
   // Dynamic properties (not stored in database)
   clientCount?: number;
   isOnline?: boolean;
@@ -80,6 +96,36 @@ const DisplaySchema = new Schema<IDisplay>(
     layoutChangeTimestamp: {
       type: Date,
     },
+    settings: {
+      volume: { type: Number, default: 70, min: 0, max: 100 },
+      brightness: { type: Number, default: 100, min: 0, max: 100 },
+      autoRestart: { type: Boolean, default: true },
+      maintenanceMode: { type: Boolean, default: false },
+      allowRemoteControl: { type: Boolean, default: true },
+      contentFiltering: { type: Boolean, default: true },
+      emergencyMessageEnabled: { type: Boolean, default: false },
+    },
+    refreshInterval: {
+      type: Number,
+      default: 300, // 5 minutes default
+      min: 30,
+      max: 3600,
+    },
+    registrationStatus: {
+      type: String,
+      enum: ['pending', 'configured'],
+      default: 'pending',
+    },
+    configuredBy: {
+      type: Schema.Types.ObjectId,
+      ref: 'User',
+    },
+    configuredAt: {
+      type: Date,
+    },
+    registrationIP: {
+      type: String,
+    },
   },
   {
     timestamps: { createdAt: "creation_date", updatedAt: "last_update" }, // Automatically manage creation_date and last_update
@@ -128,6 +174,22 @@ export const DisplaySchemaZod = z.object({
   // Layout change tracking
   layoutChangeRequested: z.boolean().optional(),
   layoutChangeTimestamp: z.date().optional(),
+  // Settings
+  settings: z.object({
+    volume: z.number().min(0).max(100).optional(),
+    brightness: z.number().min(0).max(100).optional(),
+    autoRestart: z.boolean().optional(),
+    maintenanceMode: z.boolean().optional(),
+    allowRemoteControl: z.boolean().optional(),
+    contentFiltering: z.boolean().optional(),
+    emergencyMessageEnabled: z.boolean().optional(),
+  }).optional(),
+  refreshInterval: z.number().min(30).max(3600).optional(),
+  // Registration status
+  registrationStatus: z.enum(['pending', 'configured']).optional(),
+  configuredBy: z.instanceof(mongoose.Types.ObjectId).optional(),
+  configuredAt: z.date().optional(),
+  registrationIP: z.string().optional(),
   // Dynamic properties (calculated at runtime)
   clientCount: z.number().optional(),
   isOnline: z.boolean().optional(),

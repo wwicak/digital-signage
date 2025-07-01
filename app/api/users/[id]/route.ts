@@ -3,11 +3,12 @@ import dbConnect from "@/lib/mongodb";
 import User, { UserRoleName, IUserRole } from "@/lib/models/User";
 import Building from "@/lib/models/Building";
 import Display from "@/lib/models/Display";
-import { requireAuth } from "@/lib/helpers/auth_helper";
+import { requireAuth } from "@/lib/auth";
 import { hasPermission } from "@/lib/helpers/rbac_helper";
 import { sanitizeUser } from "@/lib/helpers/auth_helper";
 import { z } from "zod";
 import mongoose from "mongoose";
+import { getHttpStatusFromError, getErrorMessage } from "@/types/error";
 
 // Request schema for updating user role
 const UpdateUserRoleSchema = z.object({
@@ -51,11 +52,12 @@ export async function GET(
     return NextResponse.json({
       user: sanitizeUser(targetUser),
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Error fetching user:", error);
+    // Use type-safe error handling utilities
     return NextResponse.json(
-      { message: error.message || "Error fetching user" },
-      { status: error.status || 500 }
+      { message: getErrorMessage(error) },
+      { status: getHttpStatusFromError(error) }
     );
   }
 }
@@ -250,14 +252,15 @@ export async function PUT(
       message: "User updated successfully",
       user: sanitizeUser(targetUser),
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Error updating user:", error);
+    // Use type-safe error handling utilities
     return NextResponse.json(
       {
         message: "Error updating user",
-        error: error.message,
+        error: getErrorMessage(error),
       },
-      { status: 500 }
+      { status: getHttpStatusFromError(error) }
     );
   }
 }
@@ -309,14 +312,15 @@ export async function DELETE(
     return NextResponse.json({
       message: "User deleted successfully",
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Error deleting user:", error);
+    // Use type-safe error handling utilities
     return NextResponse.json(
       {
         message: "Error deleting user",
-        error: error.message,
+        error: getErrorMessage(error),
       },
-      { status: 500 }
+      { status: getHttpStatusFromError(error) }
     );
   }
 }

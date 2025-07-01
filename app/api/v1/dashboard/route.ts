@@ -4,8 +4,9 @@ import Building from "@/lib/models/Building";
 import Room from "@/lib/models/Room";
 import Reservation from "@/lib/models/Reservation";
 import UserCalendarLink from "@/lib/models/UserCalendarLink";
-import { requireAuth } from "@/lib/helpers/auth_helper";
+import { requireAuth } from "@/lib/auth";
 import { hasPermission } from "@/lib/helpers/rbac_helper";
+import { getHttpStatusFromError, getErrorMessage } from "@/types/error";
 
 // Force dynamic rendering to prevent static generation errors
 export const dynamic = "force-dynamic";
@@ -316,11 +317,12 @@ export async function GET(request: NextRequest) {
       recentActivity,
       lastUpdated: new Date().toISOString(),
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Error fetching dashboard data:", error);
+    // Use type-safe error handling utilities
     return NextResponse.json(
-      { message: error.message || "Error fetching dashboard data" },
-      { status: error.status || 500 }
+      { message: getErrorMessage(error) },
+      { status: getHttpStatusFromError(error) }
     );
   }
 }

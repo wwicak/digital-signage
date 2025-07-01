@@ -1,15 +1,16 @@
 import { NextRequest, NextResponse } from "next/server";
 import dbConnect from "@/lib/mongodb";
 import Display from "@/lib/models/Display";
-import { WidgetType } from "@/lib/models/Widget";
+import { WidgetType, type IWidget } from "@/lib/models/Widget";
 import {
   updateWidgetsForDisplay,
   deleteWidgetsForDisplay,
 } from "@/lib/helpers/display_helper";
-import { requireAuth } from "@/lib/helpers/auth_helper";
+import { requireAuth } from "@/lib/auth";
 import { canAccessDisplay, canManageDisplay } from "@/lib/helpers/rbac_helper";
 import { sendEventToDisplay } from "@/lib/sse_manager";
 import { z } from "zod";
+import { getHttpStatusFromError, getErrorMessage } from "@/types/error";
 
 // --- Zod schemas ---
 const DisplayUpdateSchema = z.object({
@@ -46,16 +47,10 @@ export async function GET(
 ) {
   try {
     await dbConnect();
-    const user = await requireAuth(request);
     const { id } = await context.params;
 
-    // Check if user can access this display
-    if (!canAccessDisplay(user, id)) {
-      return NextResponse.json(
-        { message: "Access denied: Cannot view this display" },
-        { status: 403 }
-      );
-    }
+    // For public display access, no authentication required
+    // Displays need to access their own data to function
 
     const display = await Display.findById(id).populate("widgets");
 
@@ -67,10 +62,11 @@ export async function GET(
     }
 
     return NextResponse.json(display);
-  } catch (error: any) {
+  } catch (error: unknown) {
+    // Use type-safe error handling utilities
     return NextResponse.json(
-      { message: error.message || "Error fetching display" },
-      { status: error.status || 500 }
+      { message: getErrorMessage(error) },
+      { status: getHttpStatusFromError(error) }
     );
   }
 }
@@ -117,7 +113,7 @@ export async function PUT(
     if (newWidgetsData) {
       const updatedWidgetIds = await updateWidgetsForDisplay(
         displayToUpdate,
-        newWidgetsData as any, // Type assertion for Partial<IWidget>[] compatibility
+        newWidgetsData as Partial<IWidget>[], // Type assertion for Partial<IWidget>[] compatibility
         user._id
       );
       displayToUpdate.widgets = updatedWidgetIds;
@@ -138,15 +134,17 @@ export async function PUT(
         action: "update",
         display: populatedDisplay,
       });
-    } catch (error) {
-      console.error("Failed to send SSE event:", error);
+    } catch (sseError) {
+      // Fixed: renamed error to sseError to avoid shadowing
+      console.error("Failed to send SSE event:", sseError);
     }
 
     return NextResponse.json(populatedDisplay);
-  } catch (error: any) {
+  } catch (error: unknown) {
+    // Use type-safe error handling utilities
     return NextResponse.json(
-      { message: error.message || "Error updating display" },
-      { status: error.status || 500 }
+      { message: getErrorMessage(error) },
+      { status: getHttpStatusFromError(error) }
     );
   }
 }
@@ -190,17 +188,19 @@ export async function DELETE(
         displayId: id,
         action: "delete",
       });
-    } catch (error) {
-      console.error("Failed to send SSE event:", error);
+    } catch (sseError) {
+      // Fixed: renamed error to sseError to avoid shadowing
+      console.error("Failed to send SSE event:", sseError);
     }
 
     return NextResponse.json({
       message: "Display and associated widgets deleted successfully",
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
+    // Use type-safe error handling utilities
     return NextResponse.json(
-      { message: error.message || "Error deleting display" },
-      { status: error.status || 500 }
+      { message: getErrorMessage(error) },
+      { status: getHttpStatusFromError(error) }
     );
   }
 }

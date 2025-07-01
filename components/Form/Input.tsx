@@ -14,10 +14,10 @@ export interface IChoice {
 // Base props common to all input types
 export interface IBaseInputProps {
   name: string; // Name of the input field, passed to onChange
-  value?: any; // Current value of the input
+  value?: unknown; // Current value of the input
   onChange: (
     name: string,
-    value: any,
+    value: unknown,
     event?: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement> | File // File for photo/upload
   ) => void;
   label?: string;
@@ -121,8 +121,8 @@ class Input extends Component<IInputProps> {
     }
   }
 
-  handlePhotoDropRejected = (rejectedFiles: any[]): void => {
-    // Using any[] for rejectedFiles as FileRejection type might need specific import from dropzone
+  handlePhotoDropRejected = (rejectedFiles: Array<{file: File; errors: Array<{code: string; message: string}>}>): void => {
+    // Properly typed rejectedFiles for dropzone FileRejection interface
     if (rejectedFiles.length > 0) {
       const rejection = rejectedFiles[0]
       const file = rejection?.file
@@ -130,7 +130,7 @@ class Input extends Component<IInputProps> {
 
       let errorMessage = `File "${file?.name || 'Unknown'}" was rejected:\n`
 
-      errors.forEach((error: any) => {
+      errors.forEach((error: {code: string; message: string}) => {
         switch (error.code) {
           case 'file-invalid-type':
             errorMessage += '• Invalid file type. Please select an image file (JPG, PNG, GIF, WebP, SVG, BMP, TIFF)\n'
@@ -169,7 +169,7 @@ class Input extends Component<IInputProps> {
             name={name}
             className={baseInputClasses}
             placeholder={placeholder}
-            value={value || ''} // Ensure value is not null/undefined for input
+            value={typeof value === 'string' || typeof value === 'number' ? String(value) : ''} // Ensure value is a string
             onChange={this.handleHtmlInputChange}
             disabled={disabled}
             onKeyDown={onKeyDown}
@@ -183,7 +183,7 @@ class Input extends Component<IInputProps> {
             name={name}
             className={baseInputClasses}
             placeholder={placeholder}
-            value={value === undefined || value === null || isNaN(value) ? '' : value} // Handle NaN for number input
+            value={value === undefined || value === null || typeof value !== 'number' || isNaN(Number(value)) ? '' : String(value)} // Handle NaN for number input
             onChange={this.handleHtmlInputChange}
             disabled={disabled}
             onKeyDown={onKeyDown}
@@ -198,7 +198,7 @@ class Input extends Component<IInputProps> {
           <textarea
             name={name}
             className={`${baseInputClasses} resize-y min-h-[80px]`}
-            value={value || ''}
+            value={typeof value === 'string' || typeof value === 'number' ? String(value) : ''}
             placeholder={placeholder}
             onChange={this.handleHtmlInputChange}
             disabled={disabled}
@@ -212,7 +212,7 @@ class Input extends Component<IInputProps> {
           <select
             name={name}
             onChange={this.handleHtmlInputChange}
-            value={value || ''} // Ensure value is not null/undefined
+            value={typeof value === 'string' || typeof value === 'number' ? String(value) : ''} // Ensure value is not null/undefined
             className={`${baseInputClasses} appearance-none bg-[url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23007CB2%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.4-12.8z%22%2F%3E%3C%2Fsvg%3E')] bg-no-repeat bg-[right_.7em_top_50%,_0_0] bg-[.65em_auto,_100%] pr-10`}
             disabled={disabled}
             onKeyDown={onKeyDown}
@@ -290,7 +290,7 @@ class Input extends Component<IInputProps> {
           <textarea
             name={name}
             className={className}
-            value={value || ''}
+            value={typeof value === 'string' || typeof value === 'number' ? String(value) : ''}
             placeholder={placeholder}
             onChange={this.handleHtmlInputChange}
             disabled={disabled}

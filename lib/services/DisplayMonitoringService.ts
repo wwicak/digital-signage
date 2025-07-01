@@ -13,6 +13,32 @@ export interface MonitoringConfig {
   notificationCooldownMinutes: number;
 }
 
+// Define DisplayStatus document type based on the actual model
+interface DisplayStatusDoc {
+  _id: string;
+  displayId: {
+    _id: string;
+    name: string;
+  };
+  isOnline: boolean;
+  lastSeen: Date;
+  lastHeartbeat: Date;
+  clientCount: number;
+  ipAddress?: string;
+  userAgent?: string;
+  connectionType: "sse" | "websocket" | "polling";
+  disconnectionReason?: "timeout" | "network_error" | "power_off" | "manual" | "unknown";
+  consecutiveFailures: number;
+  totalUptime: number;
+  totalDowntime: number;
+  createdAt: Date;
+  updatedAt: Date;
+  markOnline(clientInfo?: { ipAddress?: string; userAgent?: string; connectionType?: string }): Promise<void>;
+  markOffline(reason?: string): Promise<void>;
+  updateHeartbeat(): Promise<void>;
+  getUptimePercentage(periodMs?: number): number;
+}
+
 export class DisplayMonitoringService {
   private static instance: DisplayMonitoringService;
   private config: MonitoringConfig;
@@ -124,7 +150,7 @@ export class DisplayMonitoringService {
       }).populate("displayId");
 
       for (const status of staleStatuses) {
-        await this.handleOfflineDisplay(status, alertCutoffTime);
+        await this.handleOfflineDisplay(status as unknown as DisplayStatusDoc, alertCutoffTime);
       }
 
       // Check for displays with consecutive failures
@@ -134,7 +160,7 @@ export class DisplayMonitoringService {
       }).populate("displayId");
 
       for (const status of failingDisplays) {
-        await this.handleFailingDisplay(status);
+        await this.handleFailingDisplay(status as unknown as DisplayStatusDoc); // Type assertion for populated document
       }
     } catch (error) {
       console.error("Error checking display statuses:", error);
@@ -142,7 +168,7 @@ export class DisplayMonitoringService {
   }
 
   private async handleOfflineDisplay(
-    status: any,
+    status: DisplayStatusDoc,
     alertCutoffTime: Date
   ): Promise<void> {
     try {
@@ -185,10 +211,12 @@ export class DisplayMonitoringService {
             offlineMinutes,
             {
               lastSeen: status.lastSeen,
-              lastHeartbeat: status.lastHeartbeat,
-              disconnectionReason,
-              ipAddress: status.ipAddress,
-              userAgent: status.userAgent,
+              errorDetails: disconnectionReason,
+              clientInfo: {
+                ip: status.ipAddress,
+                userAgent: status.userAgent,
+                lastHeartbeat: status.lastHeartbeat?.toISOString(),
+              }
             }
           );
 
@@ -205,7 +233,7 @@ export class DisplayMonitoringService {
     }
   }
 
-  private async handleFailingDisplay(status: any): Promise<void> {
+  private async handleFailingDisplay(status: DisplayStatusDoc): Promise<void> { // Use typed status document
     try {
       // Check if we already have an active connection alert
       const existingAlert = await DisplayAlert.findOne({
@@ -268,7 +296,26 @@ export class DisplayMonitoringService {
     }
   }
 
-  public async getMonitoringStats(): Promise<any> {
+  // Get monitoring statistics with proper return type
+  public async getMonitoringStats(): Promise<{
+    displays: {
+      total: number;
+      online: number;
+      offline: number;
+      uptimePercentage: number;
+    };
+    alerts: {
+      active: number;
+    };
+    heartbeats: {
+      lastHour: number;
+    };
+    service: {
+      isRunning: boolean;
+      config: MonitoringConfig;
+    };
+    lastUpdated: string;
+  }> {
     try {
       await dbConnect();
 

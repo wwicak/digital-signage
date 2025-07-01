@@ -2,10 +2,21 @@ import { NextRequest, NextResponse } from "next/server";
 import dbConnect from "@/lib/mongodb";
 import Reservation, { ReservationSchemaZod } from "@/lib/models/Reservation";
 import Room from "@/lib/models/Room";
-import { requireAuth } from "@/lib/helpers/auth_helper";
+import { requireAuth } from "@/lib/auth";
 import { hasPermission } from "@/lib/helpers/rbac_helper";
 import { sendEventToDisplay } from "@/lib/sse_manager";
 import mongoose from "mongoose";
+import { getHttpStatusFromError, getErrorMessage } from "@/types/error";
+
+// Interface for MongoDB query filters
+interface ReservationQuery {
+  room_id?: string | { $in: unknown[] };
+  building_id?: string;
+  start_time?: { $gte?: Date; $lte?: Date };
+  end_time?: { $gte?: Date; $lte?: Date };
+  status?: string;
+  $and?: Array<Record<string, unknown>>;
+}
 
 export async function GET(request: NextRequest) {
   try {
@@ -28,7 +39,8 @@ export async function GET(request: NextRequest) {
     const endDate = searchParams.get("end_date");
     const skip = (page - 1) * limit;
 
-    const query: any = {};
+    // Build MongoDB query with proper typing
+    const query: ReservationQuery = {};
 
     if (roomId && mongoose.Types.ObjectId.isValid(roomId)) {
       query.room_id = roomId;
@@ -73,11 +85,12 @@ export async function GET(request: NextRequest) {
         pages: Math.ceil(total / limit),
       },
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Error fetching reservations:", error);
+    // Use type-safe error handling utilities
     return NextResponse.json(
-      { message: error.message || "Error fetching reservations" },
-      { status: error.status || 500 }
+      { message: getErrorMessage(error) },
+      { status: getHttpStatusFromError(error) }
     );
   }
 }
@@ -161,14 +174,16 @@ export async function POST(request: NextRequest) {
       },
     });
 
-    sendEventToDisplay("all", "reservationCreated", reservation);
+    // Convert the populated Mongoose document to a plain object for SSE transmission
+    sendEventToDisplay("all", "reservationCreated", reservation.toObject() as unknown as Record<string, unknown>);
 
     return NextResponse.json(reservation, { status: 201 });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Error creating reservation:", error);
+    // Use type-safe error handling utilities
     return NextResponse.json(
-      { message: error.message || "Error creating reservation" },
-      { status: error.status || 500 }
+      { message: getErrorMessage(error) },
+      { status: getHttpStatusFromError(error) }
     );
   }
 }

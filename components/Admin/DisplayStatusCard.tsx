@@ -290,8 +290,7 @@ const DisplayStatusCard: React.FC<DisplayStatusCardProps> = ({
   const {
     displays,
     displaysByLayout,
-    getOnlineDisplays,
-    getOfflineDisplays,
+    // Removed unused getOnlineDisplays and getOfflineDisplays - not needed for current implementation
     onlineCount,
     offlineCount,
     totalCount,
@@ -307,69 +306,9 @@ const DisplayStatusCard: React.FC<DisplayStatusCardProps> = ({
 
   // Get displays for the current layout or all displays
   const currentDisplays = layoutId ? displays : Object.values(displaysByLayout).flat();
-  const onlineDisplays = getOnlineDisplays();
-  const offlineDisplays = getOfflineDisplays();
-
-  const formatLastSeen = (date?: Date) => {
-    if (!date) return "Never";
-    
-    const now = new Date();
-    const diffMs = now.getTime() - date.getTime();
-    const diffMinutes = Math.floor(diffMs / 60000);
-    const diffHours = Math.floor(diffMinutes / 60);
-    const diffDays = Math.floor(diffHours / 24);
-
-    if (diffMinutes < 1) return "Just now";
-    if (diffMinutes < 60) return `${diffMinutes}m ago`;
-    if (diffHours < 24) return `${diffHours}h ago`;
-    return `${diffDays}d ago`;
-  };
-
-  const getStatusBadge = (isOnline: boolean) => {
-    return (
-      <Badge
-        variant={isOnline ? "default" : "destructive"}
-        className={cn(
-          "text-xs",
-          isOnline
-            ? "bg-green-100 text-green-800 border-green-200"
-            : "bg-red-100 text-red-800 border-red-200"
-        )}
-      >
-        {isOnline ? (
-          <>
-            <Wifi className='w-3 h-3 mr-1' />
-            Online
-          </>
-        ) : (
-          <>
-            <WifiOff className='w-3 h-3 mr-1' />
-            Offline
-          </>
-        )}
-      </Badge>
-    );
-  };
-
-  const getUptimeBadge = (percentage?: number) => {
-    if (!percentage) return null;
-    
-    const color = percentage >= 95 ? "green" : percentage >= 85 ? "yellow" : "red";
-    
-    return (
-      <Badge
-        variant='outline'
-        className={cn(
-          "text-xs",
-          color === "green" && "border-green-200 text-green-700",
-          color === "yellow" && "border-yellow-200 text-yellow-700",
-          color === "red" && "border-red-200 text-red-700"
-        )}
-      >
-        {percentage.toFixed(1)}% uptime
-      </Badge>
-    );
-  };
+  // Removed unused onlineDisplays and offlineDisplays - current implementation shows all displays together
+  
+  // Removed duplicate utility functions - these are already defined and used within DisplayItem component
 
   return (
     <Card className={cn("", className)}>
@@ -472,7 +411,7 @@ const DisplayStatusCard: React.FC<DisplayStatusCardProps> = ({
 
               {/* Summary Stats */}
               {!error && (
-                <div className='grid grid-cols-3 gap-4 p-4 bg-muted/30 rounded-lg'>
+                <div className='grid grid-cols-4 gap-4 p-4 bg-muted/30 rounded-lg'>
                   <div className='text-center'>
                     <div className='text-2xl font-bold text-green-600'>
                       {isLoading ? "..." : onlineCount}
@@ -490,6 +429,12 @@ const DisplayStatusCard: React.FC<DisplayStatusCardProps> = ({
                       {isLoading ? "..." : totalCount}
                     </div>
                     <div className='text-xs text-muted-foreground'>Total</div>
+                  </div>
+                  <div className='text-center'>
+                    <div className='text-2xl font-bold text-purple-600'>
+                      {isLoading ? "..." : `${Math.round(uptimePercentage || 0)}%`}
+                    </div>
+                    <div className='text-xs text-muted-foreground'>Uptime</div>
                   </div>
                 </div>
               )}

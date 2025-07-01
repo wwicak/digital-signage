@@ -1,5 +1,6 @@
 import { useEffect, useState, useRef } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
+import type { QueryClient } from '@tanstack/react-query'
 
 /**
  * Hook for handling Server-Sent Events (SSE) real-time updates for specific displays.
@@ -161,7 +162,7 @@ export const useDisplaySSE = (displayId?: string, enabled: boolean = true) => {
  * Utility function to manually trigger display data refresh
  * Can be used as a fallback when SSE is not available
  */
-export const refreshDisplayData = (queryClient: any, displayId?: string) => {
+export const refreshDisplayData = (queryClient: QueryClient, displayId?: string) => {
   if (displayId) {
     // Refresh specific display
     queryClient.invalidateQueries({ queryKey: ['display', displayId] })

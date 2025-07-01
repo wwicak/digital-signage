@@ -1,9 +1,11 @@
 import dbConnect from "@/lib/mongodb";
-import { requireAuth } from "@/lib/helpers/auth_helper";
+import { requireAuth } from "@/lib/auth";
 import { initializeDefaultFeatureFlags } from "@/lib/helpers/feature_flag_helper";
 import { UserRoleName } from "@/lib/models/User";
 
-export default async function handler(req: any, res: any) {
+import type { NextApiRequest, NextApiResponse } from "next/types";
+
+export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== "POST") {
     return res.status(405).json({ message: "Method not allowed" });
   }
@@ -28,16 +30,16 @@ export default async function handler(req: any, res: any) {
       initializedBy: user.email,
       timestamp: new Date().toISOString(),
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Error initializing feature flags:", error);
 
-    if (error.message === "Authentication required") {
+    if (error instanceof Error && error.message === "Authentication required") {
       return res.status(401).json({ message: "Authentication required" });
     }
 
     return res.status(500).json({
       message: "Failed to initialize feature flags",
-      error: error.message,
+      error: error instanceof Error ? error.message : "Unknown error",
     });
   }
 }

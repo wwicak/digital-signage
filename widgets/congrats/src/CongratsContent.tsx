@@ -66,14 +66,14 @@ class CongratsContent extends Component<ICongratsContentProps> {
     })
 
     return (
-      <div className='relative box-border h-full w-full'>
+      <div className='relative box-border h-full w-full' style={{ backgroundColor: color }}>
         {animationData && (
           <div className='background-animation'>
             <Lottie options={lottieOptions} height={'100%'} width={'100%'} />
           </div>
         )}
         <AutoScroll style={{ display: 'block', flex: 1, overflowY: 'auto', minHeight:0, zIndex: 1 }}>
-          <div className='text-content' style={{ fontSize: `${fontSize}px` }}>
+          <div className='text-content' style={{ fontSize: `${fontSize}px`, color: textColor }}>
             {text.split('\n').map((line, index) => (
               <div key={`line-${index}`}>{line || <br />}</div>
             ))}

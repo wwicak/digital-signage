@@ -1,20 +1,21 @@
 import axios, { AxiosResponse } from "axios";
+import { WidgetType, WidgetData } from "@/lib/models/Widget";
 
 /*
  * Define interfaces for the data structures
  * These should ideally match the backend API/models or be a subset
- * For now, defining them based on common expectations for display data.
+ * Using the proper types from the Widget model for consistency.
  */
 
 interface IWidget {
   _id: string;
   name: string;
-  type: string; // Consider an enum if widget types are fixed
+  type: WidgetType; // Use the defined WidgetType enum for better type safety
   x: number;
   y: number;
   w: number;
   h: number;
-  data: any; // Be more specific if possible
+  data: WidgetData; // Use the union type for widget-specific data
 }
 
 interface IStatusBar {
@@ -27,7 +28,7 @@ export interface IDisplayData {
   _id: string;
   name: string;
   description?: string;
-  layout?: "spaced" | "compact"; // Assuming these are the possible layouts
+  layout?: string; // Layout ID reference
   orientation?: "landscape" | "portrait"; // Display orientation
   location?: string; // Physical location of the display
   building?: string; // Building where the display is located
@@ -38,6 +39,16 @@ export interface IDisplayData {
   last_update?: string; // Or Date
   clientCount: number; // Number of clients paired to this display
   isOnline: boolean; // Online status of the display
+  refreshInterval?: number; // In seconds
+  settings?: {
+    volume?: number;
+    brightness?: number;
+    autoRestart?: boolean;
+    maintenanceMode?: boolean;
+    allowRemoteControl?: boolean;
+    contentFiltering?: boolean;
+    emergencyMessageEnabled?: boolean;
+  };
   // Add any other fields that are part of the display object
 }
 
@@ -55,12 +66,12 @@ export const getDisplays = (host: string = ""): Promise<IDisplayData[]> => {
 
   return axios
     .get(`${host}/api/displays`)
-    .then((res: AxiosResponse<any>) => {
+    .then((res: AxiosResponse<{ displays: IDisplayData[] } | IDisplayData[]>) => {
       // The API returns {displays: [...], ...} structure
       if (
         res &&
         res.data &&
-        res.data.displays &&
+        'displays' in res.data &&
         Array.isArray(res.data.displays)
       ) {
         return res.data.displays;

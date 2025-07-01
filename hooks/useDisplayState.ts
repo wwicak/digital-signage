@@ -21,7 +21,7 @@ interface DisplayState {
     y: number;
     w: number;
     h: number;
-    options?: Record<string, any>;
+    options?: Record<string, unknown>;
   }>;
 }
 
@@ -77,7 +77,13 @@ export function useDisplayState(displayId?: string, layoutId?: string) {
           backgroundColor: layoutData.backgroundColor,
           statusBar: layoutData.statusBar,
         },
-        widgets: (layoutData.widgets || []).map((widget: any) => ({
+        widgets: (layoutData.widgets || []).map((widget: {
+          widget_id: string | { _id: string; type: string; data?: Record<string, unknown> };
+          x?: number;
+          y?: number;
+          w?: number;
+          h?: number;
+        }) => ({
           _id:
             typeof widget.widget_id === "string"
               ? widget.widget_id
@@ -92,7 +98,15 @@ export function useDisplayState(displayId?: string, layoutId?: string) {
           h: widget.h || 2,
           options:
             typeof widget.widget_id === "object" ? widget.widget_id?.data : {},
-        })),
+        })) as Array<{
+          _id: string;
+          type: string;
+          x: number;
+          y: number;
+          w: number;
+          h: number;
+          options?: Record<string, unknown>;
+        }>,
       });
     } else if (displayData?.layout) {
       // Use display's assigned layout

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 
-export async function POST(request: NextRequest) {
+export async function POST(_request: NextRequest) {
   try {
     // Clear the auth cookie by setting it to expire
     const response = NextResponse.json({
@@ -17,13 +17,15 @@ export async function POST(request: NextRequest) {
     });
 
     return response;
-  } catch (error: any) {
+  } catch (error: unknown) {
+    // Type the error as unknown first, then safely access properties
+    const errorMessage = error instanceof Error ? error.message : "Unknown error occurred";
     console.error("Logout error:", error);
 
     return NextResponse.json(
       {
         message: "Error during logout",
-        error: error.message,
+        error: errorMessage,
       },
       { status: 500 }
     );

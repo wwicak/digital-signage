@@ -89,8 +89,8 @@ export const useReservations = (filters: IReservationFilters = {}) => {
       const result: IReservationsResponse = await response.json();
       setData(result.reservations);
       setPagination(result.pagination);
-    } catch (err: any) {
-      setError(err.message || "Failed to fetch reservations");
+    } catch (err) {
+      setError((err as Error).message || "Failed to fetch reservations");
       setData([]);
     } finally {
       setIsLoading(false);

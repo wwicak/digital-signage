@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import dbConnect from "@/lib/mongodb";
 import DisplayHeartbeat from "@/lib/models/DisplayHeartbeat";
 import Display from "@/lib/models/Display";
+import DisplayStatus from "@/lib/models/DisplayStatus";
 import { z } from "zod";
 
 // Force dynamic rendering
@@ -29,6 +30,9 @@ const HeartbeatRequestSchema = z.object({
       renderTime: z.number().optional(),
       loadTime: z.number().optional(),
       errorCount: z.number().optional(),
+      // Extended performance metrics for comprehensive monitoring
+      memoryHeapUsed: z.number().optional(),
+      networkLatency: z.number().optional(),
     })
     .optional(),
   disconnect: z.boolean().optional(),
@@ -128,6 +132,13 @@ export async function POST(
         memoryUsage: clientInfo?.memoryUsage,
         cpuUsage: clientInfo?.cpuUsage,
         networkType: clientInfo?.networkType,
+        // Include performance metrics for monitoring and diagnostics
+        performanceMetrics: performanceMetrics ? {
+          loadTime: performanceMetrics.loadTime,
+          renderTime: performanceMetrics.renderTime,
+          memoryHeapUsed: performanceMetrics.memoryHeapUsed,
+          networkLatency: performanceMetrics.networkLatency,
+        } : undefined,
       },
       serverInfo: {
         serverTime,
@@ -141,6 +152,33 @@ export async function POST(
       last_update: serverTime,
     });
 
+    // Update or create DisplayStatus record with IP address
+    let displayStatus = await DisplayStatus.findOne({ displayId });
+    
+    if (!displayStatus) {
+      // Create new status record
+      displayStatus = await DisplayStatus.create({
+        displayId,
+        isOnline: true,
+        lastSeen: serverTime,
+        lastHeartbeat: serverTime,
+        clientCount: 1,
+        ipAddress: clientIP,
+        userAgent,
+        connectionType: "sse",
+        consecutiveFailures: 0,
+        totalUptime: 0,
+        totalDowntime: 0
+      });
+    } else {
+      // Update existing status with new IP and mark online
+      await (displayStatus as any).markOnline({
+        ipAddress: clientIP,
+        userAgent,
+        connectionType: "sse"
+      });
+    }
+
     return NextResponse.json({
       success: true,
       heartbeatId: heartbeat._id,
@@ -148,10 +186,10 @@ export async function POST(
       responseTime,
       clientIP,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Heartbeat error:", error);
     return NextResponse.json(
-      { error: "Internal server error", message: error.message },
+      { error: "Internal server error", message: error instanceof Error ? error.message : "Unknown error" },
       { status: 500 }
     );
   }
@@ -196,10 +234,10 @@ export async function GET(
       recentHeartbeats,
       stats,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Get heartbeat error:", error);
     return NextResponse.json(
-      { error: "Internal server error", message: error.message },
+      { error: "Internal server error", message: error instanceof Error ? error.message : "Unknown error" },
       { status: 500 }
     );
   }

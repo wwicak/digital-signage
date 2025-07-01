@@ -79,7 +79,11 @@ const DisplayHeartbeat: React.FC<DisplayHeartbeatProps> = ({
 
   // Get client information
   const getClientInfo = useCallback(async (): Promise<ClientInfo & { ipAddress?: string }> => {
-    const nav = navigator as any;
+    // Type assertion for navigator with additional properties
+    const nav = navigator as Navigator & {
+      userAgent: string;
+      platform: string;
+    };
 
     // Get screen resolution
     const screenResolution = `${screen.width}x${screen.height}`;
@@ -96,7 +100,12 @@ const DisplayHeartbeat: React.FC<DisplayHeartbeatProps> = ({
     // Get memory usage (if available)
     let memoryUsage: number | undefined;
     if ('memory' in performance) {
-      const memory = (performance as any).memory;
+      const memory = (performance as Performance & {
+        memory: {
+          usedJSHeapSize: number;
+          totalJSHeapSize: number;
+        };
+      }).memory;
       memoryUsage = memory.usedJSHeapSize / memory.totalJSHeapSize;
     }
     
@@ -105,7 +114,11 @@ const DisplayHeartbeat: React.FC<DisplayHeartbeatProps> = ({
     let connectionQuality: 'excellent' | 'good' | 'fair' | 'poor' = 'good';
     
     if ('connection' in nav) {
-      const connection = nav.connection;
+      // Type the connection object with proper interface
+      const connection = nav.connection as {
+        effectiveType?: string;
+        type?: string;
+      };
       networkType = connection.effectiveType || connection.type;
       
       // Determine connection quality based on effective type

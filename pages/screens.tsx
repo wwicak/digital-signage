@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, memo } from 'react'
 import { Tv, Layout, Settings } from 'lucide-react'
+import type { NextPageContext } from 'next/types'
 
 import Frame from '../components/Admin/Frame.tsx' // Assuming .tsx
 import ScreenListComponent, { IScreenListRef } from '../components/Admin/ScreenList.tsx' // Renamed, Assuming .tsx
@@ -94,7 +95,7 @@ const ScreensComponent = memo(function ScreensComponent({ loggedIn, displayId }:
 
         {/* Screens List */}
         <div className='space-y-6'>
-          <ScreenListComponent ref={screenListRef as any} />
+          <ScreenListComponent ref={screenListRef} />
         </div>
         
         <Dialog><div></div></Dialog>
@@ -107,7 +108,7 @@ const ScreensComponent = memo(function ScreensComponent({ loggedIn, displayId }:
 const Screens = (props: ScreensProps) => <ScreensComponent {...props} />
 
 // Add getInitialProps to the wrapper component
-Screens.getInitialProps = async (ctx: any): Promise<{ displayId?: string }> => {
+Screens.getInitialProps = async (ctx: NextPageContext): Promise<{ displayId?: string }> => {
   const displayId = ctx.query.id as string | undefined
   return { displayId }
 }
