@@ -47,3 +47,8 @@ export { ReservationSchemaZod } from "./Reservation";
 export { default as UserCalendarLink } from "./UserCalendarLink";
 export type { IUserCalendarLink } from "./UserCalendarLink";
 export { UserCalendarLinkSchemaZod } from "./UserCalendarLink";
+
+// Priority Video model exports
+export { default as PriorityVideo } from "./PriorityVideo";
+export type { IPriorityVideo } from "./PriorityVideo";
+export { PriorityVideoSchemaZod, ScheduleSchemaZod, TimeSlotSchemaZod, FallbackContentSchemaZod } from "./PriorityVideo";

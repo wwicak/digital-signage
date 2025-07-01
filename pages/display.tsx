@@ -20,6 +20,14 @@ const DisplayPageComponent = memo(function DisplayPageComponent({
   const [actualDisplayId, setActualDisplayId] = useState<string | undefined>(displayId);
   const [isRegistering, setIsRegistering] = useState(false);
 
+  // Set body class for fullscreen display
+  useEffect(() => {
+    document.body.className = 'display-fullscreen';
+    return () => {
+      document.body.className = '';
+    };
+  }, []);
+
   useEffect(() => {
     // If we have a layoutId but no displayId, we need to auto-register this display
     if (layoutId && !displayId && autostart) {
@@ -104,7 +112,7 @@ const DisplayPageComponent = memo(function DisplayPageComponent({
   }
 
   return (
-    <div className={'container'}>
+    <div className="w-full h-screen overflow-hidden">
       {/* Pass the displayId obtained from props directly to the Display component */}
       {/* The Display component uses this ID to fetch its own data and setup SSE */}
       {actualDisplayId ? (

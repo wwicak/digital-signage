@@ -1,14 +1,13 @@
-import React, { useEffect, useRef, useMemo, useCallback } from "react";
+import React, { useEffect, useRef, useMemo, useCallback, useState } from "react";
 import _ from "lodash";
 
 import Frame from "./Frame";
 import GridStackWrapper, { GridStackItem } from "../GridStack/GridStackWrapper";
 import Widgets from "../../widgets";
+import PriorityVideoDisplay, { PriorityVideoData } from "../PriorityVideo/PriorityVideoDisplay";
 
 // Debug log available widgets
 console.log('Available widgets:', Object.keys(Widgets));
-import EmptyWidget from "../Widgets/EmptyWidget";
-import { IBaseWidget } from "../../widgets/base_widget";
 import { useDisplayContext } from "../../contexts/DisplayContext";
 
 // --- Component Props and State ---
@@ -24,11 +23,13 @@ export type IDisplayComponentProps = z.infer<
 
 // --- Constants ---
 const DEFAULT_STATUS_BAR: string[] = [];
-const DEFAULT_LAYOUT: DisplayLayoutType = "spaced";
 
 const Display: React.FC<IDisplayComponentProps> = React.memo(({ display }) => {
   const { state, setId, refreshDisplayData } = useDisplayContext();
   const [layoutData, setLayoutData] = React.useState<any>(null);
+  const [priorityVideo, setPriorityVideo] = useState<PriorityVideoData | null>(null);
+  const [showPriorityVideo, setShowPriorityVideo] = useState(false);
+  const priorityCheckRef = useRef<NodeJS.Timeout | null>(null);
 
   // Fetch layout data when display data changes
   React.useEffect(() => {
@@ -44,6 +45,59 @@ const Display: React.FC<IDisplayComponentProps> = React.memo(({ display }) => {
   const eventSourceRef = useRef<EventSource | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
   const layoutChangeCheckRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Function to check for priority video
+  const checkPriorityVideo = useCallback(async () => {
+    if (!display) 
+      console.log('No display ID provided, skipping priority video check.');
+      return;
+
+    try {
+      const response = await fetch(`/api/displays/${display}/priority-video`);
+      if (response.ok) {
+        const data = await response.json();
+        
+        if (data.isActive && data.priorityVideo) {
+          console.log('Priority video is active:', data.priorityVideo);
+          setPriorityVideo(data.priorityVideo);
+          setShowPriorityVideo(true);
+        } else {
+          setShowPriorityVideo(false);
+          setPriorityVideo(null);
+        }
+      }
+    } catch (error) {
+      console.error('Error checking priority video:', error);
+    }
+  }, [display]);
+
+  // Set up periodic priority video checking
+  useEffect(() => {
+    if (display) {
+      // Check for priority video every 30 seconds
+      priorityCheckRef.current = setInterval(checkPriorityVideo, 30000);
+
+      // Also check immediately
+      checkPriorityVideo();
+    }
+
+    return () => {
+      if (priorityCheckRef.current) {
+        clearInterval(priorityCheckRef.current);
+        priorityCheckRef.current = null;
+      }
+    };
+  }, [display, checkPriorityVideo]);
+
+  // Handle priority video exit
+  const handlePriorityVideoExit = useCallback(() => {
+    setShowPriorityVideo(false);
+    setPriorityVideo(null);
+    // Re-check priority video status after a short delay
+    setTimeout(() => {
+      checkPriorityVideo();
+    }, 5000);
+  }, [checkPriorityVideo]);
 
   // Create a debounced refresh function for SSE events using React Query invalidation
   const refreshDisplay = useMemo(
@@ -166,6 +220,10 @@ const Display: React.FC<IDisplayComponentProps> = React.memo(({ display }) => {
         clearInterval(layoutChangeCheckRef.current);
         layoutChangeCheckRef.current = null;
       }
+      if (priorityCheckRef.current) {
+        clearInterval(priorityCheckRef.current);
+        priorityCheckRef.current = null;
+      }
       // Cancel any pending debounced refresh calls
       refreshDisplay.cancel();
     };
@@ -261,20 +319,7 @@ const Display: React.FC<IDisplayComponentProps> = React.memo(({ display }) => {
     [layoutData?.widgets],
   );
 
-  // Memoize layout setting
-  const currentLayout = useMemo(
-    () => layoutData?.layoutType || DEFAULT_LAYOUT,
-    [layoutData?.layoutType],
-  );
 
-  // Memoize margin calculation for stable props
-  const gridMargin = useMemo(
-    () =>
-      currentLayout === "spaced"
-        ? ([2, 2] as [number, number])
-        : ([0, 0] as [number, number]),
-    [currentLayout],
-  );
 
 
 
@@ -292,42 +337,41 @@ const Display: React.FC<IDisplayComponentProps> = React.memo(({ display }) => {
   }
 
   return (
-    /*
-     * Frame.tsx statusBar prop expects string[] currently.
-     * If IDisplayData.statusBar is more complex (e.g. { enabled, color, elements }),
-     * then Frame prop or this mapping needs adjustment.
-     * Current Frame.tsx expects string[] (item identifiers).
-     * Assuming this.state.statusBar (from displayData.statusBar.elements) is string[]
-     */
-    <Frame
-      statusBar={state.statusBar?.elements || DEFAULT_STATUS_BAR}
-      orientation={state.orientation}
-    >
-      <div
-        className={`flex-1 overflow-hidden transition-all duration-300 ease-in-out ${
-          currentLayout === "spaced" ? "mb-0" : "mb-0"
-        } ${orientationClass}`}
-        ref={containerRef}
-        style={{
-          marginBottom: currentLayout === "spaced" ? "2px" : "0px",
-        }}
-      >
-        <GridStackWrapper
-          items={gridStackItems}
-          options={{
-            float: true,
-            cellHeight: 'auto',
-            margin: "2",
-            column: layoutData.gridConfig?.cols || gridCols,
-            staticGrid: true, // Make grid read-only for display
-            disableDrag: true,
-            disableResize: true,
-            animate: false, // Disable animations for better performance
-          }}
-          className="display-grid"
+    <>
+      {/* Priority Video Overlay */}
+      {showPriorityVideo && priorityVideo && (
+        <PriorityVideoDisplay
+          data={priorityVideo}
+          onExit={handlePriorityVideoExit}
         />
-      </div>
-    </Frame>
+      )}
+      
+      {/* Regular Display Content */}
+      <Frame
+        statusBar={state.statusBar?.elements || DEFAULT_STATUS_BAR}
+        orientation={state.orientation}
+      >
+        <div
+          className={`flex-1 h-full w-full overflow-hidden ${orientationClass}`}
+          ref={containerRef}
+        >
+          <GridStackWrapper
+            items={gridStackItems}
+            options={{
+              float: true,
+              cellHeight: 'auto',
+              margin: "2",
+              column: layoutData.gridConfig?.cols || gridCols,
+              staticGrid: true, // Make grid read-only for display
+              disableDrag: true,
+              disableResize: true,
+              animate: false, // Disable animations for better performance
+            }}
+            className="display-grid"
+          />
+        </div>
+      </Frame>
+    </>
   );
 });
 

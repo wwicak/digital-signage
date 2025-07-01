@@ -13,7 +13,6 @@ import imageWidget from "./image";
 import listWidget from "./list";
 import mediaPlayerWidget from "./media-player";
 import meetingRoomWidget from "./meeting-room";
-import priorityVideoWidget from "./priority-video";
 import slideshowWidget from "./slideshow";
 import weatherWidget from "./weather";
 import webWidget from "./web";
@@ -28,7 +27,6 @@ const widgets: Record<string, IBaseWidget> = {
   [listWidget.type]: listWidget,
   [mediaPlayerWidget.type]: mediaPlayerWidget,
   [meetingRoomWidget.type]: meetingRoomWidget,
-  [priorityVideoWidget.type]: priorityVideoWidget,
   [slideshowWidget.type]: slideshowWidget,
   [weatherWidget.type]: weatherWidget,
   [webWidget.type]: webWidget,

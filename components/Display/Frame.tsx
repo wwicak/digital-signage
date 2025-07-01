@@ -65,9 +65,9 @@ const Frame: React.FC<IDisplayFrameProps> = React.memo(
     const orientationClass = isPortrait ? "portrait-frame" : "landscape-frame";
 
     return (
-      <div className={`display-frame ${orientationClass}`}>
+      <div className={`w-full h-screen flex flex-col overflow-hidden ${orientationClass}`}>
         {statusBar && statusBar.length > 0 && (
-          <div className={"status-bar-container"}>
+          <div className="flex justify-between items-center px-4 py-2 bg-black/80 text-white text-sm">
             {statusBar.map((item, index) => (
               // Each item in the status bar should have its own container for styling (e.g., margins)
               <div
