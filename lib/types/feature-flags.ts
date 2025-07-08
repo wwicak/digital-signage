@@ -21,6 +21,7 @@ export enum FeatureFlagName {
   MENU_LAYOUT = "menu_layout",
   MENU_PREVIEW = "menu_preview",
   MENU_SLIDESHOWS = "menu_slideshows",
+  MENU_PRIORITY_VIDEOS = "menu_priority_videos",
 
   // Widgets
   WIDGET_MEETING_ROOM = "widget_meeting_room",

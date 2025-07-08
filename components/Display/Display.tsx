@@ -66,15 +66,14 @@ const Display: React.FC<IDisplayComponentProps> = React.memo(({ display }) => {
 
   // Function to check for priority video
   const checkPriorityVideo = useCallback(async () => {
-    if (!display) 
-      console.log('No display ID provided, skipping priority video check.');
-      return;
+ 
 
     try {
       const response = await fetch(`/api/displays/${display}/priority-video`);
       if (response.ok) {
         const data = await response.json();
-        
+        console.log ('Priority video check response:', data);
+        console.log('display', display);
         if (data.isActive && data.priorityVideo) {
           console.log('Priority video is active:', data.priorityVideo);
           setPriorityVideo(data.priorityVideo);
@@ -91,13 +90,13 @@ const Display: React.FC<IDisplayComponentProps> = React.memo(({ display }) => {
 
   // Set up periodic priority video checking
   useEffect(() => {
-    if (display) {
+    // if (display) {
       // Check for priority video every 30 seconds
       priorityCheckRef.current = setInterval(checkPriorityVideo, 30000);
 
       // Also check immediately
       checkPriorityVideo();
-    }
+    // }
 
     return () => {
       if (priorityCheckRef.current) {
@@ -290,6 +289,7 @@ const Display: React.FC<IDisplayComponentProps> = React.memo(({ display }) => {
         console.log('Full widget data:', JSON.stringify(widgetData, null, 2));
         console.log('Widget instance:', widget);
 
+        
         // Debug log widget type and available widgets
         // Type normalization and debug logging
         const widgetType = (widgetData.type || '').toLowerCase();

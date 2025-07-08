@@ -51,7 +51,8 @@
       "Bash(do if [ -f \"$file\" ])",
       "Bash(then echo \"Fixing $file\")",
       "Bash(fi)",
-      "Bash(then echo \"Checking $file:\")"
+      "Bash(then echo \"Checking $file:\")",
+      "Bash(npx tsx:*)"
     ],
     "deny": []
   }

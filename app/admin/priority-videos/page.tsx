@@ -25,6 +25,9 @@ import {
   Play,
   Volume2
 } from 'lucide-react';
+import Frame from '@/components/Admin/Frame';
+import { useDisplays } from '@/hooks/useDisplays';
+import { useBuildings } from '@/hooks/useBuildings';
 
 interface PriorityVideo {
   _id: string;
@@ -59,6 +62,10 @@ export default function PriorityVideosPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingVideo, setEditingVideo] = useState<PriorityVideo | null>(null);
+  
+  // Get displays and buildings data
+  const { data: displays = [] } = useDisplays();
+  const { data: buildings = [] } = useBuildings();
   const [formData, setFormData] = useState({
     title: '',
     url: '',
@@ -76,6 +83,9 @@ export default function PriorityVideosPage() {
     priority: 100,
     playOnce: true,
     isActive: true,
+    displays: [] as string[],
+    buildings: [] as string[],
+    isGlobal: true,
   });
 
   useEffect(() => {
@@ -109,13 +119,21 @@ export default function PriorityVideosPage() {
       const url = editingVideo ? `/api/priority-videos/${editingVideo._id}` : '/api/priority-videos';
       const method = editingVideo ? 'PUT' : 'POST';
       
+      // Prepare data for submission - remove isGlobal field and handle displays/buildings
+      const { isGlobal, ...submitData } = {
+        ...formData,
+        // Only include displays/buildings if not global
+        displays: formData.isGlobal ? undefined : formData.displays,
+        buildings: formData.isGlobal ? undefined : formData.buildings,
+      };
+      
       const response = await fetch(url, {
         method,
         headers: {
           'Content-Type': 'application/json',
           'Authorization': 'Bearer dummy-token', // For testing
         },
-        body: JSON.stringify(formData),
+        body: JSON.stringify(submitData),
       });
 
       if (response.ok) {
@@ -165,6 +183,9 @@ export default function PriorityVideosPage() {
       priority: 100,
       playOnce: true,
       isActive: true,
+      displays: [],
+      buildings: [],
+      isGlobal: true,
     });
     setEditingVideo(null);
   };
@@ -182,6 +203,9 @@ export default function PriorityVideosPage() {
       priority: video.priority,
       playOnce: video.playOnce,
       isActive: video.isActive,
+      displays: video.displays || [],
+      buildings: video.buildings || [],
+      isGlobal: !video.displays?.length && !video.buildings?.length,
     });
     setIsDialogOpen(true);
   };
@@ -230,8 +254,38 @@ export default function PriorityVideosPage() {
     }));
   };
 
+  const toggleDisplay = (displayId: string) => {
+    setFormData(prev => ({
+      ...prev,
+      displays: prev.displays.includes(displayId)
+        ? prev.displays.filter(id => id !== displayId)
+        : [...prev.displays, displayId],
+      isGlobal: false,
+    }));
+  };
+
+  const toggleBuilding = (building: string) => {
+    setFormData(prev => ({
+      ...prev,
+      buildings: prev.buildings.includes(building)
+        ? prev.buildings.filter(b => b !== building)
+        : [...prev.buildings, building],
+      isGlobal: false,
+    }));
+  };
+
+  const setGlobalAssignment = (isGlobal: boolean) => {
+    setFormData(prev => ({
+      ...prev,
+      isGlobal,
+      displays: isGlobal ? [] : prev.displays,
+      buildings: isGlobal ? [] : prev.buildings,
+    }));
+  };
+
   return (
-    <div className="container mx-auto p-6">
+    <Frame loggedIn={true} title="Priority Videos">
+      <div className="space-y-6">
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-3xl font-bold flex items-center gap-2">
@@ -260,9 +314,10 @@ export default function PriorityVideosPage() {
             
             <form onSubmit={handleSubmit} className="space-y-6">
               <Tabs defaultValue="basic" className="w-full">
-                <TabsList className="grid w-full grid-cols-3">
+                <TabsList className="grid w-full grid-cols-4">
                   <TabsTrigger value="basic">Basic Settings</TabsTrigger>
                   <TabsTrigger value="schedule">Schedule</TabsTrigger>
+                  <TabsTrigger value="assignment">Assignment</TabsTrigger>
                   <TabsTrigger value="advanced">Advanced</TabsTrigger>
                 </TabsList>
                 
@@ -406,6 +461,97 @@ export default function PriorityVideosPage() {
                         </div>
                       ))}
                     </div>
+                  </div>
+                </TabsContent>
+                
+                <TabsContent value="assignment" className="space-y-4">
+                  <div className="space-y-4">
+                    <div>
+                      <Label className="text-base font-semibold mb-3 block">Assignment Scope</Label>
+                      <p className="text-sm text-gray-600 mb-3">Choose how this priority video should be assigned</p>
+                      
+                      <div className="space-y-3">
+                        <div className="flex items-center space-x-2">
+                          <Checkbox
+                            id="isGlobal"
+                            checked={formData.isGlobal}
+                            onCheckedChange={(checked) => setGlobalAssignment(checked as boolean)}
+                          />
+                          <Label htmlFor="isGlobal" className="font-medium">
+                            Apply to all displays (Global)
+                          </Label>
+                        </div>
+                        <p className="text-sm text-gray-500 ml-6">
+                          This priority video will override all displays when scheduled
+                        </p>
+                      </div>
+                    </div>
+
+                    {!formData.isGlobal && (
+                      <>
+                        <div>
+                          <Label className="text-base font-semibold mb-3 block">Specific Displays</Label>
+                          <p className="text-sm text-gray-600 mb-3">Select individual displays for this priority video</p>
+                          
+                          {displays.length > 0 ? (
+                            <div className="grid grid-cols-2 gap-2 max-h-40 overflow-y-auto border rounded p-3">
+                              {displays.map((display) => (
+                                <div key={display._id} className="flex items-center space-x-2">
+                                  <Checkbox
+                                    id={`display-${display._id}`}
+                                    checked={formData.displays.includes(display._id)}
+                                    onCheckedChange={() => toggleDisplay(display._id)}
+                                  />
+                                  <Label htmlFor={`display-${display._id}`} className="text-sm">
+                                    {display.name || `Display ${display._id.slice(-6)}`}
+                                    {display.building && (
+                                      <span className="text-gray-500 ml-1">({display.building})</span>
+                                    )}
+                                  </Label>
+                                </div>
+                              ))}
+                            </div>
+                          ) : (
+                            <p className="text-sm text-gray-500 italic">No displays available</p>
+                          )}
+                        </div>
+
+                        <div>
+                          <Label className="text-base font-semibold mb-3 block">Buildings</Label>
+                          <p className="text-sm text-gray-600 mb-3">Select buildings to apply to all displays in those buildings</p>
+                          
+                          {buildings.length > 0 ? (
+                            <div className="grid grid-cols-2 gap-2 max-h-40 overflow-y-auto border rounded p-3">
+                              {buildings.map((building) => (
+                                <div key={building.name} className="flex items-center space-x-2">
+                                  <Checkbox
+                                    id={`building-${building._id}`}
+                                    checked={formData.buildings.includes(building.name)}
+                                    onCheckedChange={() => toggleBuilding(building.name)}
+                                  />
+                                  <Label htmlFor={`building-${building._id}`} className="text-sm">
+                                    {building.name}
+                                  </Label>
+                                </div>
+                              ))}
+                            </div>
+                          ) : (
+                            <p className="text-sm text-gray-500 italic">No buildings available</p>
+                          )}
+                        </div>
+
+                        {formData.displays.length === 0 && formData.buildings.length === 0 && (
+                          <div className="bg-yellow-50 border border-yellow-200 rounded p-3">
+                            <div className="flex items-center gap-2">
+                              <AlertCircle className="w-4 h-4 text-yellow-600" />
+                              <p className="text-sm text-yellow-800">
+                                Please select at least one display or building, or enable global assignment.
+                              </p>
+                            </div>
+                          </div>
+                        )}
+                      </>
+                    )}
                   </div>
                 </TabsContent>
                 
@@ -599,12 +745,49 @@ export default function PriorityVideosPage() {
                       </div>
                     </div>
                   )}
+
+                  <div className="mt-4">
+                    <h4 className="text-sm font-medium mb-2">Assignment:</h4>
+                    {!video.displays?.length && !video.buildings?.length ? (
+                      <Badge variant="secondary" className="bg-blue-100 text-blue-800">
+                        Global (All Displays)
+                      </Badge>
+                    ) : (
+                      <div className="space-y-2">
+                        {video.displays && video.displays.length > 0 && (
+                          <div>
+                            <span className="text-xs text-gray-500 block mb-1">Specific Displays:</span>
+                            <div className="flex flex-wrap gap-1">
+                              {video.displays.map((displayId, index) => (
+                                <Badge key={index} variant="outline" className="text-xs">
+                                  {displays.find(d => d._id === displayId)?.name || `Display ${displayId.slice(-6)}`}
+                                </Badge>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                        {video.buildings && video.buildings.length > 0 && (
+                          <div>
+                            <span className="text-xs text-gray-500 block mb-1">Buildings:</span>
+                            <div className="flex flex-wrap gap-1">
+                              {video.buildings.map((building, index) => (
+                                <Badge key={index} variant="outline" className="text-xs">
+                                  {building}
+                                </Badge>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </div>
                 </CardContent>
               </Card>
             ))
           )}
         </div>
       )}
-    </div>
+      </div>
+    </Frame>
   );
 }

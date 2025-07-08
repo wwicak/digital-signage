@@ -18,6 +18,7 @@ import {
   Settings,
   Layout,
   Monitor,
+  Zap,
 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -136,6 +137,13 @@ const Sidebar: React.FC<ISidebarProps> = ({ loggedIn, displayId, collapsed = fal
           path: `/slideshows?display=${currentDisplayId}`,
           icon: Images,
           featureFlag: FeatureFlagName.MENU_SLIDESHOWS,
+        },
+        {
+          id: "priority-videos",
+          name: "Priority Videos",
+          path: `/admin/priority-videos`,
+          icon: Zap,
+          featureFlag: FeatureFlagName.MENU_PRIORITY_VIDEOS,
         },
         {
           id: "buildings",

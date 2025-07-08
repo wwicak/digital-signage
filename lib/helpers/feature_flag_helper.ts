@@ -85,6 +85,18 @@ export async function initializeDefaultFeatureFlags(
       ],
     },
     {
+      name: FeatureFlagName.MENU_PRIORITY_VIDEOS,
+      displayName: "Priority Videos Menu",
+      description: "Access to the priority videos management page",
+      type: FeatureFlagType.MENU_ITEM,
+      enabled: true,
+      allowedRoles: [
+        UserRoleName.SUPER_ADMIN,
+        UserRoleName.RESOURCE_MANAGER,
+        UserRoleName.DISPLAY_MANAGER,
+      ],
+    },
+    {
       name: FeatureFlagName.MENU_BUILDINGS,
       displayName: "Buildings Menu",
       description: "Access to the buildings management page",
