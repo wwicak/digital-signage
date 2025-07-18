@@ -31,6 +31,7 @@ export interface AuthenticatedUser {
   email: string;
   name?: string;
   role: IUserRole;
+  isAdmin?: boolean; // Optional, can be used to check if user is admin
 }
 
 export interface SessionData {

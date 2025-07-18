@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import dbConnect from "@/lib/mongodb";
-import Slide, { SlideSchemaZod, SlideTypeZod } from "@/lib/models/Slide";
+import Slide, { SlideSchemaZod, SlideTypeZod, SlideType } from "@/lib/models/Slide";
 import Slideshow from "@/lib/models/Slideshow";
 import mongoose from "mongoose";
 import { getHttpStatusFromError, getErrorMessage } from "@/types/error";
@@ -11,6 +11,9 @@ import {
 } from "@/lib/helpers/slide_helper";
 import { sendEventToDisplay } from "@/lib/sse_manager";
 import { requireAuth } from "@/lib/auth";
+import { writeFile, mkdir } from "fs/promises";
+import path from "path";
+import { nanoid } from "nanoid";
 
 export async function GET(
   request: NextRequest,
@@ -55,10 +58,59 @@ export async function PUT(
   try {
     await dbConnect();
     const user = await requireAuth(request);
-    const body = await request.json();
     const { id } = await context.params;
 
-    const { slideshow_ids, ...slideData } = body;
+    // Handle both FormData (for file uploads) and JSON data
+    let slideData: any = {};
+    let slideshow_ids: string[] | undefined;
+    let file: File | null = null;
+
+    const contentType = request.headers.get('content-type');
+    if (contentType && contentType.includes('multipart/form-data')) {
+      // Handle FormData from file uploads
+      const formData = await request.formData();
+      file = formData.get('slideFile') as File | null;
+      
+      // Extract fields from FormData
+      const name = formData.get('name') as string;
+      const description = formData.get('description') as string;
+      const type = formData.get('type') as string;
+      const duration = formData.get('duration') ? Number(formData.get('duration')) : undefined;
+      const is_enabled = formData.get('is_enabled') === 'true';
+      
+      // Parse data field if it's JSON string
+      const dataField = formData.get('data') as string;
+      if (dataField) {
+        try {
+          slideData.data = JSON.parse(dataField);
+        } catch {
+          slideData.data = dataField; // Use as string if not valid JSON
+        }
+      }
+      
+      // Build slideData object
+      if (name) slideData.name = name;
+      if (description) slideData.description = description;
+      if (type) slideData.type = type;
+      if (duration !== undefined) slideData.duration = duration;
+      if (is_enabled !== undefined) slideData.is_enabled = is_enabled;
+      
+      // Handle slideshow_ids if provided
+      const slideshowIdField = formData.get('slideshow_ids') as string;
+      if (slideshowIdField) {
+        try {
+          slideshow_ids = JSON.parse(slideshowIdField);
+        } catch {
+          slideshow_ids = [slideshowIdField]; // Treat as single ID if not array
+        }
+      }
+    } else {
+      // Handle JSON data (original behavior)
+      const body = await request.json();
+      const { slideshow_ids: bodySlideshow_ids, ...bodySlideData } = body;
+      slideData = bodySlideData;
+      slideshow_ids = bodySlideshow_ids;
+    }
 
     // Validate type if present
     if (slideData.type && !SlideTypeZod.safeParse(slideData.type).success) {
@@ -66,6 +118,33 @@ export async function PUT(
         { message: "Invalid slide type." },
         { status: 400 }
       );
+    }
+
+    // Handle file upload for photo slides
+    if (slideData.type === SlideType.PHOTO && file) {
+      try {
+        // Create upload directory if it doesn't exist
+        const uploadDir = path.join(process.cwd(), 'public', 'uploads', 'slides');
+        await mkdir(uploadDir, { recursive: true });
+        
+        // Generate unique filename
+        const fileExtension = file.name.split('.').pop() || 'jpg';
+        const fileName = `${nanoid()}.${fileExtension}`;
+        const filePath = path.join(uploadDir, fileName);
+        
+        // Save file
+        const bytes = await file.arrayBuffer();
+        await writeFile(filePath, new Uint8Array(bytes));
+        
+        // Set data to the file URL
+        slideData.data = { url: `/uploads/slides/${fileName}` };
+      } catch (error) {
+        console.error('File upload error:', error);
+        return NextResponse.json(
+          { message: "Failed to upload file." },
+          { status: 500 }
+        );
+      }
     }
 
     const slideToUpdate = await Slide.findOne({

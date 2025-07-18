@@ -36,7 +36,7 @@ const Slideshows: React.FC<SlideshowsProps> = ({ loggedIn, displayId }) => {
   }, [displayId, displayContext.setId])
 
   const add = (): Promise<void> => {
-    return addSlideshow().then(() => {
+    return addSlideshow({ name: 'New Slideshow' }).then(() => {
       if (slideshowList && slideshowList.current) {
         slideshowList.current.refresh()
       }

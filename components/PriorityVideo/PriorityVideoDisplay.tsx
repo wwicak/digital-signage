@@ -32,6 +32,7 @@ interface PriorityVideoDisplayState {
   hasPlayed: boolean;
   playStartTime: number | null;
   showClickToPlay: boolean;
+  isMuted: boolean;
 }
 
 class PriorityVideoDisplay extends Component<PriorityVideoDisplayProps, PriorityVideoDisplayState> {
@@ -45,6 +46,7 @@ class PriorityVideoDisplay extends Component<PriorityVideoDisplayProps, Priority
       hasPlayed: false,
       playStartTime: null,
       showClickToPlay: false,
+      isMuted: true,
     };
     this.mediaRef = React.createRef();
   }
@@ -119,6 +121,7 @@ class PriorityVideoDisplay extends Component<PriorityVideoDisplayProps, Priority
             if (mediaElement && (data.volume === undefined || data.volume > 0)) {
               console.log('Unmuting priority video');
               mediaElement.muted = false;
+              this.setState({ isMuted: false });
             }
           }, 1000);
         })
@@ -184,6 +187,7 @@ class PriorityVideoDisplay extends Component<PriorityVideoDisplayProps, Priority
           console.log('Priority video started playing after user interaction');
           this.setState({
             showClickToPlay: false,
+            isMuted: false,
             hasPlayed: true,
             playStartTime: Date.now()
           });
@@ -192,6 +196,7 @@ class PriorityVideoDisplay extends Component<PriorityVideoDisplayProps, Priority
           setTimeout(() => {
             if (mediaElement && (this.props.data?.volume === undefined || this.props.data?.volume > 0)) {
               mediaElement.muted = false;
+              this.setState({ isMuted: false });
             }
           }, 500);
         })

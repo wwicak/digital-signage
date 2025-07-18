@@ -1,388 +1,123 @@
-/**
- * @fileoverview Google Calendar Integration Service
- * Handles Google Calendar API operations including authentication and meeting retrieval
- */
+import { google } from 'googleapis';
+import UserCalendarLink, { IUserCalendarLink } from '../models/UserCalendarLink';
+import Reservation from '../models/Reservation';
+import { decrypt } from '../utils/encryption';
 
-import { google } from "googleapis";
-import { OAuth2Client } from "google-auth-library";
-import axios from "axios";
-
-/**
- * Interface for Google OAuth tokens
- */
-export interface GoogleTokens {
-  access_token: string;
-  refresh_token?: string;
-  expires_at?: number;
-  token_type: string;
-  scope: string;
-}
-
-/**
- * Interface for calendar meeting data
- */
-export interface CalendarMeeting {
-  id: string;
-  title: string;
-  startTime: string;
-  endTime: string;
-  attendees: CalendarAttendee[];
-}
-
-/**
- * Interface for meeting attendees
- */
-export interface CalendarAttendee {
-  email: string;
-  responseStatus: "needsAction" | "declined" | "tentative" | "accepted";
-  displayName?: string;
-}
-
-/**
- * Interface for auth initiation response
- */
-export interface AuthInitiationResponse {
-  authUrl: string;
-  state?: string;
-}
-
-/**
- * Interface for auth callback response
- */
-export interface AuthCallbackResponse {
-  tokens: GoogleTokens;
-  profile: {
-    id: string;
-    email: string;
-    name: string;
-  };
-}
-
-/**
- * Google Calendar Service Class
- * Provides methods for Google Calendar integration
- */
 export class GoogleCalendarService {
-  private oauth2Client: OAuth2Client;
-  private readonly baseUrl = "https://www.googleapis.com/calendar/v3";
-  private readonly revokeUrl = "https://oauth2.googleapis.com/revoke";
+  private calendarLink: IUserCalendarLink;
+  private authClient;
 
-  constructor() {
-    const clientId = process.env.GOOGLE_CLIENT_ID;
-    const clientSecret = process.env.GOOGLE_CLIENT_SECRET;
-    const redirectUri =
-      process.env.GOOGLE_CALLBACK_URL || "/api/v1/calendar/google/callback";
+  constructor(calendarLink: IUserCalendarLink) {
+    this.calendarLink = calendarLink;
+    // if (!this.calendarLink.roomId) {
+    //   throw new Error('Calendar link must have a roomId for reservation syncing.');
+    // }
+    this.authClient = new google.auth.OAuth2(
+      process.env.GOOGLE_CLIENT_ID,
+      process.env.GOOGLE_CLIENT_SECRET,
+      `${process.env.APP_URL}${process.env.GOOGLE_CALLBACK_URL}`
+    );
 
-    if (!clientId || !clientSecret) {
-      throw new Error(
-        "Google OAuth credentials not configured. Please set GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET environment variables."
-      );
-    }
+    const accessToken = decrypt(this.calendarLink.accessToken);
+    const refreshToken = this.calendarLink.refreshToken ? decrypt(this.calendarLink.refreshToken) : undefined;
 
-    this.oauth2Client = new OAuth2Client(clientId, clientSecret, redirectUri);
+    this.authClient.setCredentials({ access_token: accessToken, refresh_token: refreshToken });
   }
 
-  /**
-   * Initiates Google OAuth flow and returns authorization URL
-   * @param userId - The user ID to associate with the auth request
-   * @returns Authorization URL and optional state parameter
-   */
-  public initiateAuth(userId: string): AuthInitiationResponse {
+  async syncReservations() {
+
     try {
-      const scopes = [
-        "https://www.googleapis.com/auth/calendar.readonly",
-        "https://www.googleapis.com/auth/userinfo.profile",
-        "https://www.googleapis.com/auth/userinfo.email",
-      ];
 
-      const authUrl = this.oauth2Client.generateAuthUrl({
-        access_type: "offline",
-        scope: scopes,
-        prompt: "consent", // Force consent to get refresh token
-        state: userId, // Pass userId as state parameter
-        include_granted_scopes: true,
-      });
+    const calendar = google.calendar({ version: 'v3', auth: this.authClient });
 
-      console.log(`Generated Google OAuth URL for user ${userId}`);
+    // 1. Fetch recent events from Google Calendar
+    const googleEvents = await calendar.events.list({
+      calendarId: this.calendarLink.calendarId,
+      timeMin: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString(), // 30 days ago
+      maxResults: 250,
+      singleEvents: true,
+      orderBy: 'startTime',
+    });
 
-      return {
-        authUrl,
-        state: userId,
-      };
-    } catch (error) {
-      console.error("Error generating Google OAuth URL:", error);
-      throw new Error("Failed to generate authorization URL");
-    }
-  }
+    const gEvents = googleEvents.data.items || [];
 
-  /**
-   * Handles OAuth callback and exchanges authorization code for tokens
-   * @param code - Authorization code from Google
-   * @param userId - User ID from state parameter
-   * @returns Tokens and user profile information
-   */
-  public async handleAuthCallback(
-    code: string,
-    userId: string
-  ): Promise<AuthCallbackResponse> {
-    try {
-      // Exchange authorization code for tokens
-      const { tokens } = await this.oauth2Client.getToken(code);
+    // 2. Fetch corresponding local reservations
+    const eventIds = gEvents.map(e => e.id).filter(id => id !== null && id !== undefined) as string[];
+    const localReservations = await Reservation.find({ externalCalendarEventId: { $in: eventIds } });
+    const localReservationMap = new Map(localReservations.map(r => [r.externalCalendarEventId, r]));
 
-      if (!tokens.access_token) {
-        throw new Error("No access token received from Google");
-      }
+    let syncedCount = 0;
 
-      // Set credentials to fetch user profile
-      this.oauth2Client.setCredentials(tokens);
+    // 3. Iterate through Google events and sync with local reservations
+    for (const gEvent of gEvents) {
+      if (!gEvent.id) continue;
 
-      // Get user profile information
-      const oauth2 = google.oauth2({ version: "v2", auth: this.oauth2Client });
-      const { data: profile } = await oauth2.userinfo.get();
+      const existingReservation = localReservationMap.get(gEvent.id);
 
-      const tokenData: GoogleTokens = {
-        access_token: tokens.access_token,
-        refresh_token: tokens.refresh_token || undefined,
-        expires_at: tokens.expiry_date || Date.now() + 3600 * 1000,
-        token_type: "Bearer",
-        scope:
-          tokens.scope || "https://www.googleapis.com/auth/calendar.readonly",
-      };
-
-      console.log(
-        `Google OAuth callback successful for user ${userId}, email: ${profile.email}`
-      );
-
-      return {
-        tokens: tokenData,
-        profile: {
-          id: profile.id || "",
-          email: profile.email || "",
-          name: profile.name || "",
-        },
-      };
-    } catch (error) {
-      console.error("Error handling Google OAuth callback:", error);
-      throw new Error(
-        `Failed to exchange authorization code: ${
-          error instanceof Error ? error.message : "Unknown error"
-        }`
-      );
-    }
-  }
-
-  /**
-   * Refreshes an expired access token using refresh token
-   * @param refreshTokenValue - The refresh token
-   * @returns New access token and expiration
-   */
-  public async refreshToken(refreshTokenValue: string): Promise<GoogleTokens> {
-    try {
-      this.oauth2Client.setCredentials({
-        refresh_token: refreshTokenValue,
-      });
-
-      const { credentials } = await this.oauth2Client.refreshAccessToken();
-
-      if (!credentials.access_token) {
-        throw new Error("No access token received from refresh");
-      }
-
-      const tokenData: GoogleTokens = {
-        access_token: credentials.access_token,
-        refresh_token: credentials.refresh_token || refreshTokenValue,
-        expires_at: credentials.expiry_date || Date.now() + 3600 * 1000,
-        token_type: "Bearer",
-        scope:
-          credentials.scope ||
-          "https://www.googleapis.com/auth/calendar.readonly",
-      };
-
-      console.log("Google access token refreshed successfully");
-      return tokenData;
-    } catch (error) {
-      console.error("Error refreshing Google access token:", error);
-      throw new Error(
-        `Failed to refresh access token: ${
-          error instanceof Error ? error.message : "Unknown error"
-        }`
-      );
-    }
-  }
-
-  /**
-   * Fetches meetings from Google Calendar
-   * @param accessToken - Valid access token
-   * @param calendarId - Calendar ID (default: 'primary')
-   * @param timeMin - Start time for search (ISO string)
-   * @param timeMax - End time for search (ISO string)
-   * @returns Array of calendar meetings
-   */
-  public async fetchMeetings(
-    accessToken: string,
-    calendarId: string = "primary",
-    timeMin: string,
-    timeMax: string
-  ): Promise<CalendarMeeting[]> {
-    try {
-      // Set up authenticated client
-      this.oauth2Client.setCredentials({
-        access_token: accessToken,
-      });
-
-      const calendar = google.calendar({
-        version: "v3",
-        auth: this.oauth2Client,
-      });
-
-      const response = await calendar.events.list({
-        calendarId,
-        timeMin,
-        timeMax,
-        singleEvents: true,
-        orderBy: "startTime",
-        fields:
-          "items(id,summary,start,end,attendees(email,responseStatus,displayName))",
-      });
-
-      const events = response.data.items || [];
-
-      const meetings: CalendarMeeting[] = events
-        .filter((event) => event.start && event.end) // Only events with valid times
-        .map((event) => {
-          const attendees: CalendarAttendee[] = (event.attendees || []).map(
-            (attendee) => ({
-              email: attendee.email || "",
-              responseStatus:
-                (attendee.responseStatus as CalendarAttendee["responseStatus"]) ||
-                "needsAction",
-              displayName: attendee.displayName || undefined,
-            })
-          );
-
-          return {
-            id: event.id || "",
-            title: event.summary || "Untitled Event",
-            startTime: event.start?.dateTime || event.start?.date || "",
-            endTime: event.end?.dateTime || event.end?.date || "",
-            attendees,
-          };
+      if (existingReservation) {
+        // Update existing reservation if changed
+        const lastUpdated = new Date(gEvent.updated || gEvent.created || Date.now());
+        if (existingReservation.last_update.getTime() < lastUpdated.getTime()) {
+          existingReservation.title = gEvent.summary || 'No Title';
+          existingReservation.start_time = new Date(gEvent.start?.dateTime || gEvent.start?.date || Date.now());
+          existingReservation.end_time = new Date(gEvent.end?.dateTime || gEvent.end?.date || Date.now());
+          existingReservation.organizer = gEvent.organizer?.email || 'Unknown';
+          existingReservation.attendees = gEvent.attendees?.map(a => a.email).filter(e => e !== null && e !== undefined) as string[] || [];
+          existingReservation.location = gEvent.location || undefined;
+          existingReservation.lastSyncedAt = new Date();
+          await existingReservation.save();
+          syncedCount++;
+        }
+      } else {
+        // Create new reservation if it doesn't exist locally
+        const newReservation = new Reservation({
+          title: gEvent.summary || 'No Title',
+          room_id: this.calendarLink.roomId,
+          location: gEvent.location || undefined, // Use location from Google event
+          start_time: new Date(gEvent.start?.dateTime || gEvent.start?.date || Date.now()),
+          end_time: new Date(gEvent.end?.dateTime || gEvent.end?.date || Date.now()),
+          organizer: gEvent.organizer?.email || 'Unknown',
+          attendees: gEvent.attendees?.map(a => a.email).filter(e => e !== null && e !== undefined) as string[] || [],
+          externalCalendarEventId: gEvent.id,
+          externalCalendarId: this.calendarLink.calendarId,
+          sourceCalendarType: 'google',
+          isExternallyManaged: true,
+          lastSyncedAt: new Date(),
         });
-
-      console.log(`Fetched ${meetings.length} meetings from Google Calendar`);
-      return meetings;
-    } catch (error) {
-      console.error("Error fetching Google Calendar meetings:", error);
-
-      // Handle specific API errors
-      if (axios.isAxiosError(error)) {
-        if (error.response?.status === 401) {
-          throw new Error("Access token expired or invalid");
-        }
-        if (error.response?.status === 403) {
-          throw new Error("Insufficient permissions to access calendar");
-        }
-        if (error.response?.status === 429) {
-          throw new Error("Rate limit exceeded");
-        }
+        await newReservation.save();
+        syncedCount++;
       }
-
-      throw new Error(
-        `Failed to fetch calendar meetings: ${
-          error instanceof Error ? error.message : "Unknown error"
-        }`
-      );
     }
+
+    // 4. (Optional) Find and remove local reservations that were deleted in Google
+    const localEventIds = localReservations.map(r => r.externalCalendarEventId).filter(id => id !== null && id !== undefined) as string[];
+    const deletedEventIds = localEventIds.filter(id => !eventIds.includes(id));
+    if (deletedEventIds.length > 0) {
+      await Reservation.deleteMany({ externalCalendarEventId: { $in: deletedEventIds } });
+      syncedCount += deletedEventIds.length;
+    }
+
+    // 5. Update the sync status on the calendar link
+    this.calendarLink.lastSyncStatus = 'success';
+    this.calendarLink.lastSyncedAt = new Date();
+    await this.calendarLink.save();
+
+    return { syncedCount };
+
+  } catch (error) {
+    console.error('Sync failed:', error);
+    await this.calendarLink.save();
+    throw error;
+  }
   }
 
-  /**
-   * Revokes Google API access for the given token
-   * @param accessToken - Access token to revoke
-   * @returns Success status
-   */
-  public async revokeAuth(accessToken: string): Promise<boolean> {
+  async revokeAuth(accessToken: string): Promise<void> {
     try {
-      await axios.post(
-        `${this.revokeUrl}?token=${accessToken}`,
-        {},
-        {
-          headers: {
-            "Content-Type": "application/x-www-form-urlencoded",
-          },
-        }
-      );
-
-      console.log("Google access token revoked successfully");
-      return true;
+      await this.authClient.revokeToken(accessToken);
+      console.log('Google token revoked successfully.');
     } catch (error) {
-      console.error("Error revoking Google access token:", error);
-
-      // Even if revoke fails, we should consider it partially successful
-      // The token might already be expired or invalid
-      if (axios.isAxiosError(error) && error.response?.status === 400) {
-        console.log("Token was already invalid or expired");
-        return true;
-      }
-
-      throw new Error(
-        `Failed to revoke access token: ${
-          error instanceof Error ? error.message : "Unknown error"
-        }`
-      );
-    }
-  }
-
-  /**
-   * Helper method to make authenticated API calls
-   * @param endpoint - API endpoint path
-   * @param accessToken - Valid access token
-   * @param params - Query parameters
-   * @returns API response data
-   */
-  private async makeAuthenticatedRequest(
-    endpoint: string,
-    accessToken: string,
-    params: Record<string, string | number | boolean> = {} // API request parameters
-  ): Promise<unknown> { // API responses can vary
-    try {
-      const response = await axios.get(`${this.baseUrl}${endpoint}`, {
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-          "Content-Type": "application/json",
-        },
-        params,
-      });
-
-      return response.data;
-    } catch (error) {
-      console.error(
-        `Error making authenticated request to ${endpoint}:`,
-        error
-      );
-      throw error;
-    }
-  }
-
-  /**
-   * Validates if an access token is still valid
-   * @param accessToken - Access token to validate
-   * @returns Whether the token is valid
-   */
-  public async validateToken(accessToken: string): Promise<boolean> {
-    try {
-      await this.makeAuthenticatedRequest(
-        "/users/me/calendarList",
-        accessToken
-      );
-      return true;
-    } catch (error) {
-      if (axios.isAxiosError(error) && error.response?.status === 401) {
-        return false;
-      }
+      console.error('Error revoking Google token:', error);
       throw error;
     }
   }
 }
-
-// Export singleton instance
-export const googleCalendarService = new GoogleCalendarService();

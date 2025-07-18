@@ -9,6 +9,7 @@ export enum WidgetType {
   LIST = "list",
   MEDIA_PLAYER = "media-player",
   MEETING_ROOM = "meeting-room",
+  MEETING_ROOM_SPECIFIC = "meeting-room-specific",
   PRIORITY_VIDEO = "priority-video",
   SLIDESHOW = "slideshow", // Refers to a Slideshow model
   WEATHER = "weather",
@@ -128,6 +129,14 @@ export interface YoutubeWidgetData extends Record<string, unknown> {
   color?: string;
 }
 
+export interface MeetingRoomSpecificWidgetData extends Record<string, unknown> {
+  roomId?: string;
+  refreshInterval?: number;
+  showUpcoming?: boolean;
+  maxReservations?: number;
+  title?: string;
+}
+
 export interface EmptyWidgetData extends Record<string, unknown> {
   [key: string]: unknown;
 }
@@ -144,6 +153,7 @@ export type WidgetData =
   | WeatherWidgetData
   | WebWidgetData
   | YoutubeWidgetData
+  | MeetingRoomSpecificWidgetData
   | EmptyWidgetData;
 
 export interface IWidget extends Document {
@@ -349,6 +359,14 @@ export const YoutubeWidgetDataSchema = z.object({
   color: z.string().optional(),
 });
 
+export const MeetingRoomSpecificWidgetDataSchema = z.object({
+  roomId: z.string().optional(),
+  refreshInterval: z.number().min(5000).max(300000).optional(),
+  showUpcoming: z.boolean().optional(),
+  maxReservations: z.number().min(1).max(50).optional(),
+  title: z.string().optional(),
+});
+
 export const EmptyWidgetDataSchema = z.record(z.any()).optional(); // Allows any structure for empty data
 
 // Union schema for WidgetData
@@ -363,6 +381,7 @@ export const WidgetDataZod = z.union([
   WeatherWidgetDataSchema,
   WebWidgetDataSchema,
   YoutubeWidgetDataSchema,
+  MeetingRoomSpecificWidgetDataSchema,
   EmptyWidgetDataSchema,
 ]);
 
@@ -498,6 +517,15 @@ export const WidgetSchemaZod = z
             code: z.ZodIssueCode.custom,
             path: ["data"],
             message: "Data does not match YOUTUBE type schema",
+          });
+        }
+        break;
+      case WidgetType.MEETING_ROOM_SPECIFIC:
+        if (!MeetingRoomSpecificWidgetDataSchema.safeParse(val.data).success) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            path: ["data"],
+            message: "Data does not match MEETING_ROOM_SPECIFIC type schema",
           });
         }
         break;

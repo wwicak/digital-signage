@@ -12,6 +12,7 @@ interface IPriorityVideoContentState {
   isFullscreen: boolean;
   playStartTime: number | null; // Track when playback started
   showClickToPlay: boolean; // Show click to play overlay when autoplay is blocked
+  isMuted: boolean; // Track if video is muted
 }
 
 class PriorityVideoContent extends Component<IPriorityVideoContentProps, IPriorityVideoContentState> {
@@ -30,6 +31,7 @@ class PriorityVideoContent extends Component<IPriorityVideoContentProps, IPriori
       isFullscreen: false,
       playStartTime: null,
       showClickToPlay: false,
+      isMuted: true,
     };
     this.videoRef = React.createRef();
     this.audioRef = React.createRef();
@@ -222,6 +224,7 @@ class PriorityVideoContent extends Component<IPriorityVideoContentProps, IPriori
             if (mediaElement && (data.volume === undefined || data.volume > 0)) {
               console.log('Unmuting priority video');
               mediaElement.muted = false;
+              this.setState({ isMuted: false });
             }
           }, 1000);
         })
@@ -299,6 +302,7 @@ class PriorityVideoContent extends Component<IPriorityVideoContentProps, IPriori
           setTimeout(() => {
             if (mediaElement && (this.props.data?.volume === undefined || this.props.data?.volume > 0)) {
               mediaElement.muted = false;
+              this.setState({ isMuted: false });
             }
           }, 500);
         })

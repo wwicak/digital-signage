@@ -80,6 +80,12 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json(populatedSlideshow, { status: 201 });
   } catch (error: unknown) {
+    if (error instanceof SyntaxError) {
+      return NextResponse.json(
+        { message: "Invalid JSON in request body." },
+        { status: 400 }
+      );
+    }
     if (error instanceof Error && error.message === "Authentication required") {
       return NextResponse.json(
         { message: "Authentication required" },

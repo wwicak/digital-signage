@@ -1,10 +1,14 @@
 import mongoose, { Document, Model, Schema } from "mongoose";
 import * as z from "zod";
-import { encrypt, decrypt } from "../helpers/crypto_helper";
+
 import { IUser } from "./User";
+
+import { IRoom } from "./Room";
+import { decrypt } from "../helpers/crypto_helper";
 
 export interface IUserCalendarLink extends Document {
   userId: mongoose.Types.ObjectId | IUser;
+  roomId?: mongoose.Types.ObjectId | IRoom; // New field
   provider: "google" | "outlook";
   externalUserId: string;
   calendarId: string;
@@ -32,6 +36,10 @@ const UserCalendarLinkSchema = new Schema<IUserCalendarLink>(
       ref: "User",
       required: [true, "User reference is required"],
       // index: true,
+    },
+    roomId: {
+      type: Schema.Types.ObjectId,
+      ref: "Room",
     },
     provider: {
       type: String,
@@ -88,29 +96,7 @@ const UserCalendarLinkSchema = new Schema<IUserCalendarLink>(
 );
 
 // Pre-save middleware to encrypt tokens
-UserCalendarLinkSchema.pre("save", function (next) {
-  try {
-    // Encrypt accessToken if it's modified and not already encrypted
-    if (this.isModified("accessToken") && this.accessToken) {
-      // Check if it's already encrypted (basic check - encrypted tokens are base64 encoded)
-      if (!this.accessToken.match(/^[A-Za-z0-9+/=]+$/)) {
-        this.accessToken = encrypt(this.accessToken);
-      }
-    }
 
-    // Encrypt refreshToken if it exists and is modified
-    if (this.isModified("refreshToken") && this.refreshToken) {
-      // Check if it's already encrypted
-      if (!this.refreshToken.match(/^[A-Za-z0-9+/=]+$/)) {
-        this.refreshToken = encrypt(this.refreshToken);
-      }
-    }
-
-    next();
-  } catch (error) {
-    next(error instanceof Error ? error : new Error("Token encryption failed"));
-  }
-});
 
 // Method to get decrypted access token
 UserCalendarLinkSchema.methods.getDecryptedAccessToken = function (): string {
@@ -159,6 +145,7 @@ const UserCalendarLinkModel: Model<IUserCalendarLink> =
 export const UserCalendarLinkSchemaZod = z.object({
   _id: z.instanceof(mongoose.Types.ObjectId).optional(),
   userId: z.instanceof(mongoose.Types.ObjectId),
+  roomId: z.instanceof(mongoose.Types.ObjectId),
   provider: z.enum(["google", "outlook"]),
   externalUserId: z
     .string()

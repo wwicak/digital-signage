@@ -1,3 +1,4 @@
+import { encrypt } from "@/lib/utils/encryption";
 import { NextRequest, NextResponse } from "next/server";
 import dbConnect from "@/lib/mongodb";
 import UserCalendarLink from "@/lib/models/UserCalendarLink";
@@ -99,9 +100,9 @@ export async function GET(request: NextRequest) {
 
       if (existingLink) {
         // Update existing link
-        existingLink.accessToken = tokens.access_token;
+        existingLink.accessToken = encrypt(tokens.access_token);
         existingLink.refreshToken =
-          tokens.refresh_token || existingLink.refreshToken;
+          tokens.refresh_token ? encrypt(tokens.refresh_token) : existingLink.refreshToken;
         existingLink.tokenExpiryDate = new Date(
           Date.now() + tokens.expires_in * 1000
         );
@@ -113,11 +114,12 @@ export async function GET(request: NextRequest) {
         // Create new calendar link
         const calendarLink = new UserCalendarLink({
           userId: state,
+          roomId: new mongoose.Types.ObjectId("60d5ec49f8c7b7001c8e4d5a"), // Placeholder roomId - REPLACE WITH ACTUAL ROOM ID
           provider: "google",
           externalUserId: profile.id,
           calendarId: "primary",
-          accessToken: tokens.access_token,
-          refreshToken: tokens.refresh_token,
+          accessToken: encrypt(tokens.access_token),
+          refreshToken: tokens.refresh_token ? encrypt(tokens.refresh_token) : undefined,
           tokenExpiryDate: new Date(Date.now() + tokens.expires_in * 1000),
           scopes: tokens.scope ? tokens.scope.split(" ") : [],
           isActive: true,

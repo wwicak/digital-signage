@@ -202,7 +202,7 @@ function LayoutAdminContent() {
     })
     
     return items
-  }, [existingLayout?.widgets, layoutData.layoutType, layoutData.gridConfig.cols, isDeletingWidget])
+  }, [existingLayout?.widgets, existingLayout?.last_update, layoutData.layoutType, layoutData.gridConfig.cols, isDeletingWidget])
   // Handle layout selection
   const handleLayoutSelect = (layoutId: string) => {
     if (layoutId === 'new') {
@@ -325,6 +325,7 @@ function LayoutAdminContent() {
         data: {},
       })
       
+      // Force refresh the layout data to ensure widgets are properly positioned
       await refetchLayout()
     } catch (error) {
       console.error('Failed to add widget:', error)
@@ -534,6 +535,7 @@ function LayoutAdminContent() {
                 <span>Canvas: {layoutData.gridConfig.cols} × {layoutData.gridConfig.rows}</span>
                 <span>Orientation: {layoutData.orientation}</span>
                 <span>Margin: {layoutData.gridConfig.margin[0]}px</span>
+                <span>Auto Saved on resize !</span>
               </div>
               <div className='text-xs text-gray-500'>
                 {layoutData.orientation === 'portrait' ? '📱 Portrait Mode' : '🖥️ Landscape Mode'}

@@ -86,6 +86,8 @@ export default function PriorityVideosPage() {
     displays: [] as string[],
     buildings: [] as string[],
     isGlobal: true,
+    isUploading: false,
+    uploadError: null,
   });
 
   useEffect(() => {
@@ -186,6 +188,8 @@ export default function PriorityVideosPage() {
       displays: [],
       buildings: [],
       isGlobal: true,
+      isUploading: false,
+      uploadError: null,
     });
     setEditingVideo(null);
   };
@@ -206,6 +210,8 @@ export default function PriorityVideosPage() {
       displays: video.displays || [],
       buildings: video.buildings || [],
       isGlobal: !video.displays?.length && !video.buildings?.length,
+      isUploading: false,
+      uploadError: null,
     });
     setIsDialogOpen(true);
   };

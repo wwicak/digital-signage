@@ -169,4 +169,5 @@ DisplayPage.getInitialProps = async (ctx: NextPageContext): Promise<IDisplayPage
   return { host, displayId, layoutId, autostart }
 }
 
+DisplayPage.auth = false
 export default DisplayPage

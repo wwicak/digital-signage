@@ -47,8 +47,8 @@ export interface GoogleAuthUser {
 export const configureGoogleStrategy = (): void => {
   const clientID = process.env.GOOGLE_CLIENT_ID;
   const clientSecret = process.env.GOOGLE_CLIENT_SECRET;
-  const callbackURL =
-    process.env.GOOGLE_CALLBACK_URL || "/api/v1/calendar/google/callback";
+  const callbackURL = `${process.env.APP_URL}${process.env.GOOGLE_CALLBACK_URL}`;
+  console.log("Constructed Callback URL:", callbackURL);
 
   if (!clientID || !clientSecret) {
     console.error(

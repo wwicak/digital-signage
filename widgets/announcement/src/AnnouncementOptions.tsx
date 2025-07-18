@@ -23,21 +23,23 @@ class AnnouncementOptions extends Component<IAnnouncementOptionsProps, IAnnounce
     super(props)
     // Initialize state from props.data, providing defaults if not present
     const {
-      text = '',
-      color = '#708090',
-      textColor = '#ffffff',
-      titleTextColor = '#fff0f0',
-      accentColor = '#EDC951',
-      title = 'Announcement', // Default title if not in props.data
+      title = 'Important System Maintenance',
+      content = 'The network will be temporarily unavailable for scheduled maintenance. Please save your work and log off by 5:00 PM today. Expected downtime is 2 hours.',
+      date = new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' }),
+      time = 'All Day',
+      priority = 'high' as const,
+      category = 'IT Notice',
+      type = 'alert' as const,
     } = props.data || {}
 
     this.state = {
-      text,
-      color,
-      textColor,
-      titleTextColor,
-      accentColor,
       title,
+      content,
+      date,
+      time,
+      priority,
+      category,
+      type,
     }
   }
 
@@ -69,87 +71,112 @@ class AnnouncementOptions extends Component<IAnnouncementOptionsProps, IAnnounce
   render() {
     // All state fields are optional in IAnnouncementWidgetData, provide fallbacks for rendering
     const {
-      text = '',
-      color = '#708090',
-      textColor = '#ffffff',
-      titleTextColor = '#fff0f0',
-      accentColor = '#EDC951',
-      title = 'Announcement', // Used for preview, not directly an input here
+      title = 'Important System Maintenance',
+      content = 'The network will be temporarily unavailable for scheduled maintenance. Please save your work and log off by 5:00 PM today. Expected downtime is 2 hours.',
+      date = new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' }),
+      time = 'All Day',
+      priority = 'high' as const,
+      category = 'IT Notice',
+      type = 'alert' as const,
     } = this.state
 
     // Data for the preview
     const previewData: IAnnouncementWidgetData = {
-        text, color, textColor, titleTextColor, accentColor, title
+      title, content, date, time, priority, category, type
     }
 
     return (
-      <div className={'options-container'}> {/* Renamed class */}
+      <div className={'options-container'}>
         <Form>
           <h3>Widget: Announcement</h3>
-          <p>Choose your preferences for the announcement widget.</p>
+          <p>Create your announcement with enhanced card design.</p>
+          
           <InlineInputGroup>
             <Input
-              inline={false} // Assuming this means it takes full width in its group item
-              label={'Background Color'}
-              type={'color'}
-              name={'color'}
-              value={color}
+              inline={false}
+              label={'Title'}
+              type={'text'}
+              name={'title'}
+              value={title}
               onChange={this.handleChange}
+              placeholder={'Enter announcement title'}
             />
             <Input
               inline={false}
-              label={'Text Color'}
-              type={'color'}
-              name={'textColor'}
-              value={textColor}
+              label={'Category'}
+              type={'text'}
+              name={'category'}
+              value={category}
               onChange={this.handleChange}
+              placeholder={'e.g., IT Notice, HR Update'}
             />
             <Input
               inline={false}
-              label={'Title Text Color'}
-              type={'color'}
-              name={'titleTextColor'}
-              value={titleTextColor}
+              label={'Date'}
+              type={'text'}
+              name={'date'}
+              value={date}
               onChange={this.handleChange}
+              placeholder={'e.g., Today, March 15 or 2024-03-15'}
             />
             <Input
               inline={false}
-              label={'Accent Color'}
-              type={'color'}
-              name={'accentColor'}
-              value={accentColor}
+              label={'Time'}
+              type={'text'}
+              name={'time'}
+              value={time}
               onChange={this.handleChange}
+              placeholder={'e.g., 5:00 PM - 7:00 PM or All Day'}
             />
           </InlineInputGroup>
 
+          <div>
+            <label className="block text-sm font-medium mb-2">Priority</label>
+            <select
+              name="priority"
+              value={priority}
+              onChange={(e) => this.handleChange('priority', e.target.value)}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md"
+            >
+              <option value="low">Low</option>
+              <option value="medium">Medium</option>
+              <option value="high">High</option>
+            </select>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium mb-2">Type</label>
+            <select
+              name="type"
+              value={type}
+              onChange={(e) => this.handleChange('type', e.target.value)}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md"
+            >
+              <option value="general">General</option>
+              <option value="alert">Alert</option>
+              <option value="info">Info</option>
+              <option value="success">Success</option>
+            </select>
+          </div>
+
           <Input
             inline={false}
-            label={'Text to be Displayed'}
-            placeholder={'Enter an announcement here...'}
+            label={'Content'}
+            placeholder={'Enter the announcement content...'}
             type={'textarea'}
-            name={'text'}
-            value={text}
+            name={'content'}
+            value={content}
             onChange={this.handleChange}
-            rows={5} // Example: make textarea larger
-          />
-           {/* Optional: Input for the title if it should be configurable */}
-           <Input
-            inline={false}
-            label={'Title (for data, not displayed in header)'}
-            placeholder={'Enter a title for data...'}
-            type={'text'}
-            name={'title'}
-            value={title}
-            onChange={this.handleChange}
+            rows={5}
           />
         </Form>
-        <div className={'preview-section-container'}> {/* Renamed class */}
+        
+        <div className={'preview-section-container'}>
           <p>Preview</p>
-          <div className={'preview-box'}> {/* Renamed class */}
+          <div className={'preview-box'}>
             <AnnouncementContent data={previewData} />
           </div>
         </div>
-        
       </div>
     )
   }

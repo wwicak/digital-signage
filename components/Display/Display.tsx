@@ -389,7 +389,7 @@ const Display: React.FC<IDisplayComponentProps> = React.memo(({ display }) => {
             options={{
               float: true,
               cellHeight: 'auto',
-              margin: "2",
+              margin: 0,
               column: layoutData.gridConfig?.cols || gridCols,
               staticGrid: true, // Make grid read-only for display
               disableDrag: true,

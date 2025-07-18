@@ -67,7 +67,7 @@ interface DisplayRegistrationResponse {
    }
 }
 
-export default function DisplaySelectorPage() {
+function DisplaySelectorPage() {
    const [layouts, setLayouts] = useState<Layout[]>([])
    const [selectedLayout, setSelectedLayout] = useState<Layout | null>(null)
    const [loading, setLoading] = useState(true)
@@ -763,3 +763,7 @@ export default function DisplaySelectorPage() {
       </div>
    )
 }
+
+DisplaySelectorPage.auth = false
+
+export default DisplaySelectorPage

@@ -4,7 +4,8 @@ import { IRoom } from "./Room";
 
 export interface IReservation extends Document {
   title: string;
-  room_id: mongoose.Types.ObjectId | IRoom;
+  room_id?: mongoose.Types.ObjectId | IRoom;
+  location?: string;
   start_time: Date;
   end_time: Date;
   organizer: string;
@@ -30,7 +31,11 @@ const ReservationSchema = new Schema<IReservation>(
     room_id: {
       type: Schema.Types.ObjectId,
       ref: "Room",
-      required: [true, "Room reference is required"],
+      required: false,
+    },
+    location: {
+      type: String,
+      trim: true,
     },
     start_time: {
       type: Date,
@@ -141,12 +146,14 @@ export const ReservationSchemaZod = z
           message: "Invalid ObjectId format",
         }),
       ])
+      .optional()
       .transform((val) => {
         if (typeof val === "string") {
           return new mongoose.Types.ObjectId(val);
         }
         return val;
       }),
+    location: z.string().optional(),
     start_time: z
       .union([z.date(), z.string()])
       .transform((val) => {

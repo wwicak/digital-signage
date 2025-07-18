@@ -134,19 +134,8 @@ class StressTestMonitor {
   }
 
   countEventListeners() {
-    // Approximate count - actual count is browser-dependent
-    let count = 0
-    try {
-      const allElements = document.querySelectorAll('*')
-      allElements.forEach((el) => {
-        // This is a rough approximation
-        if (el.onclick || el.onload || el.onerror) count++
-      })
-    } catch (e) {
-      // Fallback - just return a placeholder
-      count = -1
-    }
-    return count
+    // This is a placeholder to avoid performance issues.
+    return -1;
   }
 
   collectPerformanceData() {

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import dbConnect from "@/lib/mongodb";
-import Slide, { SlideSchemaZod, SlideTypeZod } from "@/lib/models/Slide";
+import Slide, { SlideSchemaZod, SlideTypeZod, SlideType } from "@/lib/models/Slide";
 import mongoose from "mongoose";
 import { getHttpStatusFromError, getErrorMessage } from "@/types/error";
 import {
@@ -9,6 +9,9 @@ import {
 } from "@/lib/helpers/slide_helper";
 import { sendEventToDisplay } from "@/lib/sse_manager";
 import { requireAuth } from "@/lib/auth";
+import { writeFile, mkdir } from "fs/promises";
+import path from "path";
+import { nanoid } from "nanoid";
 
 export async function GET(request: NextRequest) {
   try {
@@ -34,22 +37,36 @@ export async function POST(request: NextRequest) {
   try {
     await dbConnect();
     const user = await requireAuth(request);
-    const body = await request.json();
-
-    const {
-      name,
-      description,
-      type,
-      data,
-      duration,
-      is_enabled,
-      slideshow_ids,
-    } = body;
+    
+    // Handle FormData from file uploads
+    const formData = await request.formData();
+    const file = formData.get('slideFile') as File | null;
+    
+    // Extract other fields from FormData
+    const name = formData.get('name') as string;
+    const description = formData.get('description') as string;
+    const type = formData.get('type') as string;
+    const duration = formData.get('duration') ? Number(formData.get('duration')) : 10;
+    const is_enabled = formData.get('is_enabled') === 'true';
+    const slideshow_id = formData.get('slideshow_id') as string;
+    
+    // Parse data field if it's JSON string
+    let data: any;
+    const dataField = formData.get('data') as string;
+    if (dataField) {
+      try {
+        data = JSON.parse(dataField);
+      } catch {
+        data = dataField; // Use as string if not valid JSON
+      }
+    }
+    
+    const slideshow_ids = slideshow_id ? [slideshow_id] : [];
 
     // Validate required fields
-    if (!name || !type || data === undefined) {
+    if (!name || !type) {
       return NextResponse.json(
-        { message: "Slide name, type, and data are required." },
+        { message: "Slide name and type are required." },
         { status: 400 }
       );
     }
@@ -63,13 +80,49 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Handle file upload for photo slides
+    let finalData = data;
+    if (type === SlideType.PHOTO && file) {
+      try {
+        // Create upload directory if it doesn't exist
+        const uploadDir = path.join(process.cwd(), 'public', 'uploads', 'slides');
+        await mkdir(uploadDir, { recursive: true });
+        
+        // Generate unique filename
+        const fileExtension = file.name.split('.').pop() || 'jpg';
+        const fileName = `${nanoid()}.${fileExtension}`;
+        const filePath = path.join(uploadDir, fileName);
+        
+        // Save file
+        const bytes = await file.arrayBuffer();
+        await writeFile(filePath, new Uint8Array(bytes));
+        
+        // Set data to the file URL
+        finalData = { url: `/uploads/slides/${fileName}` };
+      } catch (error) {
+        console.error('File upload error:', error);
+        return NextResponse.json(
+          { message: "Failed to upload file." },
+          { status: 500 }
+        );
+      }
+    }
+
+    // For non-photo slides, ensure data is provided
+    if (type !== SlideType.PHOTO && !finalData) {
+      return NextResponse.json(
+        { message: "Data is required for non-photo slides." },
+        { status: 400 }
+      );
+    }
+
     // Validate data using SlideSchemaZod (discriminated union)
     const slideCandidate = {
       name,
       description,
       type,
-      data,
-      creator_id: user._id,
+      data: finalData,
+      creator_id: new mongoose.Types.ObjectId(user._id),
       duration,
       is_enabled,
     };
@@ -88,10 +141,10 @@ export async function POST(request: NextRequest) {
       name,
       description,
       type,
-      data,
+      data: finalData,
       duration,
       is_enabled,
-      creator_id: user._id,
+      creator_id: new mongoose.Types.ObjectId(user._id),
     });
     const savedSlide = await newSlideDoc.save();
 

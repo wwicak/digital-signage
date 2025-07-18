@@ -15,6 +15,7 @@ const widgetTypes: string[] = [
   "announcement",
   "media-player",
   "meeting-room",
+  "meeting-room-specific",
 ];
 
 export default widgetTypes;

@@ -21,13 +21,23 @@ interface ReservationQuery {
 export async function GET(request: NextRequest) {
   try {
     await dbConnect();
-    const user = await requireAuth(request);
-
-    if (!hasPermission(user, { action: "read", resource: "reservation" })) {
-      return NextResponse.json(
-        { message: "Access denied: Cannot view reservations" },
-        { status: 403 }
-      );
+    
+    // For GET requests (viewing reservations), authentication is optional
+    // This allows public displays to fetch reservation data
+    // But we still check permissions if user is authenticated
+    let user = null;
+    try {
+      user = await requireAuth(request);
+      // If user is authenticated, check permissions
+      if (user && !hasPermission(user, { action: "read", resource: "reservation" })) {
+        return NextResponse.json(
+          { message: "Access denied: Cannot view reservations" },
+          { status: 403 }
+        );
+      }
+    } catch (authError) {
+      // If authentication fails, continue without user (public access)
+      // This allows displays to fetch reservation data without authentication
     }
 
     const { searchParams } = new URL(request.url);
@@ -63,6 +73,7 @@ export async function GET(request: NextRequest) {
     }
 
     const reservations = await Reservation.find(query)
+      .select("+location") // Explicitly include location
       .populate({
         path: "room_id",
         populate: {
@@ -122,6 +133,7 @@ export async function POST(request: NextRequest) {
     const {
       title,
       room_id,
+      location,
       start_time,
       end_time,
       organizer,
@@ -158,6 +170,7 @@ export async function POST(request: NextRequest) {
     const reservation = new Reservation({
       title,
       room_id,
+      location,
       start_time: new Date(start_time),
       end_time: new Date(end_time),
       organizer,

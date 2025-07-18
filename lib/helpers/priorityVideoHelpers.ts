@@ -25,7 +25,23 @@ export async function checkActivePriorityVideo(displayId: string): Promise<Prior
       $or: [
         { displays: new mongoose.Types.ObjectId(displayId) }, // Specific display
         { buildings: display.building }, // Building-wide
-        { displays: { $exists: false }, buildings: { $exists: false } } // Global (no specific targeting)
+        { 
+          // Global (no specific targeting) - handle both missing fields and empty arrays
+          $and: [
+            { 
+              $or: [
+                { displays: { $exists: false } },
+                { displays: { $size: 0 } }
+              ]
+            },
+            { 
+              $or: [
+                { buildings: { $exists: false } },
+                { buildings: { $size: 0 } }
+              ]
+            }
+          ]
+        }
       ]
     }).sort({ priority: -1 }); // Sort by priority descending (highest first)
 
@@ -91,7 +107,23 @@ export async function getPriorityVideosForDisplay(displayId: string): Promise<IP
       $or: [
         { displays: new mongoose.Types.ObjectId(displayId) },
         { buildings: display.building },
-        { displays: { $exists: false }, buildings: { $exists: false } }
+        { 
+          // Global (no specific targeting) - handle both missing fields and empty arrays
+          $and: [
+            { 
+              $or: [
+                { displays: { $exists: false } },
+                { displays: { $size: 0 } }
+              ]
+            },
+            { 
+              $or: [
+                { buildings: { $exists: false } },
+                { buildings: { $size: 0 } }
+              ]
+            }
+          ]
+        }
       ]
     }).sort({ priority: -1, creation_date: -1 });
 

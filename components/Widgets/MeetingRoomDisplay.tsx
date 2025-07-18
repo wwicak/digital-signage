@@ -43,6 +43,7 @@ interface IReservation {
 
 interface IMeetingRoomDisplayProps {
   buildingId?: string;
+  roomId?: string;
   refreshInterval?: number;
   showUpcoming?: boolean;
   maxReservations?: number;
@@ -50,6 +51,7 @@ interface IMeetingRoomDisplayProps {
 
 const MeetingRoomDisplay: React.FC<IMeetingRoomDisplayProps> = ({
   buildingId,
+  roomId,
   refreshInterval = 30000, // 30 seconds
   showUpcoming = true,
   maxReservations = 10,
@@ -59,12 +61,13 @@ const MeetingRoomDisplay: React.FC<IMeetingRoomDisplayProps> = ({
   const [error, setError] = useState<string | null>(null);
   const [currentTime, setCurrentTime] = useState(new Date());
   const [buildingName, setBuildingName] = useState<string>("");
+  const [roomName, setRoomName] = useState<string>("");
 
   useEffect(() => {
     fetchReservations();
     const interval = setInterval(fetchReservations, refreshInterval);
     return () => clearInterval(interval);
-  }, [buildingId, refreshInterval]);
+  }, [buildingId, roomId, refreshInterval]);
 
   useEffect(() => {
     const timeInterval = setInterval(() => {
@@ -84,7 +87,9 @@ const MeetingRoomDisplay: React.FC<IMeetingRoomDisplayProps> = ({
 
       let url = `/api/v1/reservations?start_date=${today.toISOString()}&end_date=${tomorrow.toISOString()}&limit=${maxReservations}`;
 
-      if (buildingId) {
+      if (roomId) {
+        url += `&room_id=${roomId}`;
+      } else if (buildingId) {
         url += `&building_id=${buildingId}`;
       }
 
@@ -105,6 +110,11 @@ const MeetingRoomDisplay: React.FC<IMeetingRoomDisplayProps> = ({
       // Get building name if buildingId is provided
       if (buildingId && data.reservations.length > 0) {
         setBuildingName(data.reservations[0].room_id.building_id.name);
+      }
+      
+      // Get room name if roomId is provided
+      if (roomId && data.reservations.length > 0) {
+        setRoomName(data.reservations[0].room_id.name);
       }
     } catch (error: unknown) {
       console.error("Error fetching reservations:", error);
@@ -237,11 +247,20 @@ const MeetingRoomDisplay: React.FC<IMeetingRoomDisplayProps> = ({
           <div className='flex items-center'>
             <Calendar className='mr-2 h-5 w-5' />
             <span>Today&apos;s Meetings</span>
-            {buildingName && (
+            {(buildingName || roomName) && (
               <>
                 <Separator orientation='vertical' className='mx-2 h-4' />
-                <Building className='mr-1 h-4 w-4 text-muted-foreground' />
-                <span className='text-sm text-muted-foreground'>{buildingName}</span>
+                {roomName ? (
+                  <>
+                    <DoorOpen className='mr-1 h-4 w-4 text-muted-foreground' />
+                    <span className='text-sm text-muted-foreground'>{roomName}</span>
+                  </>
+                ) : (
+                  <>
+                    <Building className='mr-1 h-4 w-4 text-muted-foreground' />
+                    <span className='text-sm text-muted-foreground'>{buildingName}</span>
+                  </>
+                )}
               </>
             )}
           </div>
@@ -374,7 +393,7 @@ const ReservationCard: React.FC<IReservationCardProps> = ({
             <div className='flex items-center space-x-4 mt-1 text-xs text-muted-foreground'>
               <div className='flex items-center'>
                 <DoorOpen className='mr-1 h-3 w-3' />
-                <span>{reservation.room_id.name}</span>
+                <span>{reservation.room_id?.name}</span>
               </div>
               <div className='flex items-center'>
                 <Clock className='mr-1 h-3 w-3' />

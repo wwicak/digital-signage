@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useMemo } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { ArrowRight, Tv, Layout, Users, Zap, Shield, Palette } from 'lucide-react'
@@ -10,6 +10,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge'
 import DropdownButton from '../components/DropdownButton'
 import { getDisplays } from '../actions/display'
+import Spinner from '@/components/ui/spinner'
 
 // Simplified display data for the dropdown
 interface IDisplaySummary {
@@ -17,8 +18,9 @@ interface IDisplaySummary {
   name: string;
 }
 
-export default function HomePage() {
+function HomePage() {
   const [displays, setDisplays] = useState<IDisplaySummary[]>([])
+  const [loading, setLoading] = useState(true)
   const router = useRouter()
 
   useEffect(() => {
@@ -34,6 +36,7 @@ export default function HomePage() {
         if (!Array.isArray(fullDisplayList)) {
           console.error('getDisplays() did not return an array:', fullDisplayList)
           setDisplays([])
+          setLoading(false)
           return
         }
 
@@ -47,18 +50,22 @@ export default function HomePage() {
         console.error('Failed to fetch displays:', error)
         setDisplays([])
       } finally {
-        // Loading complete
+        setLoading(false)
       }
     }
 
     fetchDisplays()
   }, [])
 
-  // Ensure displays is an array before calling map
-  const dropdownChoices = Array.isArray(displays) ? displays.map(display => ({
-    key: display._id,
-    name: display.name,
-  })) : []
+  // Limit to first 10 displays for performance
+  const dropdownChoices = useMemo(() =>
+    Array.isArray(displays)
+      ? displays.slice(0, 10).map(display => ({
+          key: display._id,
+          name: display.name,
+        }))
+      : []
+  , [displays])
 
   const navigateToDisplay = (id: string) => {
     router.push('/display/' + id)
@@ -97,6 +104,9 @@ export default function HomePage() {
     }
   ]
 
+  // Memoize DropdownButton for performance
+  const MemoDropdownButton = useMemo(() => React.memo(DropdownButton), [])
+
   return (
     <div className='min-h-screen bg-gradient-to-br from-background via-background to-muted/20'>
       {/* Hero Section */}
@@ -132,22 +142,29 @@ export default function HomePage() {
               </Link>
             </Button>
 
-            {displays.length > 0 && (
+            {loading ? (
               <div className='flex items-center gap-4'>
-                <span className='text-sm text-muted-foreground'>or view a display:</span>
-                <DropdownButton
-                  text='Select Display'
-                  onSelect={navigateToDisplay}
-                  choices={dropdownChoices}
-                  style={{
-                    padding: '12px 24px',
-                    borderRadius: '8px',
-                    border: '1px solid hsl(var(--border))',
-                    background: 'hsl(var(--background))',
-                    fontSize: '16px'
-                  }}
-                />
+                <Spinner />
+                <span className='text-sm text-muted-foreground'>Loading displays...</span>
               </div>
+            ) : (
+              displays.length > 0 && (
+                <div className='flex items-center gap-4'>
+                  <span className='text-sm text-muted-foreground'>or view a display:</span>
+                  <MemoDropdownButton
+                    text='Select Display'
+                    onSelect={navigateToDisplay}
+                    choices={dropdownChoices}
+                    style={{
+                      padding: '12px 24px',
+                      borderRadius: '8px',
+                      border: '1px solid hsl(var(--border))',
+                      background: 'hsl(var(--background))',
+                      fontSize: '16px'
+                    }}
+                  />
+                </div>
+              )
             )}
           </div>
         </div>
@@ -211,3 +228,7 @@ export default function HomePage() {
     </div>
   )
 }
+
+HomePage.auth = false
+
+export default HomePage

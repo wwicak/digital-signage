@@ -7,6 +7,7 @@
     "strict": true,
     "forceConsistentCasingInFileNames": true,
     "noEmit": true,
+    "skipDefaultLibCheck": true,
     "esModuleInterop": true,
     "module": "esnext",
     "moduleResolution": "node",
@@ -16,6 +17,7 @@
     "jsxFactory": "React.createElement",
     "jsxFragmentFactory": "React.Fragment",
     "incremental": true,
+    "tsBuildInfoFile": ".next/tsconfig.tsbuildinfo",
     "allowImportingTsExtensions": true,
     "baseUrl": ".",
     "paths": {
@@ -27,16 +29,31 @@
       {
         "name": "next"
       }
-    ]
+    ],
+    "assumeChangesOnlyAffectDirectDependencies": true
   },
   "include": [
     "next-env.d.ts",
     "**/*.ts",
     "**/*.tsx",
-    "**/*.js",
     "types/**/*.d.ts",
     ".next/types/**/*.ts",
     "jest.setup.js"
   ],
-  "exclude": ["node_modules", "dist", "__tests__", "scripts", "**/*Test.tsx", "**/*test.tsx"]
+  "exclude": [
+    "node_modules", 
+    "dist", 
+    "__tests__", 
+    "**/__tests__/**", 
+    "**/*.test.ts", 
+    "**/*.test.tsx", 
+    "**/*.spec.ts", 
+    "**/*.spec.tsx",
+    "scripts", 
+    "uploads",
+    "public",
+    ".next/cache",
+    "**/*Test.tsx",
+    "**/*test.tsx"
+  ]
 }

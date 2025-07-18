@@ -69,6 +69,7 @@ interface IReservation {
   sourceCalendarType?: "google" | "outlook" | "internal";
   isExternallyManaged?: boolean;
   creation_date: string;
+  location?: string;
 }
 
 interface IReservationFormData {
@@ -186,6 +187,7 @@ const ReservationsPage = () => {
       const response = await fetch(url);
       if (!response.ok) throw new Error("Failed to fetch reservations");
       const data = await response.json();
+      console.log("Fetched reservations:", data);
       setReservations(data.reservations || []);
     } catch (error) {
       console.error("Error fetching reservations:", error);
@@ -239,14 +241,24 @@ const ReservationsPage = () => {
         .map(a => a.trim())
         .filter(a => a.length > 0);
 
+      // Convert local datetime back to UTC for server
+      const startDate = new Date(formData.start_time);
+      const endDate = new Date(formData.end_time);
+      
+      // The datetime-local input already gives us local time, so we just need to ensure proper UTC conversion
+      const startTimeUTC = new Date(startDate.getTime() - (startDate.getTimezoneOffset() * 60000));
+      const endTimeUTC = new Date(endDate.getTime() - (endDate.getTimezoneOffset() * 60000));
+
       const response = await fetch(`/api/v1/reservations/${editingReservation._id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           ...formData,
           attendees: attendeesArray,
-          start_time: new Date(formData.start_time).toISOString(),
-          end_time: new Date(formData.end_time).toISOString(),
+          // start_time: startTimeUTC.toISOString(),
+          // end_time: endTimeUTC.toISOString(),
+          start_time: startDate.toISOString(),
+          end_time: endDate.toISOString(),
         }),
       });
 
@@ -289,11 +301,22 @@ const ReservationsPage = () => {
 
   const openEditDialog = (reservation: IReservation) => {
     setEditingReservation(reservation);
+    
+    // Convert UTC times to local timezone for editing
+    const startDate = new Date(reservation.start_time);
+    const endDate = new Date(reservation.end_time);
+    
+    // Adjust for local timezone offset
+    const timezoneOffset = startDate.getTimezoneOffset() * 60000; // Convert minutes to milliseconds
+    
+    const localStartTime = new Date(startDate.getTime() - timezoneOffset);
+    const localEndTime = new Date(endDate.getTime() - timezoneOffset);
+    
     setFormData({
       title: reservation.title,
       room_id: reservation.room_id._id,
-      start_time: new Date(reservation.start_time).toISOString().slice(0, 16),
-      end_time: new Date(reservation.end_time).toISOString().slice(0, 16),
+      start_time: localStartTime.toISOString().slice(0, 16),
+      end_time: localEndTime.toISOString().slice(0, 16),
       organizer: reservation.organizer,
       attendees: reservation.attendees.join(", "),
       agenda_meeting: reservation.agenda_meeting || "",
@@ -593,16 +616,18 @@ const ReservationsPage = () => {
                             )}
                           </div>
                         </TableCell>
-                        <TableCell>
+                        {reservation.isExternallyManaged ?  <TableCell></TableCell> : (
+                          <TableCell>
                           <div className='flex items-center'>
                             <Building className='mr-1 h-4 w-4 text-muted-foreground' />
-                            <span className='text-sm'>{reservation.room_id.building_id.name}</span>
+                            <span className='text-sm'>{reservation.room_id?.building_id?.name ?? ''}</span>
                           </div>
                           <div className='flex items-center'>
                             <DoorOpen className='mr-1 h-4 w-4 text-muted-foreground' />
-                            <span className='font-medium'>{reservation.room_id.name}</span>
+                            <span className='font-medium'>{reservation.room_id?.name ?? reservation.location}</span>
                           </div>
-                        </TableCell>
+                          </TableCell>
+                        )}
                         <TableCell>
                           <div className='flex items-center'>
                             <Clock className='mr-1 h-4 w-4 text-muted-foreground' />

@@ -153,6 +153,24 @@ export async function GET(request: NextRequest) {
   } catch (error: unknown) {
     console.error("Error in displays API:", error);
 
+    // Handle authentication error
+    if (error instanceof Error && error.message === "Authentication required") {
+      return NextResponse.json(
+        { 
+          message: "Authentication required",
+          redirect: "/login",
+          error: "UNAUTHENTICATED",
+          status: 401
+        },
+        { 
+          status: 401,
+          headers: {
+            'WWW-Authenticate': 'Bearer',
+            'Cache-Control': 'no-store, must-revalidate',
+          }
+        }
+      );
+    }
     // Provide more specific error messages with proper type checking
     let statusCode = 500;
     let message = "Error fetching displays";
@@ -244,6 +262,24 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json(populatedDisplay, { status: 201 });
   } catch (error: unknown) {
+    // Handle authentication error
+    if (error instanceof Error && error.message === "Authentication required") {
+      return NextResponse.json(
+        { 
+          message: "Authentication required",
+          redirect: "/login",
+          error: "UNAUTHENTICATED",
+          status: 401
+        },
+        { 
+          status: 401,
+          headers: {
+            'WWW-Authenticate': 'Bearer',
+            'Cache-Control': 'no-store, must-revalidate',
+          }
+        }
+      );
+    }
     const errorMessage = error instanceof Error ? error.message : "Error creating display";
     const statusCode = error instanceof Error && 'status' in error ? (error as { status: number }).status : 500;
     return NextResponse.json(

@@ -13,7 +13,7 @@ const DisplayPage = memo(function DisplayPage({ params }: DisplayPageProps) {
   const { id: displayId } = use(params)
 
   return (
-    <div className={'container'}>
+    <div className={'w-full h-screen overflow-hidden m-0 p-0'}>
       {displayId ? (
         <DisplayComponent display={displayId} />
       ) : (
@@ -23,5 +23,7 @@ const DisplayPage = memo(function DisplayPage({ params }: DisplayPageProps) {
     </div>
   )
 })
+
+DisplayPage.displayName = 'DisplayPage'
 
 export default DisplayPage

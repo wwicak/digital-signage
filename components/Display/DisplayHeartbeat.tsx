@@ -42,43 +42,10 @@ const DisplayHeartbeat: React.FC<DisplayHeartbeatProps> = ({
   const isConnectedRef = useRef<boolean>(false);
 
   // Get client IP address (best effort)
-  const getClientIPAddress = useCallback(async (): Promise<string | undefined> => {
-    try {
-      // Try to get IP from WebRTC (works in most browsers)
-      const pc = new RTCPeerConnection({
-        iceServers: [{ urls: 'stun:stun.l.google.com:19302' }]
-      });
-
-      return new Promise((resolve) => {
-        pc.createDataChannel('');
-        pc.createOffer().then(offer => pc.setLocalDescription(offer));
-
-        pc.onicecandidate = (event) => {
-          if (event.candidate) {
-            const candidate = event.candidate.candidate;
-            const ipMatch = candidate.match(/(\d+\.\d+\.\d+\.\d+)/);
-            if (ipMatch) {
-              pc.close();
-              resolve(ipMatch[1]);
-              return;
-            }
-          }
-        };
-
-        // Fallback after timeout
-        setTimeout(() => {
-          pc.close();
-          resolve(undefined);
-        }, 3000);
-      });
-    } catch (error) {
-      console.warn('Could not determine client IP address:', error);
-      return undefined;
-    }
-  }, []);
+  
 
   // Get client information
-  const getClientInfo = useCallback(async (): Promise<ClientInfo & { ipAddress?: string }> => {
+  const getClientInfo = useCallback(async (): Promise<ClientInfo> => {
     // Type assertion for navigator with additional properties
     const nav = navigator as Navigator & {
       userAgent: string;
@@ -95,7 +62,7 @@ const DisplayHeartbeat: React.FC<DisplayHeartbeatProps> = ({
     const platform = nav.platform || 'Unknown';
 
     // Get client IP address
-    const ipAddress = await getClientIPAddress();
+    
     
     // Get memory usage (if available)
     let memoryUsage: number | undefined;
@@ -147,9 +114,9 @@ const DisplayHeartbeat: React.FC<DisplayHeartbeatProps> = ({
       memoryUsage,
       networkType,
       connectionQuality,
-      ipAddress,
+      
     };
-  }, [getClientIPAddress]);
+  }, []);
 
   // Get performance metrics
   const getPerformanceMetrics = useCallback((): PerformanceMetrics => {

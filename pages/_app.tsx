@@ -1,21 +1,21 @@
+// pages/_app.tsx
+
 import { AppProps } from 'next/app'
-import React from 'react'
+import React, { useEffect } from 'react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { ThemeProvider } from 'next-themes'
 import { DisplayProvider } from '../contexts/DisplayContext'
 import { Toaster } from 'sonner'
+import { useRouter } from 'next/router'
 
-// Import global styles
 import '../styles/globals.css'
 
-// Create a client with better error handling
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      staleTime: 5 * 60 * 1000, // 5 minutes
-      gcTime: 10 * 60 * 1000, // 10 minutes (renamed from cacheTime)
+      staleTime: 5 * 60 * 1000,
+      gcTime: 10 * 60 * 1000,
       retry: (failureCount, error: Error & { status?: number }) => {
-        // Don't retry on network errors or 4xx errors
         if (
           error.message.includes('Failed to fetch') ||
           error.message.includes('ERR_NETWORK') ||
@@ -27,13 +27,12 @@ const queryClient = new QueryClient({
         return failureCount < 2;
       },
       retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
-      refetchOnWindowFocus: false, // Disable for digital signage use case
+      refetchOnWindowFocus: false,
       refetchOnReconnect: true,
       refetchOnMount: true,
     },
     mutations: {
       retry: (failureCount, error: Error & { status?: number }) => {
-        // Don't retry mutations on network errors
         if (
           error.message.includes('Failed to fetch') ||
           error.message.includes('ERR_NETWORK') ||
@@ -47,20 +46,43 @@ const queryClient = new QueryClient({
   },
 })
 
-// Modern functional App component using the new pattern for Next.js 12+
 export default function MyApp({ Component, pageProps }: AppProps) {
+  const router = useRouter()
+
+  useEffect(() => {
+    const checkAuth = async () => {
+      // Default: auth = true unless explicitly false
+      const requiresAuth = (Component as any).auth !== false
+      console.log('Requires auth:', requiresAuth)
+      if (typeof window !== 'undefined' && requiresAuth) {
+        try {
+          const res = await fetch('/api/auth/me')
+          if (res.status === 401) {
+            const redirectUrl = encodeURIComponent(window.location.pathname + window.location.search)
+            router.push(`/login?redirect=${redirectUrl}`)
+          }
+        } catch {
+          const redirectUrl = encodeURIComponent(window.location.pathname + window.location.search)
+          router.push(`/login?redirect=${redirectUrl}`)
+        }
+      }
+    }
+
+    checkAuth()
+  }, [router, Component])
+
   return (
     <QueryClientProvider client={queryClient}>
       <ThemeProvider
-        attribute='class'
-        defaultTheme='light'
+        attribute="class"
+        defaultTheme="light"
         enableSystem
         disableTransitionOnChange
-        storageKey='digital-signage-theme'
+        storageKey="digital-signage-theme"
       >
         <DisplayProvider>
           <Component {...pageProps} />
-          <Toaster richColors position='top-right' />
+          <Toaster richColors position="top-right" />
         </DisplayProvider>
       </ThemeProvider>
     </QueryClientProvider>

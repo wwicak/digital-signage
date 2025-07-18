@@ -127,61 +127,94 @@ const GridStackWrapper = forwardRef<GridStackWrapperRef, GridStackWrapperProps>(
     const grid = gridInstanceRef.current;
     if (!grid) return;
 
-    // Use batch update for better performance
-    grid.batchUpdate();
+    // Add a small delay to ensure DOM elements are ready
+    const syncGrid = () => {
+      // Use batch update for better performance
+      grid.batchUpdate();
 
-    try {
-      // Get current grid nodes
-      const currentNodes = grid.engine.nodes.map(n => n.id).filter(Boolean) as string[];
-      const newItemIds = items.map(item => item.id);
+      try {
+        // Get current grid nodes
+        const currentNodes = grid.engine.nodes.map(n => n.id).filter(Boolean) as string[];
+        const newItemIds = items.map(item => item.id);
 
-      // Remove nodes that are no longer in items
-      currentNodes.forEach(nodeId => {
-        if (!newItemIds.includes(nodeId)) {
-          const el = grid.engine.nodes.find(n => n.id === nodeId)?.el;
-          if (el) grid.removeWidget(el, false);
-        }
-      });
-
-      // Add or update items
-      items.forEach(item => {
-        const el = itemRefs.current?.[item.id]?.current;
-        if (!el) return;
-
-        const existingNode = grid.engine.nodes.find(n => n.id === item.id);
-
-        if (existingNode) {
-          // Update existing widget if position/size changed
-          if (existingNode.x !== item.x || existingNode.y !== item.y ||
-            existingNode.w !== item.w || existingNode.h !== item.h) {
-            grid.update(el, {
-              x: item.x,
-              y: item.y,
-              w: item.w,
-              h: item.h
-            });
+        // Remove nodes that are no longer in items
+        currentNodes.forEach(nodeId => {
+          if (!newItemIds.includes(nodeId)) {
+            const el = grid.engine.nodes.find(n => n.id === nodeId)?.el;
+            if (el) grid.removeWidget(el, false);
           }
-        } else {
-          // Add new widget
-          try {
-            // Set attributes first
-            el.setAttribute('gs-x', item.x?.toString() || '0');
-            el.setAttribute('gs-y', item.y?.toString() || '0');
-            el.setAttribute('gs-w', item.w?.toString() || '1');
-            el.setAttribute('gs-h', item.h?.toString() || '1');
-            el.setAttribute('gs-id', item.id);
+        });
 
-            // Then make it a widget
-            grid.makeWidget(el);
-          } catch (error) {
-            console.error('Error adding widget:', item.id, error);
+        // Add or update items
+        items.forEach(item => {
+          const el = itemRefs.current?.[item.id]?.current;
+          if (!el) {
+            // If ref is not ready, try to find the element directly
+            const directEl = gridRef.current?.querySelector(`[gs-id="${item.id}"]`) as HTMLElement;
+            if (!directEl) return;
+            
+            // Use the directly found element
+            const existingNode = grid.engine.nodes.find(n => n.id === item.id);
+            if (!existingNode) {
+              try {
+                // Set attributes first
+                directEl.setAttribute('gs-x', item.x?.toString() || '0');
+                directEl.setAttribute('gs-y', item.y?.toString() || '0');
+                directEl.setAttribute('gs-w', item.w?.toString() || '1');
+                directEl.setAttribute('gs-h', item.h?.toString() || '1');
+                directEl.setAttribute('gs-id', item.id);
+
+                // Then make it a widget
+                grid.makeWidget(directEl);
+              } catch (error) {
+                console.error('Error adding widget directly:', item.id, error);
+              }
+            }
+            return;
           }
-        }
-      });
 
-    } finally {
-      grid.batchUpdate(false);
-    }
+          const existingNode = grid.engine.nodes.find(n => n.id === item.id);
+
+          if (existingNode) {
+            // Update existing widget if position/size changed
+            if (existingNode.x !== item.x || existingNode.y !== item.y ||
+              existingNode.w !== item.w || existingNode.h !== item.h) {
+              grid.update(el, {
+                x: item.x,
+                y: item.y,
+                w: item.w,
+                h: item.h
+              });
+            }
+          } else {
+            // Add new widget
+            try {
+              // Set attributes first
+              el.setAttribute('gs-x', item.x?.toString() || '0');
+              el.setAttribute('gs-y', item.y?.toString() || '0');
+              el.setAttribute('gs-w', item.w?.toString() || '1');
+              el.setAttribute('gs-h', item.h?.toString() || '1');
+              el.setAttribute('gs-id', item.id);
+
+              // Then make it a widget
+              grid.makeWidget(el);
+            } catch (error) {
+              console.error('Error adding widget:', item.id, error);
+            }
+          }
+        });
+
+      } finally {
+        grid.batchUpdate(false);
+      }
+    };
+
+    // Use requestAnimationFrame to ensure DOM is ready
+    const frameId = requestAnimationFrame(syncGrid);
+    
+    return () => {
+      cancelAnimationFrame(frameId);
+    };
   }, [items]);
 
   // Handle options change
