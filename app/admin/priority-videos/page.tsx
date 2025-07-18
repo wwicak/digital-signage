@@ -11,6 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Checkbox } from '@/components/ui/checkbox';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import { 
   Zap, 
   Plus, 
@@ -23,7 +24,10 @@ import {
   Eye,
   AlertCircle,
   Play,
-  Volume2
+  Volume2,
+  Upload,
+  Link,
+  X
 } from 'lucide-react';
 import Frame from '@/components/Admin/Frame';
 import { useDisplays } from '@/hooks/useDisplays';
@@ -66,6 +70,7 @@ export default function PriorityVideosPage() {
   // Get displays and buildings data
   const { data: displays = [] } = useDisplays();
   const { data: buildings = [] } = useBuildings();
+  
   const [formData, setFormData] = useState({
     title: '',
     url: '',
@@ -89,6 +94,13 @@ export default function PriorityVideosPage() {
     isUploading: false,
     uploadError: null,
   });
+
+  // File upload state
+  const [uploadMode, setUploadMode] = useState<'url' | 'upload'>('url');
+  const [uploadProgress, setUploadProgress] = useState(0);
+  const [isUploading, setIsUploading] = useState(false);
+  const [uploadError, setUploadError] = useState<string | null>(null);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
 
   useEffect(() => {
     fetchPriorityVideos();
@@ -114,8 +126,73 @@ export default function PriorityVideosPage() {
     }
   };
 
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setSelectedFile(file);
+      setUploadError(null);
+      
+      // Auto-detect media type from file
+      const isVideo = file.type.startsWith('video/');
+      setFormData(prev => ({
+        ...prev,
+        mediaType: isVideo ? 'video' : 'audio'
+      }));
+    }
+  };
+
+  const uploadFile = async () => {
+    if (!selectedFile) return;
+
+    setIsUploading(true);
+    setUploadError(null);
+    setUploadProgress(0);
+
+    try {
+      const formData = new FormData();
+      formData.append('mediaFile', selectedFile);
+
+      const response = await fetch('/api/media/upload', {
+        method: 'POST',
+        body: formData,
+        headers: {
+          'Authorization': 'Bearer dummy-token', // For testing
+        },
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Upload failed');
+      }
+
+      const result = await response.json();
+      
+      // Update form with uploaded file URL
+      setFormData(prev => ({
+        ...prev,
+        url: result.url,
+      }));
+      
+      setUploadMode('url'); // Switch back to URL mode after successful upload
+      setSelectedFile(null);
+      
+    } catch (error) {
+      console.error('Upload error:', error);
+      setUploadError(error instanceof Error ? error.message : 'Upload failed');
+    } finally {
+      setIsUploading(false);
+      setUploadProgress(0);
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Validate that we have a URL
+    if (!formData.url.trim()) {
+      setUploadError('Please provide a media URL or upload a file');
+      return;
+    }
     
     try {
       const url = editingVideo ? `/api/priority-videos/${editingVideo._id}` : '/api/priority-videos';
@@ -192,6 +269,11 @@ export default function PriorityVideosPage() {
       uploadError: null,
     });
     setEditingVideo(null);
+    setUploadMode('url');
+    setSelectedFile(null);
+    setUploadError(null);
+    setIsUploading(false);
+    setUploadProgress(0);
   };
 
   const openEditDialog = (video: PriorityVideo) => {
@@ -368,15 +450,105 @@ export default function PriorityVideosPage() {
                     </div>
                   </div>
                   
-                  <div>
-                    <Label htmlFor="url">Media URL</Label>
-                    <Input
-                      id="url"
-                      value={formData.url}
-                      onChange={(e) => setFormData(prev => ({ ...prev, url: e.target.value }))}
-                      placeholder="https://example.com/video.mp4 or YouTube URL"
-                      required
-                    />
+                  <div className="space-y-4">
+                    <div>
+                      <Label>Media Source</Label>
+                      <div className="flex gap-2 mb-3">
+                        <Button
+                          type="button"
+                          variant={uploadMode === 'url' ? 'default' : 'outline'}
+                          size="sm"
+                          onClick={() => setUploadMode('url')}
+                          className="flex items-center gap-2"
+                        >
+                          <Link className="w-4 h-4" />
+                          URL
+                        </Button>
+                        <Button
+                          type="button"
+                          variant={uploadMode === 'upload' ? 'default' : 'outline'}
+                          size="sm"
+                          onClick={() => setUploadMode('upload')}
+                          className="flex items-center gap-2"
+                        >
+                          <Upload className="w-4 h-4" />
+                          Upload
+                        </Button>
+                      </div>
+                    </div>
+
+                    {uploadMode === 'url' ? (
+                      <div>
+                        <Label htmlFor="url">Media URL</Label>
+                        <Input
+                          id="url"
+                          value={formData.url}
+                          onChange={(e) => setFormData(prev => ({ ...prev, url: e.target.value }))}
+                          placeholder="https://example.com/video.mp4 or YouTube URL"
+                          required
+                        />
+                      </div>
+                    ) : (
+                      <div className="space-y-4">
+                        <div>
+                          <Label htmlFor="file-upload">Upload Media File</Label>
+                          <Input
+                            id="file-upload"
+                            type="file"
+                            accept="video/*,audio/*"
+                            onChange={handleFileSelect}
+                            disabled={isUploading}
+                            className="cursor-pointer"
+                          />
+                          <p className="text-sm text-gray-600 mt-1">
+                            Supported: MP4, WebM, MOV, AVI, MP3, WAV, OGG, M4A (Max 50MB)
+                          </p>
+                        </div>
+
+                        {selectedFile && (
+                          <div className="border rounded-lg p-4 space-y-3">
+                            <div className="flex items-center justify-between">
+                              <div>
+                                <p className="text-sm font-medium">{selectedFile.name}</p>
+                                <p className="text-xs text-gray-600">
+                                  {(selectedFile.size / (1024 * 1024)).toFixed(2)} MB
+                                </p>
+                              </div>
+                              <Button
+                                type="button"
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => setSelectedFile(null)}
+                              >
+                                <X className="w-4 h-4" />
+                              </Button>
+                            </div>
+                            
+                            <Button
+                              type="button"
+                              onClick={uploadFile}
+                              disabled={isUploading}
+                              className="w-full"
+                            >
+                              {isUploading ? 'Uploading...' : 'Upload File'}
+                            </Button>
+                          </div>
+                        )}
+
+                        {isUploading && (
+                          <div className="space-y-2">
+                            <div className="animate-pulse bg-orange-100 h-2 rounded"></div>
+                            <p className="text-sm text-center">Uploading file...</p>
+                          </div>
+                        )}
+
+                        {uploadError && (
+                          <Alert variant="destructive">
+                            <AlertDescription>{uploadError}</AlertDescription>
+                          </Alert>
+                        )}
+                      </div>
+                    )}
                   </div>
                   
                   <div className="grid grid-cols-2 gap-4">
@@ -633,7 +805,7 @@ export default function PriorityVideosPage() {
                 <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>
                   Cancel
                 </Button>
-                <Button type="submit" className="bg-orange-600 hover:bg-orange-700">
+                <Button type="submit" className="bg-orange-600 hover:bg-orange-700" disabled={isUploading}>
                   {editingVideo ? 'Update' : 'Create'} Priority Video
                 </Button>
               </div>
@@ -679,7 +851,7 @@ export default function PriorityVideosPage() {
                         <CardTitle className="text-lg">
                           {video.title || 'Untitled Priority Video'}
                         </CardTitle>
-                        <p className="text-sm text-gray-600">{video.url}</p>
+                        <p className="text-sm text-gray-600 break-all">{video.url}</p>
                       </div>
                     </div>
                     

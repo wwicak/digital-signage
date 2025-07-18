@@ -1,5 +1,12 @@
 import React, { Component, RefObject } from 'react';
 
+declare global {
+  interface Window {
+    onYouTubeIframeAPIReady: () => void;
+    YT: any;
+  }
+}
+
 export interface PriorityVideoData {
   title?: string;
   url: string;
@@ -37,6 +44,7 @@ interface PriorityVideoDisplayState {
 
 class PriorityVideoDisplay extends Component<PriorityVideoDisplayProps, PriorityVideoDisplayState> {
   private mediaRef: RefObject<HTMLVideoElement | HTMLAudioElement | null>;
+  private player: any;
 
   constructor(props: PriorityVideoDisplayProps) {
     super(props);
@@ -52,84 +60,78 @@ class PriorityVideoDisplay extends Component<PriorityVideoDisplayProps, Priority
   }
 
   componentDidMount() {
-    // Setup and play media immediately when component mounts (it's fullscreen)
+    this.loadYouTubeAPI();
     setTimeout(() => {
       this.setupAndPlayMedia();
     }, 100);
 
-    // Listen for escape key to exit priority mode
     document.addEventListener('keydown', this.handleKeyDown);
   }
 
   componentWillUnmount() {
     document.removeEventListener('keydown', this.handleKeyDown);
+    if (this.player) {
+      this.player.destroy();
+    }
   }
 
   handleKeyDown = (event: KeyboardEvent) => {
-    // Allow escape key to exit priority mode
     if (event.key === 'Escape' && this.props.onExit) {
       this.props.onExit();
     }
   };
 
+  loadYouTubeAPI = () => {
+    if (!window.YT) {
+      const tag = document.createElement('script');
+      tag.src = "https://www.youtube.com/iframe_api";
+      const firstScriptTag = document.getElementsByTagName('script')[0];
+      firstScriptTag.parentNode?.insertBefore(tag, firstScriptTag);
+    }
+  };
+  
   setupAndPlayMedia = () => {
     const { data } = this.props;
     const mediaElement = this.mediaRef.current;
     
-    if (!mediaElement || !data) return;
+    if (!data) return;
 
-    console.log('Setting up and playing priority video media');
-
-    // Reset any previous state
-    mediaElement.currentTime = 0;
-    
-    // Set volume but keep muted initially for autoplay
-    if (typeof data.volume === 'number') {
-      mediaElement.volume = Math.max(0, Math.min(1, data.volume));
-    } else {
-      mediaElement.volume = 1.0; // Default to full volume
+    if (this.isYouTubeUrl(data.url)) {
+      this.setupYouTubePlayer();
+    } else if (mediaElement) {
+      mediaElement.currentTime = 0;
+      
+      if (typeof data.volume === 'number') {
+        mediaElement.volume = Math.max(0, Math.min(1, data.volume));
+      } else {
+        mediaElement.volume = 1.0;
+      }
+      
+      mediaElement.muted = true;
+  
+      this.playMedia();
     }
-    
-    // Always start muted for autoplay compatibility
-    mediaElement.muted = true;
-
-    // Try to play immediately (works best for autoplay)
-    this.playMedia();
   };
 
   playMedia = () => {
-    const { data } = this.props;
     const mediaElement = this.mediaRef.current;
     
-    if (!mediaElement || !data) return;
+    if (!mediaElement) return;
 
-    console.log('Playing priority video media');
-
-    // Play the media
     const playPromise = mediaElement.play();
     if (playPromise !== undefined) {
       playPromise
         .then(() => {
-          console.log('Priority video started playing successfully');
           this.setState({
             hasPlayed: true,
             playStartTime: Date.now()
           });
-          
-          // Unmute after successful start (if volume > 0)
-          setTimeout(() => {
-            if (mediaElement && (data.volume === undefined || data.volume > 0)) {
-              console.log('Unmuting priority video');
-              mediaElement.muted = false;
-              this.setState({ isMuted: false });
-            }
-          }, 1000);
         })
         .catch(error => {
           console.error('Priority video autoplay failed:', error);
           this.setState({
-            error: null, // Clear error to avoid showing error message
-            showClickToPlay: true // Show click to play overlay instead
+            error: null,
+            showClickToPlay: true
           });
         });
     }
@@ -171,84 +173,88 @@ class PriorityVideoDisplay extends Component<PriorityVideoDisplayProps, Priority
   };
 
   handleMediaEnded = () => {
-    console.log('Priority video playback ended');
-    // Exit priority mode when video ends
     if (this.props.onExit) {
       this.props.onExit();
     }
   };
 
   handleClickToPlay = () => {
-    const mediaElement = this.mediaRef.current;
-    if (mediaElement) {
-      // This is triggered by user interaction, so autoplay restrictions don't apply
-      mediaElement.play()
-        .then(() => {
-          console.log('Priority video started playing after user interaction');
-          this.setState({
-            showClickToPlay: false,
-            isMuted: false,
-            hasPlayed: true,
-            playStartTime: Date.now()
+    if (this.player) {
+      this.player.unMute();
+      this.player.playVideo();
+      this.setState({ showClickToPlay: false, isMuted: false });
+    } else {
+      const mediaElement = this.mediaRef.current;
+      if (mediaElement) {
+        mediaElement.muted = false;
+        mediaElement.play()
+          .then(() => {
+            this.setState({
+              showClickToPlay: false,
+              isMuted: false,
+              hasPlayed: true,
+              playStartTime: Date.now()
+            });
+          })
+          .catch(error => {
+            console.error('Manual play failed:', error);
+            this.setState({ error: 'Failed to play video' });
           });
-          
-          // Unmute after successful start
-          setTimeout(() => {
-            if (mediaElement && (this.props.data?.volume === undefined || this.props.data?.volume > 0)) {
-              mediaElement.muted = false;
-              this.setState({ isMuted: false });
-            }
-          }, 500);
-        })
-        .catch(error => {
-          console.error('Manual play failed:', error);
-          this.setState({ error: 'Failed to play video' });
-        });
+      }
     }
   };
 
-  renderYouTubeEmbed = (youtubeUrl: string) => {
-    const { data } = this.props;
-    
-    // Extract video ID from various YouTube URL formats
-    const getYouTubeVideoId = (url: string): string | null => {
-      const regex = /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/;
-      const match = url.match(regex);
-      return match ? match[1] : null;
-    };
+  isYouTubeUrl = (url: string) => {
+    const youtubeRegex = /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/;
+    return youtubeRegex.test(url);
+  }
 
-    const videoId = getYouTubeVideoId(youtubeUrl);
+  setupYouTubePlayer = () => {
+    const { data } = this.props;
+    const videoId = this.getYouTubeVideoId(data.url);
+
     if (!videoId) {
-      console.error('Priority video - Could not extract YouTube video ID from:', youtubeUrl);
+      console.error('Priority video - Could not extract YouTube video ID from:', data.url);
       return this.renderFallbackContent();
     }
 
-    // Build YouTube embed URL with parameters
-    const embedUrl = new URL(`https://www.youtube.com/embed/${videoId}`);
-    
-    // Add YouTube embed parameters for priority video
-    embedUrl.searchParams.set('autoplay', '1');
-    embedUrl.searchParams.set('mute', '1'); // Start muted
-    embedUrl.searchParams.set('controls', '0'); // Hide controls for priority video
-    embedUrl.searchParams.set('rel', '0'); // Don't show related videos
-    embedUrl.searchParams.set('modestbranding', '1'); // Reduce YouTube branding
+    const onPlayerReady = (event: any) => {
+      event.target.playVideo();
+      this.setState({ hasPlayed: true, playStartTime: Date.now() });
+    }
 
-    return (
-      <iframe
-        src={embedUrl.toString()}
-        className="w-full h-full"
-        style={{
-          backgroundColor: data?.backgroundColor || '#000000',
-        }}
-        frameBorder="0"
-        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-        allowFullScreen
-        title={data?.title || 'Priority Video'}
-        onLoad={() => {
-          this.setState({ hasPlayed: true, playStartTime: Date.now() });
-        }}
-      />
-    );
+    const onPlayerStateChange = (event: any) => {
+      if (event.data === window.YT.PlayerState.ENDED) {
+        this.handleMediaEnded();
+      }
+    }
+    
+    window.onYouTubeIframeAPIReady = () => {
+      this.player = new window.YT.Player('youtube-player', {
+        videoId: videoId,
+        playerVars: {
+          autoplay: 1,
+          controls: 0,
+          rel: 0,
+          modestbranding: 1,
+          mute: 1,
+        },
+        events: {
+          'onReady': onPlayerReady,
+          'onStateChange': onPlayerStateChange
+        }
+      });
+    }
+  }
+
+  getYouTubeVideoId = (url: string): string | null => {
+    const regex = /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/;
+    const match = url.match(regex);
+    return match ? match[1] : null;
+  };
+
+  renderYouTubeEmbed = () => {
+    return <div id="youtube-player" className="w-full h-full"></div>;
   };
 
   renderFallbackContent = () => {
@@ -278,25 +284,12 @@ class PriorityVideoDisplay extends Component<PriorityVideoDisplayProps, Priority
       return this.renderFallbackContent();
     }
 
-    // Process and validate URL
     let processedUrl = data.url;
-    let isYouTubeUrl = false;
     
     try {
-      // Handle relative URLs by converting to absolute
       if (data.url.startsWith('/')) {
         processedUrl = `${window.location.origin}${data.url}`;
-      }
-      
-      // Check if it's a YouTube URL and convert it
-      const youtubeRegex = /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/;
-      const match = data.url.match(youtubeRegex);
-      
-      if (match) {
-        isYouTubeUrl = true;
-        processedUrl = data.url; // Keep original for iframe
-      } else {
-        // Validate URL format for non-YouTube URLs
+      } else if (!this.isYouTubeUrl(data.url)) {
         new URL(processedUrl);
       }
     } catch (error) {
@@ -304,19 +297,18 @@ class PriorityVideoDisplay extends Component<PriorityVideoDisplayProps, Priority
       return this.renderFallbackContent();
     }
 
-    // Handle YouTube URLs with iframe
-    if (isYouTubeUrl) {
-      return this.renderYouTubeEmbed(processedUrl);
+    if (this.isYouTubeUrl(data.url)) {
+      return this.renderYouTubeEmbed();
     }
 
     const commonProps = {
       ref: this.mediaRef as any,
       src: processedUrl,
-      controls: false, // Priority video doesn't show controls
-      autoPlay: false, // We control autoplay manually
-      loop: false, // Priority video doesn't loop
-      muted: true, // Start muted
-      playsInline: true, // Important for mobile devices
+      controls: false,
+      autoPlay: false,
+      loop: false,
+      muted: this.state.isMuted,
+      playsInline: true,
       onError: this.handleMediaError,
       onLoadStart: this.handleMediaLoadStart,
       onLoadedData: this.handleMediaLoad,
@@ -343,7 +335,6 @@ class PriorityVideoDisplay extends Component<PriorityVideoDisplayProps, Priority
       );
     }
 
-    // Video element
     return (
       <video {...commonProps}>
         Your browser does not support the video tag.
@@ -364,7 +355,7 @@ class PriorityVideoDisplay extends Component<PriorityVideoDisplayProps, Priority
           left: 0,
           right: 0,
           bottom: 0,
-          zIndex: 99999 // Maximum z-index to ensure it's above everything
+          zIndex: 99999
         }}
       >
         {isLoading && (
@@ -376,7 +367,6 @@ class PriorityVideoDisplay extends Component<PriorityVideoDisplayProps, Priority
           </div>
         )}
         
-        {/* Click to play overlay when autoplay is blocked */}
         {this.state.showClickToPlay && (
           <div
             className='absolute inset-0 flex items-center justify-center bg-black bg-opacity-80 text-white z-30 cursor-pointer'

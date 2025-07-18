@@ -80,9 +80,9 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Handle file upload for photo slides
+    // Handle file upload for image/photo slides
     let finalData = data;
-    if (type === SlideType.PHOTO && file) {
+    if ((type === SlideType.PHOTO || type === SlideType.IMAGE) && file) {
       try {
         // Create upload directory if it doesn't exist
         const uploadDir = path.join(process.cwd(), 'public', 'uploads', 'slides');
@@ -108,8 +108,8 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // For non-photo slides, ensure data is provided
-    if (type !== SlideType.PHOTO && !finalData) {
+    // For non-image/photo slides, ensure data is provided
+    if (type !== SlideType.PHOTO && type !== SlideType.IMAGE && !finalData) {
       return NextResponse.json(
         { message: "Data is required for non-photo slides." },
         { status: 400 }

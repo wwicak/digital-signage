@@ -2,34 +2,6 @@ import axios, { AxiosResponse } from "axios";
 import * as z from "zod";
 import { SlideTypeZod, SlideDataZod } from "@/lib/models/Slide"; // Using Zod schemas from the model
 
-// Local slideshow schema to avoid circular dependency
-const LocalSlideshowSchema = z.object({
-  _id: z.string(),
-  name: z.string(),
-  description: z.string().optional(),
-  slides: z.array(z.union([z.string(), z.any()])), // Can contain slide IDs (strings) or full slide objects
-  creator_id: z.string().optional(),
-  creation_date: z
-    .preprocess(
-      (arg) =>
-        typeof arg === "string" || typeof arg === "number"
-          ? new Date(arg)
-          : arg,
-      z.date()
-    )
-    .optional(),
-  last_update: z
-    .preprocess(
-      (arg) =>
-        typeof arg === "string" || typeof arg === "number"
-          ? new Date(arg)
-          : arg,
-      z.date()
-    )
-    .optional(),
-  is_enabled: z.boolean().optional().default(true),
-});
-
 // Zod schema for slide data in actions context
 export const SlideActionDataSchema = z.object({
   _id: z.string(),
@@ -64,6 +36,34 @@ export const SlideActionDataSchema = z.object({
 
 export type ISlideData = z.infer<typeof SlideActionDataSchema>;
 
+// Local slideshow schema to avoid circular dependency
+const LocalSlideshowSchema = z.object({
+  _id: z.string(),
+  name: z.string(),
+  description: z.string().optional(),
+  slides: z.array(z.union([z.string(), SlideActionDataSchema])), // Can contain slide IDs (strings) or full slide objects
+  creator_id: z.string().optional(),
+  creation_date: z
+    .preprocess(
+      (arg) =>
+        typeof arg === "string" || typeof arg === "number"
+          ? new Date(arg)
+          : arg,
+      z.date()
+    )
+    .optional(),
+  last_update: z
+    .preprocess(
+      (arg) =>
+        typeof arg === "string" || typeof arg === "number"
+          ? new Date(arg)
+          : arg,
+      z.date()
+    )
+    .optional(),
+  is_enabled: z.boolean().optional().default(true),
+});
+
 // Zod Schema for API responses
 export const ApiResponseSchema = z.object({
   message: z.string().optional(),
@@ -93,9 +93,11 @@ export const getSlides = (
         // Extract slides from the slideshow, ensuring they are full slide objects, not just IDs
         if (slideshow.slides && Array.isArray(slideshow.slides)) {
           const fullSlides = slideshow.slides.filter(
-            (slide: unknown): slide is Record<string, unknown> =>
-              typeof slide === "object" && slide !== null
-          ) as ISlideData[];
+            (slide: unknown): slide is ISlideData => {
+              const result = SlideActionDataSchema.safeParse(slide);
+              return result.success;
+            }
+          );
           return fullSlides;
         }
         return [];

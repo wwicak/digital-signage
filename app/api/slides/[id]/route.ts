@@ -120,8 +120,8 @@ export async function PUT(
       );
     }
 
-    // Handle file upload for photo slides
-    if (slideData.type === SlideType.PHOTO && file) {
+    // Handle file upload for image/photo slides
+    if ((slideData.type === SlideType.PHOTO || slideData.type === SlideType.IMAGE) && file) {
       try {
         // Create upload directory if it doesn't exist
         const uploadDir = path.join(process.cwd(), 'public', 'uploads', 'slides');

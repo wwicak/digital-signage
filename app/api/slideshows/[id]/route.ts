@@ -19,12 +19,11 @@ export async function GET(
 ) {
   try {
     await dbConnect();
-    const user = await requireAuth(request);
+    // const user = await requireAuth(request);
     const { id } = await context.params;
 
     const slideshow = await Slideshow.findOne({
       _id: id,
-      creator_id: user._id,
     }).populate("slides");
 
     if (!slideshow) {

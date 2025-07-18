@@ -155,12 +155,14 @@ export async function POST(request: NextRequest) {
  * Validate media buffer by checking file signatures
  */
 function validateMediaBuffer(buffer: Buffer, mimeType: string): boolean {
+  console.log(`Validating media buffer for MIME type: ${mimeType}`);
+  console.log('Buffer (first 8 bytes):', buffer.slice(0, 8));
   if (buffer.length < 8) return false;
 
   // Check common media file signatures
   const signatures = {
     // Video signatures
-    "video/mp4": [0x00, 0x00, 0x00, 0x18, 0x66, 0x74, 0x79, 0x70], // ftyp box
+    "video/mp4": [0x00, 0x00, 0x00, undefined, 0x66, 0x74, 0x79, 0x70], // ftyp box (size ignored)
     "video/webm": [0x1a, 0x45, 0xdf, 0xa3], // EBML header
     "video/quicktime": [0x00, 0x00, 0x00, 0x14, 0x66, 0x74, 0x79, 0x70], // QuickTime
     "video/x-msvideo": [0x52, 0x49, 0x46, 0x46], // RIFF header for AVI
@@ -181,7 +183,7 @@ function validateMediaBuffer(buffer: Buffer, mimeType: string): boolean {
 
   // Check if buffer starts with the expected signature
   for (let i = 0; i < signature.length && i < buffer.length; i++) {
-    if (buffer[i] !== signature[i]) {
+    if (signature[i] !== undefined && buffer[i] !== signature[i]) {
       // For MP3, check alternative frame headers
       if (mimeType === "audio/mpeg") {
         return buffer[0] === 0xff && (buffer[1] & 0xe0) === 0xe0;
