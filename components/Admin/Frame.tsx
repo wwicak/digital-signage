@@ -16,7 +16,7 @@ import { cn } from "@/lib/utils";
 
 import Sidebar from "./Sidebar";
 import SystemStatusIndicator from "./SystemStatusIndicator";
-import NotificationDropdown from "./NotificationDropdown";
+// import NotificationDropdown from "./NotificationDropdown";
 import UserMenu from "./UserMenu";
 import DisplayStatusCard from "./DisplayStatusCard";
 import { useDisplayContext } from "../../contexts/DisplayContext";
@@ -202,10 +202,10 @@ const Frame: React.FC<IFrameProps> = (props) => {
             {props.loggedIn && (
               <div className='flex items-center gap-4'>
                 {/* Dynamic System Status Indicator */}
-                <SystemStatusIndicator />
+                {/* <SystemStatusIndicator /> */}
 
                 {/* Functional Notifications */}
-                <NotificationDropdown />
+                {/* <NotificationDropdown /> */}
 
                 {/* Theme Toggle */}
                 <ThemeToggle />
@@ -221,11 +221,11 @@ const Frame: React.FC<IFrameProps> = (props) => {
         <div className='flex-1 overflow-y-auto'>
           <Container className='py-8 px-6 max-w-7xl'>
             {/* Display Status Card - Only show on admin pages */}
-            {props.loggedIn && (
+            {/* {props.loggedIn && (
               <div className='mb-6'>
                 <DisplayStatusCard />
               </div>
-            )}
+            )} */}
 
             <Card className='min-h-[calc(100vh-12rem)] bg-card/40 backdrop-blur-sm border-border/50 shadow-sm'>
               <CardContent className='p-8'>

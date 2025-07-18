@@ -225,7 +225,7 @@ const Sidebar: React.FC<ISidebarProps> = ({ loggedIn, displayId, collapsed = fal
   return (
     <div className='h-full flex flex-col'>
       {/* Enhanced Display Selector */}
-      {loggedIn && !collapsed && (
+      {/* {loggedIn && !collapsed && (
         <Card className='mx-0 mt-3 mb-4 border-border/50 bg-card/60 backdrop-blur-sm'>
           <CardContent className='p-4'>
             <div className='mb-3'>
@@ -263,7 +263,7 @@ const Sidebar: React.FC<ISidebarProps> = ({ loggedIn, displayId, collapsed = fal
             </DropdownButton>
           </CardContent>
         </Card>
-      )}
+      )} */}
 
       {/* Enhanced Navigation Menu */}
       <nav className='flex-1 px-0'>
